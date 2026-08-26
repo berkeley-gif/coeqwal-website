@@ -16,6 +16,9 @@ import {
   sumAlignedSeriesPoints,
   companionUnitTokensForView,
   hasEmptyScenariosResponse,
+  trimPointsToYearRange,
+  blockHasSubject,
+  locationAxisRequest,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Pure request-mapping for the data-in-depth live endpoints. Node-side spec
@@ -581,7 +584,8 @@ test("ag variables resolve the ag domain on the NOD/SOD aggregates", () => {
   expect(toDidSubject("ag", "AG_SAC", "ag_del")).toBeNull()
   expect(toDidSubject("ag", "AG_ALL", "ag_del")).toBeNull()
   // Revenue is an external-model output and stays out of scope.
-  expect(didDomainForVariable("ag_rev")).toBeNull()
+  // Revenue is served too (see the dedicated case below).
+  expect(didDomainForVariable("ag_rev")).toBe("ag")
 })
 
 test("ag measure tokens are keyed per variable and never scaled", () => {
@@ -653,4 +657,199 @@ test("hasEmptyScenariosResponse separates 'not modeled' from 'still loading'", (
     }),
   ).toBe(false)
   expect(hasEmptyScenariosResponse(undefined)).toBe(false)
+})
+
+// Entity-level subjects for the ag and CWS domains: the served code IS the
+// registry id, and each CWS variable resolves only within its own measure
+// family (delivery vs shortage/welfare), so the site never requests a subject
+// the endpoint does not serve for that measure.
+test("toDidSubject resolves ag demand units and CWS systems per measure family", () => {
+  expect(toDidSubject("ag", "08N_SA2", "ag_del")).toBe("08N_SA2")
+  expect(toDidSubject("ag", "90_PA1", "ag_pump")).toBe("90_PA1")
+  expect(toDidSubject("ag", "AGG_AG_NOD", "ag_short")).toBe("NOD_Agriculture")
+  expect(toDidSubject("ag", "NOD_Agriculture", "ag_del")).toBeNull()
+  expect(toDidSubject("cws", "MWD", "cws_del")).toBe("MWD")
+  expect(toDidSubject("cws", "MWD", "cws_short")).toBeNull()
+  expect(toDidSubject("cws", "02_NU", "cws_short")).toBe("02_NU")
+  expect(toDidSubject("cws", "02_NU", "cws_del")).toBeNull()
+  expect(toDidSubject("cws", "26N_NU1", "cws_del")).toBe("26N_NU1")
+  expect(toDidSubject("cws", "26N_NU1", "cws_short")).toBe("26N_NU1")
+  expect(toDidSubject("cws", "AGG_CWS_SOD", "cws_short")).toBe("SOD_CWS")
+  expect(toDidSubject("cws", "NO_SUCH", "cws_del")).toBeNull()
+  // Without a variable the cws domain cannot pick a family: aggregates only.
+  expect(toDidSubject("cws", "MWD")).toBeNull()
+  expect(toDidSubject("cws", "AGG_CWS_NOD")).toBe("NOD_CWS")
+})
+
+// The CWS delivery family is a calendar-year series over a model run that
+// starts in October 1921 and ends in September 2021, so its first and last
+// years are three-month and nine-month stubs (about 0.2 and 0.8 of a full
+// year). The site trims a served series to the registry's servedYearRange
+// before adoption; a series without years cannot be trimmed safely and is
+// returned untouched rather than partially trimmed.
+test("trimPointsToYearRange drops points outside the range, index-aligned, and fails closed without years", () => {
+  const points = {
+    series: [10, 100, 110, 120, 80],
+    waterYears: [1921, 1922, 1923, 2020, 2021],
+  }
+  expect(trimPointsToYearRange(points, { min: 1922, max: 2020 })).toEqual({
+    series: [100, 110, 120],
+    waterYears: [1922, 1923, 2020],
+  })
+  // Nothing outside the range: unchanged.
+  expect(
+    trimPointsToYearRange(
+      { series: [1, 2], waterYears: [1950, 1951] },
+      { min: 1922, max: 2020 },
+    ),
+  ).toEqual({ series: [1, 2], waterYears: [1950, 1951] })
+  // No years: cannot tell which points are stubs, so nothing is dropped.
+  const noYears = { series: [10, 100], waterYears: [] }
+  expect(trimPointsToYearRange(noYears, { min: 1922, max: 2020 })).toBe(noYears)
+})
+
+// A served scenario block that lacks the requested subject means the subject
+// is not modeled for that scenario (KCWA is absent from the five Delta
+// Conveyance Project scenarios on /cws). That is a fact about the model,
+// distinct from an empty response (scenario not modeled at all) and from a
+// transport failure.
+test("blockHasSubject reports whether a served block carries the subject", () => {
+  const block = {
+    subjects: [{ subject: "MWD", periods: {} }, { subject: "NOD_CWS" }],
+  }
+  expect(blockHasSubject(block, "cws", "MWD")).toBe(true)
+  expect(blockHasSubject(block, "cws", "KCWA")).toBe(false)
+  expect(blockHasSubject(undefined, "cws", "MWD")).toBe(false)
+  expect(
+    blockHasSubject(
+      { reservoirs: [{ subject: "SHSTA" }] },
+      "reservoir",
+      "SHSTA",
+    ),
+  ).toBe(true)
+})
+
+// Welfare loss reads the cws endpoint's welfare_loss measure (USD) and is the
+// second variable of the shortage/welfare family, so it resolves the same
+// 63-system list as delivery shortages. The served dollars scale to millions
+// on adoption; the scale table is pinned exactly so an accidental scale on
+// any other variable regresses loudly.
+test("welfare loss maps to the welfare_loss measure on the shortage family and scales USD to $M", () => {
+  expect(didDomainForVariable("cws_welfare")).toBe("cws")
+  expect(didPeriodForVariable("cws_welfare")).toBe("annual")
+  expect(unitTokenForView("cws", "dist", "cws_welfare")).toBe("welfare_loss")
+  expect(toDidSubject("cws", "02_NU", "cws_welfare")).toBe("02_NU")
+  expect(toDidSubject("cws", "MWD", "cws_welfare")).toBeNull()
+  expect(toDidSubject("cws", "AGG_CWS_NOD", "cws_welfare")).toBe("NOD_CWS")
+  expect(didLiveScaleForVariable("cws_welfare")).toBe(1e-6)
+  expect(didLiveScaleForVariable("cws_short")).toBe(1)
+  expect(didLiveScaleForVariable("ag_del")).toBe(1)
+  expect(
+    pickLiveSeriesPoints(
+      {
+        subjects: [
+          {
+            subject: "NOD_CWS",
+            periods: {
+              annual: {
+                welfare_loss: {
+                  values: [{ water_year: 1922, value: 2551000 }],
+                },
+              },
+            },
+          },
+        ],
+      },
+      "cws",
+      "NOD_CWS",
+      "annual",
+      "welfare_loss",
+    ).series,
+  ).toEqual([2551000])
+})
+
+// Compare by Locations makes ONE request per chart (the held scenario, every
+// selected location's subject) and each member picks its own series by
+// subject id. The helper turns the selected location ids into that request:
+// deduplicated subjects in first-seen order, and per member the subject to
+// pick (or the SSJV route list for the synthetic total, or null when the
+// registry cannot map the id, which renders sample, labeled).
+test("locationAxisRequest builds one deduplicated subject list and per-member selectors", () => {
+  expect(
+    locationAxisRequest("reservoir", "res_apr", ["SHSTA", "OROVL", "TRNTY"]),
+  ).toEqual({
+    subjects: ["SHSTA", "OROVL", "TRNTY"],
+    memberSubjects: ["SHSTA", "OROVL", "TRNTY"],
+  })
+  expect(
+    locationAxisRequest("reservoir", "res_apr", ["SLCVP", "SLSWP", "AGG_NOD"]),
+  ).toEqual({
+    subjects: ["SLUIS_CVP", "SLUIS_SWP", "NOD_Reservoirs"],
+    memberSubjects: ["SLUIS_CVP", "SLUIS_SWP", "NOD_Reservoirs"],
+  })
+  expect(
+    locationAxisRequest("sysdel", "cvp_del", ["SYS", "NOD", "SOD"]),
+  ).toEqual({
+    subjects: ["DEL_CVP_TOTAL", "DEL_CVP_TOT_N_WAMER", "DEL_CVP_TOT_S_WLOSS"],
+    memberSubjects: [
+      "DEL_CVP_TOTAL",
+      "DEL_CVP_TOT_N_WAMER",
+      "DEL_CVP_TOT_S_WLOSS",
+    ],
+  })
+  // The SSJV total depends on its three route subjects; a route picked
+  // alongside it shares the request without duplicating the subject.
+  expect(
+    locationAxisRequest("sysdel", "ssjv_exp", [
+      SSJV_ALL_ROUTES_LOCATION,
+      "CVC",
+    ]),
+  ).toEqual({
+    subjects: ["D_CAA238_CVPCV", "D_MLRTN_FRK000", "SWP_TA_KERNAG"],
+    memberSubjects: [[...SSJV_ROUTE_SUBJECTS], "D_CAA238_CVPCV"],
+  })
+  // Unknown ids map to null and never enter the request; a duplicated id
+  // is requested once and still yields two members.
+  expect(
+    locationAxisRequest("reservoir", "res_apr", ["SHSTA", "NOPE", "SHSTA"]),
+  ).toEqual({
+    subjects: ["SHSTA"],
+    memberSubjects: ["SHSTA", null, "SHSTA"],
+  })
+  // Entities: ag demand units and CWS systems ride the same helper.
+  expect(
+    locationAxisRequest("ag", "ag_del", ["AGG_AG_NOD", "08N_SA2", "90_PA1"]),
+  ).toEqual({
+    subjects: ["NOD_Agriculture", "08N_SA2", "90_PA1"],
+    memberSubjects: ["NOD_Agriculture", "08N_SA2", "90_PA1"],
+  })
+})
+
+// Revenue reads the ag endpoint's revenue measure (USD) and scales to $M on
+// adoption, the third and last entry in the scale table.
+test("gross crop revenues maps to the revenue measure and scales USD to $M", () => {
+  expect(didDomainForVariable("ag_rev")).toBe("ag")
+  expect(unitTokenForView("ag", "dist", "ag_rev")).toBe("revenue")
+  expect(didLiveScaleForVariable("ag_rev")).toBe(1e-6)
+  expect(didLiveScaleForVariable("ag_short")).toBe(1)
+  expect(
+    pickLiveSeriesPoints(
+      {
+        subjects: [
+          {
+            subject: "08N_SA2",
+            periods: {
+              annual: {
+                revenue: { values: [{ water_year: 1922, value: 178500000 }] },
+              },
+            },
+          },
+        ],
+      },
+      "ag",
+      "08N_SA2",
+      "annual",
+      "revenue",
+    ).series,
+  ).toEqual([178500000])
 })

@@ -210,6 +210,7 @@ export function useStoryboardLayout({
   const outcomeLayout = useMemo<Beat2Layout | null>(() => {
     if (!panelSize) return null
     const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
+
     // Estimated per-column inner width, used only to decide row count. The
     // precise width is measured from the DOM later.
     const approxColWidth = Math.max(80, (panelSize.width * (1 / 3)) / 2 - 36)

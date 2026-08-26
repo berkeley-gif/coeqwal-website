@@ -121,7 +121,9 @@ export function CompactSelect<T extends string = string>({
       displayEmpty={!!placeholder}
       size="small"
       disabled={disabled}
-      aria-label={ariaLabel}
+      // MUI applies the accessible name through inputProps, not through a
+      // prop on Select; passed directly it never reaches the combobox.
+      inputProps={{ "aria-label": ariaLabel }}
       sx={{
         minWidth,
         height: 32,

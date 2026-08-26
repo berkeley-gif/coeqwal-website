@@ -215,3 +215,15 @@ export const glossaryTerms: GlossaryTerm[] = [
       "Sacramento River winter-run Chinook salmon (Oncorhynchus tshawytscha) are a critically endangered salmon population unique to California that enter fresh water in winter and historically spawned in cold, spring-fed headwaters and tributaries of the Sacramento River. Today, Shasta Dam blocks access to most of those habitats, and winter-run primarily spawn downstream of Shasta Dam during the warmest part of the year. Their egg survival now depends heavily on cold water stored in Shasta Reservoir and released downstream during summer.",
   },
 ].sort((a, b) => a.term.localeCompare(b.term))
+
+/**
+ * Resolves a possibly-mistyped-case string to its canonical glossary term
+ * name (e.g. "calsim" -> "CalSim"). Falls back to the original input if
+ * nothing matches, so an unknown term fails the same way it always did.
+ */
+export function resolveGlossaryTerm(input: string): string {
+  const match = glossaryTerms.find(
+    (entry) => entry.term.toLowerCase() === input.toLowerCase(),
+  )
+  return match ? match.term : input
+}

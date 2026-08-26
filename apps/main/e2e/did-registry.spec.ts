@@ -7,6 +7,10 @@ import {
   getLocation,
   DEFAULT_VARIABLE_ID,
   resolveFoldedVariable,
+  keyOutcomeChipText,
+  carryLocationSelection,
+  LEVEL_VIEW_UNAVAILABLE_REASON,
+  RETIRED_VARIABLE_IDS,
   type VariableView,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
 import { mergeDataInitialState } from "../app/features/scenarioExplorer/explorer/store/exploreSessionPersist"
@@ -20,6 +24,11 @@ import {
   toDidSubject,
   GW_BASIN_SUBJECTS,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
+import {
+  AG_ENTITY_LOCATIONS,
+  CWS_DELIVERY_ENTITY_LOCATIONS,
+  CWS_SHORTAGE_ENTITY_LOCATIONS,
+} from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/entityLocations.generated"
 
 // Registry contract for the Data in Depth content edits (2026-07-30 review):
 // station salinity retired, the year-to-year variability view withdrawn in
@@ -320,19 +329,68 @@ test("registry data flags agree with the live request mapping", () => {
 // groups are retired (their persisted ids heal), and Delivery shortages
 // gains a served percent-of-demand view alongside the TAF volume view.
 
-test("community water systems wire live on the NOD/SOD aggregates", () => {
-  const items = LOCATION_GROUPS.cws.items
-  expect(items.map((l) => l.id)).toEqual(["AGG_CWS_NOD", "AGG_CWS_SOD"])
-  expect(items.every((l) => l.aggregate)).toBe(true)
+/** Shape every entity-bearing group must have: the two aggregates first,
+ *  then entities that are regioned, uniquely identified, and named with
+ *  their served code as the prefix. */
+function expectEntityGroupShape(
+  groupId: "agregions" | "cws" | "cwsShortage",
+  aggregateIds: string[],
+  entityCount: number,
+) {
+  const items = LOCATION_GROUPS[groupId].items
+  expect(items.slice(0, aggregateIds.length).map((l) => l.id)).toEqual(
+    aggregateIds,
+  )
+  expect(items.slice(0, aggregateIds.length).every((l) => l.aggregate)).toBe(
+    true,
+  )
+  const entities = items.slice(aggregateIds.length)
+  expect(entities).toHaveLength(entityCount)
+  expect(new Set(items.map((l) => l.id)).size).toBe(items.length)
+  for (const l of entities) {
+    expect(l.aggregate, l.id).toBeFalsy()
+    expect(["NOD", "SOD"], l.id).toContain(l.region)
+    expect(l.name.startsWith(l.id), `${l.id} name ${l.name}`).toBe(true)
+    expect(typeof l.apiLabel, l.id).toBe("string")
+    expect(l.mockBase, l.id).toBeGreaterThan(0)
+  }
+  // North of Delta block precedes the South of Delta block.
+  const regions = entities.map((l) => l.region)
+  expect(regions.lastIndexOf("NOD")).toBeLessThan(regions.indexOf("SOD"))
+}
+
+test("community water systems list every served delivery system after the aggregates", () => {
+  expectEntityGroupShape("cws", ["AGG_CWS_NOD", "AGG_CWS_SOD"], 74)
   expect(getLocation("cws", "AGG_CWS_NOD")?.name).toBe("All North of Delta")
   expect(getLocation("cws", "AGG_CWS_SOD")?.name).toBe("All South of Delta")
+  expect(getLocation("cws", "MWD")?.name).toBe(
+    "MWD - Metropolitan Water District of Southern California",
+  )
+  // A shortage-only system is not offered where only deliveries are served.
+  expect(getLocation("cws", "02_NU")).toBeUndefined()
   for (const retired of ["CWS_SACU", "CWS_BAY", "CWS_CVS", "CWS_SOC"]) {
     expect(getLocation("cws", retired)).toBeUndefined()
   }
   const del = getVariable("cws_del")
   expect(del?.data).toBe("live")
+  expect(del?.locationGroup).toBe("cws")
   expect(del?.views).toEqual(["dist"])
+})
+
+test("delivery shortages use the shortage-modeled system list, a separate group", () => {
+  // Brian's ruling: the delivery set (74) and the shortage/welfare set (63)
+  // overlap but are separate, so each variable binds to its own group and
+  // the site never requests a subject the endpoint lacks for that measure.
+  expectEntityGroupShape("cwsShortage", ["AGG_CWS_NOD", "AGG_CWS_SOD"], 63)
+  expect(getLocation("cwsShortage", "02_NU")?.name).toBe(
+    "02_NU - Anderson City of Anderson",
+  )
+  expect(getLocation("cwsShortage", "MWD")).toBeUndefined()
+  // A system in both sets appears in both groups under the same id.
+  expect(getLocation("cws", "26N_NU1")).toBeDefined()
+  expect(getLocation("cwsShortage", "26N_NU1")).toBeDefined()
   const short = getVariable("cws_short")
+  expect(short?.locationGroup).toBe("cwsShortage")
   expect(short?.data).toBe("live")
   expect(short?.views).toEqual(["dist", "pct_demand"])
   expect(short?.viewLabels?.dist).toBe("Shortage (TAF)")
@@ -356,6 +414,15 @@ test("mergeDataInitialState heals retired CWS sample-group pins", () => {
   })
   expect(healed.pinnedLocationByGroup.cws).toBe("AGG_CWS_NOD")
   expect(healed.selectedLocationsByGroup.cws).toEqual(["AGG_CWS_SOD"])
+})
+
+test("mergeDataInitialState heals a delivery-only system pinned in the shortage group", () => {
+  const healed = mergeDataInitialState({
+    pinnedLocationByGroup: { cwsShortage: "MWD" },
+    selectedLocationsByGroup: { cwsShortage: ["MWD", "02_NU"] },
+  })
+  expect(healed.pinnedLocationByGroup.cwsShortage).toBe("AGG_CWS_NOD")
+  expect(healed.selectedLocationsByGroup.cwsShortage).toEqual(["02_NU"])
 })
 
 test("shortage percent series derive from shortage over demand", () => {
@@ -403,10 +470,15 @@ test("ssjv gains a leading all-routes total and sheds the provisional chip", () 
 // ids heal. Revenue stays sample: it is an external-model output, not a
 // CalSim3 result, and is out of scope for this pass.
 
-test("agriculture wires live on the NOD/SOD aggregates", () => {
-  const items = LOCATION_GROUPS.agregions.items
-  expect(items.map((l) => l.id)).toEqual(["AGG_AG_NOD", "AGG_AG_SOD"])
-  expect(items.every((l) => l.aggregate)).toBe(true)
+test("agriculture lists every served demand unit after the aggregates", () => {
+  expectEntityGroupShape("agregions", ["AGG_AG_NOD", "AGG_AG_SOD"], 132)
+  expect(getLocation("agregions", "08N_SA2")?.name).toBe(
+    "08N_SA2 - Glenn-Colusa ID (55% of total)",
+  )
+  // Duplicate served labels ("Non-district" x22) stay distinguishable
+  // because the code leads the name.
+  expect(getLocation("agregions", "02_NA")?.name).toBe("02_NA - Non-district")
+  expect(getLocation("agregions", "03_NA")?.name).toBe("03_NA - Non-district")
   expect(getLocation("agregions", "AGG_AG_NOD")?.name).toBe(
     "All North of Delta",
   )
@@ -418,8 +490,32 @@ test("agriculture wires live on the NOD/SOD aggregates", () => {
   }
   expect(getVariable("ag_del")?.data).toBe("live")
   expect(getVariable("ag_pump")?.data).toBe("live")
-  // Revenue is an external-model output; it stays sample and provisional.
-  expect(getVariable("ag_rev")?.data).toBe("mock")
+})
+
+// Gross crop revenues: the ag endpoint serves the agricultural economics
+// model's revenue series (USD per year) on every subject, so the variable
+// goes live in millions of dollars per year with one distribution view; the
+// summary-value view had no live source and is retired.
+test("gross crop revenues is live in millions of dollars with a single distribution view", () => {
+  const rev = getVariable("ag_rev")
+  expect(rev?.data).toBe("live")
+  expect(rev?.provisional).toBeUndefined()
+  expect(rev?.unit).toBe("$M")
+  expect(rev?.unitLabel).toBe("million dollars per year")
+  expect(rev?.views).toEqual(["dist"])
+  for (const v of Object.values(VARIABLES)) {
+    expect(v.views, v.id).not.toContain("value")
+  }
+  // A persisted or shared (variable, view) pair whose view the variable no
+  // longer offers heals to the variable's first view, generically.
+  expect(resolveFoldedVariable("ag_rev", "value")).toEqual({
+    id: "ag_rev",
+    view: "dist",
+  })
+  expect(resolveFoldedVariable("res_apr", "pct")).toEqual({
+    id: "res_apr",
+    view: "pct",
+  })
 })
 
 test("ag shortage is one variable with a volume view and a percent view", () => {
@@ -480,4 +576,252 @@ test("mergeDataInitialState heals retired ag demand-unit-group pins", () => {
   })
   expect(healed.pinnedLocationByGroup.agregions).toBe("AGG_AG_NOD")
   expect(healed.selectedLocationsByGroup.agregions).toEqual(["AGG_AG_SOD"])
+})
+
+// Ted's Aug 23 board review (Data in Depth column), confirmed on the Aug 24
+// call: the provisional "Outflow as % of unimpaired flow" variable is dropped
+// outright (its unimpaired series exists only as a spreadsheet, never in the
+// API), and the key-outcome chips are reworded. A retired id must heal
+// deterministically wherever it can still arrive: a persisted session and a
+// share-URL token both go through resolveFoldedVariable.
+
+test("outflow as percent of unimpaired flow is retired from the registry", () => {
+  expect(VARIABLES.ndo_uif).toBeUndefined()
+  const outflow = SECTORS.find((s) => s.id === "outflow")
+  expect(outflow?.variables).toEqual(["ndo"])
+  expect(RETIRED_VARIABLE_IDS.has("ndo_uif")).toBe(true)
+  for (const sector of SECTORS) {
+    for (const id of sector.variables) {
+      expect(getVariable(id), `sector ${sector.id} lists ${id}`).toBeDefined()
+    }
+  }
+})
+
+test("a retired variable id resolves to the default variable", () => {
+  expect(resolveFoldedVariable("ndo_uif", "dist")).toEqual({
+    id: DEFAULT_VARIABLE_ID,
+    view: "dist",
+  })
+  // Unknown ids keep the existing behaviour: passed through unchanged, so
+  // the caller's own fallback applies.
+  expect(resolveFoldedVariable("no_such_variable", "dist")).toEqual({
+    id: "no_such_variable",
+    view: "dist",
+  })
+  const healed = mergeDataInitialState({
+    selectedVariableId: "ndo_uif",
+    view: "dist",
+  })
+  expect(healed.selectedVariableId).toBe(DEFAULT_VARIABLE_ID)
+})
+
+test("key-outcome chips read used or not used per Ted's board", () => {
+  // April X2 keeps its tier metadata but reads "not used" (n64); September
+  // X2 gets the same treatment; SWP M&I had no chip and gains a "not used"
+  // one (n84).
+  expect(getVariable("x2_apr")?.tierOutcome).toBe("FW_DELTA_USES")
+  expect(getVariable("x2_apr")?.keyOutcomeChip).toBe("not-used")
+  expect(getVariable("x2_sep")?.keyOutcomeChip).toBe("not-used")
+  expect(getVariable("swp_mi")?.keyOutcomeChip).toBe("not-used")
+  expect(keyOutcomeChipText(getVariable("x2_apr")!)).toBe(
+    "not used in calculation of key outcome",
+  )
+  expect(keyOutcomeChipText(getVariable("swp_mi")!)).toBe(
+    "not used in calculation of key outcome",
+  )
+  // Every other chip carries the same prefix (n54, n56, n58, n63 and the
+  // consistency extension to the remaining chipped variables).
+  expect(keyOutcomeChipText(getVariable("res_apr")!)).toBe(
+    "used in calculation of key outcome: Reservoir storage",
+  )
+  expect(keyOutcomeChipText(getVariable("gw_stor")!)).toBe(
+    "used in calculation of key outcome: Groundwater storage",
+  )
+  expect(keyOutcomeChipText(getVariable("ndo")!)).toBe(
+    "used in calculation of key outcome: Delta estuary ecology",
+  )
+  expect(keyOutcomeChipText(getVariable("riv_flow")!)).toBe(
+    "used in calculation of key outcome: Environmental flows",
+  )
+  // Variables with neither a tier outcome nor an explicit chip stay bare.
+  expect(keyOutcomeChipText(getVariable("cvp_ag")!)).toBeNull()
+  expect(keyOutcomeChipText(getVariable("salmon_abund")!)).toBeNull()
+})
+
+test("X2 carries the axis label and figure-title head Ted asked for", () => {
+  expect(getVariable("x2_apr")?.axisLabel).toBe(
+    "distance of X2 from Golden Gate (km)",
+  )
+  expect(getVariable("x2_sep")?.axisLabel).toBe(
+    "distance of X2 from Golden Gate (km)",
+  )
+  expect(getVariable("x2_apr")?.figureTitleHead).toBe(
+    "April X2 Position (in km)",
+  )
+  expect(getVariable("x2_sep")?.figureTitleHead).toBe(
+    "September X2 Position (in km)",
+  )
+  // Only the X2 titles change; the outflow and export titles keep their
+  // location parenthetical until Ted says otherwise.
+  expect(getVariable("ndo")?.figureTitleHead).toBeUndefined()
+  expect(getVariable("tot_exp")?.figureTitleHead).toBeUndefined()
+})
+
+// The entity lists are generated from the live API (scripts/did-entity-
+// locations); the registry composes them after the hand-authored aggregates.
+// These pins catch a regeneration that silently changed shape.
+test("the generated entity lists carry the served counts and never collide with an aggregate id", () => {
+  expect(AG_ENTITY_LOCATIONS).toHaveLength(132)
+  expect(CWS_DELIVERY_ENTITY_LOCATIONS).toHaveLength(74)
+  expect(CWS_SHORTAGE_ENTITY_LOCATIONS).toHaveLength(63)
+  const aggregateIds = new Set(
+    Object.values(LOCATION_GROUPS)
+      .flatMap((g) => g.items)
+      .filter((l) => l.aggregate)
+      .map((l) => l.id),
+  )
+  for (const l of [
+    ...AG_ENTITY_LOCATIONS,
+    ...CWS_DELIVERY_ENTITY_LOCATIONS,
+    ...CWS_SHORTAGE_ENTITY_LOCATIONS,
+  ]) {
+    expect(aggregateIds.has(l.id), l.id).toBe(false)
+  }
+})
+
+test("sample fallbacks for an entity sit at the generated magnitude", () => {
+  // Only reached when the API fails; the magnitude must still be plausible
+  // (and labeled as sample), not a hard-coded aggregate-scale number.
+  for (const [variableId, locationId, groupId] of [
+    ["ag_del", "08N_SA2", "agregions"],
+    ["ag_pump", "90_PA1", "agregions"],
+    ["cws_del", "MWD", "cws"],
+    ["cws_short", "26N_NU1", "cwsShortage"],
+  ] as const) {
+    const base = getLocation(groupId, locationId)?.mockBase ?? 0
+    const series = mockAnnualSeries(
+      variableId,
+      "s0020",
+      "historical",
+      locationId,
+    )
+    expect(series).toHaveLength(100)
+    const sorted = [...series].sort((a, b) => a - b)
+    const median = sorted[50] ?? 0
+    expect(median, `${variableId} ${locationId}`).toBeGreaterThan(base * 0.3)
+    expect(median, `${variableId} ${locationId}`).toBeLessThan(base * 3)
+  }
+})
+
+// Switching between variables that bind different location groups (the CWS
+// delivery set vs the shortage set) must not lose a pin the user just chose
+// when the same system exists in both, and must never carry one that does
+// not exist there. Pure helper, wired into the variable-select action.
+test("carryLocationSelection carries a pin across groups only when the next group has it", () => {
+  const carried = carryLocationSelection(
+    "cws",
+    "cwsShortage",
+    { cws: "26N_NU1" },
+    { cws: ["26N_NU1", "MWD"] },
+  )
+  expect(carried.pinnedLocationByGroup).toEqual({
+    cws: "26N_NU1",
+    cwsShortage: "26N_NU1",
+  })
+  expect(carried.selectedLocationsByGroup).toEqual({
+    cws: ["26N_NU1", "MWD"],
+    cwsShortage: ["26N_NU1"],
+  })
+  // A delivery-only system does not exist in the shortage group: nothing is
+  // written for the next group, so its own default applies.
+  const notCarried = carryLocationSelection(
+    "cws",
+    "cwsShortage",
+    { cws: "MWD" },
+    { cws: ["MWD"] },
+  )
+  expect(notCarried.pinnedLocationByGroup).toEqual({ cws: "MWD" })
+  expect(notCarried.selectedLocationsByGroup).toEqual({ cws: ["MWD"] })
+  // The location picked last follows the user: an older pin in the next
+  // group gives way (the store seeds every group with a default pin, so
+  // "no pin yet" cannot be told apart from "the default").
+  const latest = carryLocationSelection(
+    "cws",
+    "cwsShortage",
+    { cws: "26N_NU1", cwsShortage: "02_NU" },
+    {},
+  )
+  expect(latest.pinnedLocationByGroup.cwsShortage).toBe("26N_NU1")
+  // Same group, or groups with nothing in common, pass through untouched.
+  const same = carryLocationSelection("cws", "cws", { cws: "MWD" }, {})
+  expect(same.pinnedLocationByGroup).toEqual({ cws: "MWD" })
+  const unrelated = carryLocationSelection(
+    "reservoirs",
+    "cwsShortage",
+    { reservoirs: "SHSTA" },
+    {},
+  )
+  expect(unrelated.pinnedLocationByGroup).toEqual({ reservoirs: "SHSTA" })
+})
+
+// Calendar-year basis for the CWS delivery family: the served series runs
+// 1921 to 2021 on calendar years, with three-month and nine-month stubs at
+// the ends, so the site keeps 1922 to 2020. The shortage and welfare family
+// is 1922 to 2021 water years and needs no trim.
+test("CWS deliveries declare a calendar-year basis and a served year range", () => {
+  const del = getVariable("cws_del")
+  expect(del?.yearBasis).toBe("calendar")
+  expect(del?.servedYearRange).toEqual({ min: 1922, max: 2020 })
+  expect(getVariable("cws_short")?.servedYearRange).toBeUndefined()
+  expect(getVariable("cws_short")?.yearBasis).toBeUndefined()
+  expect(getVariable("res_apr")?.yearBasis).toBeUndefined()
+})
+
+// Prose names feed the interpretive sentences ("Mean <prose name> for ...")
+// so the text never lowercases a proper noun ("april x2 position") the way
+// the old toLowerCase() did.
+test("every variable carries a prose name that starts as the sentence needs it", () => {
+  for (const v of Object.values(VARIABLES)) {
+    expect(typeof v.proseName, v.id).toBe("string")
+    expect(v.proseName.length, v.id).toBeGreaterThan(0)
+  }
+  expect(getVariable("x2_apr")?.proseName).toBe("April X2 position")
+  expect(getVariable("swp_mi")?.proseName).toBe(
+    "M&I deliveries of the State Water Project",
+  )
+  expect(getVariable("tot_exp")?.proseName).toBe("Delta exports")
+  expect(getVariable("riv_flow")?.proseName).toBe("river flows")
+})
+
+// Welfare loss (the third community water systems variable, requested by the
+// project lead on Aug 16): the served welfare_loss measure in USD, displayed
+// in millions of dollars per year on the shortage-modeled system list.
+test("welfare loss is a live community water systems variable in millions of dollars", () => {
+  const sector = SECTORS.find((s) => s.id === "cwsS")
+  expect(sector?.variables).toEqual(["cws_del", "cws_short", "cws_welfare"])
+  const v = getVariable("cws_welfare")
+  expect(v?.name).toBe("Welfare loss")
+  expect(v?.proseName).toBe("welfare loss")
+  expect(v?.locationGroup).toBe("cwsShortage")
+  expect(v?.unit).toBe("$M")
+  expect(v?.unitLabel).toBe("million dollars per year")
+  expect(v?.views).toEqual(["dist"])
+  expect(v?.data).toBe("live")
+  expect(v?.wytApplicable).toBe(false)
+  expect(v?.provisional).toBeUndefined()
+  expect(v?.tierOutcomeName).toBeUndefined()
+  expect(keyOutcomeChipText(v!)).toBeNull()
+})
+
+// Groundwater levels are reported per basin (a water-table elevation cannot
+// be summed across basins), so the North and South of Delta totals cannot
+// show the Level view. The registry carries the capability on the location
+// and one reason string every control reads.
+test("groundwater totals declare that the Level view is unavailable", () => {
+  expect(getLocation("basins", "AGG_GW_NOD")?.levelView).toBe(false)
+  expect(getLocation("basins", "AGG_GW_SOD")?.levelView).toBe(false)
+  expect(getLocation("basins", "WBA10")?.levelView).toBeUndefined()
+  expect(LEVEL_VIEW_UNAVAILABLE_REASON).toBe(
+    "Groundwater levels are reported per basin; the North and South of Delta totals are volumes.",
+  )
 })

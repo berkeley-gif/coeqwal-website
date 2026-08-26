@@ -2,6 +2,7 @@
 
 import { Box, Typography, useTheme, Link } from "@repo/ui/mui"
 import { LinedList, WaterDroplet } from "@repo/ui"
+import { GlossaryTermLink } from "../../../glossary"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
 
@@ -39,10 +40,8 @@ export default function WelcomePanel() {
             </Typography>
             <Typography variant="body2" color="text.secondary">
               COEQWAL uses the{" "}
-              <Typography component="span" variant="body2" fontWeight={600}>
-                CalSim3
-              </Typography>{" "}
-              water planning model to evaluate how different{" "}
+              <GlossaryTermLink term="CalSim">CalSim3</GlossaryTermLink> water
+              planning model to evaluate how different{" "}
               <Typography component="span" variant="body2" fontWeight={600}>
                 scenarios
               </Typography>{" "}
@@ -50,16 +49,14 @@ export default function WelcomePanel() {
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Each scenario pairs a{" "}
-              <Typography component="span" variant="body2" fontWeight={600}>
+              <GlossaryTermLink term="Water management strategies">
                 water management strategy
-              </Typography>{" "}
+              </GlossaryTermLink>{" "}
               (the operating rules, policies, and infrastructure decisions that
               determine how water is allocated) with a{" "}
-              <Typography component="span" variant="body2" fontWeight={600}>
-                hydroclimate
-              </Typography>{" "}
-              (the temperature and precipitation patterns that determine how
-              much water is available).
+              <GlossaryTermLink>hydroclimate</GlossaryTermLink> (the temperature
+              and precipitation patterns that determine how much water is
+              available).
             </Typography>
             <Typography variant="body2" color="text.secondary">
               The management strategy represents what we can control and the
@@ -103,7 +100,7 @@ export default function WelcomePanel() {
             >
               A summary of all scenarios can be accessed{" "}
               <Link
-                href="/"
+                href="/data"
                 color="inherit"
                 underline="always"
                 sx={{

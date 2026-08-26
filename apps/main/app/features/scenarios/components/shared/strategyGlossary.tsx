@@ -169,6 +169,7 @@ export function useGlossaryRenderer(
       border: "none",
       padding: 0,
       font: "inherit",
+      ...theme.typography.glossaryTerm,
       textDecoration: "underline",
       "&:focus-visible": {
         outline: `2px solid ${theme.palette.blue.bright}`,
@@ -176,7 +177,7 @@ export function useGlossaryRenderer(
         borderRadius: "2px",
       },
     }),
-    [theme.palette.blue.bright],
+    [theme.palette.blue.bright, theme.typography.glossaryTerm],
   )
 
   return useCallback(() => {

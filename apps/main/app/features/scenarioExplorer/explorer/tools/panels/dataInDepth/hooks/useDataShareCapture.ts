@@ -9,6 +9,7 @@
  * Side effects: appends one item to the workspace share store per call.
  */
 
+import { axisLabelFor } from "../explorer/chartMarks"
 import { useCallback, useMemo } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { stageShareItem } from "../../../../share/stage"
@@ -54,7 +55,11 @@ export function useDataShareCapture(
       data.view === "pct" ||
       data.view === "pct_demand" ||
       data.view === "level")
-  const canSnapshot = data.members.length > 0 && !data.isLoading && !statsStyle
+  const canSnapshot =
+    data.members.length > 0 &&
+    !data.isLoading &&
+    !statsStyle &&
+    !data.unavailableReason
 
   const saveSnapshot = useCallback(async () => {
     if (data.members.length === 0) return
@@ -62,6 +67,7 @@ export function useDataShareCapture(
     // Same standardized title the on-screen card shows above the chart.
     const figureTitle = dataFigureTitle({
       variableName,
+      figureTitleHead: data.variable?.figureTitleHead,
       compareBy,
       memberCount: data.members.length,
       firstMemberLabel: data.members[0]?.label,
@@ -104,6 +110,8 @@ export function useDataShareCapture(
           source: data.mixedSource ? "mixed" : data.source,
           waterYearTypesLabel,
           figureTitle,
+          axisLabel: axisLabelFor(data.variable, data.view, data.unit),
+          yearBasis: data.variable?.yearBasis,
         }),
       buildItem: (captured) => ({
         id: `data-${selectedVariableId}-${crypto.randomUUID()}`,

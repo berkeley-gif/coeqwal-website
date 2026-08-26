@@ -8,6 +8,7 @@
 import type { TierLocationsResponse } from "../map/visualizationLayers"
 import { TIER_LABELS, TierLevel } from "../../content/tiers"
 import { getDemandUnitNameInfo } from "../map/config/demandUnitNames"
+import { OUTCOME_NAMES } from "../../content/outcomes"
 
 // Feature properties from Mapbox layer
 export interface DemandUnitProperties {
@@ -190,9 +191,9 @@ function generateHeadline(
   const assessment = getQualitativeAssessment(breakdown)
 
   switch (outcome) {
-    case "Community deliveries":
+    case OUTCOME_NAMES.CWS_DEL:
       return `Community water systems are ${assessment} under this scenario.`
-    case "Agricultural revenue":
+    case OUTCOME_NAMES.AG_REV:
       return `Agricultural water deliveries are ${assessment} under this scenario.`
     default:
       return `${outcome} is ${assessment} under this scenario.`
@@ -340,7 +341,7 @@ export function generateOutcomeInsight(
   const parts: string[] = []
 
   // Opening based on outcome type
-  if (outcome === "Community deliveries") {
+  if (outcome === OUTCOME_NAMES.CWS_DEL) {
     parts.push("Looking at community water system data,")
 
     if (tierBreakdown.tier1.percentage >= 80) {
@@ -365,7 +366,7 @@ export function generateOutcomeInsight(
       const names = formatLocationList(atRiskLocations)
       parts.push(`The at-risk areas are ${names}.`)
     }
-  } else if (outcome === "Agricultural revenue") {
+  } else if (outcome === OUTCOME_NAMES.AG_REV) {
     parts.push("Looking at agricultural water delivery data,")
 
     if (tierBreakdown.tier1.percentage >= 80) {

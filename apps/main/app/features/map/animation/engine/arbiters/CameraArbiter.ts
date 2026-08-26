@@ -19,6 +19,13 @@ export interface CameraHome {
   zoom: number
 }
 
+export interface CameraPadding {
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
+
 export interface FlyHomeOpts {
   /** Duration (ms) of the easeTo. Default 800. */
   duration?: number
@@ -26,6 +33,14 @@ export interface FlyHomeOpts {
    *  Doesn't affect the "already home" check, which is center and zoom
    *  only. If already home, no flight runs and bearing/pitch are kept. */
   resetOrientation?: boolean
+  /** Reserves space for the storyboard's own left (narration) and right
+   *  (white panel) columns, so the camera settles on the middle column
+   *  instead of the full map canvas. Passed explicitly on every flight
+   *  rather than relying on Mapbox to carry over a prior `easeTo`'s
+   *  padding - `isHome()` below only compares center/zoom, so a stale
+   *  padding from before a resize or sidebar toggle could otherwise go
+   *  unnoticed. */
+  padding?: CameraPadding
   /** Fires when a flight actually starts (not when already home or `map`
    *  is null). Use to flip play-state to "playing" for the flight. */
   onStart?: () => void
@@ -53,9 +68,19 @@ export class CameraArbiter {
    *  `onStart` fires, an easeTo is dispatched, and `onArrive` is wired
    *  to the next `moveend`. */
   flyHome(map: MapboxGLMap | null | undefined, opts: FlyHomeOpts = {}): void {
-    const { duration = 800, resetOrientation = false, onStart, onArrive } = opts
+    const {
+      duration = 800,
+      resetOrientation = false,
+      padding,
+      onStart,
+      onArrive,
+    } = opts
 
     if (!map || this.isHome(map)) {
+      // Position isn't moving, but padding still might be stale (e.g. a
+      // resize happened since the last flight) - `isHome()` doesn't check
+      // it, so set it directly rather than skipping silently.
+      if (map && padding) map.setPadding(padding)
       onArrive?.()
       return
     }
@@ -66,6 +91,7 @@ export class CameraArbiter {
       center: { lng: this.home.center[0], lat: this.home.center[1] },
       zoom: this.home.zoom,
       ...(resetOrientation ? { bearing: 0, pitch: 0 } : {}),
+      ...(padding ? { padding } : {}),
       duration,
     })
   }

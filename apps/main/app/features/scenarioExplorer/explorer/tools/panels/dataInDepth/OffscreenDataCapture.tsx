@@ -53,6 +53,11 @@ export interface CaptureDataInDepthInput {
   /** Standardized figure title; persisted with the chart data so the share
    *  card heading and the CSV provenance block carry it */
   figureTitle: string
+  /** Y-axis label as drawn on screen ("thousand acre feet (TAF)"); the
+   *  bare unit is the fallback. */
+  axisLabel?: string
+  /** Year basis of the series; calendar-year series label their rows so. */
+  yearBasis?: "water" | "calendar"
 }
 
 export interface CaptureDataInDepthResult {
@@ -66,7 +71,7 @@ export async function captureDataInDepthOffscreen(
 ): Promise<CaptureDataInDepthResult> {
   const { width, height } = CAPTURE_DIMENSIONS.data
   const fmt = (v: number) => formatValue(v, input.unit)
-  const yLabel = input.view === "cv" ? "CV" : input.unit
+  const yLabel = input.view === "cv" ? "CV" : (input.axisLabel ?? input.unit)
 
   // Same rule the live card applies: a member whose scenario is not modeled
   // for this variable is recorded but never drawn, so the exported image can
@@ -130,6 +135,7 @@ export async function captureDataInDepthOffscreen(
     source: input.source,
     waterYearTypesLabel: input.waterYearTypesLabel,
     figureTitle: input.figureTitle,
+    yearBasis: input.yearBasis,
     // A member with no served data exports as a LABELED, EMPTY column, never
     // as the sample series the engine produced to fill the gap. Its water
     // years stay an empty array (not undefined) so the other members keep

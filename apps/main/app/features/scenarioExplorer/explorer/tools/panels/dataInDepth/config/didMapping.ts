@@ -4,8 +4,9 @@
  * Bridges the explorer's registry ids (variable ids, location ids) to the
  * /api/data-in-depth/* request vocabulary (domain, subject short_code, period,
  * unit token, include facets). Self-contained on purpose: no React, no store,
- * no registry import, so it is trivially unit-testable and safe to import from
- * a Node-side spec. The variable-to-tier and location metadata stay in
+ * no registry import (only the generated entity id sets, which carry no
+ * runtime dependency), so it is trivially unit-testable and safe to import
+ * from a Node-side spec. The variable-to-tier and location metadata stay in
  * variableRegistry; this module only owns the registry-id -> API-code bridge,
  * which is an API-side fact (verified against the live DB, 2026-07-20).
  *
@@ -13,6 +14,12 @@
  * everything else falls back to the deterministic mock engine (a null
  * return here = mock).
  */
+
+import {
+  AG_ENTITY_IDS,
+  CWS_DELIVERY_ENTITY_IDS,
+  CWS_SHORTAGE_ENTITY_IDS,
+} from "./entityLocations.generated"
 
 /** A live data-in-depth domain (one endpoint each). */
 export type DidDomain =
@@ -37,6 +44,8 @@ export type DidUnitToken =
   | "net_diversion"
   | "gw_pumping"
   | "shortage"
+  | "welfare_loss"
+  | "revenue"
 /** Which computed facets to request. */
 export type DidIncludeToken = "values" | "exceedance" | "box" | "statistics"
 /** Request period token (river is annual; reservoir/delta are april/sept). */
@@ -65,9 +74,11 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   salmon_abund: "salmon",
   cws_del: "cws",
   cws_short: "cws",
+  cws_welfare: "cws",
   ag_del: "ag",
   ag_pump: "ag",
   ag_short: "ag",
+  ag_rev: "ag",
 }
 
 /** One pinned period per live variable, so `values` is a clean annual series. */
@@ -93,9 +104,11 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   salmon_abund: "annual",
   cws_del: "annual",
   cws_short: "annual",
+  cws_welfare: "annual",
   ag_del: "annual",
   ag_pump: "annual",
   ag_short: "annual",
+  ag_rev: "annual",
 }
 
 /**
@@ -263,22 +276,27 @@ const SALMON_SUBJECT_BY_LOCATION: Record<string, string> = {
 }
 
 /**
- * Community water systems: the endpoint serves 107 subjects, but the
- * explorer wires only the two served aggregates for now (verified against
- * /api/data-in-depth/cws, 2026-08-19: NOD_CWS/SOD_CWS carry all five
- * measures). Entity-level locations follow once the location list is
- * finalized with the data team, so any other id stays unmapped (mock).
+ * Community water systems: the two aggregates remap to their served subject
+ * codes; every entity's registry id IS its served code, checked against the
+ * generated id set of the measure family the variable reads (deliveries:
+ * 74 systems; shortage and welfare: 63 systems, overlapping but separate per
+ * the data team). A code outside the variable's family stays unmapped.
  */
 const CWS_AGGREGATE_SUBJECTS: Record<string, string> = {
   AGG_CWS_NOD: "NOD_CWS",
   AGG_CWS_SOD: "SOD_CWS",
 }
 
+/** Variables that read the shortage/welfare measure family. */
+const CWS_SHORTAGE_FAMILY_VARIABLES: ReadonlySet<string> = new Set([
+  "cws_short",
+  "cws_welfare",
+])
+
 /**
- * Agriculture: the two served aggregate subjects (verified against
- * /api/data-in-depth/ag 2026-08-21, 100 annual years each in TAF). Same
- * scoping decision as CWS: entity-level demand units are NOT guessed at, so
- * any other id stays unmapped and renders sample data.
+ * Agriculture: the two aggregates remap to their served subject codes; every
+ * demand unit's registry id IS its served code (132, generated from the
+ * live API), and all four measures are served on every subject.
  */
 const AG_AGGREGATE_SUBJECTS: Record<string, string> = {
   AGG_AG_NOD: "NOD_Agriculture",
@@ -296,6 +314,10 @@ const AG_AGGREGATE_SUBJECTS: Record<string, string> = {
  */
 const LIVE_SERIES_SCALE: Record<string, number> = {
   salmon_abund: 0.01,
+  // The cws welfare_loss and ag revenue measures are served in USD; the
+  // tool displays millions of dollars per year.
+  cws_welfare: 1e-6,
+  ag_rev: 1e-6,
 }
 
 /** Scale from a live series' served units to display units (1 = as served). */
@@ -399,10 +421,20 @@ export function toDidSubject(
     return SALMON_SUBJECT_BY_LOCATION[locationId] ?? null
   }
   if (domain === "cws") {
-    return CWS_AGGREGATE_SUBJECTS[locationId] ?? null
+    const aggregate = CWS_AGGREGATE_SUBJECTS[locationId]
+    if (aggregate) return aggregate
+    // Entities resolve only within the family the variable reads; with no
+    // variable there is no family, so only the aggregates resolve.
+    if (!variableId) return null
+    const family = CWS_SHORTAGE_FAMILY_VARIABLES.has(variableId)
+      ? CWS_SHORTAGE_ENTITY_IDS
+      : CWS_DELIVERY_ENTITY_IDS
+    return family.has(locationId) ? locationId : null
   }
   if (domain === "ag") {
-    return AG_AGGREGATE_SUBJECTS[locationId] ?? null
+    const aggregate = AG_AGGREGATE_SUBJECTS[locationId]
+    if (aggregate) return aggregate
+    return AG_ENTITY_IDS.has(locationId) ? locationId : null
   }
   if (domain === "reservoir") {
     const code = RESERVOIR_SUBJECT_REMAP[locationId] ?? locationId
@@ -448,6 +480,7 @@ export function unitTokenForView(
     if (variableId === "cws_short") {
       return view === "pct_demand" ? "shortage_pct" : "shortage_total"
     }
+    if (variableId === "cws_welfare") return "welfare_loss"
     return "delivery"
   }
   if (domain === "ag") {
@@ -456,6 +489,7 @@ export function unitTokenForView(
     // view derives from it plus the companion net_diversion series rather
     // than switching to a served percent measure the way cws does.
     if (variableId === "ag_short") return "shortage"
+    if (variableId === "ag_rev") return "revenue"
     return "net_diversion"
   }
   if (view === "pct") return "pct_capacity"
@@ -576,7 +610,7 @@ const RESPONSE_ARRAY_BY_DOMAIN: Record<
 /**
  * Request unit token -> response series key. Unit-keyed domains use unit
  * codes (TAF, PCT_CAP, km); measure-keyed domains use the measure name
- * itself (gw: volume/level; cws: delivery/shortage_total/shortage_pct) or
+ * itself (gw: volume/level; cws: delivery/shortage_total/shortage_pct/welfare_loss) or
  * the metric code (salmon: NOF_3YR_AVG).
  */
 const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
@@ -588,9 +622,11 @@ const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   delivery: "delivery",
   shortage_total: "shortage_total",
   shortage_pct: "shortage_pct",
+  welfare_loss: "welfare_loss",
   net_diversion: "net_diversion",
   gw_pumping: "gw_pumping",
   shortage: "shortage",
+  revenue: "revenue",
 }
 
 /** The series key for a domain + request token (gw is keyed by measure name). */
@@ -630,6 +666,80 @@ export function pickLiveSeries(
   const match = subjects?.find((s) => s.subject === subject)
   const facet = match?.periods?.[period]?.[responseSeriesKey(domain, unitToken)]
   return seriesFromValues(facet?.values)
+}
+
+/** Request subjects and per-member selectors for the locations axis. */
+export interface LocationAxisRequest {
+  /** Deduplicated request subjects in first-seen order */
+  subjects: string[]
+  /** Per member, index-aligned with the location ids: one subject, the SSJV
+   *  route list for the synthetic total, or null when unmapped (sample). */
+  memberSubjects: (string | readonly string[] | null)[]
+}
+
+/**
+ * The locations axis fetches ONE block for the held scenario carrying every
+ * selected location's subject; each member then picks its own series by
+ * subject id. Two locations that map to the same subject collapse in the
+ * request and still get two members. Pure.
+ */
+export function locationAxisRequest(
+  domain: DidDomain,
+  variableId: string,
+  locationIds: readonly string[],
+): LocationAxisRequest {
+  const subjects: string[] = []
+  const seen = new Set<string>()
+  const push = (code: string) => {
+    if (!seen.has(code)) {
+      seen.add(code)
+      subjects.push(code)
+    }
+  }
+  const memberSubjects = locationIds.map((id) => {
+    if (variableId === "ssjv_exp" && id === SSJV_ALL_ROUTES_LOCATION) {
+      SSJV_ROUTE_SUBJECTS.forEach(push)
+      return SSJV_ROUTE_SUBJECTS
+    }
+    const code = toDidSubject(domain, id, variableId)
+    if (code) push(code)
+    return code
+  })
+  return { subjects, memberSubjects }
+}
+
+/**
+ * Whether a served scenario block carries `subject` at all. A block that
+ * exists but lacks the subject means the subject is not modeled for that
+ * scenario (KCWA is absent from the Delta Conveyance Project family on the
+ * cws endpoint), which is a fact to show, not a reason to draw sample data.
+ */
+export function blockHasSubject(
+  block: LiveScenarioBlock | undefined,
+  domain: DidDomain,
+  subject: string,
+): boolean {
+  const subjects = block?.[RESPONSE_ARRAY_BY_DOMAIN[domain]]
+  return !!subjects?.some((s) => s.subject === subject)
+}
+
+/**
+ * Keep only the points whose year lies in `range` (inclusive), index-aligned
+ * across `series` and `waterYears`. Fails closed: with no years to judge by,
+ * the points are returned untouched rather than partially trimmed. Pure.
+ */
+export function trimPointsToYearRange(
+  points: SeriesPoints,
+  range: { min: number; max: number },
+): SeriesPoints {
+  if (points.waterYears.length !== points.series.length) return points
+  if (points.waterYears.length === 0) return points
+  const keep = points.waterYears.map((y) => y >= range.min && y <= range.max)
+  if (keep.every(Boolean)) return points
+  return {
+    series: points.series.filter((_, i) => keep[i]),
+    waterYears: points.waterYears.filter((_, i) => keep[i]),
+  }
 }
 
 /**

@@ -1,6 +1,6 @@
 "use client"
 
-import { Typography, useTheme } from "@repo/ui/mui"
+import { Typography, useTheme, icons } from "@repo/ui/mui"
 import { BarredColumns } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
@@ -33,6 +33,7 @@ export default function ChooseScenariosPanel() {
         These will be saved in the{" "}
         <Typography component="span" variant="body2" fontWeight={600}>
           SHARE
+          <icons.IosShare sx={{ fontSize: "1rem", ml: 0.5 }} fontWeight={600} />
         </Typography>{" "}
         section of the site.
       </Typography>

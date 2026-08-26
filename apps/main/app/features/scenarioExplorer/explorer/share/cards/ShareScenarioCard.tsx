@@ -12,6 +12,7 @@ import {
 import { getSingleValueLocationCount } from "../../../../../content/outcomes"
 import type { OutcomeDisplayMode } from "../../store"
 import ShareCardShell from "../ShareCardShell"
+import type { ShareFigureFooter } from "../figureFooter"
 import HydroclimateBadge from "./HydroclimateBadge"
 import ShareCardTierLegend from "./ShareCardTierLegend"
 
@@ -27,6 +28,8 @@ interface ShareScenarioCardProps {
   viewMode?: OutcomeDisplayMode
   note?: string
   onNoteChange?: (note: string) => void
+  /** Provenance footer rendered by the shell inside the exported area. */
+  figureFooter?: ShareFigureFooter
 }
 
 export default function ShareScenarioCard({
@@ -41,11 +44,13 @@ export default function ShareScenarioCard({
   viewMode,
   note,
   onNoteChange,
+  figureFooter,
 }: ShareScenarioCardProps) {
   const theme = useTheme()
 
   return (
     <ShareCardShell
+      figureFooter={figureFooter}
       onRemove={onRemove ? () => onRemove(scenarioId) : undefined}
       note={note}
       onNoteChange={onNoteChange}

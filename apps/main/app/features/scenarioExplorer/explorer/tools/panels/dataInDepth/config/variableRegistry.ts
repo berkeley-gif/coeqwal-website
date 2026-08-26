@@ -21,6 +21,12 @@
  */
 
 /** One selectable view of a variable's data. */
+import {
+  AG_ENTITY_LOCATIONS,
+  CWS_DELIVERY_ENTITY_LOCATIONS,
+  CWS_SHORTAGE_ENTITY_LOCATIONS,
+} from "./entityLocations.generated"
+
 export type VariableView =
   | "dist" // annual distribution (exceedance curve or box plot)
   | "pct" // annual distribution as percent of capacity (reservoirs)
@@ -48,8 +54,21 @@ export interface LocationDef {
   capacityTaf?: number
   /** True for aggregate rollups (e.g. all North-of-Delta reservoirs) */
   aggregate?: boolean
+  /** False when the location cannot show the groundwater Level view: a
+   *  water-table elevation is reported per basin and cannot be summed, so
+   *  the North and South of Delta totals carry volume only. Pickers disable
+   *  the location on that view and the view bar disables the view for it. */
+  levelView?: false
   /** Synthetic median magnitude for the sample-data engine */
   mockBase?: number
+  /** Uncut display label, present only when `name` was cut at a word
+   *  boundary to stay legible in chips, legends and titles (generated
+   *  entity locations). Shown in tooltips. */
+  longName?: string
+  /** The label the API serves for this subject, verbatim, when the display
+   *  name was derived from it (generated entity locations). Kept so a
+   *  display-name review can see what the data team called the entity. */
+  apiLabel?: string
 }
 
 export interface LocationGroup {
@@ -72,6 +91,7 @@ export type LocationGroupId =
   | "ssjv"
   | "agregions"
   | "cws"
+  | "cwsShortage"
   | "salmon"
 
 export interface SectorDef {
@@ -87,6 +107,11 @@ export interface SectorDef {
 export interface VariableDef {
   id: string
   name: string
+  /** How the variable reads inside a sentence after "mean", "median" or
+   *  "the annual variation in": keeps proper nouns and acronyms cased
+   *  ("April X2 position", "CVP M&I deliveries") where the display name
+   *  cannot simply be lowercased. */
+  proseName: string
   sectorId: string
   locationGroup: LocationGroupId
   unit: string
@@ -114,6 +139,16 @@ export interface VariableDef {
   tierOutcome?: string
   /** Human name of that key outcome, for copy */
   tierOutcomeName?: string
+  /** Key-outcome chip override. "not-used" renders "not used in calculation
+   *  of key outcome" whatever `tierOutcome` says (the tier metadata is kept
+   *  for the pathway; the chip is copy). Absent: the chip reads "used in
+   *  calculation of key outcome: <tierOutcomeName>" when a name exists, and
+   *  nothing renders otherwise. */
+  keyOutcomeChip?: "not-used"
+  /** Verbatim head for the standardized figure title, replacing the default
+   *  "<Variable> (<Location>)" head, e.g. "April X2 Position (in km)". Set
+   *  only where the location parenthetical adds nothing (the X2 titles). */
+  figureTitleHead?: string
   /** Data source status: live API today, or deterministic sample data */
   data: "live" | "mock"
   /** Scope still under discussion (deck vs outcomes sheet); shows a chip */
@@ -127,6 +162,17 @@ export interface VariableDef {
    *  provenance drop the water-years clause. The stored selection stays
    *  inert, not cleared. Absent means WYT applies. */
   wytApplicable?: boolean
+  /** Year basis of the served series. Absent means water years (October to
+   *  September), the CalSim3 convention. "calendar" marks series aggregated
+   *  upstream by calendar year (the CWS delivery family), which changes the
+   *  year-axis label in exports and provenance. */
+  yearBasis?: "water" | "calendar"
+  /** Inclusive range of served years the site adopts. Points outside it are
+   *  dropped before any statistic is computed. Set where the endpoint serves
+   *  partial stub years at the ends of the model run (the CWS delivery
+   *  family: a three-month 1921 and a nine-month 2021), so a stub never
+   *  becomes the minimum, the exceedance tail or a term of the mean and CV. */
+  servedYearRange?: { min: number; max: number }
   /** Shown when a scenario the user selected is not modeled for this
    *  variable, so the endpoint serves no data for it. Explains WHY rather
    *  than leaving a blank series: an absence with a reason reads as a fact
@@ -195,6 +241,7 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
         name: "All North of Delta",
         region: "NOD",
         aggregate: true,
+        levelView: false,
         mockBase: 46000,
       },
       {
@@ -202,6 +249,7 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
         name: "All South of Delta",
         region: "SOD",
         aggregate: true,
+        levelView: false,
         mockBase: 51000,
       },
       {
@@ -512,13 +560,14 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
     ],
   },
   agregions: {
-    // The two served aggregates (subjects NOD_Agriculture/SOD_Agriculture,
-    // verified against /api/data-in-depth/ag 2026-08-21). The four
-    // illustrative demand-unit groups are retired for the same reason the
-    // CWS sample groups were: real aggregates on a public tool beat invented
-    // groupings, and stale persisted ids heal at hydration. Entity-level
-    // demand units follow only when the data team confirms a subject list.
-    label: "Region",
+    // The two served aggregates (subjects NOD_Agriculture/SOD_Agriculture)
+    // followed by every demand unit the ag endpoint serves (132 as of
+    // 2026-08-24), generated from the live API by
+    // scripts/did-entity-locations. Names lead with the served code because
+    // the served labels repeat ("Non-district" appears 22 times). The
+    // aggregate mockBase values are scale factors read by AG_BASE in the
+    // sample engine; entity mockBase values are served medians.
+    label: "Demand unit",
     items: [
       {
         id: "AGG_AG_NOD",
@@ -534,32 +583,60 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
         aggregate: true,
         mockBase: 1,
       },
+      ...AG_ENTITY_LOCATIONS,
     ],
   },
   cws: {
-    // The two served aggregates (subjects NOD_CWS/SOD_CWS, verified against
-    // /api/data-in-depth/cws 2026-08-19). The four illustrative sample
-    // groups are retired: real aggregates on a public tool beat invented
-    // groupings, and stale persisted ids heal at hydration. Entity-level
-    // locations (74 systems with served delivery) follow once the location
-    // list is finalized with the data team. mockBase values approximate the
-    // served median deliveries so sample fallbacks share the live scale.
-    label: "Community water systems",
+    // Community water systems with served DELIVERIES: the two aggregates
+    // (subjects NOD_CWS/SOD_CWS) followed by the 74 systems the cws endpoint
+    // serves the delivery measure for, generated from the live API. The
+    // shortage and welfare measures cover a different, overlapping set of
+    // systems, which is the separate `cwsShortage` group below. Aggregate
+    // mockBase values approximate the served median deliveries.
+    label: "Community water system",
     items: [
       {
         id: "AGG_CWS_NOD",
         name: "All North of Delta",
         region: "NOD",
         aggregate: true,
-        mockBase: 350,
+        mockBase: 597,
       },
       {
         id: "AGG_CWS_SOD",
         name: "All South of Delta",
         region: "SOD",
         aggregate: true,
-        mockBase: 2000,
+        mockBase: 2220,
       },
+      ...CWS_DELIVERY_ENTITY_LOCATIONS,
+    ],
+  },
+  cwsShortage: {
+    // Community water systems with served SHORTAGE and WELFARE outcomes: the
+    // same two aggregates (the endpoint serves all five measures on them)
+    // followed by the 63 systems modeled in the welfare-outcomes source. The
+    // data team treats this set as separate from the delivery set (34
+    // systems are in both); binding each variable to its own group means the
+    // site never requests a subject the endpoint lacks for that measure.
+    // mockBase here is the median shortage in TAF.
+    label: "Community water system",
+    items: [
+      {
+        id: "AGG_CWS_NOD",
+        name: "All North of Delta",
+        region: "NOD",
+        aggregate: true,
+        mockBase: 2.6,
+      },
+      {
+        id: "AGG_CWS_SOD",
+        name: "All South of Delta",
+        region: "SOD",
+        aggregate: true,
+        mockBase: 3.5,
+      },
+      ...CWS_SHORTAGE_ENTITY_LOCATIONS,
     ],
   },
   salmon: {
@@ -604,7 +681,7 @@ export const SECTORS: SectorDef[] = [
       "ssjv_exp",
     ],
   },
-  { id: "outflow", name: "Delta outflows", variables: ["ndo", "ndo_uif"] },
+  { id: "outflow", name: "Delta outflows", variables: ["ndo"] },
   {
     id: "eflows",
     name: "Environmental flows",
@@ -618,7 +695,7 @@ export const SECTORS: SectorDef[] = [
   {
     id: "cwsS",
     name: "Community water systems",
-    variables: ["cws_del", "cws_short"],
+    variables: ["cws_del", "cws_short", "cws_welfare"],
   },
   {
     id: "salmonS",
@@ -636,6 +713,7 @@ const TAF = "thousand acre-feet"
 export const VARIABLES: Record<string, VariableDef> = {
   res_apr: {
     id: "res_apr",
+    proseName: "April reservoir storage",
     name: "April reservoir storage",
     sectorId: "res",
     locationGroup: "reservoirs",
@@ -654,6 +732,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   res_sep: {
     id: "res_sep",
+    proseName: "September reservoir storage",
     name: "September reservoir storage",
     sectorId: "res",
     locationGroup: "reservoirs",
@@ -672,6 +751,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   gw_stor: {
     id: "gw_stor",
+    proseName: "groundwater storage",
     name: "Groundwater storage",
     sectorId: "gw",
     locationGroup: "basins",
@@ -691,12 +771,16 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   x2_apr: {
     id: "x2_apr",
+    proseName: "April X2 position",
     name: "April X2 position",
     sectorId: "salin",
     locationGroup: "delta",
     unit: "km",
     unitLabel: "km from the Golden Gate",
     views: ["dist"],
+    axisLabel: "distance of X2 from Golden Gate (km)",
+    figureTitleHead: "April X2 Position (in km)",
+    keyOutcomeChip: "not-used",
     plain:
       "How far upstream salty water reaches into the Delta in April. X2 is the distance (km from the Golden Gate) where salinity hits 2 ppt - smaller is fresher.",
     tech: "Annual April X2 percentiles. X2 responds to Delta outflow; spring position matters for estuarine habitat.",
@@ -708,12 +792,16 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   x2_sep: {
     id: "x2_sep",
+    proseName: "September X2 position",
     name: "September X2 position",
     sectorId: "salin",
     locationGroup: "delta",
     unit: "km",
     unitLabel: "km from the Golden Gate",
     views: ["dist"],
+    axisLabel: "distance of X2 from Golden Gate (km)",
+    figureTitleHead: "September X2 Position (in km)",
+    keyOutcomeChip: "not-used",
     plain:
       "How far upstream salty water reaches in September, at the end of the dry season, when the Delta is at its saltiest.",
     tech: "Annual September X2 percentiles. The fall X2 standard is the subject of the salinity-standards scenario.",
@@ -725,6 +813,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_del: {
     id: "cvp_del",
+    proseName: "Central Valley Project deliveries",
     name: "Central Valley Project deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -742,6 +831,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_del: {
     id: "swp_del",
+    proseName: "State Water Project deliveries",
     name: "State Water Project deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -759,6 +849,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   tot_exp: {
     id: "tot_exp",
+    proseName: "Delta exports",
     name: "Total Delta exports",
     sectorId: "sysdel",
     locationGroup: "delta",
@@ -776,6 +867,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_ag: {
     id: "cvp_ag",
+    proseName: "CVP agricultural deliveries",
     name: "CVP agricultural deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -791,6 +883,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_mi: {
     id: "cvp_mi",
+    proseName: "CVP M&I deliveries",
     name: "CVP M&I deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -806,6 +899,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_refuges: {
     id: "cvp_refuges",
+    proseName: "CVP wildlife refuge deliveries",
     name: "CVP wildlife refuge deliveries",
     sectorId: "sysdel",
     locationGroup: "syswide",
@@ -821,6 +915,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_ag: {
     id: "swp_ag",
+    proseName: "SWP agricultural deliveries",
     name: "SWP agricultural deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -836,12 +931,14 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_mi: {
     id: "swp_mi",
+    proseName: "M&I deliveries of the State Water Project",
     name: "SWP M&I deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
     unit: "TAF",
     unitLabel: TAF,
     views: ["dist"],
+    keyOutcomeChip: "not-used",
     plain:
       "How much State Water Project water is delivered to cities and industry (municipal and industrial use) each year.",
     tech: "Annual SWP municipal and industrial deliveries per the API subject labels (DEL_SWP_PMI; regional splits DEL_SWP_PMI_N / DEL_SWP_PMI_S).",
@@ -851,6 +948,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_exp: {
     id: "cvp_exp",
+    proseName: "CVP Delta exports",
     name: "CVP Delta exports",
     sectorId: "sysdel",
     locationGroup: "delta",
@@ -866,6 +964,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_exp: {
     id: "swp_exp",
+    proseName: "SWP Delta exports",
     name: "SWP Delta exports",
     sectorId: "sysdel",
     locationGroup: "delta",
@@ -881,6 +980,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ssjv_exp: {
     id: "ssjv_exp",
+    proseName: "southern San Joaquin Valley exports",
     name: "Southern San Joaquin Valley exports",
     sectorId: "sysdel",
     locationGroup: "ssjv",
@@ -896,6 +996,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   salmon_abund: {
     id: "salmon_abund",
+    proseName: "winter-run abundance",
     name: "Winter-run abundance",
     sectorId: "salmonS",
     locationGroup: "salmon",
@@ -913,12 +1014,13 @@ export const VARIABLES: Record<string, VariableDef> = {
     provisional: true,
     wytApplicable: false,
     noLiveDataExplanation:
-      "Salmon spawning results are not modeled for Delta Conveyance Project scenarios.",
+      "Winter-run salmon data are not available for the Delta Conveyance Project scenario.",
     mockKind: "flow",
     mockEffect: "eco",
   },
   ndo: {
     id: "ndo",
+    proseName: "Delta outflow volume",
     name: "Delta outflow volume",
     sectorId: "outflow",
     locationGroup: "delta",
@@ -934,26 +1036,9 @@ export const VARIABLES: Record<string, VariableDef> = {
     mockKind: "outflow",
     mockEffect: "outflow",
   },
-  ndo_uif: {
-    id: "ndo_uif",
-    name: "Outflow as % of unimpaired flow",
-    sectorId: "outflow",
-    locationGroup: "delta",
-    unit: "%",
-    unitLabel: "percent of unimpaired flow",
-    views: ["dist"],
-    plain:
-      "What share of the river water that would naturally reach the Delta actually flows out of it, after storage and diversions.",
-    tech: "Annual Delta outflow divided by unimpaired outflow estimate; flagged as provisional in the outcomes spec.",
-    tierOutcome: "DELTA_ECO",
-    tierOutcomeName: "Delta estuary ecology",
-    data: "mock",
-    provisional: true,
-    mockKind: "pctuif",
-    mockEffect: "pctUIF",
-  },
   riv_flow: {
     id: "riv_flow",
+    proseName: "river flows",
     name: "River flows",
     sectorId: "eflows",
     locationGroup: "rivers",
@@ -971,6 +1056,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ag_del: {
     id: "ag_del",
+    proseName: "agricultural surface water deliveries",
     name: "Surface water deliveries",
     sectorId: "ag",
     locationGroup: "agregions",
@@ -978,7 +1064,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist", "monthly"],
     plain: "How much river and project water is delivered to farms each year.",
-    tech: "Served live from the ag data-in-depth endpoint's net_diversion measure on the NOD_Agriculture/SOD_Agriculture aggregates (annual TAF). Entity-level demand units follow once the data team confirms a subject list.",
+    tech: "Served live from the ag data-in-depth endpoint's net_diversion measure (annual TAF) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132).",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
     data: "live",
@@ -987,6 +1073,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ag_pump: {
     id: "ag_pump",
+    proseName: "agricultural groundwater pumping",
     name: "Groundwater pumping",
     sectorId: "ag",
     locationGroup: "agregions",
@@ -995,7 +1082,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist"],
     plain:
       "How much groundwater farms pump to make up for surface water they don't receive. Pumping rises in dry years.",
-    tech: "Served live from the ag data-in-depth endpoint's gw_pumping measure on the NOD_Agriculture/SOD_Agriculture aggregates (annual TAF). Pumping-limit scenarios constrain this directly.",
+    tech: "Served live from the ag data-in-depth endpoint's gw_pumping measure (annual TAF) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132). Pumping-limit scenarios constrain this directly.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
     data: "live",
@@ -1004,6 +1091,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ag_short: {
     id: "ag_short",
+    proseName: "agricultural water shortage",
     name: "Water shortage",
     sectorId: "ag",
     locationGroup: "agregions",
@@ -1014,7 +1102,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     viewUnits: { pct_demand: { unit: "%", unitLabel: "percent of demand" } },
     plain:
       "How much water farms wanted but did not get, from any source. Zero in wet years; can spike in droughts. The percent view expresses the same gap as a share of what farms needed, which compares across regions of different size.",
-    tech: "Served live from the ag data-in-depth endpoint's shortage measure on the NOD_Agriculture/SOD_Agriculture aggregates (annual TAF). The percent-of-demand view is DERIVED on the site as shortage / (net diversion + shortage) x 100, because the endpoint serves no percent measure; demand is approximated as delivered water plus shortage.",
+    tech: "Served live from the ag data-in-depth endpoint's shortage measure (annual TAF) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132). The percent-of-demand view is DERIVED on the site as shortage / (net diversion + shortage) x 100, because the endpoint serves no percent measure; demand is approximated as delivered water plus shortage.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
     data: "live",
@@ -1023,24 +1111,25 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ag_rev: {
     id: "ag_rev",
+    proseName: "gross crop revenues",
     name: "Gross crop revenues",
     sectorId: "ag",
     locationGroup: "agregions",
-    unit: "$B",
-    unitLabel: "billion dollars per year",
-    views: ["dist", "value"],
+    unit: "$M",
+    unitLabel: "million dollars per year",
+    views: ["dist"],
     plain:
       "The total value of crops produced, given the water available. Water shortages translate into fallowed land and lost revenue.",
-    tech: "Annual gross revenue percentiles from the external agricultural economics model, driven by CalSim3 deliveries and pumping. External-source metric pending scope confirmation.",
+    tech: "Served live from the ag data-in-depth endpoint's revenue measure (USD per year, displayed in millions) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132). The series comes from the agricultural economics model driven by CalSim3 deliveries and pumping, not from CalSim3 itself.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
-    data: "mock",
-    provisional: true,
+    data: "live",
     mockKind: "rev",
     mockEffect: "rev",
   },
   cws_del: {
     id: "cws_del",
+    proseName: "community water system deliveries",
     name: "Surface water deliveries",
     sectorId: "cwsS",
     locationGroup: "cws",
@@ -1048,19 +1137,22 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist"],
     plain: "How much water community drinking-water systems receive each year.",
-    tech: "Served live from the cws data-in-depth endpoint's delivery measure on the NOD_CWS/SOD_CWS aggregates (annual TAF; entity-level locations follow once the location list is finalized with the data team). Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
+    tech: "Served live from the cws data-in-depth endpoint's delivery measure (annual TAF) on the NOD_CWS/SOD_CWS aggregates and on the 74 community water systems with modeled deliveries. The served series is aggregated by calendar year over a model run from October 1921 to September 2021, so its first and last years are three-month and nine-month stubs; the site keeps 1922 to 2020. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
-    tierOutcomeName: "Community deliveries",
+    tierOutcomeName: "Community surface water",
     data: "live",
     wytApplicable: false,
+    yearBasis: "calendar",
+    servedYearRange: { min: 1922, max: 2020 },
     mockKind: "cwsdel",
     mockEffect: "cws",
   },
   cws_short: {
     id: "cws_short",
+    proseName: "community water system delivery shortages",
     name: "Delivery shortages",
     sectorId: "cwsS",
-    locationGroup: "cws",
+    locationGroup: "cwsShortage",
     unit: "TAF",
     unitLabel: TAF,
     views: ["dist", "pct_demand"],
@@ -1068,9 +1160,26 @@ export const VARIABLES: Record<string, VariableDef> = {
     viewUnits: { pct_demand: { unit: "%", unitLabel: "percent of demand" } },
     plain:
       "How much water community systems were short of their needs - the gap the tiers pathway scores against human-health thresholds.",
-    tech: "Served live from the cws data-in-depth endpoint on the NOD_CWS/SOD_CWS aggregates: the volume view reads the shortage_total measure (annual TAF), the percent view reads the served shortage_pct measure directly (0-100). Note the shortage measures aggregate over the systems with modeled shortage series, a narrower set than the delivery measure covers, so shortage_pct is not simply 100 minus pct_demand_met. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
+    tech: "Served live from the cws data-in-depth endpoint on the NOD_CWS/SOD_CWS aggregates and on the 63 community water systems with modeled shortage series: the volume view reads the shortage_total measure (annual TAF), the percent view reads the served shortage_pct measure directly (0-100). The shortage set overlaps but differs from the 74-system delivery set, so shortage_pct is not simply 100 minus pct_demand_met and the location list here is its own. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
-    tierOutcomeName: "Community deliveries",
+    tierOutcomeName: "Community surface water",
+    data: "live",
+    wytApplicable: false,
+    mockKind: "short",
+    mockEffect: "cwsShort",
+  },
+  cws_welfare: {
+    id: "cws_welfare",
+    proseName: "welfare loss",
+    name: "Welfare loss",
+    sectorId: "cwsS",
+    locationGroup: "cwsShortage",
+    unit: "$M",
+    unitLabel: "million dollars per year",
+    views: ["dist"],
+    plain:
+      "The economic cost to a community water system of the water it did not get, in dollars per year. Zero in most years; it rises steeply in the droughts when shortages bite.",
+    tech: "Served live from the cws data-in-depth endpoint's welfare_loss measure (USD per year, the capped welfare-loss series from the CWS economics analysis) on the NOD_CWS/SOD_CWS aggregates and on the 63 community water systems with modeled shortage series; the site displays millions of dollars. Water-year-type filtering does not apply: the loss is an economic outcome that does not decompose by water year. The distribution is heavily zero-inflated, so the sentence reports the share of years with no loss and the mean rather than a median.",
     data: "live",
     wytApplicable: false,
     mockKind: "short",
@@ -1099,18 +1208,54 @@ const FOLDED_VARIABLE_IDS: Record<string, { id: string; view: VariableView }> =
   }
 
 /**
- * Resolves a persisted (variableId, view) pair through the fold map. Returns
- * the pair unchanged when the id was never folded, so callers can apply it
- * unconditionally. Pure.
+ * Variable ids retired OUTRIGHT: their content is gone, not moved. A share
+ * URL or persisted session carrying one lands on the default variable, on
+ * purpose and deterministically, rather than on whatever the caller's own
+ * fallback happens to be.
+ *
+ * - ndo_uif, "Outflow as % of unimpaired flow": provisional sample data only;
+ *   the unimpaired series exists as a spreadsheet, not in the API. Dropped
+ *   from the Delta outflows sector at the project lead's request (Aug 2026).
+ */
+export const RETIRED_VARIABLE_IDS: ReadonlySet<string> = new Set(["ndo_uif"])
+
+/**
+ * Resolves a persisted (variableId, view) pair through the fold map and the
+ * retired set. Returns the pair unchanged when the id was never folded or
+ * retired, so callers can apply it unconditionally. Pure.
  */
 export function resolveFoldedVariable(
   variableId: string,
   view: string,
 ): { id: string; view: string } {
   const folded = FOLDED_VARIABLE_IDS[variableId]
-  return folded
-    ? { id: folded.id, view: folded.view }
-    : { id: variableId, view }
+  if (folded) return { id: folded.id, view: folded.view }
+  if (RETIRED_VARIABLE_IDS.has(variableId)) {
+    return { id: DEFAULT_VARIABLE_ID, view: "dist" }
+  }
+  // A view the variable no longer offers (a retired summary view) heals to
+  // its first view, so a stale link never renders a chart with no button.
+  const def = VARIABLES[variableId]
+  if (def && !def.views.includes(view as VariableView)) {
+    return { id: variableId, view: def.views[0] ?? "dist" }
+  }
+  return { id: variableId, view }
+}
+
+/**
+ * Text of the key-outcome chip under the variable breadcrumb, or null when
+ * the variable shows no chip. "not-used" wins over the tier metadata; a
+ * tier outcome name reads as "used in calculation of key outcome: <name>".
+ * Pure.
+ */
+export function keyOutcomeChipText(variable: VariableDef): string | null {
+  if (variable.keyOutcomeChip === "not-used") {
+    return "not used in calculation of key outcome"
+  }
+  if (variable.tierOutcomeName) {
+    return `used in calculation of key outcome: ${variable.tierOutcomeName}`
+  }
+  return null
 }
 
 export function getVariable(id: string): VariableDef | undefined {
@@ -1148,6 +1293,44 @@ export function getLocationTitle(
     ? `${name} ${group.titleSuffix}`
     : name
 }
+
+/**
+ * Carry the location selection from one group to another when a variable
+ * switch changes groups (community water systems deliveries vs shortages
+ * bind different, overlapping system lists). The location picked last
+ * follows the user into the next group when that group has it; a location
+ * the next group lacks is left behind, and the next group's own pin (its
+ * default at worst) stands. The store seeds every group with a default pin,
+ * so "no pin yet" cannot be told apart from "the default", which is why the
+ * latest pick wins rather than only filling a gap. Pure: returns new
+ * records, never mutates the inputs.
+ */
+export function carryLocationSelection(
+  prevGroupId: string,
+  nextGroupId: string,
+  pinnedLocationByGroup: Record<string, string>,
+  selectedLocationsByGroup: Record<string, string[]>,
+): {
+  pinnedLocationByGroup: Record<string, string>
+  selectedLocationsByGroup: Record<string, string[]>
+} {
+  const next = LOCATION_GROUPS[nextGroupId as LocationGroupId]
+  if (prevGroupId === nextGroupId || !next) {
+    return { pinnedLocationByGroup, selectedLocationsByGroup }
+  }
+  const has = (id: string) => next.items.some((l) => l.id === id)
+  const pins = { ...pinnedLocationByGroup }
+  const prevPin = pinnedLocationByGroup[prevGroupId]
+  if (prevPin && has(prevPin)) pins[nextGroupId] = prevPin
+  const selections = { ...selectedLocationsByGroup }
+  const carried = (selectedLocationsByGroup[prevGroupId] ?? []).filter(has)
+  if (carried.length > 0) selections[nextGroupId] = carried
+  return { pinnedLocationByGroup: pins, selectedLocationsByGroup: selections }
+}
+
+/** The reason shown wherever a groundwater total cannot take the Level view. */
+export const LEVEL_VIEW_UNAVAILABLE_REASON =
+  "Groundwater levels are reported per basin; the North and South of Delta totals are volumes."
 
 /** Default (first) location id per group, used to seed pinned locations. */
 export function defaultLocationSelection(): Record<string, string> {

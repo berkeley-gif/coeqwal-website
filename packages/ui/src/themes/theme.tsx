@@ -1180,6 +1180,15 @@ const theme = createTheme({
       fontWeight: 400,
       lineHeight: 1.5,
     },
+
+    // Glossary term links - the single source of truth for bold+underline
+    // emphasis on linked terms. No fontSize/lineHeight: this is meant to be
+    // spread into an inline element that inherits its surrounding text size.
+    glossaryTerm: {
+      fontFamily: themeValues.fontFamily.text,
+      fontWeight: 700,
+      textDecoration: "underline",
+    },
   },
   shape: {
     borderRadius: parseInt(themeValues.borderRadius.md, 10),
@@ -1590,6 +1599,7 @@ const theme = createTheme({
           compactCaption: "span",
           compactMicro: "span",
           dashboardBold: "span",
+          glossaryTerm: "span",
         },
       },
       variants: [
@@ -1975,6 +1985,7 @@ declare module "@mui/material/styles" {
     tooltipHeader: React.CSSProperties
     scenarioTitle: React.CSSProperties
     storyBody: React.CSSProperties
+    glossaryTerm: React.CSSProperties
   }
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
@@ -1995,6 +2006,7 @@ declare module "@mui/material/styles" {
     tooltipHeader?: React.CSSProperties
     scenarioTitle?: React.CSSProperties
     storyBody?: React.CSSProperties
+    glossaryTerm?: React.CSSProperties
   }
 }
 
@@ -2026,5 +2038,6 @@ declare module "@mui/material/Typography" {
     tooltipHeader: true
     scenarioTitle: true
     storyBody: true
+    glossaryTerm: true
   }
 }

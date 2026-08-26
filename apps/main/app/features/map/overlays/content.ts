@@ -36,13 +36,6 @@ export const WATER_ISSUE_THEMES: ReadonlyArray<WaterIssueTheme> = [
       "Whether the Delta is a place where communities, farms, and ecosystems coexist and thrive",
     themeKey: "delta",
   },
-  {
-    title: "Operations and impacts",
-    description:
-      "How management decisions affect trade-offs, equity and resilience",
-    themeKey: "governance",
-    dimmed: true,
-  },
 ] as const
 
 export interface HydroclimateFuture {
@@ -175,12 +168,6 @@ export const VIZ_TOOLS: ReadonlyArray<VizTool> = [
     title: "Radar chart",
     description:
       "Shows how outcomes vary within a scenario and enables comparisons across scenarios, highlighting commonalities, differences, and trade-offs.",
-  },
-  {
-    title: "Scatterplot",
-    description:
-      "Compares scenarios at the system level to reveal the relative effects of operational decisions and climate change on outcomes.",
-    dimmed: true,
   },
   {
     title: "Heatmaps",

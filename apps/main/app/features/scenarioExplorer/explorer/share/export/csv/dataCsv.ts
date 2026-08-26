@@ -27,6 +27,9 @@ export type DataChartDataShape = {
   waterYearTypesLabel?: string
   /** Standardized figure title as drawn on the exported image */
   figureTitle?: string
+  /** Year basis of the series rows: water years unless the variable is
+   *  aggregated by calendar year upstream (the CWS delivery family). */
+  yearBasis?: "water" | "calendar"
   members: Array<{
     label: string
     series: number[]
@@ -162,7 +165,7 @@ export function dataInDepthToCSV(
     )
     lines.push("")
     lines.push(
-      ["Water year"]
+      [data.yearBasis === "calendar" ? "Calendar year" : "Water year"]
         .concat(data.members.map((m) => csvEscape(m.label)))
         .join(","),
     )

@@ -29,7 +29,7 @@ import {
 } from "../hooks/interpretiveText"
 import { WYT_LABELS } from "../config/wytFilter"
 import { linearTrendPerYear, MOCK_YEARS } from "../config/mockDataEngine"
-import { toBars, toBoxes, toSeries } from "./chartMarks"
+import { axisLabelFor, toBars, toBoxes, toSeries } from "./chartMarks"
 import { SaveSnapshotButton } from "../../../chrome/actions/SaveSnapshotButton"
 import { useDataShareCapture } from "../hooks/useDataShareCapture"
 
@@ -43,6 +43,7 @@ export default function ChartCard() {
   // Standardized figure title, shared verbatim with the snapshot export.
   const figureTitle = dataFigureTitle({
     variableName: data.variable?.name ?? "",
+    figureTitleHead: data.variable?.figureTitleHead,
     compareBy,
     memberCount: data.members.length,
     firstMemberLabel: data.members[0]?.label,
@@ -96,34 +97,50 @@ export default function ChartCard() {
     isReference: m.isReference,
     isLive: m.isLive,
     liveDataMissing: m.liveDataMissing,
+    pending: m.pending,
   }))
 
   const ctx: SummaryContext = {
     view: data.view,
+    distKind,
     compareBy,
     variableName: data.variable?.name ?? "",
     variableId: data.variable?.id,
+    proseName: data.variable?.proseName,
     unit: data.unit,
     locationName: data.locationName,
+    locationTitleName: data.locationTitleName,
     climateName: data.climateName,
     scenarioName: data.scenarioName,
   }
 
-  const yLabel =
-    data.view === "cv" ? "CV" : (data.variable?.axisLabel ?? data.unit)
+  const yLabel = axisLabelFor(data.variable, data.view, data.unit)
   const hasMembers = data.members.length > 0
 
   // Members whose scenario is not modeled for this variable keep their legend
   // entry (with a "no data" chip and an explanation) but are NOT drawn. Their
   // series exists only because the sample engine always produces one, and
   // drawing it would put a fabricated curve on a chart labeled "Live data".
+  // A member whose live request is still in flight is held back the same
+  // way (legend chip "loading") so the stand-in never shows, even briefly.
   // Colors are positional, so the subset carries its own aligned colors.
   const plotted = data.members
     .map((m, i) => ({ member: m, color: memberColors[i] ?? "" }))
-    .filter((p) => !p.member.liveDataMissing)
+    .filter((p) => !p.member.liveDataMissing && !p.member.pending)
   const plottedMembers = plotted.map((p) => p.member)
   const plottedColors = plotted.map((p) => p.color)
   const hasPlotted = plottedMembers.length > 0
+  const anyPending = data.members.some((m) => m.pending)
+  const missingMembers = data.members.filter((m) => m.liveDataMissing)
+  // One visible line, in addition to the per-curve chip, whenever a compared
+  // member is not modeled for this variable and the chart still draws others.
+  const noDataNotice =
+    hasPlotted && missingMembers.length > 0
+      ? (data.variable?.noLiveDataExplanation ??
+        `Live data is not available for ${missingMembers
+          .map((m) => m.label)
+          .join(", ")}.`)
+      : null
 
   // Dev-only (NEXT_PUBLIC_PERF_LOG=1): approximate when the explorer chart
   // hits the screen for the current members/variable/view combination.
@@ -134,7 +151,41 @@ export default function ChartCard() {
   )
 
   let chart: React.ReactNode = null
-  if (!hasMembers || !hasPlotted) {
+  if (data.unavailableReason) {
+    chart = (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: CHART_HEIGHT,
+          color: theme.palette.grey[600],
+          px: 3,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="body2">{data.unavailableReason}</Typography>
+      </Box>
+    )
+  } else if (!hasPlotted && anyPending) {
+    // Nothing has answered yet: say so, rather than showing the sample
+    // engine's stand-in or the no-data explanation for a result still coming.
+    chart = (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: CHART_HEIGHT,
+          color: theme.palette.grey[600],
+          px: 3,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="body2">Loading model results.</Typography>
+      </Box>
+    )
+  } else if (!hasMembers || !hasPlotted) {
     chart = (
       <Box
         sx={{
@@ -171,7 +222,7 @@ export default function ChartCard() {
       {
         key: "mean",
         title: `Mean (${data.unit})`,
-        yLabel: data.unit,
+        yLabel: axisLabelFor(data.variable, data.view, data.unit),
         format: fmt,
         valueOf: (m: (typeof data.members)[number]) => m.stats.mean,
       },
@@ -260,21 +311,24 @@ export default function ChartCard() {
     >
       {/* Data-source labels */}
       <Box sx={{ display: "flex", gap: 1, mb: 1.5, flexWrap: "wrap" }}>
-        <Chip
-          size="small"
-          label={data.source === "live" ? "Live data" : "Sample data"}
-          sx={{
-            backgroundColor:
-              data.source === "live"
-                ? theme.palette.info.light
-                : theme.palette.grey[100],
-            color:
-              data.source === "live"
-                ? theme.palette.info.dark
-                : theme.palette.grey[600],
-            fontWeight: 600,
-          }}
-        />
+        {/* Nothing is claimed when nothing is shown, or not yet known */}
+        {!data.unavailableReason && !(anyPending && !hasPlotted) && (
+          <Chip
+            size="small"
+            label={data.source === "live" ? "Live data" : "Sample data"}
+            sx={{
+              backgroundColor:
+                data.source === "live"
+                  ? theme.palette.info.light
+                  : theme.palette.grey[100],
+              color:
+                data.source === "live"
+                  ? theme.palette.info.dark
+                  : theme.palette.grey[600],
+              fontWeight: 600,
+            }}
+          />
+        )}
         {data.provisional && (
           <Tooltip title="Scope still under discussion (deck vs. outcomes sheet)">
             <Chip
@@ -296,13 +350,30 @@ export default function ChartCard() {
         />
       </Box>
 
-      {/* Interpretive summary sentence */}
-      {hasMembers && (
+      {/* Interpretive summary sentence (never from series that cannot be shown) */}
+      {hasMembers && !data.unavailableReason && (
         <Typography
           variant="body2"
           sx={{ mb: 1.5, color: theme.palette.text.primary, lineHeight: 1.5 }}
         >
           {summarySentence(summaryMembers, ctx)}
+        </Typography>
+      )}
+
+      {/* Visible no-data notice for a compared member the model does not
+          cover (the per-curve chip alone is easy to miss) */}
+      {noDataNotice && !data.unavailableReason && (
+        <Typography
+          role="status"
+          variant="body2"
+          sx={{
+            mb: 1.5,
+            color: theme.palette.grey[700],
+            fontStyle: "italic",
+            lineHeight: 1.5,
+          }}
+        >
+          {noDataNotice}
         </Typography>
       )}
 
@@ -382,7 +453,13 @@ export default function ChartCard() {
                   "sample" are deliberately different words: the first means
                   the scenario is not modeled for this variable at all, the
                   second means it is not wired to live data yet. */}
-              {m.liveDataMissing ? (
+              {m.pending ? (
+                <Tooltip title="Waiting for model results for this series.">
+                  <Box component="span" sx={memberChipSx}>
+                    loading
+                  </Box>
+                </Tooltip>
+              ) : m.liveDataMissing ? (
                 <Tooltip
                   title={
                     data.variable?.noLiveDataExplanation ??
@@ -423,21 +500,23 @@ export default function ChartCard() {
       )}
 
       {/* Provenance note */}
-      <Typography
-        variant="caption"
-        sx={{
-          display: "block",
-          mt: 1.5,
-          color: theme.palette.grey[500],
-          fontStyle: "italic",
-        }}
-      >
-        {data.source === "live"
-          ? data.mixedSource
-            ? `Live data from api.coeqwal.org (CalSim3 post-processed annual series) for ${liveMemberCount} of ${data.members.length} series; see the legend for series shown as sample or without data.`
-            : "Live data from api.coeqwal.org (CalSim3 post-processed annual series)."
-          : `Sample data (${MOCK_YEARS} simulated years, seeded): illustrative structure that mimics CalSim3 post-processed output, not model results.`}
-      </Typography>
+      {!data.unavailableReason && (
+        <Typography
+          variant="caption"
+          sx={{
+            display: "block",
+            mt: 1.5,
+            color: theme.palette.grey[500],
+            fontStyle: "italic",
+          }}
+        >
+          {data.source === "live"
+            ? data.mixedSource
+              ? `Live data from api.coeqwal.org (CalSim3 post-processed annual series) for ${liveMemberCount} of ${data.members.length} series; see the legend for series shown as sample or without data.`
+              : "Live data from api.coeqwal.org (CalSim3 post-processed annual series)."
+            : `Sample data (${MOCK_YEARS} simulated years, seeded): illustrative structure that mimics CalSim3 post-processed output, not model results.`}
+        </Typography>
+      )}
     </Box>
   )
 }

@@ -1117,8 +1117,8 @@ export default function RadarPanel({
             pointerEvents: "none",
           }}
         >
-          Delta Conveyence Project scenario is selected. Winter-run salmon data
-          are not yet supported for this scenario.
+          Delta Conveyance Project scenario is selected. Winter-run salmon data
+          are not available for this scenario.
         </Box>
       )}
     </Box>
