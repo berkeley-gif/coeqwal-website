@@ -202,27 +202,27 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0020: {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Current ops",
+    shortLabel: "Current operations",
   },
   "s0020-R": {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Current ops with reintroduction",
+    shortLabel: "Current operations with reintroduction",
   },
   s0021: {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Without TUCPs",
+    shortLabel: "Current operations without TUCPs",
   },
   s0023: {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "2024 BiOps (no TUCPs)",
+    shortLabel: "Current USBR operations without TUPCs",
   },
   s0024: {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "2024 BiOps",
+    shortLabel: "Current USBR operations",
   },
 
   // ---------------------------------------------------------------------------
@@ -231,22 +231,24 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0025: {
     theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
-    shortLabel: "SGMA: SJ pumping",
+    shortLabel: "Groundwater pumping limits in the San Joaquin Valley",
   },
   s0026: {
     theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
-    shortLabel: "SGMA: SJ reduced ag",
+    shortLabel:
+      "Groundwater pumping limits via reduced crop acreage in the San Joaquin Valley",
   },
   s0027: {
     theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
-    shortLabel: "SGMA: CV pumping",
+    shortLabel: "Groundwater pumping limits in the Central Valley",
   },
   s0028: {
     theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
-    shortLabel: "SGMA: CV reduced ag",
+    shortLabel:
+      "Groundwater pumping limits via reduced crop acreage in the Central Valley",
   },
 
   // ---------------------------------------------------------------------------
@@ -260,47 +262,49 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0030: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "No flow req.",
+    shortLabel: "No flow requirements",
   },
   s0031: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Salmon flows",
+    shortLabel: "Winter-run refuge flows",
   },
   "s0031-R": {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Winter-run flows with reintroduction",
+    shortLabel: "Winter-run refuge flows with reintroduction",
   },
   s0032: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Func. flows + reduced ag",
+    shortLabel: "Functional environmental flows with reduced crop acreage",
   },
   "s0032-R": {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Func. flows + reduced ag with reintroduction",
+    shortLabel:
+      "Functional environmental flows with reduced crop acreage and reintroduction",
   },
   s0033: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Salmon flows + reduced ag",
+    shortLabel: "Winter-run refuge flows with reduced crop acreage",
   },
   "s0033-R": {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Winter-run flows + reduced ag with reintroduction",
+    shortLabel:
+      "Winter-run refuge flows with reduced crop acreage and reintroduction",
   },
   s0046: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Func. flows (v2)",
+    shortLabel: "Functional environmental flows",
   },
   "s0046-R": {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Func. flows (v2) with reintroduction",
+    shortLabel: "Functional environmental flows with reintroduction",
   },
 
   // ---------------------------------------------------------------------------
@@ -309,7 +313,8 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0035: {
     theme: "cws",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "CWS priority: HHS level",
+    shortLabel:
+      "Prioritizing human health water deliveries to community water systems",
   },
   s0036: {
     theme: "cws",
@@ -319,7 +324,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0037: {
     theme: "cws",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "CWS priority: full contract",
+    shortLabel: "Prioritizing full demands of community water systems",
   },
 
   // ---------------------------------------------------------------------------
@@ -328,37 +333,37 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0039: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Alt 3: 65% unimp.",
+    shortLabel: "Increase Delta outflows (65% unimpaired flow target)",
   },
   s0040: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Alt 3: 35% unimp.",
+    shortLabel: "Reduce delta outflows (35% unimpaired flow target)",
   },
   s0041: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Alt 3: 45% unimp.",
+    shortLabel: "Maintain Delta outflows (45% unimpaired flow target)",
   },
   s0042: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Alt 3: 55% unimp.",
+    shortLabel: "Increase Delta outflows (55% unimpaired flow target)",
   },
   s0044: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Shasta +20% carryover",
+    shortLabel: "Increase Shasta carry-over storage ",
   },
   s0045: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "No fall X2",
+    shortLabel: "Relax Delta salinity standards",
   },
   s0065: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "DWR 2025 DCP",
+    shortLabel: "Delta Conveyance Project",
   },
 }
 
