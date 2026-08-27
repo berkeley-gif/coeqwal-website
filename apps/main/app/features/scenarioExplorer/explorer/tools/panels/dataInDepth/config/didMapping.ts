@@ -41,6 +41,7 @@ export type DidUnitToken =
   | "delivery"
   | "shortage_total"
   | "shortage_pct"
+  | "pct_demand_met"
   | "net_diversion"
   | "gw_pumping"
   | "shortage"
@@ -73,6 +74,7 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   gw_stor: "gw",
   salmon_abund: "salmon",
   cws_del: "cws",
+  cws_del_short: "cws",
   cws_short: "cws",
   cws_welfare: "cws",
   ag_del: "ag",
@@ -103,6 +105,7 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   gw_stor: "annual",
   salmon_abund: "annual",
   cws_del: "annual",
+  cws_del_short: "annual",
   cws_short: "annual",
   cws_welfare: "annual",
   ag_del: "annual",
@@ -325,6 +328,31 @@ export function didLiveScaleForVariable(variableId: string): number {
   return LIVE_SERIES_SCALE[variableId] ?? 1
 }
 
+/**
+ * Served-series -> display transform per variable, for the cases a
+ * multiplicative scale cannot express. The surface water delivery shortage
+ * is the complement of the served percent-of-demand-met series (100 - x),
+ * so a fully met year reads 0 and the series is never negative (the served
+ * measure is capped at 100 upstream).
+ */
+const LIVE_SERIES_TRANSFORM: Record<string, (v: number) => number> = {
+  cws_del_short: (v) => 100 - v,
+}
+
+/**
+ * The function that maps one served value to display units for a variable,
+ * or null when the series is used exactly as served. Composes the affine
+ * cases above with `LIVE_SERIES_SCALE`. Pure.
+ */
+export function didLiveSeriesTransformForVariable(
+  variableId: string,
+): ((v: number) => number) | null {
+  const affine = LIVE_SERIES_TRANSFORM[variableId]
+  if (affine) return affine
+  const scale = didLiveScaleForVariable(variableId)
+  return scale === 1 ? null : (v) => v * scale
+}
+
 /** Registry reservoir-location id -> API subject short_code (only the differences). */
 const RESERVOIR_SUBJECT_REMAP: Record<string, string> = {
   SLCVP: "SLUIS_CVP",
@@ -477,6 +505,7 @@ export function unitTokenForView(
   if (domain === "gw") return view === "level" ? "level" : "volume"
   if (domain === "salmon") return "nof_3yr_avg"
   if (domain === "cws") {
+    if (variableId === "cws_del_short") return "pct_demand_met"
     if (variableId === "cws_short") {
       return view === "pct_demand" ? "shortage_pct" : "shortage_total"
     }
@@ -610,7 +639,7 @@ const RESPONSE_ARRAY_BY_DOMAIN: Record<
 /**
  * Request unit token -> response series key. Unit-keyed domains use unit
  * codes (TAF, PCT_CAP, km); measure-keyed domains use the measure name
- * itself (gw: volume/level; cws: delivery/shortage_total/shortage_pct/welfare_loss) or
+ * itself (gw: volume/level; cws: delivery/pct_demand_met/shortage_total/shortage_pct/welfare_loss) or
  * the metric code (salmon: NOF_3YR_AVG).
  */
 const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
@@ -622,6 +651,7 @@ const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   delivery: "delivery",
   shortage_total: "shortage_total",
   shortage_pct: "shortage_pct",
+  pct_demand_met: "pct_demand_met",
   welfare_loss: "welfare_loss",
   net_diversion: "net_diversion",
   gw_pumping: "gw_pumping",

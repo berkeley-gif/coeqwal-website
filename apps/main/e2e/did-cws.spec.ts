@@ -22,13 +22,28 @@ const SCENARIOS_FIXTURE = [
 // Distinct value per (subject, measure) so a wrong subject or measure
 // mapping would draw the wrong (detectable) series.
 const VALUE_BY_SUBJECT_MEASURE: Record<string, Record<string, number>> = {
-  NOD_CWS: { delivery: 350, shortage_total: 42, shortage_pct: 6.5 },
-  SOD_CWS: { delivery: 2000, shortage_total: 77, shortage_pct: 12 },
+  NOD_CWS: {
+    delivery: 350,
+    pct_demand_met: 93.5,
+    shortage_total: 42,
+    shortage_pct: 6.5,
+  },
+  SOD_CWS: {
+    delivery: 2000,
+    pct_demand_met: 88,
+    shortage_total: 77,
+    shortage_pct: 12,
+  },
   // One delivery-only system, one shortage-only system, and one in both
   // families, so a subject requested outside its family is detectable.
-  MWD: { delivery: 1134 },
+  MWD: { delivery: 1134, pct_demand_met: 100 },
   "02_NU": { shortage_total: 9, shortage_pct: 4, welfare_loss: 28000 },
-  "26N_NU1": { delivery: 20, shortage_total: 3, shortage_pct: 2.5 },
+  "26N_NU1": {
+    delivery: 20,
+    pct_demand_met: 97.5,
+    shortage_total: 3,
+    shortage_pct: 2.5,
+  },
 }
 // Welfare loss is served in USD; the aggregates are millions, an entity
 // tens of thousands. Both must read correctly in $M.
@@ -74,11 +89,13 @@ function cwsPayload(subjectsCsv: string, measuresCsv: string) {
               measure,
               {
                 unit:
-                  measure === "shortage_pct"
-                    ? "PCT_SHORTAGE"
-                    : measure === "welfare_loss"
-                      ? "USD"
-                      : "TAF",
+                  measure === "pct_demand_met"
+                    ? "PCT_DEMAND_MET"
+                    : measure === "shortage_pct"
+                      ? "PCT_SHORTAGE"
+                      : measure === "welfare_loss"
+                        ? "USD"
+                        : "TAF",
                 values,
               },
             ]
@@ -175,10 +192,10 @@ test("cws variables fetch their per-variable measures and go live", async ({
     .click()
 
   // "Surface water deliveries" also exists in the Agricultural water sector,
-  // so scope to the list that carries the unique "Delivery shortages".
+  // so scope to the list that carries the unique "M&I supply shortage".
   const cwsList = page
     .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
 
   // Deliveries: the default pinned location is the group's first entry
   // (All North of Delta) -> subject NOD_CWS, measure delivery.
@@ -214,7 +231,7 @@ test("cws variables fetch their per-variable measures and go live", async ({
 
   // Shortages, volume view (default): the SAME endpoint serves a different
   // measure for this variable; the SOD pin persists per location group.
-  await cwsList.getByRole("button", { name: "Delivery shortages" }).click()
+  await cwsList.getByRole("button", { name: "M&I supply shortage" }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
     .poll(() =>
@@ -270,10 +287,10 @@ test("cws variables disable the water-year-type row and never send wyt", async (
   ).toBeVisible()
 
   // "Surface water deliveries" also exists in the Agricultural water sector,
-  // so scope to the list that carries the unique "Delivery shortages".
+  // so scope to the list that carries the unique "M&I supply shortage".
   const cwsList = page
     .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
 
   const expectChipsNotApplicable = async () => {
     await expect(
@@ -304,7 +321,7 @@ test("cws variables disable the water-year-type row and never send wyt", async (
   await expectChipsNotApplicable()
 
   // Shortages, volume view.
-  await cwsList.getByRole("button", { name: "Delivery shortages" }).click()
+  await cwsList.getByRole("button", { name: "M&I supply shortage" }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
     .poll(() => requested.some((r) => r.measures === "shortage_total"))
@@ -344,7 +361,7 @@ test("cws systems are pickable per measure family and pins carry over only when 
     .click()
   const cwsList = page
     .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
@@ -369,7 +386,7 @@ test("cws systems are pickable per measure family and pins carry over only when 
 
   // Shortages do not serve MWD: the pin heals to the aggregate and the
   // request never names MWD.
-  await cwsList.getByRole("button", { name: "Delivery shortages" }).click()
+  await cwsList.getByRole("button", { name: "M&I supply shortage" }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
     .poll(() =>
@@ -418,7 +435,7 @@ test("cws systems are pickable per measure family and pins carry over only when 
       ),
     )
     .toBe(true)
-  await cwsList.getByRole("button", { name: "Delivery shortages" }).click()
+  await cwsList.getByRole("button", { name: "M&I supply shortage" }).click()
   await expect
     .poll(() =>
       requested.some(
@@ -446,7 +463,7 @@ test("cws deliveries drop the partial calendar years and export calendar-year ro
     .click()
   const cwsList = page
     .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
@@ -497,7 +514,7 @@ test("a subject absent from a served block is reported as no data, not sample", 
     .click()
   const cwsList = page
     .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
@@ -526,7 +543,7 @@ test("welfare loss reads the welfare_loss measure and displays millions of dolla
     .click()
   const cwsList = page
     .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
   await cwsList.getByRole("button", { name: "Welfare loss" }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
@@ -565,5 +582,53 @@ test("welfare loss reads the welfare_loss measure and displays millions of dolla
   await expect(
     page.getByText(/^Mean welfare loss for .+ is \$0\.028 M\./),
   ).toBeVisible()
+  expect(errors).toEqual([])
+})
+
+// Surface water delivery shortage (2026-08-26, project lead and CWS team):
+// derived on the site as 100 minus the served pct_demand_met measure on the
+// delivery family, carrying the Community deliveries key-outcome chip. The
+// relabeled M&I supply shortage keeps its series and loses that chip.
+test("surface water delivery shortage derives 100 minus percent met from the served delivery family", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  const requested = await setupCwsRoutes(page)
+
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  const cwsList = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
+
+  await cwsList
+    .getByRole("button", { name: "Surface water delivery shortage" })
+    .click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "NOD_CWS" && r.measures === "pct_demand_met",
+      ),
+    )
+    .toBe(true)
+  // NOD aggregate: 100 - 93.5 = 6.5, printed with one decimal under 10.
+  await expect(page.getByText(/6\.5 %/).first()).toBeVisible()
+  await expect(
+    page.getByText(/key outcome: Community surface water/),
+  ).toBeVisible()
+  await expect(page.getByText(/^Provisional$/)).toHaveCount(0)
+
+  // The relabeled M&I supply shortage: same series as before, no chip.
+  await cwsList.getByRole("button", { name: "M&I supply shortage" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.getByText(/42(\.0)? TAF/).first()).toBeVisible()
+  await expect(
+    page.getByText(/key outcome: Community surface water/),
+  ).toHaveCount(0)
+
   expect(errors).toEqual([])
 })

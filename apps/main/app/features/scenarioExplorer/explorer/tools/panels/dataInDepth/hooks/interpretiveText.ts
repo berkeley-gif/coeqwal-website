@@ -142,15 +142,21 @@ export function summarySentence(
   const vn = ctx.proseName ?? ctx.variableName.toLowerCase()
   const first = members[0] as SummaryMember
 
-  // Welfare loss is zero in most years, so its distribution sentence names
-  // the share of years with no loss and the mean; a median would read 0.
+  // Welfare loss and the surface water delivery shortage are zero in most
+  // years, so their distribution sentence names the share of years with
+  // none and the mean; a median would read 0.
   if (
-    ctx.variableId === "cws_welfare" &&
+    (ctx.variableId === "cws_welfare" || ctx.variableId === "cws_del_short") &&
     ctx.distKind !== "stats" &&
     (ctx.view === "dist" || ctx.view === "pct")
   ) {
-    const welfare = welfareSentence(members, ctx, vn)
-    if (welfare) return welfare
+    const zeroAware = welfareSentence(
+      members,
+      ctx,
+      vn,
+      ctx.variableId === "cws_welfare" ? "loss" : "shortage",
+    )
+    if (zeroAware) return zeroAware
   }
 
   // The Stats style draws mean and CV bars; its sentence reports the same
@@ -249,16 +255,20 @@ export function summarySentence(
 }
 
 /**
- * The welfare-loss distribution sentence: per member, the count of years
- * with no loss and the mean annual loss in dollars. Scenarios compare to the
+ * The zero-inflated distribution sentence (welfare loss in dollars, the
+ * surface water delivery shortage in percent): per member, the count of
+ * years with none and the mean annual value. Scenarios compare to the
  * reference by percent; climates and locations range from first to last, or
  * lowest to highest. Members without model results are named, not quoted.
+ * `kind` picks the noun the sentence repeats after the first clause.
  */
 function welfareSentence(
   members: SummaryMember[],
   ctx: SummaryContext,
   vn: string,
+  kind: "loss" | "shortage" = "loss",
 ): string {
+  const noun = kind
   const rows = members.filter(hasUsableSeries).map((m) => {
     const series = m.series as number[]
     const zero = series.filter((v) => v <= 0).length
@@ -267,15 +277,16 @@ function welfareSentence(
   if (rows.length === 0) return ""
   const noDataClause = noDataClauseFor(members)
   const money = (v: number) => formatWithUnit(v, ctx.unit)
-  const noLoss = (r: (typeof rows)[0]) => `no loss in ${r.zero} of ${r.n} years`
+  const noLoss = (r: (typeof rows)[0]) =>
+    `no ${noun} in ${r.zero} of ${r.n} years`
 
   if (ctx.compareBy === "scenarios") {
     const ref =
       rows.find((r) => r.m.isReference) ?? (rows[0] as (typeof rows)[0])
     const others = rows.filter((r) => r !== ref)
-    let s = `At ${ctx.locationName} under the ${heldClimateOf(ctx)}, ${ref.m.label} has no ${vn} in ${ref.zero} of ${ref.n} years and a mean annual loss of ${money(ref.mean)}`
+    let s = `At ${ctx.locationName} under the ${heldClimateOf(ctx)}, ${ref.m.label} has no ${vn} in ${ref.zero} of ${ref.n} years and a mean annual ${noun} of ${money(ref.mean)}`
     for (const r of others) {
-      s += `; ${r.m.label} has ${noLoss(r)} and a mean annual loss of ${money(r.mean)} (${percentDelta(ref.mean, r.mean)})`
+      s += `; ${r.m.label} has ${noLoss(r)} and a mean annual ${noun} of ${money(r.mean)} (${percentDelta(ref.mean, r.mean)})`
     }
     return `${s}${noDataClause}.`
   }

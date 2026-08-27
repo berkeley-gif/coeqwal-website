@@ -11,6 +11,7 @@ import {
   pointsFromValues,
   pickLiveSeriesPoints,
   didLiveScaleForVariable,
+  didLiveSeriesTransformForVariable,
   SSJV_ALL_ROUTES_LOCATION,
   SSJV_ROUTE_SUBJECTS,
   sumAlignedSeriesPoints,
@@ -852,4 +853,29 @@ test("gross crop revenues maps to the revenue measure and scales USD to $M", () 
       "revenue",
     ).series,
   ).toEqual([178500000])
+})
+
+// Surface water delivery shortage (2026-08-26, project lead and CWS team):
+// derived on the site as 100 minus the served percent-of-demand-met measure
+// on the delivery family, so a delivery-only system resolves and a
+// shortage-only system does not.
+test("cws_del_short reads pct_demand_met from the cws domain on the delivery family", () => {
+  expect(didDomainForVariable("cws_del_short")).toBe("cws")
+  expect(unitTokenForView("cws", "dist", "cws_del_short")).toBe(
+    "pct_demand_met",
+  )
+  expect(toDidSubject("cws", "MWD", "cws_del_short")).toBe("MWD")
+  expect(toDidSubject("cws", "02_NU", "cws_del_short")).toBeNull()
+  expect(toDidSubject("cws", "AGG_CWS_NOD", "cws_del_short")).toBe("NOD_CWS")
+})
+
+test("didLiveSeriesTransformForVariable complements percent met, scales salmon, passes others through", () => {
+  const short = didLiveSeriesTransformForVariable("cws_del_short")
+  expect(short).not.toBeNull()
+  expect(short!(93.5)).toBeCloseTo(6.5)
+  expect(short!(100)).toBe(0)
+  const salmon = didLiveSeriesTransformForVariable("salmon_abund")
+  expect(salmon!(50)).toBeCloseTo(0.5)
+  expect(didLiveSeriesTransformForVariable("cws_del")).toBeNull()
+  expect(didLiveSeriesTransformForVariable("res_apr")).toBeNull()
 })
