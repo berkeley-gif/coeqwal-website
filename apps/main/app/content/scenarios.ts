@@ -197,7 +197,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0011: {
     theme: "baseline",
     iconPath: "/images/icons/land_use_prev.svg",
-    shortLabel: "Historical ag land use",
+    shortLabel: "Current operations with historical land use",
   },
   s0020: {
     theme: "baseline",
@@ -217,7 +217,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0023: {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Current USBR operations without TUPCs",
+    shortLabel: "Current USBR operations without TUCPs",
   },
   s0024: {
     theme: "baseline",
@@ -353,7 +353,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0044: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Increase Shasta carry-over storage ",
+    shortLabel: "Increase Shasta carry-over storage",
   },
   s0045: {
     theme: "delta",
