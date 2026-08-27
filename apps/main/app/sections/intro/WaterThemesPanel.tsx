@@ -5,7 +5,12 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme, alpha, ArrowDownwardIcon } from "@repo/ui/mui"
+import {
+  Box, Typography, useTheme, alpha, ArrowDownwardIcon, Tabs,
+  Tab,
+  IconButton,
+  MobileStepper,
+} from "@repo/ui/mui"
 import {
   InfoCard,
   resolveRadius,
@@ -89,6 +94,12 @@ function WaterThemesPanelContent({
 
   const radius = resolveRadius(borderRadius, theme.borderRadius)
   const insetCfg = resolveInset(inset)
+
+  const cardsScrollRef = React.useRef<HTMLDivElement | null>(null)
+
+  const [activeCard, setActiveCard] = React.useState(0)
+  const activeTabCard = TAB_CARDS[activeCard]!
+  const activeTabColor = theme.palette.tabPanels[activeTabCard.tab]
 
   const content = (
     <Box
@@ -192,22 +203,12 @@ function WaterThemesPanelContent({
           </Box>
         </motion.div>
 
-        {/* Three squares, one per tab - anchored to the image's top
-            edge instead of floating wherever vertical centering left
-            them. The Delta Aerials image is width:100%, height:auto,
-            bottom-anchored, so its top edge sits
-            `100vw * IMG_ASPECT_RATIO` up from the panel's bottom edge.
-            translateY(-50%) centers the row ON that line so it reads
-            as "starting where the photo begins." */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: theme.space.section.sm,
-            mt: "10vh",
-          }}
-        >
+        {/* Desktop tab cards: full row with decorative dividers between cards */}
+        <Box sx={{
+          display: { xs: "none", md: "flex" },
+          alignItems: "center", justifyContent: "center",
+          gap: theme.space.section.sm, mt: "10vh"
+        }}>
           {TAB_CARDS.map((c, i) => {
             const panelColor = theme.palette.tabPanels[c.tab]
             return (
@@ -240,6 +241,51 @@ function WaterThemesPanelContent({
               </React.Fragment>
             )
           })}
+        </Box>
+
+        {/* Mobile/tablet tab cards: one card at a time, MUI MobileStepper for dots + arrows */}
+        <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", alignItems: "center", gap: 2, mt: "10vh", width: "100%" }}>
+          <InfoCard
+            title={activeTabCard.title}
+            titleVariant="h5"
+            description={activeTabCard.description}
+            onClick={() => navigateToTab(activeTabCard.tab)}
+            variant="onDark"
+            background={activeTabColor}
+            hoverBackground={alpha(activeTabColor, 0.85)}
+            sx={{ width: "100%", maxWidth: "350px", height: "200px" }}
+          />
+          <MobileStepper
+            variant="dots"
+            steps={TAB_CARDS.length}
+            position="static"
+            activeStep={activeCard}
+            sx={{
+              background: "transparent",
+              "& .MuiMobileStepper-dot": { backgroundColor: alpha(theme.palette.brand.panelLight, 0.4) },
+              "& .MuiMobileStepper-dotActive": { backgroundColor: theme.palette.brand.panelLight },
+            }}
+            nextButton={
+              <IconButton
+                onClick={() => setActiveCard((i) => Math.min(i + 1, TAB_CARDS.length - 1))}
+                disabled={activeCard === TAB_CARDS.length - 1}
+                aria-label="Next card"
+                sx={{ color: theme.palette.brand.panelLight }}
+              >
+                <ArrowDownwardIcon sx={{ transform: "rotate(-90deg)" }} />
+              </IconButton>
+            }
+            backButton={
+              <IconButton
+                onClick={() => setActiveCard((i) => Math.max(i - 1, 0))}
+                disabled={activeCard === 0}
+                aria-label="Previous card"
+                sx={{ color: theme.palette.brand.panelLight }}
+              >
+                <ArrowDownwardIcon sx={{ transform: "rotate(90deg)" }} />
+              </IconButton>
+            }
+          />
         </Box>
       </Box>
       <Box sx={{

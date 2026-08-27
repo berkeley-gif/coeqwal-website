@@ -26,6 +26,7 @@ export {
   AccordionDetails,
   Tabs,
   Tab,
+  MobileStepper,
   Link,
 
   // Typography and content
