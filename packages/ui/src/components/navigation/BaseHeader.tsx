@@ -82,7 +82,7 @@ import {
 const MotionAppBar = motion.create(AppBar)
 
 // Mobile breakpoint - below this width, show hamburger menu
-const MOBILE_BREAKPOINT = 750
+const MOBILE_BREAKPOINT = 900
 // WCAG: Minimum touch target size (44x44px)
 const MIN_TOUCH_TARGET = 44
 // ID for drawer (used by aria-controls)
