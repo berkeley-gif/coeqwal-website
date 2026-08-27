@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { getScenarioShortLabel } from "../app/content/scenarios"
 
 // Browser contract for the label edits from the project lead's Aug 23 board
 // review: the key-outcome chips read "used in calculation of key outcome:
@@ -95,4 +96,19 @@ test("outflow as percent of unimpaired flow is gone from the rail", async ({
   await expect(
     variableButton(page, "Outflow as % of unimpaired flow"),
   ).toHaveCount(0)
+})
+
+// Content Summary sheet, tab Scenarios, Short Title column (2026-08-26): the
+// two copy defects the sheet carried and the one title the Aug 26 label
+// update left behind. Pure registry check, no browser.
+test("scenario short labels match the Content Summary sheet for the three corrected rows", () => {
+  expect(getScenarioShortLabel("s0023")).toBe(
+    "Current USBR operations without TUCPs",
+  )
+  expect(getScenarioShortLabel("s0044")).toBe(
+    "Increase Shasta carry-over storage",
+  )
+  expect(getScenarioShortLabel("s0011")).toBe(
+    "Current operations with historical land use",
+  )
 })
