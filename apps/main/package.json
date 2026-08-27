@@ -17,6 +17,7 @@
     "perf:driver": "playwright test --config playwright.perf.config.ts --project driver",
     "did:entities": "node scripts/did-entity-locations/generate.mjs",
     "did:entities:check": "node scripts/did-entity-locations/generate.mjs --check",
+    "did:names": "node scripts/did-display-names/import.mjs",
     "test:scripts": "node --test scripts/**/*.test.mjs"
   },
   "dependencies": {
