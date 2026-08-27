@@ -87,13 +87,13 @@ function footerAccordionSx(theme: Theme, isExpanded: boolean) {
     },
     isExpanded
       ? {
-          "& .MuiAccordion-region": { height: "auto" },
-          "& .MuiAccordionDetails-root": { display: "block" },
-        }
+        "& .MuiAccordion-region": { height: "auto" },
+        "& .MuiAccordionDetails-root": { display: "block" },
+      }
       : {
-          "& .MuiAccordion-region": { height: 0 },
-          "& .MuiAccordionDetails-root": { display: "none" },
-        },
+        "& .MuiAccordion-region": { height: 0 },
+        "& .MuiAccordionDetails-root": { display: "none" },
+      },
   ]
 }
 
@@ -109,7 +109,7 @@ const footerLinkButtonSx = {
 }
 
 const accordionSummarySx = {
-  justifyContent: "left",
+  justifyContent: { xs: "center", lg: "left" },
   minHeight: "25px",
   paddingLeft: 0,
   paddingRight: 0,
@@ -157,6 +157,7 @@ export function Footer() {
         py: { xs: 8, lg: 8 },
         px: { xs: 2, lg: 13 },
         display: "flex",
+        gap: { xs: 2, md: "none" },
         flexDirection: { xs: "column", lg: "row" },
         textAlign: { xs: "center", lg: "left" },
       }}
@@ -164,13 +165,13 @@ export function Footer() {
       {/* Left: credit text + partner logos */}
       <Box
         sx={{
+          order: { xs: 2, lg: 0 },
           flexBasis: { lg: "65%" },
           borderRight: { lg: `1px solid ${theme.palette.common.white}` },
           pr: { lg: 12 },
         }}
       >
         <Typography variant="dashboard">
-          {/* TODO: replace with real COEQWAL credit text */}
           This research project is supported by funds from the California
           Climate Action Seed and Matching Grants Program of the University of
           California (Grant Number R02CM7222). This funding is part of the
@@ -222,6 +223,7 @@ export function Footer() {
       {/* Right: nav links mirroring BaseHeader */}
       <Box
         sx={{
+          order: { xs: 1, lg: 0 },
           flexBasis: { lg: "35%" },
           pl: { lg: 12 },
           display: "flex",

@@ -43,6 +43,7 @@ export function AboutCoeqwalPanel() {
             minHeight: "100%",
             display: "flex",
             justifyContent: "center",
+            alignItems: "flex-start",
           }}
         >
           <Box
@@ -50,17 +51,17 @@ export function AboutCoeqwalPanel() {
               color: theme.palette.text.primary,
               display: "grid",
               gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-              rowGap: { xs: 3, md: 2 },
+              rowGap: { xs: 0, md: 2 },
               columnGap: { md: 6 },
               maxWidth: theme.breakpoints.values.xl
             }}
           >
             {/** Title */}
-            <Box sx={{ gridColumn: "1 / -1", mb: { xs: 2, md: 3 }, gap: 7 }}>
+            <Box sx={{ gridColumn: "1 / -1", mb: { xs: 2, md: 3 }, gap: 7, textAlign: { xs: "center", md: "left" } }}>
               <Typography
                 variant="h2Main"
                 component="span"
-                sx={{ color: "inherit", mr: 1 }}
+                sx={{ color: "inherit", mr: 1, display: { xs: "block", md: "inline" } }}
               >
                 What is
               </Typography>
@@ -83,22 +84,23 @@ export function AboutCoeqwalPanel() {
               alt={calSimMapImg.alt}
               sx={{
                 display: "block",
-                mx: 18,
+                mx: { xs: "auto", md: 18 },
                 mt: 1,
+                mb: { xs: 4, md: "none" },
                 width: "auto",
                 maxWidth: "100%",
                 height: "auto",
-                maxHeight: { xs: "220px", md: "clamp(360px, 45vh, 640px)" },
+                maxHeight: { xs: "180px", md: "clamp(360px, 45vh, 640px)" },
                 objectFit: "contain",
               }}
             />
 
             {/** Body text */}
-            <Box sx={{ maxWidth: "70ch" }}>
+            <Box sx={{ maxWidth: "70ch", mx: { xs: "auto", md: 0 }, textAlign: { xs: "center", md: "left" } }}>
               <Typography
                 variant="displayBody"
                 component="div"
-                sx={{ color: "inherit", mb: 4 }}
+                sx={{ color: "inherit", mb: { xs: 2, md: 4 } }}
               >
                 COEQWAL – the Collaboratory for Equity in Water Allocation – is
                 a publicly-funded project that works with communities to better
@@ -144,7 +146,7 @@ export function AboutCoeqwalPanel() {
           />
         </Box>
       </StickyScrollSection>
-    </div>
+    </div >
   )
 }
 

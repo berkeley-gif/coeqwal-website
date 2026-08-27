@@ -141,6 +141,7 @@ function WaterThemesPanelContent({
           zIndex: 2,
           pb: theme.space.panel.padding,
           boxSizing: "border-box",
+          width: "100%",
           maxWidth: theme.breakpoints.values.xl
         }}
       >
@@ -162,7 +163,7 @@ function WaterThemesPanelContent({
               alignItems: "start",
             }}
           >
-            <Box sx={{ mb: { xs: 2, md: 0 } }}>
+            <Box sx={{ mb: { xs: 2, md: 0 }, textAlign: { xs: "center", md: "left" } }}>
               <Typography
                 variant="h1"
                 component="span"
@@ -173,10 +174,12 @@ function WaterThemesPanelContent({
             </Box>
 
             <Typography
-              variant="body1"
+              variant="displayBody"
               sx={{
                 color: TEXT_COLOR,
                 maxWidth: { xs: "66%", md: "none" },
+                mx: { xs: "auto", md: 0 },
+                textAlign: { xs: "center", md: "left" },
                 mb: { xs: theme.space.section.md, md: 0 },
                 gridColumn: { md: "2" },
               }}

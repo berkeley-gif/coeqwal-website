@@ -36,8 +36,6 @@ export interface VideoHeroProps {
   title?: string
   paragraphs?: string[] // The paragraphs that appear underneath the title
   children?: React.ReactNode // Custom content in case you don't want the title/paragraphs layout
-  /** Hide the headline (for use with MorphingHeadline) */
-  hideHeadline?: boolean
   /** Rounded corner radius. Token key or raw CSS value. */
   borderRadius?: RadiusValue
   /** Pull the hero in from the viewport edges so all four rounded
@@ -50,7 +48,6 @@ export interface VideoHeroProps {
 export default function VideoHero({
   sources,
   fallbackImage,
-  hideHeadline = false,
   borderRadius,
   inset,
   frameBackground,
@@ -293,8 +290,9 @@ export default function VideoHero({
         {/* Headline.upper-left */}
         <Box
           sx={{
-            display: hideHeadline ? { xs: "block", lg: "none" } : "block",
-            alignSelf: "flex-start",
+            display: "block",
+            alignSelf: { xs: "center", md: "flex-start" },
+            textAlign: { xs: "center", md: "left" },
             maxWidth: { xs: "100%", sm: "720px" },
             color: "text.secondary",
             textShadow: theme.textShadow.display,
@@ -314,9 +312,9 @@ export default function VideoHero({
           variant="displayBody"
           component="p"
           sx={{
-            alignSelf: "flex-end",
-            maxWidth: { md: "480px", xl: "700px" },
-            textAlign: "left",
+            alignSelf: { xs: "center", md: "flex-end" },
+             maxWidth: { xs: "100%", sm: "480px", xl: "700px" },
+            textAlign: { xs: "center", md: "left" },
             color: "text.secondary",
             textShadow: theme.textShadow.nav,
             lineHeight: 1.6,
