@@ -559,3 +559,27 @@ test("other variables keep the generic sentence with the prose name", () => {
     "At Yuba River under the Historical hydroclimate, median river flows for Current Operations (the reference) is 20.0 TAF; relative to it: Other +100%.",
   )
 })
+
+// The surface water delivery shortage is zero in most years at the
+// aggregates (percent of demand met is 100), so it reads by the same
+// zero-aware sentence as welfare loss, with "shortage" as the noun and the
+// percent unit.
+test("surface water delivery shortage sentence reports the no-shortage year count and the mean", () => {
+  const ref = member("Current Operations", [0, 0, 0, 4], true) // mean 1
+  const other = member("Winter-run refuge flows", [0, 0, 8, 8]) // mean 4
+  const s = summarySentence([ref, other], {
+    view: "dist",
+    distKind: "exceedance",
+    compareBy: "scenarios",
+    variableName: "Surface water delivery shortage",
+    variableId: "cws_del_short",
+    proseName: "surface water delivery shortage",
+    unit: "%",
+    locationName: "All North of Delta",
+    climateName: "Historical",
+    scenarioName: "Current Operations",
+  })
+  expect(s).toBe(
+    "At All North of Delta under the Historical hydroclimate, Current Operations has no surface water delivery shortage in 3 of 4 years and a mean annual shortage of 1.0 %; Winter-run refuge flows has no shortage in 2 of 4 years and a mean annual shortage of 4.0 % (+300%).",
+  )
+})

@@ -86,7 +86,7 @@ import {
 import {
   didDomainForVariable,
   didPeriodForVariable,
-  didLiveScaleForVariable,
+  didLiveSeriesTransformForVariable,
   toDidSubject,
   unitTokenForView,
   companionUnitTokensForView,
@@ -442,16 +442,18 @@ export function useVariableData(): VariableData {
       useCwsDataInDepth(id ? [id] : [], {
         subjects: requestSubjects,
         // The cws request token IS the measure name (delivery /
-        // shortage_total / shortage_pct / welfare_loss); anything else
-        // defers to delivery.
+        // pct_demand_met / shortage_total / shortage_pct / welfare_loss);
+        // anything else defers to delivery.
         measures: [
-          unitToken === "shortage_pct"
-            ? "shortage_pct"
-            : unitToken === "shortage_total"
-              ? "shortage_total"
-              : unitToken === "welfare_loss"
-                ? "welfare_loss"
-                : "delivery",
+          unitToken === "pct_demand_met"
+            ? "pct_demand_met"
+            : unitToken === "shortage_pct"
+              ? "shortage_pct"
+              : unitToken === "shortage_total"
+                ? "shortage_total"
+                : unitToken === "welfare_loss"
+                  ? "welfare_loss"
+                  : "delivery",
         ],
         // No wyt: the CWS series aggregate by calendar year, so the filter
         // does not apply. It is not a field on CwsDataInDepthOptions, and the
@@ -626,6 +628,25 @@ export function useVariableData(): VariableData {
             spec.locationId,
           ),
         )
+      } else if (variable.id === "cws_del_short") {
+        // Sample delivery shortage percent: sample shortage over
+        // shortage-plus-delivered, both from the sample engine, so an
+        // unserved member reads on the same 0-100 scale as the derived live
+        // series.
+        series = shortagePctOfDemand(
+          mockAnnualSeries(
+            "cws_short",
+            spec.scenarioId,
+            spec.climateKey,
+            spec.locationId,
+          ),
+          mockAnnualSeries(
+            "cws_del",
+            spec.scenarioId,
+            spec.climateKey,
+            spec.locationId,
+          ),
+        )
       } else {
         series = raw
       }
@@ -695,13 +716,11 @@ export function useVariableData(): VariableData {
             adoptedLive = true
           }
         } else if (points && points.series.length > 0) {
-          // Served units -> display units (e.g. the salmon habitat-occupancy
-          // ratio displays as percent); 1 for every other variable.
-          const liveScale = didLiveScaleForVariable(variable.id)
-          series =
-            liveScale === 1
-              ? points.series
-              : points.series.map((v) => v * liveScale)
+          // Served units -> display units: the salmon ratio scales to a
+          // proportion, the delivery shortage is the complement of percent
+          // met; null means the series is used exactly as served.
+          const toDisplay = didLiveSeriesTransformForVariable(variable.id)
+          series = toDisplay ? points.series.map(toDisplay) : points.series
           waterYears =
             points.waterYears.length > 0 ? points.waterYears : undefined
           anyLive = true

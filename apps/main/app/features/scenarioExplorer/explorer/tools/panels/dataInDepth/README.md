@@ -132,6 +132,24 @@ id lists, so no request fires until data is actually requested.
 The CWS and AG sections share this kit. As other categories grow to the same
 complexity, they should reuse these pieces rather than re-inlining the markup.
 
+## Live series transforms
+
+Most live variables plot the served series as is. Two do not, and both go
+through `didLiveSeriesTransformForVariable` in `config/didMapping.ts` (the
+hook `useVariableData.ts` applies it when it adopts a live series):
+
+- `salmon_abund`: the endpoint serves percent, the tool displays a
+  proportion (scale 0.01).
+- `cws_del_short` (Surface water delivery shortage): derived on the site as
+  100 minus the served `pct_demand_met` measure of the cws endpoint, on the
+  74-system delivery list and the NOD/SOD aggregates. It is the "annual
+  surface water delivery shortages" variable of the Content Summary sheet
+  and carries the Community deliveries key-outcome chip.
+
+`cws_short` (M&I supply shortage) is a different series: `shortage_total` and
+`shortage_pct` from the CWS economics source, on the 63-system shortage list,
+with no key-outcome chip.
+
 ## Planned / incomplete features
 
 These are intentionally kept (not deleted) and wired or stubbed for a future pass:
