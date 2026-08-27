@@ -268,62 +268,68 @@ export default function VideoHero({
         </IconButton>
       )}
 
-      {/* Headline.upper-left, offset below fixed header */}
+
+      {/* Content column - centered and capped at the xl breakpoint,
+          matching AboutCoeqwalPanel/WaterThemesPanel below, so the
+          headline and paragraph share one rectangle instead of
+          hugging the true viewport edges on very wide screens. */}
       <Box
         sx={{
           gridArea: "stack",
-          display: hideHeadline ? { xs: "block", lg: "none" } : "block",
-          alignSelf: "flex-start",
-          justifySelf: "flex-start",
-          marginTop: `calc(${theme.layout.headerHeight}px + 48px)`,
-          marginLeft: theme.space.panel.padding,
-          marginRight: theme.space.panel.padding,
-          maxWidth: { xs: "100%", sm: "720px" },
-          color: "text.secondary",
-          textShadow: theme.textShadow.display,
-          pointerEvents: "auto",
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          maxWidth: theme.breakpoints.values.xl,
+          mx: "auto",
           zIndex: theme.zIndex.heroContent,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          gap: theme.space.section.md,
+          px: theme.space.panel.padding,
+          pb: { xl: 15 }
         }}
       >
-        <Typography
-          variant="h2Main"
-          component="h2"
-          sx={{ display: "block", mb: 0.5 }}
+        {/* Headline.upper-left */}
+        <Box
+          sx={{
+            display: hideHeadline ? { xs: "block", lg: "none" } : "block",
+            alignSelf: "flex-start",
+            maxWidth: { xs: "100%", sm: "720px" },
+            color: "text.secondary",
+            textShadow: theme.textShadow.display,
+            pointerEvents: "auto",
+          }}
         >
-          {t("homePanel.titleLine1")}
-        </Typography>
-        <Typography variant="h1" component="h1" sx={{ display: "block" }}>
-          {t("homePanel.titleLine2")}
+          <Typography variant="h2Main" component="h2" sx={{ display: "block", mb: 0.5 }}>
+            {t("homePanel.titleLine1")}
+          </Typography>
+          <Typography variant="h1" component="h1" sx={{ display: "block" }}>
+            {t("homePanel.titleLine2")}
+          </Typography>
+        </Box>
+
+        {/* Paragraph.lower-right, within the centered content column */}
+        <Typography
+          variant="displayBody"
+          component="p"
+          sx={{
+            alignSelf: "flex-end",
+            maxWidth: { md: "480px", xl: "700px" },
+            textAlign: "left",
+            color: "text.secondary",
+            textShadow: theme.textShadow.nav,
+            lineHeight: 1.6,
+            pointerEvents: "auto",
+          }}
+        >
+          Water is vital to our communities, farms, and the environment. But
+          satisfying water needs is becoming more difficult. We invite you to
+          explore and shape pathways to a water future that works for all
+          Californians.
         </Typography>
       </Box>
 
-      {/* Paragraph.lower-right. Left edge aligns with the first
-          header nav item ("Guides") via the `--coeqwal-nav-left`
-          CSS variable published by BaseHeader. Right edge aligns
-          with the header's right panel padding so the block tracks
-          the nav horizontally. Falls back gracefully if the header
-          hasn't measured yet (e.g. SSR, mobile nav). */}
-      <Typography
-        variant="displayBody"
-        component="p"
-        sx={{
-          position: "absolute",
-          bottom: theme.space.panel.topOffset,
-          left: `var(--coeqwal-nav-left, calc(100% - 480px - ${theme.space.panel.padding}))`,
-          right: theme.space.panel.padding,
-          textAlign: "left",
-          color: "text.secondary",
-          textShadow: theme.textShadow.nav,
-          lineHeight: 1.6,
-          pointerEvents: "auto",
-          zIndex: theme.zIndex.heroContent,
-        }}
-      >
-        Water is vital to our communities, farms, and the environment. But
-        satisfying water needs is becoming more difficult. We invite you to
-        explore and shape pathways to a water future that works for all
-        Californians.
-      </Typography>
 
       {/* WCAG 2.4.4: Scroll indicator with descriptive aria-label */}
       <Box
