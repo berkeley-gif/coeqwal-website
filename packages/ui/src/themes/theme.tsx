@@ -1176,7 +1176,7 @@ const theme = createTheme({
     // Display body - for hero/panel body text (frontmatter, video hero)
     displayBody: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1.4rem", // 22.4px
+      fontSize: "clamp(0.8rem, 0.5rem + 1.5vw, 1.4rem)",
       fontWeight: 400,
       lineHeight: 1.5,
     },
