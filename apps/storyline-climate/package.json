@@ -8,9 +8,7 @@
     "dev:webpack": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint --max-warnings 0",
-    "e2e": "playwright test",
-    "a11y": "playwright test e2e/a11y.spec.ts"
+    "lint": "next lint --max-warnings 0"
   },
   "dependencies": {
     "@mui/system": "^7.3.2",
@@ -28,11 +26,8 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.12.1",
-    "@playwright/test": "^1.61.1",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/lodash": "^4.17.16",
-    "serve": "^14.2.6"
+    "@types/lodash": "^4.17.16"
   }
 }
