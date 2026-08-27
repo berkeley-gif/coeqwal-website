@@ -13,18 +13,19 @@
  * cross-fade animation for smooth expand/collapse transitions.
  */
 
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ScenarioBadge } from "@repo/ui"
 import type { ScenarioForDisplay } from "./types"
 import {
   DescriptionWithGlossaryLinks,
   useGlossaryRenderer,
+  truncateDescriptionText,
 } from "./strategyGlossary"
 import { THEME_LABEL_CONFIG } from "../../../../content/themes"
 import type { ScenarioTheme } from "../../../../content/scenarios"
 import { shouldWrapThemeBadgeLabel } from "../../utils/themeLabelWrap"
-
+import { useIsCoarsePointer } from "@repo/ui/hooks"
 export interface StrategyHeaderProps {
   /** Scenario data */
   strategy: ScenarioForDisplay
@@ -38,6 +39,8 @@ export interface StrategyHeaderProps {
   titleVariant?: "subtitle1" | "subtitle2" | "body1" | "body2"
   /** Max width for the description */
   descriptionMaxWidth?: string | number | object
+  /** Overrides the default ~3-line char budget for the collapsed description preview */
+  descriptionCharLimit?: number
   /** Called when title is clicked */
   onTitleClick?: () => void
   /** Whether to show the theme badge (defaults to true) */
@@ -56,14 +59,24 @@ function CompactDescription({
   description,
   forceExpanded = false,
   disableTruncation = false,
+  maxWidth,
 }: {
   description: string
   forceExpanded?: boolean
   disableTruncation?: boolean
+  maxWidth?: string | number | object
 }) {
   const theme = useTheme()
   const [expanded, setExpanded] = useState(false)
+  const isCoarsePointer = useIsCoarsePointer()
+  const charLimit = isCoarsePointer ? 220 : 150
+  const truncatedDescription = useMemo(
+    () => truncateDescriptionText(description, charLimit),
+    [description, charLimit],
+  )
+  const isTruncated = truncatedDescription.length < description.length
   const renderGlossaryText = useGlossaryRenderer(description)
+  const renderTruncatedText = useGlossaryRenderer(truncatedDescription)
 
   if (disableTruncation) {
     return (
@@ -74,6 +87,7 @@ function CompactDescription({
           lineHeight: 1.35,
           mt: "1px",
           pb: 0.5,
+          ...(maxWidth && { maxWidth }),
         }}
       >
         {renderGlossaryText()}
@@ -102,6 +116,7 @@ function CompactDescription({
         mt: "1px",
         pb: 0.5,
         position: "relative",
+        ...(maxWidth && { maxWidth }),
       }}
     >
       {expanded || forceExpanded ? (
@@ -123,27 +138,23 @@ function CompactDescription({
         </>
       ) : (
         <Box sx={{ position: "relative" }}>
-          <Box sx={{ maxHeight: "2.7em", overflow: "hidden" }}>
-            {renderGlossaryText()}
+          <Box component="span">
+            {renderTruncatedText()}
+            {isTruncated && "… "}
           </Box>
-          <Box
-            component="button"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setExpanded(true)
-            }}
-            sx={{
-              ...toggleStyles,
-              position: "absolute",
-              bottom: 0,
-              right: 0,
-              pl: 3,
-              background: `linear-gradient(to right, transparent, var(--row-bg, ${theme.palette.common.white}) 40%)`,
-            }}
-          >
-            … more
-          </Box>
+          {isTruncated && (
+            <Box
+              component="button"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setExpanded(true)
+              }}
+              sx={{ ...toggleStyles, pl: 1 }}
+            >
+              more
+            </Box>
+          )}
         </Box>
       )}
     </Box>
@@ -157,6 +168,7 @@ export function StrategyHeader({
   compact = false,
   titleVariant = "body2",
   descriptionMaxWidth,
+  descriptionCharLimit,
   showThemeBadge = true,
   onTitleClick,
   onThemeBadgeClick,
@@ -269,9 +281,7 @@ export function StrategyHeader({
               component="span"
               sx={{
                 minWidth: 0,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+                wordBreak: "break-word",
               }}
             >
               {displayLabel}
@@ -321,6 +331,7 @@ export function StrategyHeader({
             description={strategy.description}
             forceExpanded={expandDescription}
             disableTruncation={disableTruncation}
+            maxWidth={descriptionMaxWidth}
           />
         )}
       </Box>
@@ -437,6 +448,7 @@ export function StrategyHeader({
           description={strategy.description}
           maxWidth={descriptionMaxWidth}
           disableTruncation={disableTruncation}
+          charLimit={descriptionCharLimit}
         />
       )}
     </Box>

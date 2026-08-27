@@ -12,11 +12,12 @@
  */
 
 import React from "react"
+import { useRouter } from "next/navigation"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useOutcomeDefinitions } from "../scenarios/hooks"
 import {
   OUTCOME_TIER_VALUES,
-  OUTCOME_FOOTER_DEFINITIONS,
+  OUTCOME_FOOTER_PREFIXES,
   getOutcomeName,
   type OutcomeCode,
 } from "../../content/outcomes"
@@ -134,6 +135,7 @@ export default function TierTooltipContent({
   chartData,
 }: TierTooltipContentProps) {
   const theme = useTheme()
+  const router = useRouter()
   const { definitions: outcomeDefinitions } = useOutcomeDefinitions()
 
   const emphasisWeight = theme.typography.fontWeightBold as number
@@ -145,6 +147,7 @@ export default function TierTooltipContent({
   const { tierType, currentTier } = getTierFromChartData(chartData)
 
   const tierLevelNames = [1, 2, 3, 4].map((t) => TIER_LABELS[t as TierLevel])
+  const footerPrefix = OUTCOME_FOOTER_PREFIXES[outcomeCode as OutcomeCode]
 
   return (
     <Box sx={{ color: theme.palette.text.primary }}>
@@ -342,10 +345,32 @@ export default function TierTooltipContent({
           )
         })}
         <Typography variant="dashboard" component="span">
-          {formatTierText(
-            OUTCOME_FOOTER_DEFINITIONS[outcomeCode as OutcomeCode],
-            emphasisWeight,
-          )}
+          {footerPrefix && <>{formatTierText(footerPrefix, emphasisWeight)} </>}
+          For more information, see technical documentation on{" "}
+          <Box
+            component="button"
+            type="button"
+            onClick={() => router.push("/data")}
+            sx={{
+              appearance: "none",
+              WebkitAppearance: "none",
+              color: "inherit",
+              cursor: "pointer",
+              background: "none",
+              border: "none",
+              padding: 0,
+              font: "inherit",
+              textDecoration: "underline",
+              "&:focus-visible": {
+                outline: `2px solid ${theme.palette.blue.bright}`,
+                outlineOffset: "2px",
+                borderRadius: "2px",
+              },
+            }}
+          >
+            Data
+          </Box>{" "}
+          page.
         </Typography>
       </Box>
     </Box>

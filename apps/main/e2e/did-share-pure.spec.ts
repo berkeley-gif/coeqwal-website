@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test"
 import {
+  shareFigureFooter,
+  shareFigureFooterText,
+} from "../app/features/scenarioExplorer/explorer/share/figureFooter"
+import { thumbnailAspectRatioFor } from "../app/features/scenarioExplorer/explorer/share/thumbnailAspect"
+import {
   toBars,
   toBoxes,
   toSeries,
@@ -241,4 +246,146 @@ test("dataInDepthToCSV returns null with no members", () => {
       variantTitle: "Data in depth",
     }),
   ).toBeNull()
+})
+
+test("a mixed-provenance export labels the figure Mixed and blanks the no-data row", () => {
+  // A figure whose series do not share one provenance must not claim one, and
+  // the member the model has no results for must export as a labeled, EMPTY
+  // row. The sample engine always produces a series, so writing its numbers
+  // here would hand the reader fabricated values under a live-looking export.
+  const csv = dataInDepthToCSV(
+    csvData({
+      source: "mixed",
+      members: [
+        ...csvData().members,
+        {
+          label: "Delta Conveyance Project",
+          series: [],
+          waterYears: [],
+          isLive: false,
+          liveDataMissing: true,
+          stats: {
+            min: 0,
+            p10: 0,
+            p25: 0,
+            p50: 0.55,
+            p75: 0,
+            p90: 0,
+            max: 0,
+            mean: 0.55,
+            cv: 0,
+          },
+          value: 0.55,
+        },
+      ],
+    }),
+    { variantTitle: "Data in depth" },
+  )
+  expect(csv).toContain("Data source,Mixed (see the Source column)")
+  expect(csv).toContain("Delta Conveyance Project,,,,,,,,,,No data")
+  // The sample engine's stand-in values appear nowhere in the export.
+  expect(csv).not.toContain("0.55")
+  // The served member keeps its year-labeled rows: the empty member carries
+  // an empty year array rather than an absent one, so the export does not
+  // fall back to an index axis for everyone.
+  expect(csv).toContain(
+    "Water year,Current Operations,Delta Conveyance Project",
+  )
+  expect(csv).toContain("1921,4200,")
+})
+
+// Every exported figure carries the same footer: who produced the data, what
+// kind of data the figure shows, and when it was captured. Built by a pure
+// helper from the share item so all five card types read one way.
+test("shareFigureFooter names the source, the provenance and the capture date", () => {
+  const live = shareFigureFooter({
+    id: "x",
+    type: "data",
+    variableId: "res_apr",
+    view: "dist",
+    distKind: "exceedance",
+    compareBy: "scenarios",
+    memberIds: ["s0020"],
+    memberLabels: ["Current operations"],
+    source: "live",
+    hydroclimate: "historical",
+    capturedAt: "2026-08-24T19:00:00.000Z",
+  })
+  expect(live.source).toBe("COEQWAL, coeqwal.org. CalSim3 model results.")
+  expect(live.provenance).toBe("Live data from api.coeqwal.org.")
+  expect(live.capturedAt).toBe("Captured Aug 24, 2026.")
+  expect(shareFigureFooterText(live)).toBe(
+    "COEQWAL, coeqwal.org. CalSim3 model results. Live data from api.coeqwal.org. Captured Aug 24, 2026.",
+  )
+  const sample = shareFigureFooter({
+    id: "y",
+    type: "data",
+    variableId: "ag_rev",
+    view: "dist",
+    distKind: "box",
+    compareBy: "scenarios",
+    memberIds: ["s0020"],
+    memberLabels: ["Current operations"],
+    source: "mock",
+    hydroclimate: "historical",
+  })
+  expect(sample.provenance).toBe("Sample data, not model results.")
+  expect(sample.capturedAt).toBeUndefined()
+  const mixed = shareFigureFooter({
+    id: "z",
+    type: "data",
+    variableId: "res_apr",
+    view: "dist",
+    distKind: "exceedance",
+    compareBy: "scenarios",
+    memberIds: ["s0020", "s0065"],
+    memberLabels: ["Current operations", "DCP"],
+    source: "mixed",
+    hydroclimate: "historical",
+  })
+  expect(mixed.provenance).toBe(
+    "Live data from api.coeqwal.org for some series; see the legend.",
+  )
+})
+
+test("shareFigureFooter covers the other tools with the tiers wording", () => {
+  const radar = shareFigureFooter({
+    id: "r",
+    type: "radar",
+    scenarioIds: ["s0020"],
+    hydroclimate: "historical",
+    showRange: false,
+    highlightBaseline: false,
+    showDotsOnly: false,
+    capturedAt: "2026-08-24T19:00:00.000Z",
+  } as never)
+  expect(radar.source).toBe(
+    "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome tiers.",
+  )
+  expect(radar.provenance).toBeUndefined()
+  expect(radar.capturedAt).toBe("Captured Aug 24, 2026.")
+})
+
+// The snapshot thumbnail box takes the captured chart's own aspect ratio, so
+// a 900 x 520 chart is not letterboxed inside a square (the blank bands the
+// reviewer saw on the resilience heatmap cards).
+test("thumbnailAspectRatioFor follows each variant's capture size", () => {
+  expect(thumbnailAspectRatioFor({ type: "data" } as never)).toBeCloseTo(
+    900 / 520,
+    6,
+  )
+  expect(thumbnailAspectRatioFor({ type: "equity" } as never)).toBeCloseTo(
+    900 / 600,
+    6,
+  )
+  expect(
+    thumbnailAspectRatioFor({
+      type: "resilience",
+      tileScope: "panel",
+    } as never),
+  ).toBeCloseTo(1200 / 800, 6)
+  expect(
+    thumbnailAspectRatioFor({ type: "resilience", tileScope: "tile" } as never),
+  ).toBeCloseTo(800 / 520, 6)
+  expect(thumbnailAspectRatioFor({ type: "radar" } as never)).toBe(1)
 })

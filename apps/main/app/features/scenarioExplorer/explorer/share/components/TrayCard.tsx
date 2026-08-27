@@ -60,8 +60,12 @@ export default function TrayCard({
       }}
       sx={{
         position: "relative",
+        // Never wider than the tray column, and never wider than the space
+        // actually available: below md the tray is a horizontal strip, where
+        // a hard 280px minimum would push cards past a narrow viewport.
         width: TRAY_CARD_WIDTH,
-        minWidth: TRAY_CARD_WIDTH,
+        minWidth: { xs: "min(100%, 280px)", md: TRAY_CARD_WIDTH },
+        maxWidth: "100%",
         borderRadius: "8px",
         border: `2px solid ${isInStory ? theme.palette.primary.main : theme.palette.divider}`,
         backgroundColor: theme.palette.background.paper,

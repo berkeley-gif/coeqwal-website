@@ -25,6 +25,7 @@ import {
 import { useRadarPlotTheme } from "../../tools/panels/radar/useRadarPlotTheme"
 import { CAPTURE_DIMENSIONS } from "../capture/dimensions"
 import CapturedSizeFrame from "./CapturedSizeFrame"
+import { OUTCOME_LABEL_BREAKS } from "../../../../../content/outcomes"
 
 const RADAR_W = CAPTURE_DIMENSIONS.radar.width
 const RADAR_H = CAPTURE_DIMENSIONS.radar.height
@@ -143,6 +144,7 @@ export default function ShareRadarLiveChart({
           highlightBaseline={highlightBaseline && !!baselineData}
           showAllPaths
           showScenarioPath
+          labelBreaks={OUTCOME_LABEL_BREAKS}
           showTierZones={showTierZones}
           showDotsOnly={showDotsOnly}
           axisRange={showRadarRange ? axisRange : undefined}

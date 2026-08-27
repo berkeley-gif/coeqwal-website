@@ -20,7 +20,6 @@ import { useTheme } from "@repo/ui/mui"
 import { Box, Typography } from "@repo/ui/mui"
 import { CallResponsePanel } from "@repo/ui"
 import { Scrollama, Step } from "react-scrollama"
-import { themeValues } from "@repo/ui/themes/theme"
 import { PanelEyebrow } from "./PanelEyebrow"
 import type { SubSectionId } from "../config/sectionLayers"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
@@ -35,6 +34,8 @@ import {
   BeforeYouBeginPanel,
 } from "./learnPanels"
 import TierAnimationSection from "../animation/TierAnimationSection"
+import { StickyScrollSection } from "@repo/scrollytelling"
+import { GlossaryTermLink } from "../../glossary"
 interface MapOverlayPanelsProps {
   navWidth: number
 }
@@ -50,13 +51,6 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
 
   // react-scrollama callbacks
   const { onStepEnter, onStepExit, onStepProgress } = useLearnScrollama()
-
-  const ACCENT_TEXT_SX = {
-    fontFamily: themeValues.fontFamily.accent,
-    fontStyle: "italic",
-    fontWeight: 500,
-    fontSize: "1.4rem",
-  } as const
 
   return (
     <Box
@@ -96,10 +90,13 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
             >
               <PanelEyebrow>Get Started</PanelEyebrow>
               <Typography variant="body1">
-                Review this section to learn how you can explore the COEQWAL
-                scenario library, evaluate the effects of different water
-                management strategies on communities, farms, and the
-                environment, and gather information to share with others.
+                Review this section to learn how you can explore the{" "}
+                <GlossaryTermLink>COEQWAL</GlossaryTermLink>{" "}
+                <GlossaryTermLink>scenario</GlossaryTermLink> library, evaluate
+                the effects of different water{" "}
+                <GlossaryTermLink>management strategies</GlossaryTermLink> on
+                communities, farms, and the environment, and gather information
+                to share with others.
               </Typography>
             </CallResponsePanel>
           </Box>
@@ -147,15 +144,12 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
                   California&apos;s Central Valley Water System
                 </PanelEyebrow>
                 <Typography variant="body1">
-                  The{" "}
-                  <Box component="span" sx={ACCENT_TEXT_SX}>
-                    Central Valley
-                  </Box>{" "}
-                  is a long, low valley that collects much of California&apos;s
-                  water from surrounding mountains. This water is stored,
-                  divided up, and used to irrigate the most productive farmland
-                  in the world, supplies drinking water to millions of people,
-                  and protects sensitive species and health of ecosystems.
+                  The <GlossaryTermLink>Central Valley</GlossaryTermLink> is a
+                  long, low valley that collects much of California&apos;s water
+                  from surrounding mountains. This water is stored, divided up,
+                  and used to irrigate the most productive farmland in the
+                  world, supply drinking water to millions of people, and
+                  protect sensitive species and health of ecosystems.
                 </Typography>
               </Box>
             </CallResponsePanel>
@@ -190,25 +184,23 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
                 side="left"
                 variant="call"
                 isVisible
-                sx={{ minHeight: "auto", mb: 0 }}
+                sx={{
+                  minHeight: "auto",
+                  mb: 0,
+                  backgroundColor: (theme) => theme.background.paragraph,
+                  padding: (theme) => theme.space.card.xs,
+                  borderRadius: (theme) => theme.borderRadius.md,
+                }}
               >
                 <Typography variant="body1">
-                  The{" "}
-                  <Box component="span" sx={ACCENT_TEXT_SX}>
-                    Sacramento River
-                  </Box>{" "}
+                  The <GlossaryTermLink>Sacramento River</GlossaryTermLink>{" "}
                   flows through the Valley from the north and the{" "}
-                  <Box component="span" sx={ACCENT_TEXT_SX}>
-                    San Joaquin River
-                  </Box>{" "}
-                  flows from the south. These rivers meet in the{" "}
-                  <Box component="span" sx={ACCENT_TEXT_SX}>
-                    Delta
-                  </Box>
-                  , a unique ecosystem of low-lying islands, farms, and
-                  wetlands. Here river water mixes with salty tides from San
-                  Francisco Bay. Pumps and canals move water from the Delta to
-                  cities and farms to the south.
+                  <GlossaryTermLink>San Joaquin River</GlossaryTermLink> flows
+                  from the south. These rivers meet in the Delta, a unique
+                  ecosystem of low-lying islands, farms, and wetlands. Here
+                  river water mixes with salty tides from San Francisco Bay.
+                  Pumps and canals move water from the Delta to cities and farms
+                  to the south.
                 </Typography>
               </CallResponsePanel>
             </Box>
@@ -236,9 +228,10 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
               isVisible
             >
               <Typography variant="body1">
-                Water is stored, diverted and distributed to multiple points
-                throughout the Valley and to cities along the coast, including
-                Los Angeles. All of it must be carefully accounted for.
+                Water is stored, diverted, and distributed to multiple points
+                throughout the Central Valley and to cities along the coast,
+                including Los Angeles. All of the water must be carefully
+                accounted for.
               </Typography>
             </CallResponsePanel>
           </Box>
@@ -277,39 +270,45 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
                   sx={{ mb: theme.space.component.lg }}
                 >
                   The federal{" "}
-                  <Box component="span" sx={ACCENT_TEXT_SX}>
+                  <GlossaryTermLink>
                     U.S. Bureau of Reclamation
-                  </Box>{" "}
+                  </GlossaryTermLink>{" "}
                   and the state{" "}
-                  <Box component="span" sx={ACCENT_TEXT_SX}>
+                  <GlossaryTermLink term="California Department of Water Resources (DWR)">
                     Department of Water Resources
-                  </Box>{" "}
+                  </GlossaryTermLink>{" "}
                   use a computer model called{" "}
-                  <Box component="span" sx={ACCENT_TEXT_SX}>
-                    CalSim3
-                  </Box>{" "}
-                  to do this accounting.
+                  <GlossaryTermLink>CalSim3</GlossaryTermLink> to do this
+                  accounting.
                 </Typography>
                 <Typography
                   variant="body1"
                   sx={{ mb: theme.space.component.lg }}
                 >
-                  <Box component="span" sx={ACCENT_TEXT_SX}>
-                    CalSim
-                  </Box>{" "}
-                  represents the Central Valley water management system as a
-                  network of interconnected nodes. The model simulates how much
-                  water flows through rivers and into reservoirs, how much is
-                  stored or released, and where it gets delivered - both within
-                  and outside of the Central Valley.
+                  <GlossaryTermLink>CalSim3</GlossaryTermLink> represents the
+                  water management system as a network of interconnected nodes,
+                  spanning most of the Sacramento and San Joaquin Valley. The
+                  Tulare Basin and other parts of the southern San Joaquin
+                  Valley are only partially represented. The model simulates how
+                  much water flows through rivers and into reservoirs, how much
+                  is stored or released, and where it gets delivered – both
+                  within and outside of the{" "}
+                  <GlossaryTermLink>Central Valley</GlossaryTermLink>.
                 </Typography>
                 <Typography variant="body1">
-                  {" "}
-                  CalSim also predicts how water flowing into the Delta affects
-                  salinity, how much water is pumped out of the Delta, and how
-                  much water flows into the San Francisco Bay. In addition,
-                  CalSim estimates how groundwater aquifers below the Central
-                  Valley are affected by pumping.
+                  <GlossaryTermLink>CalSim3</GlossaryTermLink> also calculates
+                  how water flowing into the{" "}
+                  <GlossaryTermLink>Delta</GlossaryTermLink> affects{" "}
+                  <GlossaryTermLink>salinity</GlossaryTermLink>, how much water
+                  is pumped out of the{" "}
+                  <GlossaryTermLink>Delta</GlossaryTermLink>, and how much water
+                  flows into the San Francisco Bay. In addition,{" "}
+                  <GlossaryTermLink>CalSim3</GlossaryTermLink> estimates how{" "}
+                  <GlossaryTermLink term="Groundwater basin">
+                    groundwater basins
+                  </GlossaryTermLink>{" "}
+                  below the <GlossaryTermLink>Central Valley</GlossaryTermLink>{" "}
+                  are affected by pumping.
                 </Typography>
               </Box>
             </CallResponsePanel>
@@ -395,35 +394,33 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
         </Step>
 
         {/* ==================== Storyboard ====================
-        300vh runway gives the click-driven storyboard room to sit.
-        sticky + 100vh pins it in view while the user is in this section.
-        progress={true} is prep for scroll-driven migration — onStepProgress
-        will eventually write the storyboard's MotionValue instead of Next/Back.
+        StickyScrollSection gives the click-driven storyboard a real 300vh
+        runway to sit in — same pinning primitive the homepage panels use
+        (AboutCoeqwalPanel, WaterThemesPanel). The hand-rolled sticky+minHeight
+        version this replaced never actually held the panel in place: minHeight
+        just floors the runway, so it silently grew to match the sticky child's
+        own height instead of exceeding it, collapsing the dwell window to zero.
+        progress={true} on the Step is prep for scroll-driven migration —
+        onStepProgress will eventually write the storyboard's MotionValue
+        instead of Next/Back.
         */}
         <Step data={"outcomes-viz" as SubSectionId} progress>
-          <Box
-            sx={{
-              minHeight: "100vh",
-              position: "relative",
+          <StickyScrollSection
+            height="300vh"
+            stickyTop={theme.layout.headerHeight}
+            stickyHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
+            style={{
               pointerEvents: "none",
               paddingLeft: defaultLeftPadding,
               transition: defPaddingTransition,
-              paddingRight: (theme) => theme.space.panel.padding,
+              paddingRight: theme.space.panel.padding,
             }}
+            // Re-enable pointer events for Play/Next/Back controls and
+            // interactive squares.
+            stickyStyle={{ pointerEvents: "auto" }}
           >
-            <Box
-              sx={{
-                position: "sticky",
-                top: 0,
-                height: "120vh",
-                // Re-enable pointer events for Play/Next/Back controls
-                // and interactive squares.
-                pointerEvents: "auto",
-              }}
-            >
-              <TierAnimationSection />
-            </Box>
-          </Box>
+            <TierAnimationSection />
+          </StickyScrollSection>
         </Step>
 
         <Step data={"data-in-depth-intro" as SubSectionId}>

@@ -27,6 +27,8 @@ import {
 } from "../../../../../scenarios/components/shared"
 import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
+import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
+import ScrollRightIndicator from "../../chrome/layout/ScrollRightIndicator"
 import { useTierTooltipState } from "../../../../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../../../../tooltips/TierTooltipPortal"
 import { THEME_LABEL_CONFIG } from "../../../../../../content/themes"
@@ -291,6 +293,10 @@ export default function BarPanel() {
     [cardScenarios, pinnedSet],
   )
 
+  const { scrollRef, canScrollRight, checkOverflow } = useScrollRightIndicator([
+    outcomeNames.length,
+  ])
+
   if (isLoading) {
     return (
       <Box
@@ -334,6 +340,7 @@ export default function BarPanel() {
     )
   }
 
+  // Bar chart scenario card
   const renderCard = (scenario: (typeof cardScenarios)[number]) => {
     const chartData = allChartData[scenario.scenarioId] ?? {}
     const isFirstCard = scenario.scenarioId === cardScenarios[0]?.scenarioId
@@ -352,8 +359,8 @@ export default function BarPanel() {
           strategy={scenario}
           titleVariant="body2"
           showThemeBadge={false}
-          descriptionMaxWidth="100%"
-          disableTruncation
+          descriptionMaxWidth="65ch"
+          descriptionCharLimit={100}
           inlineActions={
             <InlineRowActions
               scenarioId={scenario.scenarioId}
@@ -408,120 +415,132 @@ export default function BarPanel() {
   }
 
   return (
-    <Box
-      sx={{
-        height: "100%",
-        overflow: "auto",
-        px: theme.space.tool.px,
-        pb: theme.space.component.md,
-        backgroundColor: theme.palette.grey[100],
-      }}
-    >
-      <TierTooltipPortal
-        outcomeCode={activeTooltip}
-        anchorEl={tooltipAnchor}
-        onClose={closeTooltip}
-        onForceClose={forceCloseTooltip}
-      />
+    <Box sx={{ position: "relative", height: "100%" }}>
+      <Box
+        ref={scrollRef}
+        onScroll={checkOverflow}
+        sx={{
+          height: "100%",
+          overflow: "auto",
+          px: theme.space.tool.px,
+          pb: theme.space.component.md,
+          backgroundColor: theme.palette.grey[100],
+        }}
+      >
+        <TierTooltipPortal
+          outcomeCode={activeTooltip}
+          anchorEl={tooltipAnchor}
+          onClose={closeTooltip}
+          onForceClose={forceCloseTooltip}
+        />
 
-      {/* Inner content: min-width 100% so cards/header fill the panel
+        {/* Inner content: min-width 100% so cards/header fill the panel
           when there's little data, width max-content so the whole block
           (header + every card) grows past the panel and scrolls together
           once there are more outcomes than fit. */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: theme.space.gap.md,
-        }}
-      >
-        {/* One shared sticky region: header + pinned cards move together as a unit */}
         <Box
           sx={{
-            position: "sticky",
-            top: 0,
-            zIndex: 2,
-            backgroundColor: theme.palette.grey[100],
+            display: "flex",
+            flexDirection: "column",
+            gap: theme.space.gap.md,
+            minWidth: "100%",
+            width: "max-content",
           }}
         >
+          {/* One shared sticky region: header + pinned cards move together as a unit */}
           <Box
             sx={{
-              display: "flex",
-              gap: theme.space.gap.sm,
-              pl: theme.space.component.md,
-              pt: theme.space.component.md,
-              pb: theme.space.gap.sm,
+              position: "sticky",
+              top: 0,
+              zIndex: 2,
+              backgroundColor: theme.palette.grey[100],
             }}
           >
-            {outcomeNames.map(({ shortCode, displayName }, index) => (
-              <Box
-                key={shortCode}
-                sx={{
-                  flex: `1 1 ${OUTCOME_COLUMN_WIDTH}px`,
-                  minWidth: OUTCOME_COLUMN_WIDTH,
-                }}
-              >
-                <BarOutcomeHeaderCell
-                  shortCode={shortCode}
-                  displayName={displayName}
-                  isSorted={sortBy === shortCode}
-                  sortDirection={sortDirection}
-                  activeTooltip={activeTooltip}
-                  onTooltipToggle={handleToggleWithAnchor}
-                  onSortChange={handleSortChange}
-                  isFirstColumn={index === 0}
-                />
-              </Box>
-            ))}
-          </Box>
-
-          {pinnedCardScenarios.length > 0 && (
             <Box
               sx={{
                 display: "flex",
-                flexDirection: "column",
-                gap: theme.space.gap.md,
-                pb: theme.space.gap.md,
-                maxHeight: "40vh",
-                overflowY: "auto",
+                gap: theme.space.gap.sm,
+                pl: theme.space.component.md,
+                pt: theme.space.component.md,
+                pb: theme.space.gap.sm,
               }}
             >
-              {pinnedCardScenarios.map((scenario) => renderCard(scenario))}
+              {outcomeNames.map(({ shortCode, displayName }, index) => (
+                <Box
+                  key={shortCode}
+                  sx={{
+                    flex: `1 1 ${OUTCOME_COLUMN_WIDTH}px`,
+                    minWidth: OUTCOME_COLUMN_WIDTH,
+                  }}
+                >
+                  <BarOutcomeHeaderCell
+                    shortCode={shortCode}
+                    displayName={displayName}
+                    isSorted={sortBy === shortCode}
+                    sortDirection={sortDirection}
+                    activeTooltip={activeTooltip}
+                    onTooltipToggle={handleToggleWithAnchor}
+                    onSortChange={handleSortChange}
+                    isFirstColumn={index === 0}
+                  />
+                </Box>
+              ))}
             </Box>
-          )}
+
+            {pinnedCardScenarios.length > 0 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: theme.space.gap.md,
+                  pb: theme.space.gap.md,
+                  maxHeight: "40vh",
+                  overflowY: "auto",
+                }}
+              >
+                {pinnedCardScenarios.map((scenario) => renderCard(scenario))}
+              </Box>
+            )}
+          </Box>
+
+          {unpinnedCardScenarios.map((scenario, index) => {
+            const previousTheme =
+              index > 0
+                ? (unpinnedCardScenarios[index - 1]?.theme ?? null)
+                : null
+            const showGroupLabel = scenario.theme !== previousTheme
+
+            return (
+              <Fragment key={scenario.scenarioId}>
+                {showGroupLabel && scenario.theme && (
+                  <ThemeGroupLabel themeKey={scenario.theme as ScenarioTheme} />
+                )}
+                {renderCard(scenario)}
+              </Fragment>
+            )
+          })}
         </Box>
-
-        {unpinnedCardScenarios.map((scenario, index) => {
-          const previousTheme =
-            index > 0 ? (unpinnedCardScenarios[index - 1]?.theme ?? null) : null
-          const showGroupLabel = scenario.theme !== previousTheme
-
-          return (
-            <Fragment key={scenario.scenarioId}>
-              {showGroupLabel && scenario.theme && (
-                <ThemeGroupLabel themeKey={scenario.theme as ScenarioTheme} />
-              )}
-              {renderCard(scenario)}
-            </Fragment>
-          )
-        })}
+        <Snackbar
+          open={pinCapReached}
+          autoHideDuration={3000}
+          onClose={dismissPinCapReached}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          message="Pin limit reached - unpin a scenario to pin another"
+          ContentProps={{
+            sx: {
+              backgroundColor: theme.palette.grey[800],
+              color: theme.palette.common.white,
+              fontSize: "0.85rem",
+              fontWeight: 500,
+              borderRadius: theme.borderRadius.sm,
+              justifyContent: "center",
+            },
+          }}
+        />
       </Box>
-      <Snackbar
-        open={pinCapReached}
-        autoHideDuration={3000}
-        onClose={dismissPinCapReached}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        message="Pin limit reached - unpin a scenario to pin another"
-        ContentProps={{
-          sx: {
-            backgroundColor: theme.palette.grey[800],
-            color: theme.palette.common.white,
-            fontSize: "0.85rem",
-            fontWeight: 500,
-            borderRadius: theme.borderRadius.sm,
-            justifyContent: "center",
-          },
-        }}
+      <ScrollRightIndicator
+        visible={canScrollRight}
+        fadeColor={theme.palette.grey[100]}
       />
     </Box>
   )

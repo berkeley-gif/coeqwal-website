@@ -9,7 +9,7 @@
 
 import type { ElementType } from "react"
 import {
-  HistoryIcon,
+  AccessTimeFilledIcon,
   WaterDropIcon,
   WbSunnyIcon,
   LocalFireDepartmentIcon,
@@ -34,7 +34,7 @@ export const HYDROCLIMATE_FALLBACK_ACCENT = "#9e9e9e"
 // Add an entry to give a new climate its own icon and accent color.
 export const HYDROCLIMATE_CONFIG: Record<string, HydroclimateVisualConfig> = {
   historical: {
-    icon: HistoryIcon,
+    icon: AccessTimeFilledIcon,
     bgColor: "#2d89b7",
   },
   ecv: {

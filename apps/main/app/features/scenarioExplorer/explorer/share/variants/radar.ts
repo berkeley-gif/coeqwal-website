@@ -9,6 +9,7 @@
  * lazily.
  */
 
+import { shareFigureFooter } from "../figureFooter"
 import React, { useEffect } from "react"
 import type { VerticalParallelLineData } from "@repo/viz"
 import { getOutcomeName } from "../../../../../content/outcomes"
@@ -82,6 +83,7 @@ const radarHandler: VariantHandler<RadarItem> = {
       ? undefined
       : renderRadarLiveChart(item, radarLive, ctx.theme.palette.grey[600])
     return React.createElement(ShareRadarCard, {
+      figureFooter: shareFigureFooter(item),
       scenarioNames: names,
       scenarioDefinitions: definitions,
       scenarioColors: item.scenarioColors,

@@ -20,6 +20,7 @@ import {
 import {
   getRegionalTierMean,
   type RegionalOutcomeCode,
+  type RegionalHydroclimate,
 } from "@repo/data/coeqwal"
 import {
   PRIMARY_SCENARIO_BASELINE_ID,
@@ -188,14 +189,11 @@ export function useTierChartData(
         // is opened up.
         NOD_SOD_OUTCOME_CODES.forEach((code) => {
           const displayName = getOutcomeName(code)
-          const raw =
-            hydroclimate === HC_HISTORICAL
-              ? getRegionalTierMean(
-                  scenarioId,
-                  code as RegionalOutcomeCode,
-                  "historical",
-                )
-              : null
+          const raw = getRegionalTierMean(
+            scenarioId,
+            code as RegionalOutcomeCode,
+            hydroclimate as RegionalHydroclimate,
+          )
           values[displayName] = raw != null ? tierMeanToRadarValue(raw) : null
         })
 
@@ -239,12 +237,11 @@ export function useTierChartData(
         }
       }
 
-      if (hydroclimate !== HC_HISTORICAL) continue
       for (const code of NOD_SOD_OUTCOME_CODES) {
         const raw = getRegionalTierMean(
           scenarioId,
           code as RegionalOutcomeCode,
-          "historical",
+          hydroclimate as RegionalHydroclimate,
         )
         if (raw == null) continue
         const v = tierMeanToRadarValue(raw)

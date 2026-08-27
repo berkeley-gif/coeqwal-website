@@ -70,13 +70,19 @@ export interface FigureTitleParts {
    *  means water-year typing does not apply to this variable (e.g. salmon
    *  population metrics, welfare loss) and the clause is omitted. */
   waterYearTypeLabels: readonly string[] | null
+  /** Verbatim replacement for the "<Variable> (<Location>)" head, used as
+   *  written (no title-casing) and with no location parenthetical, e.g.
+   *  "April X2 Position (in km)". */
+  headVerbatim?: string
 }
 
 /** Build the standardized figure title from its parts. */
 export function buildFigureTitle(parts: FigureTitleParts): string {
-  const head = parts.locationName
-    ? `${titleCaseLabel(parts.variableName)} (${titleCaseLabel(parts.locationName)})`
-    : titleCaseLabel(parts.variableName)
+  const head =
+    parts.headVerbatim ??
+    (parts.locationName
+      ? `${titleCaseLabel(parts.variableName)} (${titleCaseLabel(parts.locationName)})`
+      : titleCaseLabel(parts.variableName))
   const waterYears =
     parts.waterYearTypeLabels === null
       ? undefined

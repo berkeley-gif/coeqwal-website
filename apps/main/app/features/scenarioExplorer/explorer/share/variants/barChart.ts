@@ -4,6 +4,7 @@
  * sidebar. URL prefix `b`.
  */
 
+import { shareFigureFooter } from "../figureFooter"
 import React, { useEffect } from "react"
 import type { ChartDataPoint } from "../../../../scenarios/components/shared/types"
 import { barChartDataToCSV } from "../export/csv/barChartCsv"
@@ -33,6 +34,7 @@ const barChartHandler: VariantHandler<BarChartItem> = {
         | Record<string, ChartDataPoint[]>
         | undefined)
     return React.createElement(ShareScenarioCard, {
+      figureFooter: shareFigureFooter(item),
       scenarioId: item.id,
       name: info?.description ?? info?.name ?? item.scenarioId,
       scenarioDefinition: info?.definition,

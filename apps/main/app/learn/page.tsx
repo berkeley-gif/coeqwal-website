@@ -1,3 +1,4 @@
+"use client"
 /**
  * /learn page — hosts the Learn, Explore, and Share tabs.
  */
@@ -14,6 +15,9 @@ import SmoothTabs from "../components/tabs/SmoothTabs"
 import TabPanels from "../components/tabs/TabPanels"
 import TabsShell from "../components/tabs/TabsShell"
 
+import { useMediaQuery, useTheme } from "@repo/ui/mui"
+import { MobileNotSupported } from "@repo/ui"
+
 function TabPanelsErrorFallback() {
   return (
     <Box sx={{ minHeight: 320, display: "flex", justifyContent: "center" }}>
@@ -26,6 +30,13 @@ function TabPanelsErrorFallback() {
 }
 
 export default function LearnPage() {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
+
+  if (isMobile) {
+    return <MobileNotSupported />
+  }
+
   return (
     <MapProvider>
       <DynamicMap />

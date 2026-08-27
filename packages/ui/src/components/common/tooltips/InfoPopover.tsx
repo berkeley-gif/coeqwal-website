@@ -106,10 +106,12 @@ export function InfoPopover({
         zIndex={zIndex}
         showArrow={showArrow}
         density={density}
+        closeButton={
+          !hideCloseButton && (
+            <TooltipCloseButton onClick={close} offset={{ top: 8, right: 8 }} />
+          )
+        }
       >
-        {!hideCloseButton && (
-          <TooltipCloseButton onClick={close} offset={{ top: 8, right: 8 }} />
-        )}
         {content}
       </AnchoredPortal>
     </>

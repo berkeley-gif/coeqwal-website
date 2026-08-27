@@ -95,16 +95,8 @@ const KINDS: Record<string, Kind> = {
   agdel: { clim: -0.18, sens: 0.5, cv0: 0.2, cvS: 0.45, shape: "agdel" },
   pump: { clim: 0.12, sens: -0.45, cv0: 0.16, cvS: 0.4, shape: "agdel" },
   short: { clim: 0.55, sens: -2.0, cv0: 0.55, cvS: 0.4 },
-  shortpct: {
-    clim: 0.55,
-    sens: -2.0,
-    cv0: 0.55,
-    cvS: 0.4,
-    clamp: [0, 100],
-  },
   rev: { clim: -0.1, sens: 0.22, cv0: 0.08, cvS: 0.45 },
   cwsdel: { clim: -0.08, sens: 0.22, cv0: 0.06, cvS: 0.45 },
-  pctuif: { clim: -0.08, sens: 0.12, cv0: 0.1, cvS: 0.4, clamp: [2, 98] },
 }
 
 /** Seasonal shapes by water month (Oct..Sep). */
@@ -186,7 +178,6 @@ const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
       storage: 0.08,
       outflow: -0.15,
       sal: 0.1,
-      pctUIF: -0.2,
     },
   },
   s0046: {
@@ -197,7 +188,6 @@ const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
       storage: -0.05,
       outflow: 0.12,
       sal: -0.06,
-      pctUIF: 0.25,
     },
   },
   s0032: {
@@ -209,7 +199,6 @@ const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
       rev: -0.1,
       gwStor: 0.2,
       gwTrend: 0.7,
-      pctUIF: 0.27,
       short: 0.3,
     },
   },
@@ -220,7 +209,6 @@ const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
       sepBonus: 0.1,
       exports: -0.1,
       agDel: -0.08,
-      pctUIF: 0.15,
     },
   },
   s0033: {
@@ -233,19 +221,17 @@ const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
       rev: -0.09,
       gwStor: 0.2,
       gwTrend: 0.7,
-      pctUIF: 0.17,
       short: 0.3,
     },
   },
-  s0040: { eff: { outflow: -0.15, exports: 0.12, sal: 0.12, pctUIF: -0.18 } },
-  s0041: { eff: { outflow: 0.02, exports: 0.02, pctUIF: 0.02 } },
-  s0042: { eff: { outflow: 0.15, exports: -0.13, sal: -0.08, pctUIF: 0.2 } },
+  s0040: { eff: { outflow: -0.15, exports: 0.12, sal: 0.12 } },
+  s0041: { eff: { outflow: 0.02, exports: 0.02 } },
+  s0042: { eff: { outflow: 0.15, exports: -0.13, sal: -0.08 } },
   s0039: {
     eff: {
       outflow: 0.3,
       exports: -0.27,
       sal: -0.15,
-      pctUIF: 0.42,
       storage: -0.07,
       agDel: -0.1,
     },
@@ -278,7 +264,6 @@ function scenarioEffect(scenarioId: string): ScenarioEffect {
       gwStor: shift(),
       gwTrend: shift(),
       sal: shift(),
-      pctUIF: shift(),
       cwsShort: shift(),
     },
   }
@@ -288,14 +273,16 @@ function scenarioEffect(scenarioId: string): ScenarioEffect {
 /* Base magnitudes                                                     */
 /* ------------------------------------------------------------------ */
 
+// Sample magnitudes per served aggregate, in the same units the endpoint
+// serves (TAF; revenue in millions of USD). Only reached when a live series
+// is absent. There is no shortpct row: the percent-of-demand view is DERIVED
+// from the shortage and delivery series, never seeded from a base.
 const AG_BASE: Record<
   string,
-  { del: number; pump: number; short: number; shortpct: number; rev: number }
+  { del: number; pump: number; short: number; rev: number }
 > = {
-  AG_SAC: { del: 5200, pump: 2300, short: 620, shortpct: 7, rev: 9.2 },
-  AG_SJV: { del: 4600, pump: 5600, short: 980, shortpct: 11, rev: 14.8 },
-  AG_TUL: { del: 2400, pump: 4400, short: 760, shortpct: 12, rev: 12.4 },
-  AG_ALL: { del: 12200, pump: 12300, short: 2360, shortpct: 10, rev: 36.4 },
+  AGG_AG_NOD: { del: 3800, pump: 3500, short: 85, rev: 4142 },
+  AGG_AG_SOD: { del: 3400, pump: 3800, short: 113, rev: 9309 },
 }
 
 function baseFor(variable: VariableDef, location: LocationDef): number {
@@ -330,25 +317,30 @@ function baseFor(variable: VariableDef, location: LocationDef): number {
       return location.mockBase ?? 400
     case "tot_exp":
       return 4800
-    case "ndo_uif":
-      return 42
     case "salmon_abund":
       // Proportion of spawning habitat occupied (display units, matching
       // the 0.01-scaled live series); most sample years sit well below
       // capacity (1.0).
       return 0.55
+    // Ag aggregates keep their hand-set bases; demand units carry a served
+    // net-diversion median as mockBase, and the other measures scale from it
+    // at roughly the aggregate ratios (pumping ~0.9x, shortage ~0.03x,
+    // revenue ~1.08x in $M).
     case "ag_del":
-      return AG_BASE[location.id]?.del ?? 4000
+      return AG_BASE[location.id]?.del ?? location.mockBase ?? 4000
     case "ag_pump":
-      return AG_BASE[location.id]?.pump ?? 3000
+      return AG_BASE[location.id]?.pump ?? (location.mockBase ?? 3300) * 0.9
     case "ag_short":
-      return AG_BASE[location.id]?.short ?? 800
-    case "ag_shortpct":
-      return AG_BASE[location.id]?.shortpct ?? 10
+      return AG_BASE[location.id]?.short ?? (location.mockBase ?? 26000) * 0.03
     case "ag_rev":
-      return AG_BASE[location.id]?.rev ?? 15
+      return AG_BASE[location.id]?.rev ?? (location.mockBase ?? 14) * 1.08
     case "cws_short":
-      return (location.mockBase ?? 500) * 0.06
+      // The shortage group's mockBase is already a shortage median (TAF).
+      return location.mockBase ?? 30
+    case "cws_welfare":
+      // Sample only on API failure: the shortage magnitude in TAF is the
+      // same order as the welfare loss in $M at the aggregates.
+      return location.mockBase ?? 3
     default:
       return location.mockBase ?? 1000
   }
@@ -553,6 +545,38 @@ export function gwLevelFromStorage(
 }
 
 /**
+ * Shortage as a percent of demand for the "pct_demand" view, derived per year
+ * as shortage / (shortage + delivered) x 100. Demand is approximated as
+ * delivered water plus shortage. Clamped to [0, 100]; a no-demand year (both
+ * series 0) renders 0, never NaN; mismatched lengths trim to the shorter
+ * series so years stay aligned. Pure.
+ *
+ * Two callers, with different reach:
+ *  - Community water systems: SAMPLE members only. Live members adopt the
+ *    endpoint's served shortage_pct measure directly.
+ *  - Agriculture: BOTH live and sample members. The ag endpoint serves no
+ *    percent measure, so there is nothing to adopt and the view is derived
+ *    from the served shortage and net_diversion series. The delivered term is
+ *    net diversion there. Formula pending a one-line science confirm (asked
+ *    2026-08-21); it ships documented rather than blocking, the same way the
+ *    CWS percent view shipped with its open confirm.
+ */
+export function shortagePctOfDemand(
+  shortage: readonly number[],
+  delivered: readonly number[],
+): number[] {
+  const n = Math.min(shortage.length, delivered.length)
+  const out: number[] = []
+  for (let i = 0; i < n; i++) {
+    const short = shortage[i] as number
+    const demand = short + (delivered[i] as number)
+    const pct = demand > 0 ? (short / demand) * 100 : 0
+    out.push(Math.min(100, Math.max(0, pct)))
+  }
+  return out
+}
+
+/**
  * Least-squares linear trend of an annual series, in value units per year.
  * Pure and source-agnostic (works for live and sample series alike); returns
  * 0 for series too short to carry a slope.
@@ -586,7 +610,7 @@ export function mockSummaryValue(
   const stats = seriesStats(
     mockAnnualSeries(variableId, scenarioId, climateKey, locationId),
   )
-  return variableId === "ag_rev" ? stats.mean : stats.p50
+  return stats.p50
 }
 
 /**

@@ -5,10 +5,17 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  alpha,
+  ArrowDownwardIcon,
+  IconButton,
+  MobileStepper,
+} from "@repo/ui/mui"
 import {
   InfoCard,
-  CircularArrowButton,
   resolveRadius,
   resolveInset,
   type RadiusValue,
@@ -22,6 +29,7 @@ import {
 } from "@repo/scrollytelling"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { TabKey } from "../../types/tabs"
+import { ScrollToButton, resolveCssLengthPx } from "@repo/ui"
 
 /*───────────────── */
 /* IMAGE & TAB CARDS                                                       */
@@ -73,6 +81,8 @@ function WaterThemesPanelContent({
   const prefersReducedMotion = useReducedMotion()
   const { navigateToTab } = useTabNavigation()
 
+  const TEXT_COLOR = "text.primary"
+
   // Local scroll progress (0-1) within this StickyScrollSection
   const progress = useScrollProgress()
 
@@ -87,6 +97,10 @@ function WaterThemesPanelContent({
   const radius = resolveRadius(borderRadius, theme.borderRadius)
   const insetCfg = resolveInset(inset)
 
+  const [activeCard, setActiveCard] = React.useState(0)
+  const activeTabCard = TAB_CARDS[activeCard]!
+  const activeTabColor = theme.palette.tabPanels[activeTabCard.tab]
+
   const content = (
     <Box
       sx={{
@@ -96,6 +110,12 @@ function WaterThemesPanelContent({
         overflow: "hidden",
         borderBottom: insetCfg ? "none" : (borderBottom ?? "none"),
         borderRadius: radius,
+        px: theme.space.panel.padding,
+        py: theme.space.panel.padding,
+        display: "flex",
+        alignItems: "center",
+        flexDirection: "column",
+        justifyContent: "center",
       }}
     >
       {/* Layer 1: Gradient background (always visible) */}
@@ -104,7 +124,7 @@ function WaterThemesPanelContent({
           position: "absolute",
           inset: 0,
           zIndex: 0,
-          background: `${theme.palette.brand.panelLight}`,
+          background: `#aacbd9`,
         }}
       />
 
@@ -130,11 +150,10 @@ function WaterThemesPanelContent({
         sx={{
           position: "relative",
           zIndex: 2,
-          px: theme.space.panel.padding,
-          pt: theme.space.panel.topOffset,
           pb: theme.space.panel.padding,
-          height: "100%",
           boxSizing: "border-box",
+          width: "100%",
+          maxWidth: theme.breakpoints.values.xl,
         }}
       >
         {/* Headline + intro - pinned near the top, fades in on first
@@ -152,25 +171,31 @@ function WaterThemesPanelContent({
             sx={{
               display: { xs: "block", md: "grid" },
               gridTemplateColumns: { md: "1fr 1fr" },
-              columnGap: { md: theme.space.section.lg },
               alignItems: "start",
             }}
           >
-            <Box sx={{ mb: { xs: 2, md: 0 } }}>
+            <Box
+              sx={{
+                mb: { xs: 2, md: 0 },
+                textAlign: { xs: "center", md: "left" },
+              }}
+            >
               <Typography
                 variant="h1"
                 component="span"
-                sx={{ display: "block", color: "text.primary" }}
+                sx={{ display: "block", color: TEXT_COLOR }}
               >
                 Want to know more?
               </Typography>
             </Box>
 
             <Typography
-              variant="body1"
+              variant="displayBody"
               sx={{
-                color: "text.primary",
+                color: TEXT_COLOR,
                 maxWidth: { xs: "66%", md: "none" },
+                mx: { xs: "auto", md: 0 },
+                textAlign: { xs: "center", md: "left" },
                 mb: { xs: theme.space.section.md, md: 0 },
                 gridColumn: { md: "2" },
               }}
@@ -183,17 +208,12 @@ function WaterThemesPanelContent({
           </Box>
         </motion.div>
 
-        {/* Three squares, one per tab - anchored to the image's top
-            edge instead of floating wherever vertical centering left
-            them. The Delta Aerials image is width:100%, height:auto,
-            bottom-anchored, so its top edge sits
-            `100vw * IMG_ASPECT_RATIO` up from the panel's bottom edge.
-            translateY(-50%) centers the row ON that line so it reads
-            as "starting where the photo begins." */}
+        {/* Desktop tab cards: full row with decorative dividers between cards */}
         <Box
           sx={{
-            display: "flex",
+            display: { xs: "none", md: "flex" },
             alignItems: "center",
+            justifyContent: "center",
             gap: theme.space.section.sm,
             mt: "10vh",
           }}
@@ -210,20 +230,112 @@ function WaterThemesPanelContent({
                   variant="onDark"
                   background={panelColor}
                   hoverBackground={alpha(panelColor, 0.85)}
-                  sx={{ flex: 1, height: "200px" }}
+                  sx={{ flex: 1, height: "200px", maxWidth: "350px" }}
                 />
                 {i < TAB_CARDS.length - 1 && (
-                  <CircularArrowButton
-                    decorative
-                    size={50}
-                    rotation="-90deg"
-                    color={theme.palette.brand.panelLight}
+                  <ArrowDownwardIcon
+                    aria-hidden="true"
+                    sx={{
+                      fontSize: 54,
+                      transform: "rotate(-90deg)",
+                      color: theme.palette.brand.panelLight,
+                      "& path": {
+                        stroke: "currentColor",
+                        strokeWidth: `${theme.strokeWidth.accent}px`,
+                        paintOrder: "stroke fill",
+                      },
+                    }}
                   />
                 )}
               </React.Fragment>
             )
           })}
         </Box>
+
+        {/* Mobile/tablet tab cards: one card at a time, MUI MobileStepper for dots + arrows */}
+        <Box
+          sx={{
+            display: { xs: "flex", md: "none" },
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            mt: "10vh",
+            width: "100%",
+          }}
+        >
+          <InfoCard
+            title={activeTabCard.title}
+            titleVariant="h5"
+            description={activeTabCard.description}
+            onClick={() => navigateToTab(activeTabCard.tab)}
+            variant="onDark"
+            background={activeTabColor}
+            hoverBackground={alpha(activeTabColor, 0.85)}
+            sx={{ width: "100%", maxWidth: "350px", height: "200px" }}
+          />
+          <MobileStepper
+            variant="dots"
+            steps={TAB_CARDS.length}
+            position="static"
+            activeStep={activeCard}
+            sx={{
+              background: "transparent",
+              "& .MuiMobileStepper-dot": {
+                backgroundColor: alpha(theme.palette.brand.panelLight, 0.4),
+              },
+              "& .MuiMobileStepper-dotActive": {
+                backgroundColor: theme.palette.brand.panelLight,
+              },
+            }}
+            nextButton={
+              <IconButton
+                onClick={() =>
+                  setActiveCard((i) => Math.min(i + 1, TAB_CARDS.length - 1))
+                }
+                disabled={activeCard === TAB_CARDS.length - 1}
+                aria-label="Next card"
+                sx={{ color: theme.palette.brand.panelLight }}
+              >
+                <ArrowDownwardIcon sx={{ transform: "rotate(-90deg)" }} />
+              </IconButton>
+            }
+            backButton={
+              <IconButton
+                onClick={() => setActiveCard((i) => Math.max(i - 1, 0))}
+                disabled={activeCard === 0}
+                aria-label="Previous card"
+                sx={{ color: theme.palette.brand.panelLight }}
+              >
+                <ArrowDownwardIcon sx={{ transform: "rotate(90deg)" }} />
+              </IconButton>
+            }
+          />
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: 40,
+          left: "50%",
+          transform: "translate(-50%)",
+        }}
+      >
+        <ScrollToButton
+          color={`${theme.palette.brand.panelLight}`}
+          size={52}
+          scrollToId="water-themes"
+          // Same offset math as VideoHero's scroll button: land
+          // the target panel's rounded card flush below the
+          // header by subtracting the header height and adding
+          // back one top frame-gap. Resolved at click time so
+          // the responsive `clamp()` value is read at the
+          // viewport's current width.
+          scrollOffset={() =>
+            theme.layout.headerHeight -
+            resolveCssLengthPx(theme.layout.panel.insetY, 24)
+          }
+          ariaLabel="Scroll down to the know more section"
+        />
       </Box>
     </Box>
   )

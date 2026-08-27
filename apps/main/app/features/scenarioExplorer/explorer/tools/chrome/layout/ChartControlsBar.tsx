@@ -1,17 +1,9 @@
 "use client"
 
-/**
- * ChartControlsBar - Secondary toolbar row for unique per-chart controls.
- *
- * Renders a "Chart controls" label followed by the controls passed as
- * children. Each panel supplies its own controls.
- * Sits between the primary ToolToolbar and the chart content area
- * inside UnifiedToolView.
- */
-
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-
+import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
+import ScrollRightIndicator from "./ScrollRightIndicator"
 interface ChartControlsBarProps {
   children: React.ReactNode
 }
@@ -21,6 +13,9 @@ const ChartControlsBar = React.forwardRef<
   ChartControlsBarProps
 >(function ChartControlsBar({ children }, ref) {
   const theme = useTheme()
+  const { scrollRef, canScrollRight, checkOverflow } = useScrollRightIndicator([
+    children,
+  ])
 
   return (
     <Box
@@ -58,15 +53,26 @@ const ChartControlsBar = React.forwardRef<
         }}
       />
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 0.5,
-        }}
-      >
-        {children}
+      <Box sx={{ position: "relative", flex: 1, minWidth: 0 }}>
+        <Box
+          ref={scrollRef}
+          onScroll={checkOverflow}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "nowrap",
+            gap: 0.5,
+            overflowX: "auto",
+            overflowY: "hidden",
+            WebkitOverflowScrolling: "touch",
+            py: 0.5,
+            "& > *": { flexShrink: 0 },
+          }}
+        >
+          {children}
+        </Box>
+
+        <ScrollRightIndicator visible={canScrollRight} />
       </Box>
     </Box>
   )

@@ -59,8 +59,8 @@ export default function StoryboardControls({
     <motion.div
       style={{
         position: "absolute",
-        top: 600,
-        left: "16.6667vw",
+        bottom: theme.space.panel.padding,
+        left: "50%",
         transform: "translateX(-50%)",
         display: "flex",
         gap: theme.spacing(0.75),

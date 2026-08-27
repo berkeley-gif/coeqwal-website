@@ -3,10 +3,10 @@
 /**
  * TierTooltipPortal - Tier tooltip shown next to its glyph.
  *
- * Positioning, the arrow, and the mobile-modal fallback all come from the
- * shared AnchoredPortal. This component only supplies the tier content and
- * close button. Click-away and Escape call onClose (debounced upstream to
- * survive the opening click); the X button calls onForceClose.
+ * Positioning and the arrow come from the shared AnchoredPortal. This
+ * component only supplies the tier content and close button. Click-away and
+ * Escape call onClose (debounced upstream to survive the opening click); the
+ * X button calls onForceClose.
  *
  * WCAG 4.1.2: when scenarioLabel and chartData are provided, the content shows
  * the scenario's actual tier level alongside the tier definitions.
@@ -55,13 +55,14 @@ export function TierTooltipPortal({
       fallbackPlacements={["right", "top", "bottom"]}
       width={TIER_TOOLTIP_WIDTH}
       maxWidth="calc(100vw - 48px)"
-      mobileMaxWidth={TIER_TOOLTIP_WIDTH}
       zIndex={zIndex}
+      closeButton={
+        <TooltipCloseButton
+          onClick={onForceClose}
+          offset={{ top: 8, right: 8 }}
+        />
+      }
     >
-      <TooltipCloseButton
-        onClick={onForceClose}
-        offset={{ top: 8, right: 8 }}
-      />
       <TierTooltipContent
         outcomeCode={outcomeCode!}
         showTitle={true}

@@ -37,6 +37,16 @@ interface StoryboardNavigationParams {
   mapAPI: ReturnType<typeof useMap>
   /** Camera helper that eases the map back to the home view. */
   cameraArbiter: CameraArbiter
+  /** Live padding reserving the storyboard's left/right columns, computed
+   *  from the panel's current DOM rect at call time (not baked into
+   *  `cameraArbiter`, which is a module-level singleton with no access to
+   *  it) - see `TierAnimationSection.tsx`. */
+  getCameraPadding: () => {
+    top: number
+    bottom: number
+    left: number
+    right: number
+  }
   /** Map layers reset on settle and Restart. */
   animPolygonLayers: readonly { fill: string; outline: string }[]
   controlsRef: React.RefObject<ReturnType<typeof animate> | null>
@@ -72,6 +82,7 @@ export function useStoryboardNavigation({
   panelInView,
   mapAPI,
   cameraArbiter,
+  getCameraPadding,
   animPolygonLayers,
   controlsRef,
   setBeatIndex,
@@ -193,6 +204,7 @@ export function useStoryboardNavigation({
       if (opts?.viaCamera) {
         cameraArbiter.flyHome(mapAPI.mapRef?.current?.getMap?.(), {
           duration: 800,
+          padding: getCameraPadding(),
           onStart: () => setPlayState("playing"),
           onArrive: () => {
             computePolygonDataRef.current()
@@ -216,6 +228,7 @@ export function useStoryboardNavigation({
       engineApiRef,
       setBeatIndex,
       setPlayState,
+      getCameraPadding,
     ],
   )
 
@@ -251,9 +264,12 @@ export function useStoryboardNavigation({
   const handleNext = useCallback(() => {
     if (beatIndexRef.current >= FINAL_TIMING_BEAT_INDEX) return
     clearInteractiveState()
+    const fromBeat = beatIndexRef.current
     // `viaCamera` eases back to home first (no-op when already home) so a
-    // square-click zoom doesn't persist into the next beat.
-    goTo(beatIndexRef.current + 1, { viaCamera: true })
+    // square-click zoom doesn't persist into the next beat. Skipped leaving
+    // beat 0 - nothing interactive exists yet to have moved the camera, so
+    // there's nothing to reset, and flying home anyway is a needless move.
+    goTo(fromBeat + 1, { viaCamera: fromBeat > 0 })
   }, [goTo, clearInteractiveState, beatIndexRef])
 
   /* Intro tween (Play). Tweens the first beat's window (0 to
@@ -331,6 +347,7 @@ export function useStoryboardNavigation({
       // `moveend`, then `applyBeat` snaps the beat.
       cameraArbiter.flyHome(mapAPI.mapRef?.current?.getMap?.(), {
         duration: 800,
+        padding: getCameraPadding(),
         onStart: () => setPlayState("playing"),
         onArrive: applyBeat,
       })
@@ -370,6 +387,7 @@ export function useStoryboardNavigation({
     mapAPI.mapRef,
     beatIndexRef,
     cameraArbiter,
+    getCameraPadding,
     controlsRef,
     engineApiRef,
     hasPlayedRef,
@@ -445,6 +463,7 @@ export function useStoryboardNavigation({
       cameraArbiter.flyHome(map, {
         duration: 800,
         resetOrientation: true,
+        padding: getCameraPadding(),
       })
     }
 
@@ -466,6 +485,7 @@ export function useStoryboardNavigation({
     animPolygonLayers,
     beatIndexRef,
     cameraArbiter,
+    getCameraPadding,
     computePolygonDataRef,
     controlsRef,
     engineApiRef,

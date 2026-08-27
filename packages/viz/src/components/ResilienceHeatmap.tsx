@@ -1867,9 +1867,17 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     // When `responsive` is false, fall back to the prop-driven dims and
     // call updateChart once at mount / when dims change.
     useEffect(() => {
+      const syncSvgAttrs = (w: number, h: number) => {
+        const svg = svgRef.current
+        if (!svg) return
+        svg.setAttribute("width", String(w))
+        svg.setAttribute("height", String(h))
+      }
+
       if (!responsive) {
         if (width > 0 && height > 0) {
           lastDimsRef.current = { width, height }
+          syncSvgAttrs(width, height)
           updateChartRef.current(width, height)
         }
         return
@@ -1888,6 +1896,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         if (prev.width === rw && prev.height === rh) return
         lastDimsRef.current = { width: rw, height: rh }
         if (rw > 0 && rh > 0) {
+          syncSvgAttrs(rw, rh)
           updateChartRef.current(rw, rh)
         }
       })
@@ -1900,6 +1909,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       const ih = Math.round(rect.height)
       if (iw > 0 && ih > 0) {
         lastDimsRef.current = { width: iw, height: ih }
+        syncSvgAttrs(iw, ih)
         updateChartRef.current(iw, ih)
       }
 
@@ -1951,8 +1961,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       >
         <svg
           ref={svgRef}
-          width={width}
-          height={height}
+          {...(!responsive && { width, height })}
           style={{ display: "block", width: "100%", height: "100%" }}
         />
         {/* Tooltips are portaled to document.body and positioned with

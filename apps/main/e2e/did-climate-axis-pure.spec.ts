@@ -39,17 +39,16 @@ test("climateFanoutIds resolves the held scenario per climate, index-aligned wit
   ])
 })
 
-test("liveAxisEligible: scenarios axis needs the workspace climate; climates axis is always eligible; locations stays mock", () => {
-  // scenarios axis: live only when the held climate is the one the workspace
-  // resolver used (the pre-existing rule, unchanged)
-  expect(liveAxisEligible("scenarios", "historical", "historical")).toBe(true)
-  expect(liveAxisEligible("scenarios", "cc95", "historical")).toBe(false)
-  // climates axis: each member resolves its own climate, so eligibility does
-  // not depend on the workspace climate
-  expect(liveAxisEligible("climates", "historical", "historical")).toBe(true)
-  expect(liveAxisEligible("climates", "cc95", "historical")).toBe(true)
-  // locations axis: not wired for live yet
-  expect(liveAxisEligible("locations", "historical", "historical")).toBe(false)
+test("liveAxisEligible: every offered axis is live regardless of the pinned climate", () => {
+  // Each axis resolves its scenario ids through the pinned hydroclimate, so
+  // eligibility no longer depends on the climate the workspace resolver ran
+  // for. Pinning a different climate used to drop the scenarios and
+  // locations axes to sample data (and draw a fabricated series for a
+  // scenario the model does not cover).
+  expect(liveAxisEligible("scenarios")).toBe(true)
+  expect(liveAxisEligible("climates")).toBe(true)
+  expect(liveAxisEligible("locations")).toBe(true)
+  expect(liveAxisEligible("bogus")).toBe(false)
 })
 
 test("climateFanoutIds yields null for a missing variant or unknown climate, never a crash", () => {

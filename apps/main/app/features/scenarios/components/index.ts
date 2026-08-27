@@ -5,10 +5,6 @@ export {
   default as HydroclimateChooserDefault,
 } from "./HydroclimateChooser"
 
-// Layout components
-export { ScenarioRow } from "./ScenarioRow"
-export type { ScenarioRowProps } from "./ScenarioRow"
-
 // Shared scenario/outcome components
 export {
   OutcomeGlyphItem,

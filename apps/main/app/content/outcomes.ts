@@ -141,6 +141,34 @@ export const NOD_SOD_OUTCOME_CODES: NodSodCode[] = [
   "SOD_GW",
 ]
 
+/**
+ * Two-line breaks for chart axis labels. Keyed off OUTCOME_NAMES/NOD_SOD_NAMES
+ * values (not typed-out strings) so a rename in either map can't silently
+ * orphan an entry here the way "Community deliveries" → "Community surface
+ * water" did.
+ */
+export const OUTCOME_LABEL_BREAKS: Record<string, [string, string]> = {
+  [OUTCOME_NAMES.CWS_DEL]: ["Community", "surface water"],
+  [OUTCOME_NAMES.AG_REV]: ["Agricultural", "revenue"],
+  [OUTCOME_NAMES.ENV_FLOWS]: ["Environmental", "flows"],
+  [OUTCOME_NAMES.RES_STOR]: ["Reservoir", "storage"],
+  [OUTCOME_NAMES.GW_STOR]: ["Groundwater", "storage"],
+  [OUTCOME_NAMES.DELTA_ECO]: ["Delta estuary", "ecology"],
+  [OUTCOME_NAMES.FW_EXP]: ["Freshwater for", "Delta exports"],
+  [OUTCOME_NAMES.FW_DELTA_USES]: ["Freshwater for", "in-Delta uses"],
+  [OUTCOME_NAMES.WRC_SALMON_AB]: ["Winter-run", "salmon"],
+  [NOD_SOD_NAMES.NOD_DW]: ["NOD:", "Community deliveries"],
+  [NOD_SOD_NAMES.SOD_DW]: ["SOD:", "Community deliveries"],
+  [NOD_SOD_NAMES.NOD_AG]: ["NOD:", "Agricultural revenue"],
+  [NOD_SOD_NAMES.SOD_AG]: ["SOD:", "Agricultural revenue"],
+  [NOD_SOD_NAMES.NOD_EFLOWS]: ["NOD:", "Environmental flows"],
+  [NOD_SOD_NAMES.SOD_EFLOWS]: ["SOD:", "Environmental flows"],
+  [NOD_SOD_NAMES.NOD_RES]: ["NOD:", "Reservoir storage"],
+  [NOD_SOD_NAMES.SOD_RES]: ["SOD:", "Reservoir storage"],
+  [NOD_SOD_NAMES.NOD_GW]: ["NOD:", "Groundwater storage"],
+  [NOD_SOD_NAMES.SOD_GW]: ["SOD:", "Groundwater storage"],
+}
+
 /** NOD-only codes, in the same category order as OUTCOME_CODE_ORDER */
 export const NOD_CODES: NodSodCode[] = [
   "NOD_DW",
@@ -245,23 +273,36 @@ export function describeOutcomeLocations(
  */
 export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   CWS_DEL:
-    "Tiers reflect the extent to which surface water deliveries to cities and towns satisfy associated drinking water demands. Water deliveries are evaluated relative to estimated recent potable water demands for these deliveries at 74 locations of interest.",
+    "The extent to which surface water deliveries to cities and towns satisfy associated drinking water demands. Water deliveries are evaluated relative to independent estimates of recent potable water demands at each of 74 locations of interest.",
   AG_REV:
-    "Tiers reflect how average agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
+    "How average agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
   ENV_FLOWS:
-    "Tiers reflect the extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
+    "The extent to which river flows are of sufficient magnitude across seasons and years to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
   RES_STOR:
-    "Tier reflects how full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
+    "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
   GW_STOR:
-    "Tier reflects trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
+    "Trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
   DELTA_ECO:
-    "Tiers reflect the extent to which winter and spring outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
+    "The extent to which winter and spring outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation (SAV), salinity, turbidity, and microhabitat availability.",
   FW_EXP:
-    "Tier reflects the amount of freshwater exported from the Delta (Banks and Jones pumping plants), with volumes reduced if salinity exceeds water quality requirements for drinking water or irrigation needs.",
+    "The amount of freshwater exported from the Delta (Banks and Jones pumping plants), with volumes reduced if salinity exceeds water quality requirements for drinking water or irrigation needs.",
   FW_DELTA_USES:
-    "Tiers reflect how often water in the Delta is fresh enough for in-Delta community and agricultural uses, assessed at two compliance locations (Jersey Point and Emmaton) in the western Delta.",
+    "How often water in the Delta is fresh enough for in-Delta community and agricultural uses, assessed at two compliance locations (Jersey Point and Emmaton) in the western Delta.",
   WRC_SALMON_AB:
-    "Tiers reflect condition of the endangered Sacramento River winter-run Chinook salmon population, assessed by a life cycle model. Population condition is assessed by the proportion of spawning habitat potentially utilized by natural-origin adult females over a 3-year rolling average.",
+    "The condition of the endangered Sacramento River winter-run Chinook salmon population, assessed by a life cycle model. Population condition is assessed by the proportion of spawning habitat potentially utilized by natural-origin adult females over a 3-year rolling average.",
+}
+
+/**
+ * Outcome-specific caveat shown before the shared "see technical
+ * documentation" footer (that sentence is rendered once, in
+ * TierTooltipContent). Only outcomes with extra context to add need an
+ * entry here.
+ */
+export const OUTCOME_FOOTER_PREFIXES: Partial<Record<OutcomeCode, string>> = {
+  CWS_DEL:
+    "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery.",
+  WRC_SALMON_AB:
+    "The lowest outcome level corresponds to approximately 3,000 total returning female spawners. Below this level, changes in commercial harvest practices are required to mitigate impacts to the population.",
 }
 
 export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
