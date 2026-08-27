@@ -1009,9 +1009,8 @@ export const VARIABLES: Record<string, VariableDef> = {
     viewLabels: { dist: "Abundance (3-yr avg)" },
     plain:
       "How the Sacramento winter-run Chinook salmon population is doing relative to what the habitat can support, averaged over three years.",
-    tech: "WRLCM 3-year-average winter-run abundance (WRLCM_ADULT_FEMALES, NOF_3YR_AVG), served in percent (0-100) and displayed as a proportion of 1.0 (adopted live series scale by 0.01, see didLiveScaleForVariable; scale and labels confirmed by the science team 2026-08-18). The reintroduction (-R) scenarios are not served by the endpoint yet, so the Provisional chip stays. Water-year-type filtering does not apply to a 3-year population average.",
+    tech: "WRLCM 3-year-average winter-run abundance (WRLCM_ADULT_FEMALES, NOF_3YR_AVG), served in percent (0-100) and displayed as a proportion of 1.0 (adopted live series scale by 0.01, see didLiveScaleForVariable; scale and labels confirmed by the science team 2026-08-18). The reintroduction (-R) scenarios are served by the endpoint and plot as their own members. Water-year-type filtering does not apply to a 3-year population average.",
     data: "live",
-    provisional: true,
     wytApplicable: false,
     noLiveDataExplanation:
       "Winter-run salmon data are not available for the Delta Conveyance Project scenario.",
