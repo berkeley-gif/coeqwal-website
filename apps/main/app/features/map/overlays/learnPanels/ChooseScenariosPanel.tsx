@@ -5,6 +5,7 @@ import { BarredColumns } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
 import { SCENARIO_QUESTIONS } from "../content"
+import { GlossaryTermLink } from "../../../glossary"
 
 export default function ChooseScenariosPanel() {
   const theme = useTheme()
@@ -14,7 +15,7 @@ export default function ChooseScenariosPanel() {
       <PanelHeading
         title="Choose your scenarios"
         kicker="Which water management strategies do you want to explore?"
-        lead="To use the library effectively, you may want to start by asking these questions:"
+        lead="To guide your exploration of the COEQWAL scenario library, we recommend you ask:"
       />
 
       <BarredColumns
@@ -28,9 +29,10 @@ export default function ChooseScenariosPanel() {
       />
 
       <Typography variant="body2" color="text.secondary">
-        As you explore scenarios with different visualization tools, use the
-        &ldquo;share&rdquo; icon to save graphs, text, or maps of interest.
-        These will be saved in the{" "}
+        As you explore{" "}
+        <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink> with
+        different visualization tools, use the &ldquo;share&rdquo; icon to save
+        plots and data. These will be saved in the{" "}
         <Typography component="span" variant="body2" fontWeight={600}>
           SHARE
           <icons.IosShare sx={{ fontSize: "1rem", ml: 0.5 }} fontWeight={600} />
