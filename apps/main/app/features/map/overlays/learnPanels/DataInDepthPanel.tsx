@@ -3,6 +3,7 @@
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
+import { GlossaryTermLink } from "../../../glossary"
 
 export default function DataInDepthPanel() {
   const theme = useTheme()
@@ -17,14 +18,15 @@ export default function DataInDepthPanel() {
 
       <Box sx={{ maxWidth: "50%" }}>
         <Typography variant="body2" color="text.secondary">
-          The key outcomes are calculated from additional variables that can be
-          viewed in the{" "}
+          The <GlossaryTermLink>key outcomes</GlossaryTermLink> are calculated
+          from other variables that can be explored with the{" "}
           <Typography component="span" variant="body2" fontWeight={600}>
             DATA IN DEPTH
           </Typography>{" "}
-          section. These describe different features of the water system,
-          including river flows, water delivery amounts, reservoir and
-          groundwater storage levels, and salinity conditions within the
+          viewer. These variables describe different features of the water
+          system, including river flows, water delivery amounts, reservoir and
+          groundwater storage levels, and{" "}
+          <GlossaryTermLink>salinity</GlossaryTermLink> conditions within the
           Bay-Delta estuary.
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: sp.md }}>
@@ -32,9 +34,10 @@ export default function DataInDepthPanel() {
           <Typography component="span" variant="body2" fontWeight={600}>
             DATA IN DEPTH
           </Typography>{" "}
-          tool, you can generate summaries and plots of these different outcome
-          variables to explore how they vary over space and time for different
-          scenarios.
+          viewer, you can generate plots of these additional outcome variables
+          to understand how they vary under different locations, water year
+          types, <GlossaryTermLink>management strategies</GlossaryTermLink>, and{" "}
+          <GlossaryTermLink>hydroclimates</GlossaryTermLink>.
         </Typography>
       </Box>
     </PanelShell>

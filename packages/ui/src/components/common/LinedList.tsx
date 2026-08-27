@@ -14,7 +14,7 @@ import {
 
 export interface LinedListItem {
   label: React.ReactNode
-  description?: string
+  description?: React.ReactNode
   /** Dim the row (0-1). Defaults to 1. */
   opacity?: number
 }

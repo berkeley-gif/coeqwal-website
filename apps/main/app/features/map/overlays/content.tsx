@@ -2,7 +2,9 @@
  * getStarted/content
  */
 
+import React from "react"
 import { type OutcomeCode } from "../../../content/outcomes"
+import { GlossaryTermLink } from "../../glossary"
 
 export interface WaterIssueTheme {
   title: string
@@ -127,18 +129,29 @@ export const KEY_OUTCOMES: ReadonlyArray<KeyOutcome> = [
 
 export interface InterpretingLens {
   label: string
-  description: string
+  description: React.ReactNode
 }
 
 export const INTERPRETING_LENSES: ReadonlyArray<InterpretingLens> = [
   {
     label: "Trade-offs",
-    description: "How outcomes improve or decline together across scenarios",
+    description: (
+      <>
+        How outcomes improve or decline together across{" "}
+        <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink>
+      </>
+    ),
   },
   {
     label: "Equity",
-    description:
-      "How benefits and impacts are distributed across outcomes and locations of interest",
+    description: (
+      <>
+        How benefits and impacts are distributed across outcomes and{" "}
+        <GlossaryTermLink term="Location of interest">
+          locations of interest
+        </GlossaryTermLink>
+      </>
+    ),
   },
   {
     label: "Resilience",
@@ -155,24 +168,29 @@ export interface VizTool {
 
 export const VIZ_TOOLS: ReadonlyArray<VizTool> = [
   {
-    title: "Map view",
+    title: "Bar chart",
     description:
-      "Displays how outcomes vary across locations of interest and reveals spatial patterns in outcomes.",
-  },
-  {
-    title: "Distribution viewer",
-    description:
-      "Highlights how outcomes vary across key outcomes and among different locations of interest and communities, revealing who benefits and who is most impacted.",
+      "Summarizes how outcomes vary within and across key outcomes for a selected scenario.",
   },
   {
     title: "Radar chart",
     description:
-      "Shows how outcomes vary within a scenario and enables comparisons across scenarios, highlighting commonalities, differences, and trade-offs.",
+      "Shows how outcomes vary within a scenario and enables comparisons across scenarios to highlight commonalities, differences, and trade-offs.",
   },
   {
-    title: "Heatmaps",
+    title: "Distribution view",
     description:
-      "Show how scenarios perform across increasing levels of climate stress, highlighting which management strategies are most resilient or vulnerable to climate impacts.",
+      "Shows how outcomes vary among different locations of interest, including rivers, communities, and farms to reveal who benefits and who is most impacted.",
+  },
+  {
+    title: "Heatmap",
+    description:
+      "Shows how scenarios perform under increasing levels of climate stress, to highlight which management strategies are more resilient or vulnerable to climate impacts.",
+  },
+  {
+    title: "Map",
+    description:
+      "Displays how outcomes vary across locations of interest and to reveal spatial patterns.",
   },
 ] as const
 
@@ -185,25 +203,34 @@ export const SCENARIO_QUESTIONS: ReadonlyArray<ScenarioQuestion> = [
   {
     title: "How is my water interest doing now?",
     description:
-      "This is the current operations scenario under the historical hydroclimate, which serves as a baseline for comparison.",
+      "Select the current operations scenario and identify the location(s) in which you are most interested. Determine the outcome level for that location of interest under the historical hydroclimate.",
   },
   {
-    title: "How could alternative strategies impact my water interest?",
+    title:
+      "How could alternative management strategies impact my water interest?",
     description:
-      "Select one or more scenarios to compare against the current operations scenario under the historical hydroclimate.",
+      "Select one or more scenarios to compare against current operations. Assess if and how outcome levels changed for your location(s) of interest.",
   },
   {
     title: "How does climate change shift the picture?",
     description:
-      "Select scenarios that represent how current operations and alternative strategies perform under alternative hydroclimates.",
+      "Select scenarios that represent current operations and alternative management strategies under different hydroclimates. Consider how outcomes change with increasing levels of climate risk.",
   },
 ] as const
 
-export const CAVEATS: ReadonlyArray<string> = [
+export const CAVEATS: ReadonlyArray<React.ReactNode> = [
   "All scenarios are created by CalSim3, a water planning tool to guide operations of California\u2019s water supply system in the Central Valley.",
-  "The scenarios do not include all regions of California nor certain aspects of our water system that may be of interest.",
-  "Key outcomes summarize scenario results over a 100-year period. Annual variation in outcomes can be explored with the DATA IN DEPTH view and in the GET DATA section.",
-  "The hydroclimates used in scenarios approximate the range of historical and potential future conditions that our system may experience. They do not represent historical observations or predicted future conditions according to climate models.",
-  "Estimates of water deliveries to locations of interest with small water demands may be less reliable than delivery estimates for water users that receive larger volumes.",
-  "The outcomes of CalSim scenarios are best interpreted in a comparative manner \u2014 evaluating how outcomes change relative to current operations (as a baseline) is more appropriate than assessing the specific outcomes of any particular scenario.",
+  "The scenarios do not include all regions of California nor do they represent all uses of water within the CalSim3 model area.",
+  "COEQWAL scenario library represents a wide range of management strategies and hydroclimates, but not all possibilities.",
+  <>
+    Key outcomes summarize results of CalSim3 scenarios, which are run over a
+    100-year period, into a single value for each{" "}
+    <GlossaryTermLink>location of interest</GlossaryTermLink>. Annual variation
+    in outcomes can be explored in the DATA IN DEPTH view and in the DATA page.
+  </>,
+  "Land use is specified in a static configuration in all scenarios. Land use does not dynamically change over the simulation period in response to changes in surface water or groundwater availability.",
+  "All hydroclimates use a historical 1922–2021 weather sequence, adjusted to account for recent climate change (for the historical hydroclimate) and adjusted to account for possible climate conditions the state may experience by 2043 (for all future hydroclimates). They do not specifically represent historical observations or predicted future conditions according to climate models.",
+  "Estimates of water deliveries to locations of interest with small water demands may be less reliable than deliveries to water users that receive large volumes.",
+  "The outcomes of CalSim3 are best interpreted in a comparative manner – evaluating how outcomes change relative to current operations (as a baseline) is more appropriate than assessing the specific outcomes of any particular scenario.",
+  "COEQWAL scenarios are exploratory model runs and are not intended for direct use in legal or regulatory proceedings. Visit ABOUT US to learn how COEQWAL scenarios were developed.",
 ] as const
