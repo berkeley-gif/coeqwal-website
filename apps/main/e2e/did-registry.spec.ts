@@ -257,9 +257,10 @@ test("salmon abundance displays as proportion of spawning habitat occupied", () 
   // The above-1.0 sentence was removed at the science team's request; assert
   // it stays gone so a future caption edit cannot restore it silently.
   expect(v?.footnote).not.toContain("above 1.0")
-  // The reintroduction (-R) scenarios are not served yet, so the chip
-  // stays; a population average does not decompose by water-year type.
-  expect(v?.provisional).toBe(true)
+  // 2026-08-25: the salmon endpoint serves the reintroduction (-R) scenarios
+  // (s0020-R, s0031-R, s0032-R checked live), so the chip is gone; a
+  // population average does not decompose by water-year type.
+  expect(v?.provisional).toBeUndefined()
   expect(v?.wytApplicable).toBe(false)
 })
 
