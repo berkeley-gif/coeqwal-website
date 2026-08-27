@@ -87,13 +87,13 @@ function footerAccordionSx(theme: Theme, isExpanded: boolean) {
     },
     isExpanded
       ? {
-        "& .MuiAccordion-region": { height: "auto" },
-        "& .MuiAccordionDetails-root": { display: "block" },
-      }
+          "& .MuiAccordion-region": { height: "auto" },
+          "& .MuiAccordionDetails-root": { display: "block" },
+        }
       : {
-        "& .MuiAccordion-region": { height: 0 },
-        "& .MuiAccordionDetails-root": { display: "none" },
-      },
+          "& .MuiAccordion-region": { height: 0 },
+          "& .MuiAccordionDetails-root": { display: "none" },
+        },
   ]
 }
 

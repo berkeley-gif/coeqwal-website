@@ -6,8 +6,11 @@
 
 import React from "react"
 import {
-  Box, Typography, useTheme, alpha, ArrowDownwardIcon, Tabs,
-  Tab,
+  Box,
+  Typography,
+  useTheme,
+  alpha,
+  ArrowDownwardIcon,
   IconButton,
   MobileStepper,
 } from "@repo/ui/mui"
@@ -33,7 +36,6 @@ import { ScrollToButton, resolveCssLengthPx } from "@repo/ui"
 /*───────────────── */
 
 const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
-
 
 interface TabCard {
   tab: TabKey
@@ -95,8 +97,6 @@ function WaterThemesPanelContent({
   const radius = resolveRadius(borderRadius, theme.borderRadius)
   const insetCfg = resolveInset(inset)
 
-  const cardsScrollRef = React.useRef<HTMLDivElement | null>(null)
-
   const [activeCard, setActiveCard] = React.useState(0)
   const activeTabCard = TAB_CARDS[activeCard]!
   const activeTabColor = theme.palette.tabPanels[activeTabCard.tab]
@@ -153,7 +153,7 @@ function WaterThemesPanelContent({
           pb: theme.space.panel.padding,
           boxSizing: "border-box",
           width: "100%",
-          maxWidth: theme.breakpoints.values.xl
+          maxWidth: theme.breakpoints.values.xl,
         }}
       >
         {/* Headline + intro - pinned near the top, fades in on first
@@ -174,7 +174,12 @@ function WaterThemesPanelContent({
               alignItems: "start",
             }}
           >
-            <Box sx={{ mb: { xs: 2, md: 0 }, textAlign: { xs: "center", md: "left" } }}>
+            <Box
+              sx={{
+                mb: { xs: 2, md: 0 },
+                textAlign: { xs: "center", md: "left" },
+              }}
+            >
               <Typography
                 variant="h1"
                 component="span"
@@ -204,11 +209,15 @@ function WaterThemesPanelContent({
         </motion.div>
 
         {/* Desktop tab cards: full row with decorative dividers between cards */}
-        <Box sx={{
-          display: { xs: "none", md: "flex" },
-          alignItems: "center", justifyContent: "center",
-          gap: theme.space.section.sm, mt: "10vh"
-        }}>
+        <Box
+          sx={{
+            display: { xs: "none", md: "flex" },
+            alignItems: "center",
+            justifyContent: "center",
+            gap: theme.space.section.sm,
+            mt: "10vh",
+          }}
+        >
           {TAB_CARDS.map((c, i) => {
             const panelColor = theme.palette.tabPanels[c.tab]
             return (
@@ -244,7 +253,16 @@ function WaterThemesPanelContent({
         </Box>
 
         {/* Mobile/tablet tab cards: one card at a time, MUI MobileStepper for dots + arrows */}
-        <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", alignItems: "center", gap: 2, mt: "10vh", width: "100%" }}>
+        <Box
+          sx={{
+            display: { xs: "flex", md: "none" },
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            mt: "10vh",
+            width: "100%",
+          }}
+        >
           <InfoCard
             title={activeTabCard.title}
             titleVariant="h5"
@@ -262,12 +280,18 @@ function WaterThemesPanelContent({
             activeStep={activeCard}
             sx={{
               background: "transparent",
-              "& .MuiMobileStepper-dot": { backgroundColor: alpha(theme.palette.brand.panelLight, 0.4) },
-              "& .MuiMobileStepper-dotActive": { backgroundColor: theme.palette.brand.panelLight },
+              "& .MuiMobileStepper-dot": {
+                backgroundColor: alpha(theme.palette.brand.panelLight, 0.4),
+              },
+              "& .MuiMobileStepper-dotActive": {
+                backgroundColor: theme.palette.brand.panelLight,
+              },
             }}
             nextButton={
               <IconButton
-                onClick={() => setActiveCard((i) => Math.min(i + 1, TAB_CARDS.length - 1))}
+                onClick={() =>
+                  setActiveCard((i) => Math.min(i + 1, TAB_CARDS.length - 1))
+                }
                 disabled={activeCard === TAB_CARDS.length - 1}
                 aria-label="Next card"
                 sx={{ color: theme.palette.brand.panelLight }}
@@ -288,12 +312,14 @@ function WaterThemesPanelContent({
           />
         </Box>
       </Box>
-      <Box sx={{
-        position: "absolute",
-        bottom: 40,
-        left: "50%",
-        transform: "translate(-50%)",
-      }}>
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: 40,
+          left: "50%",
+          transform: "translate(-50%)",
+        }}
+      >
         <ScrollToButton
           color={`${theme.palette.brand.panelLight}`}
           size={52}

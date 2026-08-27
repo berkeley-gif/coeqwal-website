@@ -119,7 +119,7 @@ export function Header() {
       waterThemesOptions={waterThemesOptions}
       backgroundColor={isPastHero ? theme.palette.common.white : "transparent"}
       textColor={isPastHero ? "#555555" : theme.palette.common.white}
-      borderBottom= "none"
+      borderBottom="none"
       navTextShadow={isPastHero ? "none" : theme.textShadow.nav}
       logoVariant={isPastHero ? "color" : "light"}
       shrinkOnScroll={shrinkOnScroll}

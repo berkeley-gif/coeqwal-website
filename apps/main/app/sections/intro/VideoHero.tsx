@@ -265,7 +265,6 @@ export default function VideoHero({
         </IconButton>
       )}
 
-
       {/* Content column - centered and capped at the xl breakpoint,
           matching AboutCoeqwalPanel/WaterThemesPanel below, so the
           headline and paragraph share one rectangle instead of
@@ -284,7 +283,7 @@ export default function VideoHero({
           justifyContent: "center",
           gap: theme.space.section.md,
           px: theme.space.panel.padding,
-          pb: { xl: 15 }
+          pb: { xl: 15 },
         }}
       >
         {/* Headline.upper-left */}
@@ -299,7 +298,11 @@ export default function VideoHero({
             pointerEvents: "auto",
           }}
         >
-          <Typography variant="h2Main" component="h2" sx={{ display: "block", mb: 0.5 }}>
+          <Typography
+            variant="h2Main"
+            component="h2"
+            sx={{ display: "block", mb: 0.5 }}
+          >
             {t("homePanel.titleLine1")}
           </Typography>
           <Typography variant="h1" component="h1" sx={{ display: "block" }}>
@@ -313,7 +316,7 @@ export default function VideoHero({
           component="p"
           sx={{
             alignSelf: { xs: "center", md: "flex-end" },
-             maxWidth: { xs: "100%", sm: "480px", xl: "700px" },
+            maxWidth: { xs: "100%", sm: "480px", xl: "700px" },
             textAlign: { xs: "center", md: "left" },
             color: "text.secondary",
             textShadow: theme.textShadow.nav,
@@ -327,7 +330,6 @@ export default function VideoHero({
           Californians.
         </Typography>
       </Box>
-
 
       {/* WCAG 2.4.4: Scroll indicator with descriptive aria-label */}
       <Box

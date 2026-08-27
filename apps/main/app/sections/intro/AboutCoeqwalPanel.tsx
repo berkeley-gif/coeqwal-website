@@ -53,15 +53,26 @@ export function AboutCoeqwalPanel() {
               gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
               rowGap: { xs: 0, md: 2 },
               columnGap: { md: 6 },
-              maxWidth: theme.breakpoints.values.xl
+              maxWidth: theme.breakpoints.values.xl,
             }}
           >
             {/** Title */}
-            <Box sx={{ gridColumn: "1 / -1", mb: { xs: 2, md: 3 }, gap: 7, textAlign: { xs: "center", md: "left" } }}>
+            <Box
+              sx={{
+                gridColumn: "1 / -1",
+                mb: { xs: 2, md: 3 },
+                gap: 7,
+                textAlign: { xs: "center", md: "left" },
+              }}
+            >
               <Typography
                 variant="h2Main"
                 component="span"
-                sx={{ color: "inherit", mr: 1, display: { xs: "block", md: "inline" } }}
+                sx={{
+                  color: "inherit",
+                  mr: 1,
+                  display: { xs: "block", md: "inline" },
+                }}
               >
                 What is
               </Typography>
@@ -69,7 +80,6 @@ export function AboutCoeqwalPanel() {
                 variant="h1"
                 component="span"
                 sx={{
-
                   color: "inherit",
                 }}
               >
@@ -96,7 +106,13 @@ export function AboutCoeqwalPanel() {
             />
 
             {/** Body text */}
-            <Box sx={{ maxWidth: "70ch", mx: { xs: "auto", md: 0 }, textAlign: { xs: "center", md: "left" } }}>
+            <Box
+              sx={{
+                maxWidth: "70ch",
+                mx: { xs: "auto", md: 0 },
+                textAlign: { xs: "center", md: "left" },
+              }}
+            >
               <Typography
                 variant="displayBody"
                 component="div"
@@ -117,17 +133,17 @@ export function AboutCoeqwalPanel() {
                 Learn more about COEQWAL
               </AboutCtaLink>
             </Box>
-
-
           </Box>
         </Box>
 
-        <Box sx={{
-          position: "absolute",
-          bottom: 40,
-          left: "50%",
-          transform: "translate(-50%)",
-        }}>
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 40,
+            left: "50%",
+            transform: "translate(-50%)",
+          }}
+        >
           <ScrollToButton
             color={`${theme.palette.text.primary}`}
             size={52}
@@ -146,7 +162,7 @@ export function AboutCoeqwalPanel() {
           />
         </Box>
       </StickyScrollSection>
-    </div >
+    </div>
   )
 }
 
