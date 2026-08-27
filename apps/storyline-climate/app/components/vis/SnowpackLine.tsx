@@ -64,9 +64,10 @@ export default function SnowpackLine({
     () => ({
       ...margin,
       left: margin.left + extraLeft,
+      right: size.width < 500 ? 28 : margin.right,
       bottom: margin.bottom + extraBottom, // from your X-axis fix
     }),
-    [extraLeft, extraBottom],
+    [extraLeft, extraBottom, size.width],
   )
   const years = useMemo(() => filteredData.map((d) => d.year), [filteredData])
   const xScale = useMemo(() => {

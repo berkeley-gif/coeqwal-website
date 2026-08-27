@@ -28,7 +28,7 @@ type GroundwaterJsonRow = {
 }
 
 type Margin = { top: number; right: number; bottom: number; left: number }
-const margin: Margin = { top: 64, right: 24, bottom: 50, left: 150 }
+const defaultMargin: Margin = { top: 64, right: 24, bottom: 50, left: 150 }
 const axisColor = "#fcfbfa"
 
 // --------------------------------------------
@@ -58,6 +58,13 @@ export default function GroundwaterLine({
   const [yExtents, setYExtents] = useState<[number, number]>([0, 0])
   const svgRef = useRef<SVGSVGElement | null>(null)
   const [size, setSize] = useState<ContainerSize>({ width: 0, height: 0 })
+  const margin = useMemo<Margin>(
+    () =>
+      size.width < 500
+        ? { top: 54, right: 24, bottom: 46, left: 104 }
+        : defaultMargin,
+    [size.width],
+  )
 
   useFetchData(
     "/data/combined_groundwater.json",
@@ -108,14 +115,14 @@ export default function GroundwaterLine({
     return scaleTime()
       .domain([minDate, maxDate])
       .range([margin.left, Math.max(margin.left, size.width - margin.right)])
-  }, [data, size.width])
+  }, [data, margin.left, margin.right, size.width])
 
   const yScale = useMemo(() => {
     return scaleLinear()
       .domain(yExtents)
       .range([margin.top, Math.max(margin.top, size.height - margin.bottom)]) // reversed
       .nice()
-  }, [yExtents, size.height])
+  }, [margin.bottom, margin.top, size.height, yExtents])
 
   const linePath = useMemo(() => {
     const lineGen = line<GroundwaterRow>()
@@ -182,7 +189,10 @@ export default function GroundwaterLine({
     )
   }, [data, xScale, yScale])
 
-  const xTicks = useMemo(() => xScale.ticks(6), [xScale])
+  const xTicks = useMemo(
+    () => xScale.ticks(size.width < 500 ? 4 : 6),
+    [xScale, size.width],
+  )
   const yTicks = useMemo(() => yScale.ticks(3), [yScale])
 
   const plotWidth = Math.max(0, size.width - margin.left - margin.right)
@@ -204,6 +214,7 @@ export default function GroundwaterLine({
     })
   }, [
     groundwaterGuideValue,
+    margin.right,
     onGroundwaterGuidePointChange,
     size.height,
     size.width,
@@ -453,6 +464,7 @@ function YAxis({
     [0.4, 0.6],
     [0, 1],
   )
+  const labelDx = margin.left < 120 ? "-3.25em" : "-5em"
 
   return (
     <g transform={`translate(${margin.left},0)`}>
@@ -469,7 +481,7 @@ function YAxis({
       <motion.text
         x={0}
         y={yScale(50)}
-        dx="-5em"
+        dx={labelDx}
         dy="0.3em"
         style={{
           fill: OffWhiteColor,
@@ -483,7 +495,7 @@ function YAxis({
       <motion.text
         x={0}
         y={yScale(50)}
-        dx="-5em"
+        dx={labelDx}
         dy="1.5em"
         style={{
           fill: OffWhiteColor,
@@ -497,7 +509,7 @@ function YAxis({
       <motion.text
         x={0}
         y={yScale(50)}
-        dx="-5em"
+        dx={labelDx}
         dy="2.7em"
         style={{
           fill: OffWhiteColor,

@@ -9,7 +9,6 @@ import {
   Typography,
   WaterDropIcon,
   WbSunnyIcon,
-  useTheme,
 } from "@repo/ui/mui"
 
 export type ContainerSize = {
@@ -88,8 +87,8 @@ export default function HydroClimateContainer() {
 
   return (
     <>
-      <div
-        style={{
+      <Box
+        sx={{
           width: "100%",
           height: "100%",
           display: "flex",
@@ -98,20 +97,31 @@ export default function HydroClimateContainer() {
           flexDirection: "column",
         }}
       >
-        <div
-          style={{
-            height: "10%",
+        <Box
+          sx={{
+            minHeight: { xs: "5.5rem", md: "6rem", lg: "10%" },
             width: "100%",
             display: "flex",
-            alignItems: "center",
+            alignItems: { xs: "flex-start", lg: "center" },
             justifyContent: "flex-start",
-            marginBottom: "1rem",
-            gap: "0.75rem",
+            flexDirection: { xs: "column", lg: "row" },
+            mb: { xs: 1, lg: 2 },
+            gap: { xs: 0.5, lg: 1.5 },
+            "@media (min-width: 750px) and (max-width: 899.95px)": {
+              minHeight: "10rem",
+            },
+            "@media (min-width: 900px) and (max-width: 1399.95px)": {
+              minHeight: "8rem",
+            },
           }}
         >
           <Typography
             variant="body2"
-            sx={{ mr: 2, whiteSpace: "nowrap", fontWeight: 700 }}
+            sx={{
+              mr: { xs: 0, lg: 2 },
+              whiteSpace: "nowrap",
+              fontWeight: "fontWeightBold",
+            }}
           >
             {"Examine a hydroclimate:"}
           </Typography>
@@ -119,7 +129,7 @@ export default function HydroClimateContainer() {
             onSelect={onModelSelect}
             selectedModel={selectedModel}
           />
-        </div>
+        </Box>
         {selectedModel && (
           <FlowLine
             selected={selectedModel}
@@ -127,7 +137,7 @@ export default function HydroClimateContainer() {
             yExtents={flowYExtents}
           />
         )}
-      </div>
+      </Box>
     </>
   )
 }
@@ -139,12 +149,12 @@ function ClimateModelSelector({
   onSelect: (model: string) => void
   selectedModel: string
 }) {
-  const theme = useTheme()
-
   return (
     <Box
       width="100%"
       height="100%"
+      role="group"
+      aria-label="Hydroclimate scenario"
       sx={{
         display: "flex",
         flexDirection: "row",
@@ -154,13 +164,17 @@ function ClimateModelSelector({
     >
       <Stack
         direction="row"
-        spacing={1.5}
+        spacing={{ xs: 0.5, md: 0.75, lg: 1.5 }}
         useFlexGap
         sx={{
           flexWrap: "wrap",
           justifyContent: "center",
           alignItems: "center",
-          px: 2,
+          px: 0,
+          "@media (min-width: 750px) and (max-width: 1399.95px)": {
+            flexDirection: "column",
+            alignItems: "stretch",
+          },
         }}
       >
         {models.map((model: Model) => {
@@ -173,6 +187,7 @@ function ClimateModelSelector({
               variant="contained"
               size="small"
               onClick={() => onSelect(model.model)}
+              aria-pressed={isSelected}
               startIcon={
                 <Box
                   component="span"
@@ -195,16 +210,14 @@ function ClimateModelSelector({
               }
               sx={{
                 borderRadius: "999px",
-                px: { xs: 1.25, md: 1.5 },
-                py: { xs: 0.5, md: 0.9 },
+                px: { xs: 1, md: 1.25, lg: 1.5 },
+                py: { xs: 0.35, md: 0.55, lg: 0.9 },
                 minHeight: { xs: "16px", md: "20px" },
-                fontSize: {
-                  xs: theme.typography.body2.fontSize,
-                  md: theme.typography.caption.fontSize,
-                },
+                typography: "dashboardBold",
                 textTransform: "none",
-                fontWeight: 700,
-                letterSpacing: "0.01em",
+                "@media (min-width: 750px) and (max-width: 1399.95px)": {
+                  justifyContent: "flex-start",
+                },
                 backgroundColor: isSelected
                   ? "rgba(252, 251, 250, 0.16)"
                   : "rgba(252, 251, 250, 0.08)",

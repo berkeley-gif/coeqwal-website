@@ -15,6 +15,7 @@ header {
 /* TODO: might need to set this in the story container */
 body {
   background-color: #172a48 !important;
+  overflow-x: hidden;
 }
 
 /* This shuts framer motion up: https://github.com/motiondivision/motion/issues/1853#issuecomment-2122841818*/
@@ -252,8 +253,47 @@ html {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: max-content;
+  width: 100%;
   pointer-events: none;
+}
+
+/*
+ * Supported compact layouts: tablets and half-width laptop windows.
+ * Phones are intentionally out of scope, so these rules begin at 750px.
+ */
+@media (min-width: 750px) and (max-width: 1199.95px) {
+  .text-section {
+    padding-left: clamp(1.5rem, 4vw, 3.5rem);
+    padding-right: clamp(1.5rem, 4vw, 3.5rem);
+  }
+
+  main .paragraph .MuiStack-root {
+    gap: clamp(0.5rem, 1.2vh, 0.9rem);
+  }
+}
+
+/* BaseHeader stays shared and unchanged. Compact only this story's desktop
+   navigation in the narrow 750-899px tablet band where the drawer is not used. */
+@media (min-width: 750px) and (max-width: 899.95px) {
+  body > header .MuiToolbar-root {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  body > header nav[aria-label="Main navigation"] > .MuiStack-root {
+    gap: 0.25rem;
+  }
+
+  body > header nav[aria-label="Main navigation"] .MuiButton-root {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+  }
+}
+
+@media (min-width: 750px) and (max-width: 1199.95px) and (max-height: 800px) {
+  main .paragraph .MuiStack-root {
+    gap: 0.4rem;
+  }
 }
 
 .glow-effect {

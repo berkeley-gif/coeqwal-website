@@ -97,6 +97,11 @@ function Opener() {
         scrollIndicator={<ScrollIndicator animationComplete={true} />}
         sx={{
           top: "50%",
+          px: { xs: 3, md: 6, lg: 10 },
+          "@media (min-width: 750px) and (max-width: 1199.95px) and (max-height: 800px)":
+            {
+              top: "52%",
+            },
         }}
       >
         <Paragraph
@@ -104,7 +109,7 @@ function Opener() {
           blocks={openerBody}
           alignment="center"
           sx={{
-            maxWidth: "70%",
+            maxWidth: { xs: "88%", md: "78%", lg: "70%" },
             textShadow: "0 1px 10px rgba(0, 0, 0, 1)",
           }}
         />
