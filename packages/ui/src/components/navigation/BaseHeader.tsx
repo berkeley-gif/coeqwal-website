@@ -740,6 +740,33 @@ export function BaseHeader({
           sx={{ color: theme.palette.text.primary, pt: 1 }}
         >
           <List disablePadding>
+            {/* Get Started */}
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  onGetStartedClick?.()
+                  handleMobileMenuClose()
+                }}
+                sx={{
+                  px: 2,
+                  minHeight: MIN_TOUCH_TARGET,
+                  "&:focus-visible": {
+                    outline: `2px solid ${theme.palette.text.primary}`,
+                    outlineOffset: -2,
+                  },
+                }}
+              >
+                <ListItemText
+                  primary="Get Started"
+                  slotProps={{
+                    primary: { sx: { ...theme.typography.nav } },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+
+            <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
+
             {/* WCAG 1.3.1: Water Stories section with group semantics */}
             <ListItem
               disablePadding
