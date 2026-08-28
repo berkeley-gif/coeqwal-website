@@ -34,7 +34,10 @@ export default function ChooseScenariosPanel() {
         As you explore{" "}
         <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink> with
         different visualization tools, use the
-        <icons.IosShare sx={{ fontSize: "1rem", ml: 0.5 }} fontWeight={600} />{" "}
+        <icons.IosShare
+          sx={{ fontSize: "1rem", ml: 0.5 }}
+          fontWeight={600}
+        />{" "}
         to save plots and data. These will be saved in the{" "}
         <Typography
           variant="body2"
