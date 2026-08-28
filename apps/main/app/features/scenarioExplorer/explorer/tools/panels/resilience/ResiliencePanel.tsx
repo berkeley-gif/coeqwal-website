@@ -289,13 +289,18 @@ export default function ResiliencePanel({
       })
   }, [hydroclimates, selectedHydroclimates])
 
-  // Outcome-row order. Both Scenario and Overview honor the user's
-  // Rows chooser (`resilienceVisibleOutcomes`). Scenario mode adds no
-  // extra filtering but is no longer forced to the full outcome list.
-  // NOD/SOD variants are interleaved whenever the parent outcome is
-  // listed in `expandedRegionalOutcomes`, or when the user has
-  // explicitly picked a variant in Overview.
-  //   - Outcome mode: handled separately via outcomeSmallMultiplesCodes.
+  // Outcome-row order, shared by every view. A row shows up when its
+  // own code is selected in the Rows chooser (`resilienceVisibleOutcomes`)
+  // - this applies to parent outcomes and to NOD/SOD variants alike, so
+  // picking "North of Delta" on its own is enough, with no dependency on
+  // the parent also being selected. `expandedRegionalOutcomes` is a
+  // second, independent way to pull in both variants of a parent at
+  // once; nothing in the UI sets it today, so in practice this is
+  // driven entirely by direct picks - but the check is left in place
+  // since it's a real, documented field on this state.
+  //   - Outcome mode's tile set is handled separately via
+  //     outcomeSmallMultiplesCodes; this only governs rows within a
+  //     tile (by-scenario, by-hydroclimate) or the LOI-distribution scope.
   const regionalExpandSet = useMemo(
     () => new Set(expandedRegionalOutcomes),
     [expandedRegionalOutcomes],
@@ -303,35 +308,19 @@ export default function ResiliencePanel({
   const outcomeRowCodes = useMemo(() => {
     const rows: string[] = []
     const selected = new Set(resilienceVisibleOutcomes)
-    if (view === "scenario") {
-      for (const code of OUTCOME_CODE_ORDER) {
-        if (!selected.has(code)) continue
-        rows.push(code)
-        if (regionalExpandSet.has(code)) {
-          const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
-          if (variants) {
-            for (const v of variants) rows.push(v)
-          }
-        }
-      }
-      return rows
-    }
-    // Overview / Outcome mode: fall back to the existing Rows-backed set.
     for (const code of OUTCOME_CODE_ORDER) {
       if (selected.has(code)) rows.push(code)
       const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
       if (variants) {
         const expanded = regionalExpandSet.has(code)
         for (const v of variants) {
-          // Overview mode keeps the user's explicit regional picks. When
-          // they expand the parent we also auto-insert the variants.
           if (selected.has(v) || expanded) rows.push(v)
         }
       }
     }
     return rows
-  }, [view, resilienceVisibleOutcomes, regionalExpandSet])
-
+  }, [resilienceVisibleOutcomes, regionalExpandSet])
+  
   // Outcome-mode small-multiples codes. Driven primarily by the
   // outcome-axis picker (`resilienceVisibleOutcomes`). A user-chosen
   // "primary outcome" floats to the front, and any compare codes
