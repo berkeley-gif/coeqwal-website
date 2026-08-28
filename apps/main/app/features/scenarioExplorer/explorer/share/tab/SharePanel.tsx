@@ -152,9 +152,10 @@ function SharePanelContent() {
             opacity: 0.8,
           }}
         >
-          No scenarios staged for sharing yet. Go to the Explore tab, find
-          scenarios that you want to share, and click the share icon on each
-          one.
+          No results staged for sharing yet. Go to the Explore tab and find
+          scenario results that you want to share by clicking on the{" "}
+          <icons.IosShare sx={{ fontSize: "1rem", ml: 0.5 }} fontWeight={600} />
+          .
         </Typography>
         <Button
           variant="outlined"

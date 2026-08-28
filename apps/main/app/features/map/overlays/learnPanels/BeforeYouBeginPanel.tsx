@@ -26,14 +26,14 @@ export default function BeforeYouBeginPanel() {
         }}
       >
         <LinedList
-          items={CAVEATS.slice(0, 3).map((c) => ({ label: c }))}
+          items={CAVEATS.slice(0, 5).map((c) => ({ label: c }))}
           color={theme.palette.common.white}
           icon={dropletIcon}
           labelVariant="body2"
           labelWeight={400}
         />
         <LinedList
-          items={CAVEATS.slice(3).map((c) => ({ label: c }))}
+          items={CAVEATS.slice(5).map((c) => ({ label: c }))}
           color={theme.palette.common.white}
           icon={dropletIcon}
           labelVariant="body2"

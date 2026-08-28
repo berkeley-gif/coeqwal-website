@@ -214,7 +214,7 @@ export const SCENARIO_QUESTIONS: ReadonlyArray<ScenarioQuestion> = [
   {
     title: "How does climate change shift the picture?",
     description:
-      "Select scenarios that represent current operations and alternative management strategies under different hydroclimates. Consider how outcomes change with increasing levels of climate risk.",
+      "Select scenarios that represent current operations and alternative management strategies under different hydroclimates. Consider how outcomes change with increasing levels of climate stress.",
   },
 ] as const
 
