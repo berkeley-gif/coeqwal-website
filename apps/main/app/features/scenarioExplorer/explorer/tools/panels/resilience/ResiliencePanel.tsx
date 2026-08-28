@@ -233,9 +233,11 @@ export default function ResiliencePanel({
   } = useResilienceMatrix()
 
   /**
-   * Heatmap axis ticks use the API `shortCode` (e.g. s0020) so dense
-   * columns of scenarios stay legible. `fullLabel` and optional
-   * `definitionTooltip` carry the long name and description for hover.
+   * Heatmap axis ticks show the scenario's full display name. Dense
+   * axes stay legible via truncation-with-ellipsis in ResilienceHeatmap
+   * (native `<title>` tooltip on truncation), not a short code.
+   * `definitionTooltip` carries the description for the richer hover
+   * card when one is on file.
    */
   const resolveScenarioAxisItem = useCallback(
     (sid: string): ResilienceAxisItem => {
@@ -243,8 +245,7 @@ export default function ResiliencePanel({
       const full = getDisplayName(sid)
       return {
         key: sid,
-        label: s?.shortCode ?? sid,
-        fullLabel: full,
+        label: getDisplayName(sid),
         definitionTooltip:
           s?.description && s.description.length > 0
             ? s.description
@@ -1576,10 +1577,10 @@ export default function ResiliencePanel({
       const dynamicHeight =
         captureState.kind === "smallMultiples"
           ? computeResiliencePanelSmallMultiplesCaptureHeight({
-              tilesCount: captureState.tiles.length,
-              tileAspect: captureState.tileAspect,
-              rowsCount: captureState.rows.length,
-            })
+            tilesCount: captureState.tiles.length,
+            tileAspect: captureState.tileAspect,
+            rowsCount: captureState.rows.length,
+          })
           : undefined
       const { svg, dataUrl } = await captureResiliencePanelOffscreen({
         state: captureState,
