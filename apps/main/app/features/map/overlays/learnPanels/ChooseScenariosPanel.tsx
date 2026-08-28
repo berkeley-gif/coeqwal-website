@@ -15,8 +15,7 @@ export default function ChooseScenariosPanel() {
   return (
     <PanelShell background={theme.palette.blue.dark}>
       <PanelHeading
-        title="Choose your scenarios"
-        kicker="Which water management strategies do you want to explore?"
+        title="Which water management strategies do you want to explore?"
         lead="To guide your exploration of the COEQWAL scenario library, we recommend you ask:"
       />
 
