@@ -25,7 +25,7 @@ import {
 import { WaterDropIcon } from "./components/helpers/WaterIcon"
 import {
   BaseHeader,
-  getStorylineWaterThemesOptions,
+  getWaterThemeOptions,
   goToMainAbout,
   goToMainData,
   goToMainHome,
@@ -76,7 +76,7 @@ const MotionBox = motion.create(Box)
 export default function StoryContainer() {
   const isMapReady = useMapReady()
   const tooltipContent = useTooltip()
-  const waterThemesOptions = useMemo(() => getStorylineWaterThemesOptions(), [])
+  const waterThemesOptions = useMemo(() => getWaterThemeOptions(), [])
 
   useEffect(() => {
     appActions.fetchStoryline()

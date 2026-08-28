@@ -9,7 +9,7 @@ import { Temperature, TemperatureBuilder } from "./components/02Temperature"
 import { AnimatePresence, motion } from "@repo/motion"
 import {
   BaseHeader,
-  getStorylineWaterThemesOptions,
+  getWaterThemeOptions,
   goToMainAbout,
   goToMainData,
   goToMainHome,
@@ -33,7 +33,7 @@ import {
 
 export default function StoryContainer() {
   const isMapReady = true //useStoryStore((state) => state.isMapReady)
-  const waterThemesOptions = useMemo(() => getStorylineWaterThemesOptions(), [])
+  const waterThemesOptions = useMemo(() => getWaterThemeOptions(), [])
 
   return (
     <>

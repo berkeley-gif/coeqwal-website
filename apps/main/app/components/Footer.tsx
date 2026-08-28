@@ -16,6 +16,7 @@
  */
 
 import * as React from "react"
+import { WATER_STORIES, getWaterThemeOptions } from "@repo/ui"
 import {
   Box,
   Typography,
@@ -44,32 +45,6 @@ const PARTNER_LOGOS = [
     src: "/images/GIF-logo.png",
     alt: "Geospatial Innovation Facilities",
     width: 185,
-  },
-]
-
-// Mirrors the Water Stories dropdown in BaseHeader.tsx. Duplicated here
-// (not imported) because BaseHeader keeps this URL list module-private —
-// if BaseHeader's URLS ever change, update both.
-const WATER_STORIES = [
-  {
-    key: "flow",
-    label: "How water flows through California",
-    href: "https://flow.coeqwal.org",
-  },
-  {
-    key: "climate",
-    label: "How climate affects California water",
-    href: "https://climate.coeqwal.org",
-  },
-  {
-    key: "managed",
-    label: "How California water is managed",
-    href: "https://management.coeqwal.org",
-  },
-  {
-    key: "equity",
-    label: "How equity shapes California water",
-    href: "https://equity.coeqwal.org",
   },
 ]
 
@@ -140,12 +115,12 @@ export function Footer() {
     pathname === "/learn" || pathname === "/explore" || pathname === "/share"
   if (isTabsPage) return null
 
-  const waterIssues = WATER_THEMES.map((wt) => ({
-    key: wt.id,
-    label: wt.label.replace(/\n/g, " "),
-    onClick: () => openThemePanel(wt.id),
-    disabled: wt.sections.length === 0,
-  }))
+  const waterIssues = getWaterThemeOptions({
+    disabledKeys: WATER_THEMES.filter(
+      (theme) => theme.sections.length === 0,
+    ).map((theme) => theme.id),
+    onThemeClick: openThemePanel,
+  })
 
   return (
     <Box
@@ -279,11 +254,18 @@ export function Footer() {
               {WATER_STORIES.map((story) => (
                 <li key={story.key}>
                   <Typography
-                    component="a"
-                    href={story.href}
-                    target="_blank"
+                    component={story.disabled ? "span" : "a"}
+                    href={story.disabled ? undefined : story.href}
+                    target={story.disabled ? undefined : "_blank"}
+                    aria-disabled={story.disabled}
                     variant="dashboard"
-                    sx={{ color: "inherit" }}
+                    sx={{
+                      color: "inherit",
+                      ...(story.disabled && {
+                        opacity: 0.5,
+                        pointerEvents: "none",
+                      }),
+                    }}
                   >
                     {story.label}
                   </Typography>
