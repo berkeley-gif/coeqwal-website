@@ -17,21 +17,16 @@ import type { ResilienceControlsState } from "./resilienceTypes"
 export type { ResilienceControlsState } from "./resilienceTypes"
 export type {
   ResilienceView,
-  AggregateOver,
   CellEncoding,
   DeltaMode,
-  AggregateScope,
 } from "./resilienceTypes"
 
 /** Default resilience chart controls (flat store fields use these values on mount) */
 export const DEFAULT_RESILIENCE_CONTROLS: ResilienceControlsState = {
-  view: "aggregate",
+  view: "scenario",
   cellEncoding: "tier",
   deltaMode: "none",
   deltaBaselineScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
-  aggregateScope: "all",
-  reorderBySimilarity: false,
-  showMarginals: false,
   showAllScenarios: false,
   selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
   showCellNumbers: false,
@@ -39,21 +34,16 @@ export const DEFAULT_RESILIENCE_CONTROLS: ResilienceControlsState = {
   compareOutcomeCodes: [],
   expandedRegionalOutcomes: [],
   transposed: false,
-  aggregateOver: "scenarios",
 }
 
 export interface ResilienceState {
   showResilienceOutcomeSelector: boolean
   resilienceVisibleOutcomes: string[]
   resilienceDistributionMode: "scenario" | "location"
-
   resilienceView: ResilienceControlsState["view"]
   resilienceCellEncoding: ResilienceControlsState["cellEncoding"]
   resilienceDeltaMode: ResilienceControlsState["deltaMode"]
   resilienceDeltaBaselineScenarioId: string
-  resilienceAggregateScope: ResilienceControlsState["aggregateScope"]
-  resilienceReorderBySimilarity: boolean
-  resilienceShowMarginals: boolean
   resilienceShowAllScenarios: boolean
   resilienceSelectedHydroclimates: ReadonlySet<ResilienceHydroclimate>
   resilienceShowCellNumbers: boolean
@@ -61,7 +51,6 @@ export interface ResilienceState {
   resilienceCompareOutcomeCodes: string[]
   resilienceExpandedRegionalOutcomes: string[]
   resilienceTransposed: boolean
-  resilienceAggregateOver: ResilienceControlsState["aggregateOver"]
 }
 
 export interface ResilienceActions {
@@ -76,11 +65,6 @@ export interface ResilienceActions {
   ) => void
   setResilienceDeltaMode: (mode: ResilienceControlsState["deltaMode"]) => void
   setResilienceDeltaBaselineScenarioId: (scenarioId: string) => void
-  setResilienceAggregateScope: (
-    scope: ResilienceControlsState["aggregateScope"],
-  ) => void
-  setResilienceReorderBySimilarity: (value: boolean) => void
-  setResilienceShowMarginals: (show: boolean) => void
   setResilienceShowAllScenarios: (show: boolean) => void
   setResilienceSelectedHydroclimates: (
     climates: ReadonlySet<ResilienceHydroclimate>,
@@ -90,9 +74,6 @@ export interface ResilienceActions {
   setResilienceCompareOutcomeCodes: (codes: string[]) => void
   setResilienceExpandedRegionalOutcomes: (codes: string[]) => void
   setResilienceTransposed: (transposed: boolean) => void
-  setResilienceAggregateOver: (
-    aggregateOver: ResilienceControlsState["aggregateOver"],
-  ) => void
 }
 
 export type ResilienceSlice = ResilienceState & ResilienceActions
@@ -106,10 +87,6 @@ export const resilienceInitialState: ResilienceState = {
   resilienceDeltaMode: DEFAULT_RESILIENCE_CONTROLS.deltaMode,
   resilienceDeltaBaselineScenarioId:
     DEFAULT_RESILIENCE_CONTROLS.deltaBaselineScenarioId,
-  resilienceAggregateScope: DEFAULT_RESILIENCE_CONTROLS.aggregateScope,
-  resilienceReorderBySimilarity:
-    DEFAULT_RESILIENCE_CONTROLS.reorderBySimilarity,
-  resilienceShowMarginals: DEFAULT_RESILIENCE_CONTROLS.showMarginals,
   resilienceShowAllScenarios: DEFAULT_RESILIENCE_CONTROLS.showAllScenarios,
   resilienceSelectedHydroclimates: new Set(
     DEFAULT_RESILIENCE_CONTROLS.selectedHydroclimates,
@@ -123,7 +100,6 @@ export const resilienceInitialState: ResilienceState = {
     ...DEFAULT_RESILIENCE_CONTROLS.expandedRegionalOutcomes,
   ],
   resilienceTransposed: DEFAULT_RESILIENCE_CONTROLS.transposed,
-  resilienceAggregateOver: DEFAULT_RESILIENCE_CONTROLS.aggregateOver,
 }
 
 export type ResilienceControlFields = Pick<
@@ -132,9 +108,6 @@ export type ResilienceControlFields = Pick<
   | "resilienceCellEncoding"
   | "resilienceDeltaMode"
   | "resilienceDeltaBaselineScenarioId"
-  | "resilienceAggregateScope"
-  | "resilienceReorderBySimilarity"
-  | "resilienceShowMarginals"
   | "resilienceShowAllScenarios"
   | "resilienceSelectedHydroclimates"
   | "resilienceShowCellNumbers"
@@ -142,7 +115,6 @@ export type ResilienceControlFields = Pick<
   | "resilienceCompareOutcomeCodes"
   | "resilienceExpandedRegionalOutcomes"
   | "resilienceTransposed"
-  | "resilienceAggregateOver"
 >
 
 /** One-shot assembly for share callbacks (`getState()`). Do not use as a selector */
@@ -154,9 +126,6 @@ export function selectResilienceControls(
     cellEncoding: state.resilienceCellEncoding,
     deltaMode: state.resilienceDeltaMode,
     deltaBaselineScenarioId: state.resilienceDeltaBaselineScenarioId,
-    aggregateScope: state.resilienceAggregateScope,
-    reorderBySimilarity: state.resilienceReorderBySimilarity,
-    showMarginals: state.resilienceShowMarginals,
     showAllScenarios: state.resilienceShowAllScenarios,
     selectedHydroclimates: state.resilienceSelectedHydroclimates,
     showCellNumbers: state.resilienceShowCellNumbers,
@@ -164,7 +133,6 @@ export function selectResilienceControls(
     compareOutcomeCodes: state.resilienceCompareOutcomeCodes,
     expandedRegionalOutcomes: state.resilienceExpandedRegionalOutcomes,
     transposed: state.resilienceTransposed,
-    aggregateOver: state.resilienceAggregateOver,
   }
 }
 
@@ -180,15 +148,6 @@ export function applyResilienceControlsPatch(
   if (patch.deltaMode !== undefined) state.resilienceDeltaMode = patch.deltaMode
   if (patch.deltaBaselineScenarioId !== undefined) {
     state.resilienceDeltaBaselineScenarioId = patch.deltaBaselineScenarioId
-  }
-  if (patch.aggregateScope !== undefined) {
-    state.resilienceAggregateScope = patch.aggregateScope
-  }
-  if (patch.reorderBySimilarity !== undefined) {
-    state.resilienceReorderBySimilarity = patch.reorderBySimilarity
-  }
-  if (patch.showMarginals !== undefined) {
-    state.resilienceShowMarginals = patch.showMarginals
   }
   if (patch.showAllScenarios !== undefined) {
     state.resilienceShowAllScenarios = patch.showAllScenarios
@@ -210,9 +169,6 @@ export function applyResilienceControlsPatch(
   }
   if (patch.transposed !== undefined) {
     state.resilienceTransposed = patch.transposed
-  }
-  if (patch.aggregateOver !== undefined) {
-    state.resilienceAggregateOver = patch.aggregateOver
   }
 }
 
@@ -270,21 +226,6 @@ export function createResilienceSlice(
         state.resilienceDeltaBaselineScenarioId = scenarioId
       }),
 
-    setResilienceAggregateScope: (scope) =>
-      set((state) => {
-        state.resilienceAggregateScope = scope
-      }),
-
-    setResilienceReorderBySimilarity: (value) =>
-      set((state) => {
-        state.resilienceReorderBySimilarity = value
-      }),
-
-    setResilienceShowMarginals: (show) =>
-      set((state) => {
-        state.resilienceShowMarginals = show
-      }),
-
     setResilienceShowAllScenarios: (show) =>
       set((state) => {
         state.resilienceShowAllScenarios = show
@@ -318,11 +259,6 @@ export function createResilienceSlice(
     setResilienceTransposed: (transposed) =>
       set((state) => {
         state.resilienceTransposed = transposed
-      }),
-
-    setResilienceAggregateOver: (aggregateOver) =>
-      set((state) => {
-        state.resilienceAggregateOver = aggregateOver
       }),
   }
 }

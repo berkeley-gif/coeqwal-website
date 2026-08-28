@@ -18,9 +18,6 @@ export function useResilienceControlsWriter() {
     resilienceCellEncoding: cellEncoding,
     resilienceDeltaMode: deltaMode,
     resilienceDeltaBaselineScenarioId: deltaBaselineScenarioId,
-    resilienceAggregateScope: aggregateScope,
-    resilienceReorderBySimilarity: reorderBySimilarity,
-    resilienceShowMarginals: showMarginals,
     resilienceShowAllScenarios: showAllScenarios,
     resilienceSelectedHydroclimates: selectedHydroclimates,
     resilienceShowCellNumbers: showCellNumbers,
@@ -28,7 +25,6 @@ export function useResilienceControlsWriter() {
     resilienceCompareOutcomeCodes: compareOutcomeCodes,
     resilienceExpandedRegionalOutcomes: expandedRegionalOutcomes,
     resilienceTransposed: transposed,
-    resilienceAggregateOver: aggregateOver,
   } = useResilienceSlice()
 
   /** READ: current controls as one object (for presets and planPivotPatch) */
@@ -39,9 +35,6 @@ export function useResilienceControlsWriter() {
         resilienceCellEncoding: cellEncoding,
         resilienceDeltaMode: deltaMode,
         resilienceDeltaBaselineScenarioId: deltaBaselineScenarioId,
-        resilienceAggregateScope: aggregateScope,
-        resilienceReorderBySimilarity: reorderBySimilarity,
-        resilienceShowMarginals: showMarginals,
         resilienceShowAllScenarios: showAllScenarios,
         resilienceSelectedHydroclimates: selectedHydroclimates,
         resilienceShowCellNumbers: showCellNumbers,
@@ -49,16 +42,12 @@ export function useResilienceControlsWriter() {
         resilienceCompareOutcomeCodes: compareOutcomeCodes,
         resilienceExpandedRegionalOutcomes: expandedRegionalOutcomes,
         resilienceTransposed: transposed,
-        resilienceAggregateOver: aggregateOver,
       }),
     [
       view,
       cellEncoding,
       deltaMode,
       deltaBaselineScenarioId,
-      aggregateScope,
-      reorderBySimilarity,
-      showMarginals,
       showAllScenarios,
       selectedHydroclimates,
       showCellNumbers,
@@ -66,7 +55,6 @@ export function useResilienceControlsWriter() {
       compareOutcomeCodes,
       expandedRegionalOutcomes,
       transposed,
-      aggregateOver,
     ],
   )
 
@@ -77,9 +65,7 @@ export function useResilienceControlsWriter() {
     selectedHydroclimates,
     primaryOutcomeCode,
     compareOutcomeCodes,
-    aggregateOver,
     transposed,
-    reorderBySimilarity,
     showCellNumbers,
     controlsSnapshot,
     writeChange: writeControlsChange,

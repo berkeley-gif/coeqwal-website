@@ -10,7 +10,6 @@
  */
 
 import type {
-  AggregateOver,
   ResilienceControlsState,
   ResilienceView,
 } from "../../../../store"
@@ -35,44 +34,15 @@ export const PIVOT_DIM_LABEL_PLURAL: Record<PivotDim, string> = {
   outcome: "outcomes",
   hydroclimate: "hydroclimates",
 }
-
-const AGGREGATE_OVER_TO_PIVOT_DIM: Record<AggregateOver, PivotDim> = {
-  scenarios: "scenario",
-  outcomes: "outcome",
-  hydroclimates: "hydroclimate",
-}
-
-const PIVOT_DIM_TO_AGGREGATE_OVER: Record<PivotDim, AggregateOver> = {
-  scenario: "scenarios",
-  outcome: "outcomes",
-  hydroclimate: "hydroclimates",
-}
-
-/** Stored (view, aggregateOver) → which dimension is the sentence "pivot" (Z) */
-export function derivePivotFromStore(
-  view: ResilienceView,
-  aggregateOver: AggregateOver,
-): { pivotDim: PivotDim; pivotMode: PivotMode } {
-  if (view === "aggregate") {
-    return {
-      pivotDim: AGGREGATE_OVER_TO_PIVOT_DIM[aggregateOver],
-      pivotMode: "aggregate",
-    }
-  }
-  return { pivotDim: view as PivotDim, pivotMode: "facet" }
+/** Stored view → which dimension is the sentence "pivot" (Z) */
+export function derivePivotFromStore(view: ResilienceView): PivotDim {
+  return view
 }
 
 /** Pivot (Z) choice → partial store patch for view / aggregateOver */
 function pivotDimToStorePatch(
   pivotDim: PivotDim,
-  pivotMode: PivotMode,
 ): Partial<ResilienceControlsState> {
-  if (pivotMode === "aggregate") {
-    return {
-      view: "aggregate",
-      aggregateOver: PIVOT_DIM_TO_AGGREGATE_OVER[pivotDim],
-    }
-  }
   return { view: pivotDim }
 }
 
@@ -108,26 +78,21 @@ export function deriveSentenceAxes(
  */
 export function planPivotPatch(
   pivotDim: PivotDim,
-  pivotMode: PivotMode,
   current: ResilienceControlsState,
   extra: Partial<ResilienceControlsState> = {},
 ): Partial<ResilienceControlsState> {
   const patch: Partial<ResilienceControlsState> = {
-    ...pivotDimToStorePatch(pivotDim, pivotMode),
+    ...pivotDimToStorePatch(pivotDim),
     ...extra,
   }
-  const nextView = patch.view ?? current.view
-  const nextAgg = patch.aggregateOver ?? current.aggregateOver
   const enc = current.cellEncoding
 
-  if (nextView !== "aggregate" && (enc === "glyph" || enc === "leverage")) {
+  if (enc === "glyph" || enc === "leverage") {
     patch.cellEncoding = "tier"
   }
-  if (nextAgg === "outcomes" && enc === "leverage") {
-    patch.cellEncoding = "tier"
-  }
-  if (nextAgg === "hydroclimates" && current.deltaMode !== "none") {
+  if (pivotDim === "hydroclimate" && current.deltaMode !== "none") {
     patch.deltaMode = "none"
   }
+  
   return patch
 }

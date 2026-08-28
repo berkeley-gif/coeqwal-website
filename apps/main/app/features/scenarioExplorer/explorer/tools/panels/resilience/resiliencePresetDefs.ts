@@ -33,20 +33,6 @@ export interface ResiliencePresetDefinition {
 export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[] =
   [
     {
-      id: "overview-mean-tiers",
-      group: "Start",
-      label: "Overview",
-      description: "Averaged across all scenarios, colored by mean tier.",
-      salient: true,
-      getPatch: () => ({
-        view: "aggregate",
-        cellEncoding: "tier",
-        deltaMode: "none",
-        aggregateScope: "all",
-        showCellNumbers: true,
-      }),
-    },
-    {
       id: "browse-all-scenarios",
       group: "Browse",
       label: "All scenarios",
@@ -80,34 +66,6 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
       salient: true,
       getPatch: () => ({
         view: "hydroclimate",
-        cellEncoding: "tier",
-        deltaMode: "none",
-      }),
-    },
-    {
-      id: "analyze-aggregate-over-outcomes",
-      group: "Analyze",
-      label: "Averaged across outcomes",
-      description:
-        "Single chart with outcomes meaned away. Read scenarios directly.",
-      salient: true,
-      getPatch: () => ({
-        view: "aggregate",
-        aggregateOver: "outcomes",
-        cellEncoding: "tier",
-        deltaMode: "none",
-      }),
-    },
-    {
-      id: "analyze-aggregate-over-hydroclimates",
-      group: "Analyze",
-      label: "Averaged across hydroclimates",
-      description:
-        "Single chart with hydroclimates meaned away. Climate-agnostic profile.",
-      salient: true,
-      getPatch: () => ({
-        view: "aggregate",
-        aggregateOver: "hydroclimates",
         cellEncoding: "tier",
         deltaMode: "none",
       }),

@@ -4,7 +4,6 @@ export type ResilienceView =
   | "scenario"
   | "outcome"
   | "hydroclimate"
-  | "aggregate"
 
 export type AggregateOver = "scenarios" | "outcomes" | "hydroclimates"
 
@@ -25,9 +24,6 @@ export interface ResilienceControlsState {
   cellEncoding: CellEncoding
   deltaMode: DeltaMode
   deltaBaselineScenarioId: string
-  aggregateScope: AggregateScope
-  reorderBySimilarity: boolean
-  showMarginals: boolean
   showAllScenarios: boolean
   selectedHydroclimates: ReadonlySet<ResilienceHydroclimate>
   showCellNumbers: boolean
@@ -35,5 +31,4 @@ export interface ResilienceControlsState {
   compareOutcomeCodes: string[]
   expandedRegionalOutcomes: string[]
   transposed: boolean
-  aggregateOver: AggregateOver
 }
