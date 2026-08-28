@@ -1980,7 +1980,7 @@ export default function ResiliencePanel({
             flexDirection: "column",
             flex: 1,
             minHeight: 0,
-            minWidth: 720,
+            minWidth: 960,
           }}
         >
           {/* Panel-level title. Names the pivot (what the chart is) and
