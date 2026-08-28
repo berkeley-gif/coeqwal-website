@@ -303,25 +303,8 @@ export const OUTCOME_FOOTER_PREFIXES: Partial<Record<OutcomeCode, string>> = {
     "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery.",
   WRC_SALMON_AB:
     "The lowest outcome level corresponds to approximately 3,000 total returning female spawners. Below this level, changes in commercial harvest practices are required to mitigate impacts to the population.",
-}
-
-export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
-  CWS_DEL:
-    "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery. For more information, see technical documentation on **Data** page.",
-  AG_REV: "For more information, see technical documentation on **Data** page.",
-  ENV_FLOWS:
-    "For more information, see technical documentation on **Data** page.",
   RES_STOR:
-    "For more information, see technical documentation on **Data** page.",
-  GW_STOR:
-    "For more information, see technical documentation on **Data** page.",
-  DELTA_ECO:
-    "For more information, see technical documentation on **Data** page.",
-  FW_EXP: "For more information, see technical documentation on **Data** page.",
-  FW_DELTA_USES:
-    "For more information, see technical documentation on **Data** page.",
-  WRC_SALMON_AB:
-    "The lowest outcome level corresponds to approximately 3,000 total returning female spawners. Below this level, changes in commercial harvest practices are required to mitigate impacts to the population. For more information, see technical documentation on **Data** page.",
+    "Note that the Central Valley Project and State Water Project portions of San Luis Reservoir are evaluated separately.",
 }
 
 export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
@@ -399,7 +382,7 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   RES_STOR: {
     tier1:
-      "Reservoir storage is frequently high (There is a **90%** chance that end-of-April reservoir storage is greater than the long-term median value).",
+      "Reservoir storage is frequently high (In more than 9 out of 10 years, end-of-April reservoir storage is greater than the long-term median value).",
     tier2:
       "Reservoir storage is similar to recent history (In more than two out of three years, end-of-April storage exceeds the **33rd** percentile of long-term values).",
     tier3:
@@ -409,9 +392,9 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   GW_STOR: {
     tier1:
-      "Groundwater trend is stable or increasing and average total storage is greater than historical.",
+      "Groundwater trend is stable or increasing and is greater than the historical trend.",
     tier2:
-      "Groundwater trend is stable or increasing and average total storage is less than historical.",
+      "Groundwater trend is stable or increasing but is less than the historical trend.",
     tier3: "Groundwater trend is declining at a moderate rate.",
     tier4: "Groundwater trend is declining at a rapid rate.",
   },
@@ -427,32 +410,32 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   FW_EXP: {
     tier1:
-      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **greater than 505 million acre-feet**.",
+      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **> 505 million acre-feet**.",
     tier2:
-      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **greater than 465 million acre-feet but less than 505 million acre-feet**",
+      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **> 465 million acre-feet but <= 505 million acre-feet**",
     tier3:
-      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **greater than 400 million acre-feet but less than 465 million acre-feet**",
+      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **> 400 million acre-feet but <= 465 million acre-feet**",
     tier4:
-      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **less than 400 million acre-feet.**",
+      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **< 400 million acre-feet.**",
   },
   FW_DELTA_USES: {
     tier1:
-      "Water is fresh enough for human use with no restrictions in at least **75%** of all months, and unusable no more than in **5%** of all months.",
+      "Water is fresh enough for human use with no restrictions in ≥ **75%** of all months, and unusable in ≤ **5%** of all months.",
     tier2:
-      "Water is fresh enough for human use with no restrictions in at least **65%** of all months, fresh enough for human use with some treatment or cropping adjustments in at least **75%** of months, and unusable in no more than **12%** of all months.",
+      "Water is fresh enough for human use with no restrictions in ≥ **65%** of all months, fresh enough for human use with some treatment or cropping adjustments in ≥ **75%** of months, and unusable in ≤ **12%** of all months.",
     tier3:
-      "Water is fresh enough for human use with no restrictions in at least **55%** of all months, fresh enough for human use with some treatment or cropping adjustments in at least **65%** of months, and unusable in no more than **20%** of all months.",
+      "Water is fresh enough for human use with no restrictions in ≥ **55%** of all months, fresh enough for human use with some treatment or cropping adjustments in ≥ **65%** of months, and unusable in ≤ **20%** of all months.",
     tier4:
-      "Water is fresh enough for human use with no restrictions in less than **55%** of all months and/or is unusable in more than **20%** of all months.",
+      "Water is fresh enough for human use with no restrictions in ≤ **55%** of all months and/or is unusable in ≥ **20%** of all months.",
   },
   WRC_SALMON_AB: {
     tier1:
-      "There is at least an **80%** chance that greater than **50%** of maximum available spawning habitat is utilized.",
+      "There is ≥ **80%** chance that > **50%** of maximum available spawning habitat is utilized.",
     tier2:
-      "There is at least an **80%** chance that between **18 and 50%** of maximum available spawning habitat is utilized.",
+      "There is ≥ **80%** chance that between **18% and 50%** of maximum available spawning habitat is utilized.",
     tier3:
-      "There is at least an **80%** chance that between **6 and 18%** of maximum available spawning habitat is utilized.",
+      "There is ≥ **80%** chance that between **6% and 18%** of maximum available spawning habitat is utilized.",
     tier4:
-      "There is at least an **80%** chance that less than **6%** of maximum available spawning habitat is utilized.",
+      "There is ≥ **80%** chance that < **6%** of maximum available spawning habitat is utilized.",
   },
 }
