@@ -37,6 +37,11 @@ export type ResilienceSmallMultiplesTileAspect = "wide" | "tall"
  */
 export const RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS = 2
 
+/** Grid gap between tiles, in px. Named so the column-cap formula below
+ * (which needs to subtract the gaps between tracks) can't drift out of
+ * sync with the actual `gap` style applied to the grid. */
+const TILE_GRID_GAP_PX = 16
+
 /**
  * Per-tile height (in CSS pixels) used by the small-multiples grid.
  * Exported so callers laying out the grid in a fixed-size off-screen
@@ -84,7 +89,7 @@ export interface ResilienceHeatmapSmallMultiplesProps {
   tileAspect?: ResilienceSmallMultiplesTileAspect
   /** Minimum tile width in px; grid auto-fits into columns based on this. */
   minTileWidth?: number
-  /** Maximum columns in the grid. Defaults to 4. */
+  /** Maximum columns in the grid. Defaults to 2. */
   maxColumns?: number
   /**
    * Reconfigure the grid for off-screen SVG capture. When true:
@@ -221,7 +226,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       showCellNumbers = false,
       tileAspect = "wide",
       minTileWidth = 520,
-      maxColumns = 4,
+      maxColumns = 2,
       captureMode = false,
       onCellHover,
       onTileHover,
@@ -250,16 +255,21 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
         [tileAspect, rows.length],
       )
 
-      // Live grid: auto-fit responsiveness clamped by maxColumns. Capture
-      // grid: a fixed column count so the snapshot layout is deterministic
-      // and not dependent on the off-screen host's width.
-      const gridTemplate = useMemo(
-        () =>
-          captureMode
-            ? `repeat(${RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS}, 1fr)`
-            : `repeat(auto-fit, minmax(${minTileWidth}px, 1fr))`,
-        [minTileWidth, captureMode],
-      )
+      // Live grid: auto-fit responsiveness clamped by maxColumns, without
+      // capping the grid's own width - each track's minimum is whichever
+      // is larger, minTileWidth or an even split of the full row into
+      // maxColumns tracks, so a wide row lands on exactly maxColumns
+      // full-width tracks instead of shrinking the grid to fit fewer.
+      // Capture grid: a fixed column count so the snapshot layout is
+      // deterministic and not dependent on the off-screen host's width.
+      const gridTemplate = useMemo(() => {
+        if (captureMode) {
+          return `repeat(${RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS}, 1fr)`
+        }
+        const evenSplit = `calc((100% - ${(maxColumns - 1) * TILE_GRID_GAP_PX
+          }px) / ${maxColumns})`
+        return `repeat(auto-fit, minmax(max(${minTileWidth}px, ${evenSplit}), 1fr))`
+      }, [minTileWidth, maxColumns, captureMode])
 
       if (tiles.length === 0) {
         return null
@@ -292,19 +302,19 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
             style={{
               display: "grid",
               gridTemplateColumns: gridTemplate,
-              gap: 16,
+              gap: TILE_GRID_GAP_PX,
               flex: 1,
               minHeight: 0,
               overflowY: captureMode ? "visible" : "auto",
               overflowX: "auto",
-              // Live mode caps via max-width to avoid stretching the
-              // tiles too wide on huge screens. Capture mode leaves the
-              // grid free to fill the off-screen host width that the
-              // caller chose deliberately.
-              maxWidth: captureMode ? "none" : `${maxColumns * 560}px`,
+              // Column count (not grid width) is what caps tile count now
+              // - see gridTemplate above - so the grid is free to fill the
+              // panel's full width in both live and capture mode.
+              maxWidth: "100%",
               alignContent: "start",
             }}
           >
+
             {tiles.map((tile, tileIdx) => {
               const extraActions = renderTileActions?.(tile)
               const hasActions = extraActions != null
@@ -450,15 +460,15 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                       onSquareHover={
                         onSquareHover
                           ? (info) =>
-                              onSquareHover(
-                                info ? { tileId: tile.id, ...info } : null,
-                              )
+                            onSquareHover(
+                              info ? { tileId: tile.id, ...info } : null,
+                            )
                           : undefined
                       }
                       onSquareClick={
                         onSquareClick
                           ? (info) =>
-                              onSquareClick({ tileId: tile.id, ...info })
+                            onSquareClick({ tileId: tile.id, ...info })
                           : undefined
                       }
                     />
