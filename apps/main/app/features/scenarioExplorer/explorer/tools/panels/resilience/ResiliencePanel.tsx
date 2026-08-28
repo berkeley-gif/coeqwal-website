@@ -1789,8 +1789,13 @@ export default function ResiliencePanel({
   // 10. Chart-view state assembly
   // ============================================================
   const chartViewState = useMemo<ResiliencePanelChartViewState>(() => {
+    // Scenario names land on the column axis - needing the same
+    // rotate-to-fit treatment - whenever transpose puts them there:
+    // by-hydroclimate view untransposed, or by-outcome view transposed.
     const labelRotation =
-      !transposed && effectiveView === "hydroclimate" ? -90 : 0
+      !transposed && effectiveView === "hydroclimate" ||
+        (transposed && effectiveView === "outcome")
+        ? -90 : 0
     if (hydroclimateColumns.length === 0) return { kind: "noColumns" }
     if (outcomeRowCodes.length === 0 && !outcomeEmpty) {
       return { kind: "noOutcomesSelected" }
@@ -1822,6 +1827,7 @@ export default function ResiliencePanel({
         columns: displayByOutcomeColumns,
         tiles: displayByOutcomeTiles,
         tileAspect: transposed ? "wide" : "tall",
+        columnLabelRotation: labelRotation,
         highlightedRowKeys: effectiveRowHighlight,
       }
     }
