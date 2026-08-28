@@ -23,7 +23,7 @@ const NARRATION_BY_BEAT: readonly (readonly string[])[] = [
   [], // [0] intro + tier legend, rendered separately
   [
     "For example, each colored location on the map represents an agricultural water district in the Central Valley receiving surface water deliveries.",
-    "The colors correspond to different water delivery shortages that affect agricultural revenue, ranging from minimal shortages, which yield optimal revenues (blue), to significant shortages, which result in critically low revenues (red).",
+    "The colors correspond to different levels of water delivery shortages that affect agricultural revenue, ranging from minimal shortages, which yield optimal revenues (blue), to significant shortages, which result in critically low revenues (red).",
   ],
   [
     "Each location can be represented as a square colored by its outcome level and, together, they form a distribution view showing how agricultural revenues vary for that scenario at a glance.",
