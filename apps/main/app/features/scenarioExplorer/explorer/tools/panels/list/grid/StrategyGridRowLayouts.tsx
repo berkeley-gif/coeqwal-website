@@ -5,13 +5,11 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import {
   OperationsIconGroup,
   StrategyHeader,
-  type ChartDataPoint,
   type ScenarioForDisplay,
 } from "../../../../../../scenarios/components/shared"
 import { useWorkspaceSlice } from "../../../../store"
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
 import type { LayoutMode } from "./StrategyGridHeader"
-import { InlineRowActions } from "./InlineRowActions"
 
 /**
  * Non-compact mode content - grid-based layout with vertical dividers
@@ -28,8 +26,8 @@ interface NonCompactRowContentProps {
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   onIconClick?: (iconId: string) => void
   isDistributionView?: boolean
-  scenarioChartData?: Record<string, ChartDataPoint[]>
 }
+
 
 export function NonCompactRowContent({
   scenario,
@@ -39,39 +37,15 @@ export function NonCompactRowContent({
   showThemeBadge = true,
   onThemeBadgeClick,
   onIconClick,
-  accentColor,
-  handleShare,
-  pinRowTourRef,
-  shareRowTourRef,
   operationsRowTourRef,
 }: NonCompactRowContentProps & {
-  accentColor?: string
-  handleShare?: () => void
-  pinRowTourRef?: React.RefCallback<HTMLElement | null>
-  shareRowTourRef?: React.RefCallback<HTMLElement | null>
   operationsRowTourRef?: React.RefCallback<HTMLElement | null>
 }) {
   const theme = useTheme()
   const isListMode = useWorkspaceSlice((s) => s.exploreMode === "list")
-  const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
 
   const isCompactMode = layoutMode === "compact"
   const isFullMode = layoutMode === "full"
-
-  const inlineActionsNode =
-    isListMode && handleShare && accentColor ? (
-      <Box sx={{ display: "inline-flex", alignItems: "center" }}>
-        <InlineRowActions
-          scenarioId={scenario.scenarioId}
-          scenarioLabel={scenario.label}
-          displayMode={outcomeDisplayMode}
-          accentColor={accentColor}
-          onShare={handleShare}
-          pinTourRef={pinRowTourRef}
-          shareTourRef={shareRowTourRef}
-        />
-      </Box>
-    ) : undefined
 
   /** List mode strategy header */
   const strategyHeaderBlock = (disableTrunc: boolean) => (
@@ -84,7 +58,6 @@ export function NonCompactRowContent({
       descriptionMaxWidth="80%"
       showThemeBadge={showThemeBadge}
       onThemeBadgeClick={onThemeBadgeClick}
-      inlineActions={inlineActionsNode}
     />
   )
 

@@ -13,22 +13,16 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React, { useCallback, useMemo } from "react"
+import React, { useMemo } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import { PanelFeedback } from "@repo/ui"
-import type {
-  ChartDataPoint,
-  OutcomeName,
-  ScenarioForDisplay,
-} from "../../../../../../scenarios/components/shared"
+import type { ScenarioForDisplay } from "../../../../../../scenarios/components/shared"
+import { useWorkspaceSlice } from "../../../../store"
 import { StrategyGridRow } from "./StrategyGridRow"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
 import ThemeGroupHeader from "../../../chrome/sidebar/ThemeGroupHeader"
 import { HydroclimateGate } from "../../../../../../scenarios/components/HydroclimateGate"
-import { useWorkspaceSlice } from "../../../../store"
-import { captureBarChartRow } from "./captureBarChartRow"
-import { stageShareItem } from "../../../../share/stage"
 
 export interface StrategyGridContentProps {
   scenarios: ScenarioForDisplay[]
@@ -46,14 +40,6 @@ export interface StrategyGridContentProps {
   showAlternativeBaselines: boolean
   layoutMode: LayoutMode
   showOperations?: boolean
-  /** Outcome names - used only for each row's share-to-drawer capture */
-  outcomeNames: OutcomeName[]
-  /** Get chart data for a scenario - used only for each row's share-to-drawer capture */
-  getChartDataForScenario: (
-    scenarioId: string,
-  ) => Record<string, ChartDataPoint[]>
-  /** Glyph size in pixels, forwarded to the off-screen share capture */
-  glyphSize: number
   onToggleScenario: (scenarioId: string) => void
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   onIconClick?: (iconId: string) => void
@@ -82,9 +68,6 @@ export function StrategyGridContent({
   showAlternativeBaselines,
   layoutMode,
   showOperations = true,
-  outcomeNames,
-  getChartDataForScenario,
-  glyphSize,
   onToggleScenario,
   onThemeBadgeClick,
   onIconClick,
@@ -128,52 +111,6 @@ export function StrategyGridContent({
     }
     return map
   }, [themeSubheaderMode, displayScenarios])
-
-  const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
-  const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
-  const addShareItem = useWorkspaceSlice((s) => s.addShareItem)
-
-  // ThemeGroupHeader's "share all" loop. Each scenario's outcome row
-  // is captured off-screen at fixed dimensions before its share item
-  // is staged. Sequential await keeps each off-screen mount tidy.
-  const handleShareThemeScenarios = useCallback(
-    async (scenarioIds: string[]) => {
-      for (const sid of scenarioIds) {
-        const scenarioChartData = getChartDataForScenario(sid)
-        await stageShareItem({
-          capture: () =>
-            captureBarChartRow({
-              outcomeNames,
-              chartData: scenarioChartData,
-              viewMode: outcomeDisplayMode,
-              theme,
-              glyphSize,
-            }),
-          buildItem: (captured) => ({
-            id: crypto.randomUUID(),
-            type: "barChart",
-            scenarioId: sid,
-            viewMode: outcomeDisplayMode,
-            hydroclimate,
-            cachedChartData: scenarioChartData as Record<string, unknown>,
-            cachedSvg: captured?.svg,
-            cachedImageDataUrl: captured?.dataUrl,
-          }),
-          addItem: addShareItem,
-          errorLabel: "StrategyGridContent.handleShareThemeScenarios",
-        })
-      }
-    },
-    [
-      outcomeNames,
-      getChartDataForScenario,
-      outcomeDisplayMode,
-      theme,
-      glyphSize,
-      hydroclimate,
-      addShareItem,
-    ],
-  )
 
   const renderScenarioRows = (
     list: ScenarioForDisplay[],
@@ -229,7 +166,6 @@ export function StrategyGridContent({
                 themeKey={scenario.theme as ScenarioTheme}
                 scenarioIds={ids}
                 isFirst={opts.isFirstGroup && index === 0}
-                onShareScenarios={handleShareThemeScenarios}
               />,
             )
           }
@@ -250,9 +186,6 @@ export function StrategyGridContent({
             isChosen={selectedScenarios.includes(scenario.scenarioId)}
             layoutMode={layoutMode}
             showOperations={showOperations}
-            outcomeNames={outcomeNames}
-            getChartDataForScenario={getChartDataForScenario}
-            glyphSize={glyphSize}
             onToggleScenario={onToggleScenario}
             showThemeBadge={showThemeBadgeUnpinned}
             onThemeBadgeClick={onThemeBadgeClick}

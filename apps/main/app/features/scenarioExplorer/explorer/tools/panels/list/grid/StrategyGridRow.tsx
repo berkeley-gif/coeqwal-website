@@ -12,16 +12,12 @@
 import React, { useCallback } from "react"
 import { Box, useTheme, Checkbox } from "@repo/ui/mui"
 import type {
-  ChartDataPoint,
-  OutcomeName,
   ScenarioForDisplay,
 } from "../../../../../../scenarios/components/shared"
 import { useWorkspaceSlice } from "../../../../store"
 import { useTourAnchor } from "../../../tour"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
-import { captureBarChartRow } from "./captureBarChartRow"
-import { stageShareItem } from "../../../../share/stage"
 import { NonCompactRowContent } from "./StrategyGridRowLayouts"
 
 export interface StrategyGridRowProps {
@@ -43,14 +39,6 @@ export interface StrategyGridRowProps {
   layoutMode: LayoutMode
   /** When false, hides the key operations column */
   showOperations?: boolean
-  /** Outcome names - used only for the row's share-to-drawer capture, not rendered */
-  outcomeNames: OutcomeName[]
-  /** Get chart data for this scenario - used only for the row's share-to-drawer capture */
-  getChartDataForScenario: (
-    scenarioId: string,
-  ) => Record<string, ChartDataPoint[]>
-  /** Glyph size in pixels, forwarded to the off-screen share capture */
-  glyphSize: number
   /** Toggle scenario selection */
   onToggleScenario: (scenarioId: string) => void
   /** Whether to show inline theme badge on each row */
@@ -78,9 +66,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   isChosen,
   layoutMode,
   showOperations = true,
-  outcomeNames,
-  getChartDataForScenario,
-  glyphSize,
   onToggleScenario,
   showThemeBadge = true,
   onThemeBadgeClick,
@@ -90,61 +75,16 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   onRowHover,
 }: StrategyGridRowProps) {
   const theme = useTheme()
-  const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
   const isListMode = useWorkspaceSlice((s) => s.exploreMode === "list")
   const showDefinitions = useWorkspaceSlice((s) => s.showDefinitions)
-  const addShareItem = useWorkspaceSlice((s) => s.addShareItem)
-  const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
 
   const accentColor = scenarioColor || theme.palette.blue.bright
 
-  // Tour anchors. Only the first list exemplar row registers (see
-  // `tourListFirstItem`), so the tour highlights one checkbox / pin / share
-  // instead of bulk-registering all rows.
+  // Tour anchor. Only the first list exemplar row registers (see
+  // `tourListFirstItem`), so the tour highlights one checkbox instead of
+  // bulk-registering all rows.
   const listSelectCheckboxTourRef = useTourAnchor("list.select.checkbox")
-  const listRowPinTourRef = useTourAnchor("list.row.pin")
-  const listRowShareTourRef = useTourAnchor("list.row.share")
   const listRowOperationsTourRef = useTourAnchor("list.row.operations")
-
-  // Chart data feeds only the off-screen share capture below - outcomes
-  // are never rendered in this row (they live in the Bar tool now).
-  const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
-
-  const handleShare = useCallback(
-    () =>
-      stageShareItem({
-        capture: () =>
-          captureBarChartRow({
-            outcomeNames,
-            chartData: scenarioChartData,
-            viewMode: outcomeDisplayMode,
-            theme,
-            glyphSize,
-          }),
-        buildItem: (captured) => ({
-          id: crypto.randomUUID(),
-          type: "barChart",
-          scenarioId: scenario.scenarioId,
-          viewMode: outcomeDisplayMode,
-          hydroclimate,
-          cachedChartData: scenarioChartData as Record<string, unknown>,
-          cachedSvg: captured?.svg,
-          cachedImageDataUrl: captured?.dataUrl,
-        }),
-        addItem: addShareItem,
-        errorLabel: "StrategyGridRow.handleShare",
-      }),
-    [
-      scenario.scenarioId,
-      outcomeDisplayMode,
-      scenarioChartData,
-      addShareItem,
-      hydroclimate,
-      outcomeNames,
-      theme,
-      glyphSize,
-    ],
-  )
 
   return (
     <Box
@@ -224,14 +164,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         showThemeBadge={showThemeBadge}
         onThemeBadgeClick={onThemeBadgeClick}
         onIconClick={onIconClick}
-        accentColor={accentColor}
-        handleShare={handleShare}
-        pinRowTourRef={
-          tourListFirstItem && isListMode ? listRowPinTourRef : undefined
-        }
-        shareRowTourRef={
-          tourListFirstItem && isListMode ? listRowShareTourRef : undefined
-        }
         operationsRowTourRef={
           tourListFirstItem && isListMode ? listRowOperationsTourRef : undefined
         }

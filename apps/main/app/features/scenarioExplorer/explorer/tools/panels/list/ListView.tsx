@@ -31,8 +31,6 @@ export default function ListView({ highlightedIds }: ListViewProps) {
   const theme = useTheme()
 
   const {
-    allChartData,
-    outcomeNames,
     allScoreData,
     isLoading: tiersLoading,
     error: tiersError,
@@ -54,12 +52,6 @@ export default function ListView({ highlightedIds }: ListViewProps) {
 
   const isLoading = listLoading || tiersLoading
   const error = listError ?? tiersError ?? null
-
-  const getChartDataForScenario = useMemo(
-    () => (scenarioId: string) =>
-      (allChartData[scenarioId] ?? {}) as Record<string, ChartDataPoint[]>,
-    [allChartData],
-  )
 
   const listScrollRef = useRef<HTMLDivElement>(null)
 
@@ -165,8 +157,6 @@ export default function ListView({ highlightedIds }: ListViewProps) {
   const showNoResultsMessage = searchQuery.trim() !== "" && !hasSearchResults
 
   const strategyGridProps = {
-    getChartDataForScenario,
-    outcomeNames,
     scenarios: orderedScenarios,
     highlightedScenarios: mergedHighlighted,
     showSearchDivider: hasSearchResults,

@@ -1,10 +1,10 @@
 "use client"
 
-import { Box, Checkbox, IconButton, useTheme, icons } from "@repo/ui/mui"
-import { HoverTip, InfoIconButton } from "@repo/ui"
+import { Box, Checkbox, useTheme } from "@repo/ui/mui"
+import { InfoIconButton } from "@repo/ui"
 import { THEME_LABEL_CONFIG } from "../../../../../../content/themes"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
-import { useWorkspaceSlice, type OutcomeDisplayMode } from "../../../store"
+import { useWorkspaceSlice } from "../../../store"
 
 interface ThemeGroupHeaderProps {
   themeKey: ScenarioTheme
@@ -16,21 +16,6 @@ interface ThemeGroupHeaderProps {
   onRowHover?: (scenarioIds: string[] | null) => void
   /** when true, hide the select-all-in-theme header checkbox (e.g. equity) */
   singleSelect?: boolean
-  /**
-   * "Share all in theme" dispatcher. List-mode parents bind a bar-chart
-   * row capture loop, sidebar parents bind a per-active-mode dispatcher
-   * (radar capture, equity item, resilience tile). Required so the
-   * header never has to know which capture pipeline is active.
-   */
-  onShareScenarios: (scenarioIds: string[]) => void | Promise<void>
-  /**
-   * Disables the "share all" icon. Used when the active mode can't
-   * produce a meaningful card given the current state (e.g. radar
-   * has no axes selected).
-   */
-  shareDisabled?: boolean
-  /** Tooltip shown over the disabled share icon explaining the gate. */
-  shareDisabledTooltip?: React.ReactNode
 }
 
 export default function ThemeGroupHeader({
@@ -39,17 +24,11 @@ export default function ThemeGroupHeader({
   layout = "grid",
   onRowHover,
   singleSelect = false,
-  onShareScenarios,
-  shareDisabled = false,
-  shareDisabledTooltip,
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
   const {
     selectedScenarios,
     selectScenarios,
-    shareItems,
-    outcomeDisplayMode,
-    hydroclimate,
   } = useWorkspaceSlice()
 
   const themeConfig = THEME_LABEL_CONFIG[themeKey]
@@ -61,18 +40,6 @@ export default function ThemeGroupHeader({
     scenarioIds.every((id) => selectedScenarios.includes(id))
   const someChecked =
     !allChecked && scenarioIds.some((id) => selectedScenarios.includes(id))
-  const viewMode: OutcomeDisplayMode = outcomeDisplayMode
-  const allShared =
-    scenarioIds.length > 0 &&
-    scenarioIds.every((sid) =>
-      shareItems.some(
-        (s) =>
-          s.type === "barChart" &&
-          s.scenarioId === sid &&
-          s.viewMode === viewMode &&
-          s.hydroclimate === hydroclimate,
-      ),
-    )
 
   const handleToggle = () => {
     if (scenarioIds.length === 0) return
@@ -96,17 +63,17 @@ export default function ThemeGroupHeader({
       sx={{
         ...(isFlex
           ? {
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              px: 1.5,
-              py: 0.5,
-            }
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            px: 1.5,
+            py: 0.5,
+          }
           : {
-              gridColumn: "1 / -1",
-              display: "grid",
-              gridTemplateColumns: "subgrid",
-            }),
+            gridColumn: "1 / -1",
+            display: "grid",
+            gridTemplateColumns: "subgrid",
+          }),
         alignItems: "center",
         minHeight: "24px",
         borderRadius: isFlex ? 0 : "4px",
@@ -185,52 +152,6 @@ export default function ThemeGroupHeader({
             />
           </Box>
         )}
-
-        <HoverTip
-          content={
-            shareDisabled
-              ? (shareDisabledTooltip ??
-                `Share all ${themeConfig.label} scenarios`)
-              : allShared
-                ? "All shared"
-                : `Share all ${themeConfig.label} scenarios`
-          }
-          density="compact"
-          describeChild
-        >
-          {/* span wrapper preserves tooltip hover when the button is
-              disabled - MUI suppresses pointer events on disabled
-              buttons. describeChild keeps the tooltip's aria-label off
-              this span (prohibited on unroled elements); the button
-              carries its own. */}
-          <span style={{ display: "inline-flex" }}>
-            <IconButton
-              className="theme-action-icon"
-              size="small"
-              aria-label={`Share all ${themeConfig.label} scenarios`}
-              disabled={shareDisabled}
-              onClick={() => {
-                void onShareScenarios(scenarioIds)
-              }}
-              sx={{
-                p: 0.25,
-                // The icon stays visible at all times. `allShared` no
-                // longer reflects share state in non-bar-chart contexts
-                // (sidebar dispatches equity / radar / resilience), and
-                // hiding the action by default made it undiscoverable.
-                opacity: 1,
-                color: theme.palette.text.primary,
-                transition: "opacity 200ms ease",
-                "&.Mui-disabled": {
-                  color: theme.palette.grey[400],
-                  opacity: 0.5,
-                },
-              }}
-            >
-              <icons.IosShare sx={{ fontSize: "0.8rem" }} />
-            </IconButton>
-          </span>
-        </HoverTip>
       </Box>
     </Box>
   )
