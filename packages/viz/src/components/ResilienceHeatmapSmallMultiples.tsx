@@ -37,10 +37,21 @@ export type ResilienceSmallMultiplesTileAspect = "wide" | "tall"
  */
 export const RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS = 2
 
-/** Grid gap between tiles, in px. Named so the column-cap formula below
- * (which needs to subtract the gaps between tracks) can't drift out of
- * sync with the actual `gap` style applied to the grid. */
-const TILE_GRID_GAP_PX = 16
+/** Horizontal gap between tile columns, in px. Named so the column-cap
+ * formula below (which needs to subtract the gaps between tracks)
+ * can't drift out of sync with the actual `gap` style applied to the
+ * grid. */
+const TILE_GRID_COLUMN_GAP_PX = 16
+
+/**
+ * Vertical gap between tile rows, in px. Kept larger than the column
+ * gap: each tile's heatmap stretches to fill the tile's full height
+ * with no bottom padding (see the tile body's `flex: 1` below), so a
+ * short tile (few rows) ends with its last cell row flush against the
+ * tile's bottom edge. A gap sized for column spacing then reads as the
+ * next tile's title crowding that cell row.
+ */
+const TILE_GRID_ROW_GAP_PX = 68
 
 /**
  * Per-tile height (in CSS pixels) used by the small-multiples grid.
@@ -266,7 +277,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
         if (captureMode) {
           return `repeat(${RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS}, 1fr)`
         }
-        const evenSplit = `calc((100% - ${(maxColumns - 1) * TILE_GRID_GAP_PX
+        const evenSplit = `calc((100% - ${(maxColumns - 1) * TILE_GRID_COLUMN_GAP_PX
           }px) / ${maxColumns})`
         return `repeat(auto-fit, minmax(max(${minTileWidth}px, ${evenSplit}), 1fr))`
       }, [minTileWidth, maxColumns, captureMode])
@@ -302,7 +313,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
             style={{
               display: "grid",
               gridTemplateColumns: gridTemplate,
-              gap: TILE_GRID_GAP_PX,
+              gap: `${TILE_GRID_ROW_GAP_PX}px ${TILE_GRID_COLUMN_GAP_PX}px`,
               flex: 1,
               minHeight: 0,
               overflowY: captureMode ? "visible" : "auto",
