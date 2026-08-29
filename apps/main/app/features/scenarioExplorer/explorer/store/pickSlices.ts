@@ -132,7 +132,6 @@ export const RESILIENCE_PERSIST_KEYS = [
   "resilienceShowCellNumbers",
   "resiliencePrimaryOutcomeCode",
   "resilienceCompareOutcomeCodes",
-  "resilienceExpandedRegionalOutcomes",
   "resilienceTransposed",
 ] as const satisfies readonly (keyof ResilienceState)[]
 
@@ -258,7 +257,6 @@ const RESILIENCE_ACTION_KEYS = [
   "setResilienceShowCellNumbers",
   "setResiliencePrimaryOutcomeCode",
   "setResilienceCompareOutcomeCodes",
-  "setResilienceExpandedRegionalOutcomes",
   "setResilienceTransposed",
 ] as const satisfies readonly (keyof ResilienceSlice)[]
 

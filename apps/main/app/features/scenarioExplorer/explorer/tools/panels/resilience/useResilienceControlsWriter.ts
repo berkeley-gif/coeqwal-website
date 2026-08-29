@@ -23,7 +23,6 @@ export function useResilienceControlsWriter() {
     resilienceShowCellNumbers: showCellNumbers,
     resiliencePrimaryOutcomeCode: primaryOutcomeCode,
     resilienceCompareOutcomeCodes: compareOutcomeCodes,
-    resilienceExpandedRegionalOutcomes: expandedRegionalOutcomes,
     resilienceTransposed: transposed,
   } = useResilienceSlice()
 
@@ -40,7 +39,6 @@ export function useResilienceControlsWriter() {
         resilienceShowCellNumbers: showCellNumbers,
         resiliencePrimaryOutcomeCode: primaryOutcomeCode,
         resilienceCompareOutcomeCodes: compareOutcomeCodes,
-        resilienceExpandedRegionalOutcomes: expandedRegionalOutcomes,
         resilienceTransposed: transposed,
       }),
     [
@@ -53,7 +51,6 @@ export function useResilienceControlsWriter() {
       showCellNumbers,
       primaryOutcomeCode,
       compareOutcomeCodes,
-      expandedRegionalOutcomes,
       transposed,
     ],
   )

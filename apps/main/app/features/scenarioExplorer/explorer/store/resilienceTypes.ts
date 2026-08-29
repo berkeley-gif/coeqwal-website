@@ -29,6 +29,5 @@ export interface ResilienceControlsState {
   showCellNumbers: boolean
   primaryOutcomeCode: string | null
   compareOutcomeCodes: string[]
-  expandedRegionalOutcomes: string[]
   transposed: boolean
 }

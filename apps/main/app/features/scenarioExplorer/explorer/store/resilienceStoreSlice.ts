@@ -32,7 +32,6 @@ export const DEFAULT_RESILIENCE_CONTROLS: ResilienceControlsState = {
   showCellNumbers: false,
   primaryOutcomeCode: null,
   compareOutcomeCodes: [],
-  expandedRegionalOutcomes: [],
   transposed: false,
 }
 
@@ -49,7 +48,6 @@ export interface ResilienceState {
   resilienceShowCellNumbers: boolean
   resiliencePrimaryOutcomeCode: string | null
   resilienceCompareOutcomeCodes: string[]
-  resilienceExpandedRegionalOutcomes: string[]
   resilienceTransposed: boolean
 }
 
@@ -72,7 +70,6 @@ export interface ResilienceActions {
   setResilienceShowCellNumbers: (show: boolean) => void
   setResiliencePrimaryOutcomeCode: (code: string | null) => void
   setResilienceCompareOutcomeCodes: (codes: string[]) => void
-  setResilienceExpandedRegionalOutcomes: (codes: string[]) => void
   setResilienceTransposed: (transposed: boolean) => void
 }
 
@@ -96,9 +93,6 @@ export const resilienceInitialState: ResilienceState = {
   resilienceCompareOutcomeCodes: [
     ...DEFAULT_RESILIENCE_CONTROLS.compareOutcomeCodes,
   ],
-  resilienceExpandedRegionalOutcomes: [
-    ...DEFAULT_RESILIENCE_CONTROLS.expandedRegionalOutcomes,
-  ],
   resilienceTransposed: DEFAULT_RESILIENCE_CONTROLS.transposed,
 }
 
@@ -113,7 +107,6 @@ export type ResilienceControlFields = Pick<
   | "resilienceShowCellNumbers"
   | "resiliencePrimaryOutcomeCode"
   | "resilienceCompareOutcomeCodes"
-  | "resilienceExpandedRegionalOutcomes"
   | "resilienceTransposed"
 >
 
@@ -131,7 +124,6 @@ export function selectResilienceControls(
     showCellNumbers: state.resilienceShowCellNumbers,
     primaryOutcomeCode: state.resiliencePrimaryOutcomeCode,
     compareOutcomeCodes: state.resilienceCompareOutcomeCodes,
-    expandedRegionalOutcomes: state.resilienceExpandedRegionalOutcomes,
     transposed: state.resilienceTransposed,
   }
 }
@@ -163,9 +155,6 @@ export function applyResilienceControlsPatch(
   }
   if (patch.compareOutcomeCodes !== undefined) {
     state.resilienceCompareOutcomeCodes = patch.compareOutcomeCodes
-  }
-  if (patch.expandedRegionalOutcomes !== undefined) {
-    state.resilienceExpandedRegionalOutcomes = patch.expandedRegionalOutcomes
   }
   if (patch.transposed !== undefined) {
     state.resilienceTransposed = patch.transposed
@@ -249,11 +238,6 @@ export function createResilienceSlice(
     setResilienceCompareOutcomeCodes: (codes) =>
       set((state) => {
         state.resilienceCompareOutcomeCodes = codes
-      }),
-
-    setResilienceExpandedRegionalOutcomes: (codes) =>
-      set((state) => {
-        state.resilienceExpandedRegionalOutcomes = codes
       }),
 
     setResilienceTransposed: (transposed) =>
