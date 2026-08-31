@@ -167,27 +167,42 @@ export default function AboutPage() {
         >
           <Typography
             variant="body1"
-            sx={{ 
+            sx={{
               maxSize: themeValues.spacing.paragraphMaxWidth.default,
-              paddingBottom: "25px"
+              paddingBottom: "25px",
             }}
           >
-            COEQWAL uses CalSim3 in a way that differs from its typical application. Agencies generally develop a small number of CalSim3 model scenarios to inform specific regulatory decisions and planning processes. COEQWAL instead takes an exploratory approach, using a wide range of scenarios to understand how California&apos;s water system responds to different management strategies and climate futures.
+            COEQWAL uses CalSim3 in a way that differs from its typical
+            application. Agencies generally develop a small number of CalSim3
+            model scenarios to inform specific regulatory decisions and planning
+            processes. COEQWAL instead takes an exploratory approach, using a
+            wide range of scenarios to understand how California&apos;s water
+            system responds to different management strategies and climate
+            futures.
           </Typography>
           <Typography
             variant="body1"
             sx={{
               maxSize: themeValues.spacing.paragraphMaxWidth.default,
-              paddingBottom: "25px"
+              paddingBottom: "25px",
             }}
           >
-            COEQWAL scenarios reflect generalized variations in system operations and climate. They were developed through collaborative engagement with community partners. Scenarios are not calibrated to specific outcomes, locations, regulatory requirements, or agency priorities (beyond those already represented in CalSim3), and are not intended for direct use in legal or regulatory proceedings.
+            COEQWAL scenarios reflect generalized variations in system
+            operations and climate. They were developed through collaborative
+            engagement with community partners. Scenarios are not calibrated to
+            specific outcomes, locations, regulatory requirements, or agency
+            priorities (beyond those already represented in CalSim3), and are
+            not intended for direct use in legal or regulatory proceedings.
           </Typography>
           <Typography
             variant="body1"
             sx={{ maxSize: themeValues.spacing.paragraphMaxWidth.default }}
           >
-            COEQWAL is an independent research project that does not advocate for any specific policy, water allocation strategy, or action. COEQWAL aims to broaden access to CalSim3 model data, build understanding of California&apos;s water system, and support broader participation in decisions about California&apos;s water future.
+            COEQWAL is an independent research project that does not advocate
+            for any specific policy, water allocation strategy, or action.
+            COEQWAL aims to broaden access to CalSim3 model data, build
+            understanding of California&apos;s water system, and support broader
+            participation in decisions about California&apos;s water future.
           </Typography>
         </Box>
       </Box>
