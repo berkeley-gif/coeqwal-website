@@ -1,16 +1,18 @@
 /**
  * Outcome Level Methodology documentation
  *
- * Maps each outcome-level-methodology PDF (in
- * public/documents/Outcome_Level_Methodology/) to a stable id and human-readable
- * label, so the UI never has to expose a raw filename or url slug.
+ * Maps each outcome-level-methodology HTML page (in
+ * public/documents/Outcome_Level_Methodology/) to a stable id and
+ * human-readable label, so the UI never has to expose a raw filename or url
+ * slug. Each HTML page links to its underlying PDF, which now lives in the
+ * Outcome_Level_Methodology/pdf/ subfolder.
  *
  * These documents are standalone reference material — they are not resolved
  * against the scenario API/hooks, so no scenario_id/short_code mapping is
  * involved here.
  *
- * To add a new outcome level doc: drop the PDF in that folder and add one
- * entry below.
+ * To add a new outcome level doc: drop the HTML file in that folder and add
+ * one entry below.
  */
 
 export interface OutcomeLevelDocument {
@@ -22,54 +24,54 @@ export interface OutcomeLevelDocument {
   file: string
 }
 
-/** Base path (under public/) where outcome level methodology PDFs are served from. */
+/** Base path (under public/) where outcome level methodology pages are served from. */
 const OUTCOME_LEVEL_DOCS_PATH = "/documents/Outcome_Level_Methodology"
 
 export const OUTCOME_LEVEL_DOCUMENTS: OutcomeLevelDocument[] = [
   {
     id: "community-water-deliveries",
-    label: "Community water deliveries outcome level brief",
-    file: "community-water-deliveries.pdf",
+    label: "Community surface water",
+    file: "community-water-systems.html",
   },
   {
     id: "agricultural-revenues",
-    label: "Agricultural revenues outcome level brief",
-    file: "agricultural-revenues.pdf",
+    label: "Agricultural revenue",
+    file: "agricultural-revenue.html",
   },
   {
     id: "environmental-flows",
-    label: "Environmental flows outcome level brief",
-    file: "environmental-flows.pdf",
+    label: "Environmental flows",
+    file: "environmental-flows.html",
   },
   {
     id: "winter-run-chinook-salmon",
-    label: "Winter run Chinook salmon outcome level brief",
-    file: "winter-run-chinook-salmon.pdf",
+    label: "Winter-run salmon",
+    file: "winter-run-salmon.html",
   },
   {
     id: "bay-delta-estuary-ecology",
-    label: "Bay Delta estuary ecology outcome level brief",
-    file: "bay-delta-estuary-ecology.pdf",
+    label: "Delta estuary ecology",
+    file: "delta-estuary-ecology.html",
   },
   {
     id: "freshwater-for-in-delta-uses",
-    label: "Freshwater for in-Delta uses outcome level brief",
-    file: "freshwater-for-in-delta-uses.pdf",
+    label: "Freshwater for in-Delta uses",
+    file: "freshwater-for-in-delta-uses.html",
   },
   {
     id: "freshwater-for-delta-exports",
-    label: "Freshwater for Delta exports outcome level brief",
-    file: "freshwater-for-delta-exports.pdf",
+    label: "Freshwater for Delta exports",
+    file: "freshwater-for-delta-exports.html",
   },
   {
     id: "groundwater-storage",
-    label: "Groundwater storage outcome level brief",
-    file: "groundwater-storage.pdf",
+    label: "Groundwater storage",
+    file: "groundwater-storage.html",
   },
   {
     id: "reservoir-storage",
-    label: "Reservoir storage outcome level brief",
-    file: "reservoir-storage.pdf",
+    label: "Reservoir storage",
+    file: "reservoir-storage.html",
   },
 ]
 
