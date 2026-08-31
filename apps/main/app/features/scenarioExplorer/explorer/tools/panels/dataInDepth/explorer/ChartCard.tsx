@@ -31,12 +31,14 @@ import { WYT_LABELS } from "../config/wytFilter"
 import { linearTrendPerYear, MOCK_YEARS } from "../config/mockDataEngine"
 import { axisLabelFor, toBars, toBoxes, toSeries } from "./chartMarks"
 import { SaveSnapshotButton } from "../../../chrome/actions/SaveSnapshotButton"
+import { InlineTourAnchor, useTourAnchor } from "../../../tour"
 import { useDataShareCapture } from "../hooks/useDataShareCapture"
 
 const CHART_HEIGHT = 340
 
 export default function ChartCard() {
   const theme = useTheme()
+  const chartAnchorRef = useTourAnchor("data.chart")
   const { compareBy, distKind, selectedWaterYearTypes } = useDataSlice()
   const data = useVariableData()
 
@@ -344,10 +346,12 @@ export default function ChartCard() {
           </Tooltip>
         )}
         <Box sx={{ flex: 1 }} />
-        <SaveSnapshotButton
-          disabled={!share.canSnapshot}
-          onClick={share.onSaveSnapshot}
-        />
+        <InlineTourAnchor anchorId="data.saveSnapshot">
+          <SaveSnapshotButton
+            disabled={!share.canSnapshot}
+            onClick={share.onSaveSnapshot}
+          />
+        </InlineTourAnchor>
       </Box>
 
       {/* Interpretive summary sentence (never from series that cannot be shown) */}
@@ -396,6 +400,7 @@ export default function ChartCard() {
           the D3 internals carry no accessible semantics of their own,
           and the per-chart data alternative is the CSV export. */}
       <Box
+        ref={chartAnchorRef}
         {...(hasMembers ? { role: "img", "aria-label": figureTitle } : {})}
         sx={{ width: "100%", height: CHART_HEIGHT }}
       >

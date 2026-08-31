@@ -16,6 +16,7 @@ import listTour from "../panels/list/tour"
 import radarTour from "../panels/radar/tour"
 import barTour from "../panels/bar/tour"
 import equityTour from "../panels/equity/tour"
+import dataTour from "../panels/dataInDepth/tour"
 import type { TourTool } from "./registry"
 import type { TourModule } from "./types"
 
@@ -24,4 +25,5 @@ export const TOUR_MODULES: Record<TourTool, TourModule> = {
   radar: radarTour,
   bar: barTour,
   equity: equityTour,
+  data: dataTour,
 }

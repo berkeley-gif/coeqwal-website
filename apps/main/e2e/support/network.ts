@@ -13,6 +13,14 @@ const API_URL_PATTERN =
 const RECORDING = !!process.env.RECORD_FIXTURES
 
 export async function setupNetwork(page: Page): Promise<void> {
+  // The Data in Depth tour auto-starts on the tool's first visit and its
+  // scrim would sit over the controls every other spec drives. Those specs
+  // test the tool, not the tour, so the shared setup marks it seen;
+  // did-tour.spec.ts clears the key to exercise the auto-start itself.
+  await page.addInitScript(() => {
+    window.localStorage.setItem("coeqwal-tour-seen-data", "true")
+  })
+
   // Registered first, consulted last: catch-all abort for external requests
   // the HAR route below does not claim.
   await page.route(
