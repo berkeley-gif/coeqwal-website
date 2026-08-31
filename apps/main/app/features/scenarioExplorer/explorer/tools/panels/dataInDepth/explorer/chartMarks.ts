@@ -10,7 +10,12 @@ import type {
   CategoricalBarDatum,
   ExceedanceSeries,
 } from "@repo/viz"
-import { toExceedancePoints, type SeriesStats } from "../config/mockDataEngine"
+import {
+  linearTrendPerYear,
+  toExceedancePoints,
+  type SeriesStats,
+} from "../config/mockDataEngine"
+import { formatValue } from "../hooks/interpretiveText"
 import type { VariableDef } from "../config/variableRegistry"
 
 /** Long form of the thousand acre-feet unit for y-axis titles. */
@@ -99,4 +104,55 @@ export function toSeries(
     points: toExceedancePoints(m.series),
     color: colors[i],
   }))
+}
+
+/** One panel of the Stats chart style. */
+export interface StatsPanelSpec {
+  key: "mean" | "cv" | "trend"
+  /** Panel caption on screen, and the panel's y-axis label in the composed
+   *  export, so a stitched figure still says what each panel shows. */
+  title: string
+  /** Y-axis label on screen (the full unit sentence for the mean panel). */
+  yLabel: string
+  format: (v: number) => string
+  valueOf: (m: MarkMember) => number
+}
+
+/**
+ * The side-by-side summary panels of the Stats chart style: mean and CV for
+ * every variable, plus the linear level trend (ft/yr) on the groundwater
+ * level view. One builder shared by the live ChartCard and the off-screen
+ * capture, so a Stats export cannot disagree with the Stats card. Pure.
+ */
+export function buildStatsPanels(
+  view: string,
+  unit: string,
+  axisLabel: string,
+): StatsPanelSpec[] {
+  const panels: StatsPanelSpec[] = [
+    {
+      key: "mean",
+      title: `Mean (${unit})`,
+      yLabel: axisLabel,
+      format: (v) => formatValue(v, unit),
+      valueOf: (m) => m.stats.mean,
+    },
+    {
+      key: "cv",
+      title: "CV",
+      yLabel: "CV",
+      format: (v) => v.toFixed(2),
+      valueOf: (m) => m.stats.cv,
+    },
+  ]
+  if (view === "level") {
+    panels.push({
+      key: "trend",
+      title: "Trend (ft/yr)",
+      yLabel: "ft/yr",
+      format: (v) => formatValue(v, "ft/yr"),
+      valueOf: (m) => linearTrendPerYear(m.series),
+    })
+  }
+  return panels
 }
