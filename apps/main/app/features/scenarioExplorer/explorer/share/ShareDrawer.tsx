@@ -273,9 +273,13 @@ function ShareDrawerContent() {
                 mt: 4,
               }}
             >
-              No scenarios staged.
-              <br />
-              Click the share icon on a scenario to add it.
+              No results staged for sharing yet. Go to the Explore tab and find
+              scenario results that you want to share by clicking on the{" "}
+              <icons.IosShare
+                sx={{ fontSize: "1rem", ml: 0.5 }}
+                fontWeight={600}
+              />
+              .
             </Typography>
           ) : (
             shareItems.map((item) => (

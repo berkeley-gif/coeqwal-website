@@ -50,28 +50,28 @@ export const HYDROCLIMATES: ReadonlyArray<HydroclimateFuture> = [
   {
     title: "Historical hydroclimate (baseline)",
     description:
-      "Temperature, precipitation, and streamflow patterns reflect historical conditions",
+      "Temperature, precipitation, and flow patterns reflect historical conditions, adjusted for recent climate change",
   },
   {
-    title: "Moderate-dry climate risk",
+    title: "Moderate-dry climate stress",
     description:
-      "Warmer and slightly drier conditions (\u22121% runoff change) - 50th percentile level of concern",
+      "Slightly warmer and moderately wetter conditions (+3.5% flow change) and assuming 15 cm of sea level rise",
   },
   {
-    title: "Moderate-wet climate risk",
+    title: "Moderate-wet climate stress",
     description:
-      "Warmer and wetter conditions (+7% runoff change) - 44th percentile level of concern",
+      "Moderately warmer with little change in precipitation (-1% flow change) and assuming 15 cm of sea level rise",
     dimmed: true,
   },
   {
-    title: "High climate risk",
+    title: "High climate stress",
     description:
-      "Warmer and much drier conditions (\u22127% runoff change) - 95th percentile level of concern",
+      "Much warmer and moderately drier conditions (-6.5% flow change) and assuming 30 cm of sea level rise",
   },
   {
-    title: "Extreme climate risk",
+    title: "Extreme climate stress",
     description:
-      "Much warmer and extremely drier conditions (\u221221% runoff change) - 99th percentile level of concern",
+      "Much warmer and much drier conditions (-19.2% flow change) and assuming 30 cm of sea level rise",
     dimmed: true,
   },
 ] as const
@@ -114,8 +114,7 @@ export const KEY_OUTCOMES: ReadonlyArray<KeyOutcome> = [
   },
   {
     outcomeCode: "FW_EXP",
-    description:
-      "Volume of availability of freshwater for export to other regions",
+    description: "Volume of freshwater for export to other regions",
   },
   {
     outcomeCode: "RES_STOR",
@@ -214,7 +213,7 @@ export const SCENARIO_QUESTIONS: ReadonlyArray<ScenarioQuestion> = [
   {
     title: "How does climate change shift the picture?",
     description:
-      "Select scenarios that represent current operations and alternative management strategies under different hydroclimates. Consider how outcomes change with increasing levels of climate risk.",
+      "Select scenarios that represent current operations and alternative management strategies under different hydroclimates. Consider how outcomes change with increasing levels of climate stress.",
   },
 ] as const
 

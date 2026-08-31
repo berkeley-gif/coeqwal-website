@@ -17,6 +17,7 @@ import { ShareRadarLiveProvider } from "../ShareRadarLiveProvider"
 import TrayCard, { TRAY_CARD_WIDTH } from "../components/TrayCard"
 import StoryCanvas from "../components/StoryCanvas"
 import ShareExportBar from "../components/ShareExportBar"
+import { GlossaryTermLink } from "../../../../glossary"
 
 /**
  * Per-hydroclimate radar fields for share. See `buildShareRadarLiveDataFields`
@@ -141,20 +142,34 @@ function SharePanelContent() {
         }}
       >
         <Typography variant="h3" component="h2" color="text.secondary">
-          Share
+          What scenarios align with your interests?
         </Typography>
         <Typography
           sx={{
             fontSize: "0.9375rem",
             color: theme.palette.text.secondary,
             textAlign: "center",
-            maxWidth: 420,
+            maxWidth: 800,
             opacity: 0.8,
           }}
         >
-          No scenarios staged for sharing yet. Go to the Explore tab, find
-          scenarios that you want to share, and click the share icon on each
-          one.
+          Review snapshots of{" "}
+          <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink> to
+          access data, gain insights, and share what you have learned.
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: "0.9375rem",
+            color: theme.palette.text.secondary,
+            textAlign: "center",
+            maxWidth: 500,
+            opacity: 0.8,
+          }}
+        >
+          No results staged for sharing yet. Go to the Explore tab and find
+          scenario results that you want to share by clicking on the{" "}
+          <icons.IosShare sx={{ fontSize: "1rem", ml: 0.5 }} fontWeight={600} />
+          .
         </Typography>
         <Button
           variant="outlined"
@@ -199,6 +214,7 @@ function SharePanelContent() {
         <Box
           sx={{
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "space-between",
             gap: 2,
@@ -206,7 +222,20 @@ function SharePanelContent() {
           }}
         >
           <Typography variant="h3" component="h2" color="text.secondary">
-            Tell your water story
+            What scenarios align with your interests?
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: "0.9375rem",
+              color: theme.palette.text.secondary,
+              textAlign: "center",
+              maxWidth: 800,
+              opacity: 0.8,
+            }}
+          >
+            Review snapshots of{" "}
+            <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink> to
+            access data, gain insights, and share what you have learned.
           </Typography>
           {/* Clears the tray AND the story, and the store persists the empty
               state immediately. No confirm step, matching the drawer's
@@ -219,6 +248,12 @@ function SharePanelContent() {
               size="small"
               startIcon={<icons.Close sx={{ fontSize: "0.875rem" }} />}
               onClick={clearShareItems}
+              sx={{
+                textTransform: "none",
+                mt: 1,
+                color: theme.palette.text.secondary,
+                borderColor: theme.palette.text.secondary,
+              }}
             >
               Clear share tray
             </Button>

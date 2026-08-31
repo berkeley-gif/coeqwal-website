@@ -158,7 +158,7 @@ test("the share tab can clear the tray, and the empty state survives reload", as
   await clear.click()
 
   await expect(
-    page.getByText(/No scenarios staged for sharing yet/),
+    page.getByText(/No results staged for sharing yet/),
   ).toBeVisible()
   // The action clears the STORY too, not just the tray, so no orphaned story
   // card can outlive the items it was built from.
@@ -170,7 +170,7 @@ test("the share tab can clear the tray, and the empty state survives reload", as
 
   await page.reload()
   await expect(
-    page.getByText(/No scenarios staged for sharing yet/),
+    page.getByText(/No results staged for sharing yet/),
   ).toBeVisible()
 
   expect(errors).toEqual([])
