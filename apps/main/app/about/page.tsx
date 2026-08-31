@@ -6,7 +6,10 @@
  * Provides background information on funding and methodology
  */
 import React, { useEffect } from "react"
-import { useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { motion } from "@repo/motion"
+import { fadeIn } from "../lib/constants/motionAnimations"
+import { themeValues } from "@repo/ui/themes/theme"
 import { CenterImageText } from "../components/CenterImageText"
 import { TieredImageText } from "../components/TieredImageText"
 import { ScrollImageTextBlocks } from "../components/ScrollImageTextBlocks"
@@ -28,7 +31,7 @@ export default function AboutPage() {
     {
       imgSrc: "/images/about/approach-person-projector.png",
       imgAlt: "A person on a podium with a projection behind",
-      text: "Using CalSim, we simulate how these strategies affect water allocation outcomes – the patterns and amounts of water allocated to different water users and the environment – under a range of possible climate futures. We then convene community partners in workshops to receive feedback on the scenarios that are run and how they are interpreted.",
+      text: "Using CalSim3, we simulate how these management strategies affect water allocation outcomes – the patterns and amounts of water allocated to different water users and the environment – under a range of possible climate futures. We then convene community partners in workshops to receive feedback on the scenarios that are run and how they are interpreted.",
       imagePosition: "right",
     },
     {
@@ -108,7 +111,7 @@ export default function AboutPage() {
         ariaLabel="intro"
         backgroundColor={theme.palette.brand.panelMedium}
         bodyTextBold="COEQWAL – the Collaboratory for Equity in Water Allocation - "
-        bodyText="is a collaborative, community-engaged research project aimed at delivering actionable information for water management planning in California. Until now, water planning tools used by the state have been inaccessible to most communities, especially to those historically excluded from decision-making. COEQWAL is working to change that. "
+        bodyText="is a collaborative, community-engaged project led by researchers at the University of California aimed at delivering actionable information for water management planning in California. Until now, water planning tools used by the state have been inaccessible to most communities, especially to those historically excluded from decision-making. COEQWAL is working to change that."
         scrollToId="projectGoals"
         imgSrc="/images/about/collage-intro.png"
         imgAlt="A collage showing a person advocating on a podium, birds flying, a river flowing, a farmer holding grapes and a child looking at a salmon inside a fish tank"
@@ -133,6 +136,76 @@ export default function AboutPage() {
         backgroundSrc="/images/about/image-text-bg"
         imageTextBlocks={imageTextBlocks}
       />
+      <Box
+        component="section"
+        id="ourApproachAdditionalText"
+        aria-label="our approach additional text"
+        sx={{
+          pointerEvents: "auto",
+          background: theme.palette.blue.pale,
+          paddingTop: `${theme.layout.headerHeight + 25}px`,
+          paddingBottom: `${theme.layout.headerHeight + 25}px`,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "left",
+          justifyContent: "left",
+          color: theme.palette.blue.darkest,
+          paddingX: { xs: "24px", sm: "40px", md: "0" },
+        }}
+      >
+        <Box
+          component={motion.div}
+          initial="hidden"
+          whileInView="show"
+          variants={fadeIn}
+          sx={{
+            width: "100%",
+            maxWidth: "800px", // Max width of grid
+            margin: "60px auto", // Centers the grid horizontally
+            textAlign: "left",
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              maxSize: themeValues.spacing.paragraphMaxWidth.default,
+              paddingBottom: "25px",
+            }}
+          >
+            COEQWAL uses CalSim3 in a way that differs from its typical
+            application. Agencies generally develop a small number of CalSim3
+            model scenarios to inform specific regulatory decisions and planning
+            processes. COEQWAL instead takes an exploratory approach, using a
+            wide range of scenarios to understand how California&apos;s water
+            system responds to different management strategies and climate
+            futures.
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              maxSize: themeValues.spacing.paragraphMaxWidth.default,
+              paddingBottom: "25px",
+            }}
+          >
+            COEQWAL scenarios reflect generalized variations in system
+            operations and climate. They were developed through collaborative
+            engagement with community partners. Scenarios are not calibrated to
+            specific outcomes, locations, regulatory requirements, or agency
+            priorities (beyond those already represented in CalSim3), and are
+            not intended for direct use in legal or regulatory proceedings.
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ maxSize: themeValues.spacing.paragraphMaxWidth.default }}
+          >
+            COEQWAL is an independent research project that does not advocate
+            for any specific policy, water allocation strategy, or action.
+            COEQWAL aims to broaden access to CalSim3 model data, build
+            understanding of California&apos;s water system, and support broader
+            participation in decisions about California&apos;s water future.
+          </Typography>
+        </Box>
+      </Box>
       <LogoGrid
         logos={logos}
         title="Our Partners"
@@ -140,11 +213,11 @@ export default function AboutPage() {
         ariaLabel="our partners"
       />
       <CenteredTextSection
-        title="Get Involved"
+        title="Contact Us!"
         id="getInvolved"
-        ariaLabel="get involved"
+        ariaLabel="contact us"
         text="Do you have questions or feedback about our project? 
-                    Would you like to be involved in future phases of this work? Please email: "
+                    Would you like to be involved in future phases of this work? Please contact us at "
         email="coeqwal@berkeley.edu"
       />
     </>
