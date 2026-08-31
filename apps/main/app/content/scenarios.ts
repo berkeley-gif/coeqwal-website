@@ -102,39 +102,39 @@ export const HYDROCLIMATE_DEFS = [
     label: "Historical",
     shortLabel: "Historical",
     description:
-      "Temperature, precipitation, and streamflow patterns reflect historical conditions",
+      "Temperature, precipitation, and flow patterns reflect historical conditions, adjusted for recent climate change",
   },
   {
     value: "ecv",
     apiId: 7,
-    label: "Moderate-wet climate risk",
-    shortLabel: "Moderate risk",
+    label: "Moderate-wet climate stress",
+    shortLabel: "Moderate stress",
     description:
-      "44th percentile level of concern: warmer and wetter conditions (\u002b6.7% runoff change)",
+      "Slightly warmer and moderately wetter conditions (+3.5% flow change) and assuming 15 cm of sea level rise",
   },
   {
     value: "cc50",
     apiId: 3,
-    label: "Moderate-dry climate risk",
-    shortLabel: "Moderate-high risk",
+    label: "Moderate-dry climate stress",
+    shortLabel: "Moderate-high stress",
     description:
-      "50th percentile level of concern: warmer and slightly drier conditions (\u22121% runoff change)",
+      "Moderately warmer with little change in precipitation (-1% flow change) and assuming 15 cm of sea level rise",
   },
   {
     value: "cc95",
     apiId: 4,
-    label: "High climate risk",
-    shortLabel: "High risk",
+    label: "High climate stress",
+    shortLabel: "High stress",
     description:
-      "95th percentile level of concern: warmer and much drier conditions (\u22127% runoff change)",
+      "Much warmer and moderately drier conditions (-6.5% flow change) and assuming 30 cm of sea level rise",
   },
   {
     value: "tai",
     apiId: 5,
-    label: "Extreme climate risk",
-    shortLabel: "Extreme risk",
+    label: "Extreme climate stress",
+    shortLabel: "Extreme stress",
     description:
-      ">99th percentile level of concern: warmer and considerably drier conditions (\u221221% runoff change)",
+      "Much warmer and much drier conditions (-19.2% flow change) and assuming 30 cm of sea level rise",
   },
 ] as const satisfies readonly HydroclimateDef[]
 

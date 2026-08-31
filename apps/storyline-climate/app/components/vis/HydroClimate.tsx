@@ -26,28 +26,28 @@ type Model = {
 
 const models: Model[] = [
   {
-    model: "Moderate-wet climate risk",
+    model: "Moderate-wet climate stress",
     background: "#44ce1b",
     hover: "#35a915",
     text: "#fcfbfa",
     icon: WaterDropIcon,
   },
   {
-    model: "Moderate-dry climate risk",
+    model: "Moderate-dry climate stress",
     background: "#f7e379",
     hover: "#dfc94f",
     text: "#fcfbfa",
     icon: WbSunnyIcon,
   },
   {
-    model: "High climate risk",
+    model: "High climate stress",
     background: "#f2a134",
     hover: "#d8841f",
     text: "#fcfbfa",
     icon: WbSunnyIcon,
   },
   {
-    model: "Extreme climate risk",
+    model: "Extreme climate stress",
     background: "#e51f1f",
     hover: "#bf1616",
     text: "#fcfbfa",
@@ -56,17 +56,17 @@ const models: Model[] = [
 ]
 
 const modelQueryMap: Record<string, string> = {
-  "Moderate-wet climate risk": "Warmer & Wetter",
-  "Moderate-dry climate risk": "Warmer & Drier I",
-  "High climate risk": "Warmer & Drier II",
-  "Extreme climate risk": "Warmer & Drier III",
+  "Moderate-wet climate stress": "Warmer & Wetter",
+  "Moderate-dry climate stress": "Warmer & Drier I",
+  "High climate stress": "Warmer & Drier II",
+  "Extreme climate stress": "Warmer & Drier III",
 }
 
 export default function HydroClimateContainer() {
   const [flowData, setFlowData] = useState<FlowEntry[]>([])
   const [flowYExtents, setFlowYExtents] = useState<[number, number]>([0, 0])
   const [selectedModel, setSelectedModel] = useState<string>(
-    "Moderate-wet climate risk",
+    "Moderate-wet climate stress",
   )
   const selectedDataModel = modelQueryMap[selectedModel] ?? selectedModel
 
