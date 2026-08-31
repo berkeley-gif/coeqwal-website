@@ -56,13 +56,13 @@ const FLOW: FlowStep[] = [
     mode: "bar",
     icon: <BarChartIcon sx={{ fontSize: "1.1rem" }} />,
     label: "Bar",
-    purpose: "Compare outcomes side by side",
+    purpose: "Compare scenarios",
   },
   {
     mode: "radar",
     icon: <AdjustIcon sx={{ fontSize: "1.1rem" }} />,
     label: "Radar",
-    purpose: "Compare tradeoffs",
+    purpose: "Evaluate trade-offs",
   },
   {
     mode: "equity",
@@ -73,8 +73,8 @@ const FLOW: FlowStep[] = [
   {
     mode: "resilience",
     icon: <GridOnIcon sx={{ fontSize: "1.1rem" }} />,
-    label: "Resilience",
-    purpose: "Stress-test",
+    label: "Heatmap",
+    purpose: "Test climate stress",
   },
   {
     mode: "data",
