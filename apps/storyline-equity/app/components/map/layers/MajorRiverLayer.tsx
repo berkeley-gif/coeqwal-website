@@ -143,11 +143,13 @@ type SacramentoRiverData = typeof sacramentoRiver
 interface RiversLayerProps {
   visible: boolean
   progress: number
+  deemphasized?: boolean
 }
 
 export default function MajorRiversLayer({
   visible,
   progress,
+  deemphasized = false,
 }: RiversLayerProps) {
   const { mapRef } = useMap()
 
@@ -242,7 +244,7 @@ export default function MajorRiversLayer({
           paint={{
             "line-color": RIVER_TROUGH_COLOR,
             "line-width": 7,
-            "line-opacity": 0.6,
+            "line-opacity": deemphasized ? 0.18 : 0.6,
           }}
           layout={{
             "line-join": "round",
@@ -256,7 +258,7 @@ export default function MajorRiversLayer({
           paint={{
             "line-color": RIVER_BODY_COLOR,
             "line-width": 5,
-            "line-opacity": 1,
+            "line-opacity": deemphasized ? 0.24 : 1,
           }}
           layout={{
             "line-join": "round",
@@ -278,7 +280,7 @@ export default function MajorRiversLayer({
           paint={{
             "line-color": RIVER_TROUGH_COLOR,
             "line-width": 7,
-            "line-opacity": 0.6,
+            "line-opacity": deemphasized ? 0.18 : 0.6,
             "line-trim-offset": mainstemTrimOffset,
           }}
           layout={{
@@ -293,7 +295,7 @@ export default function MajorRiversLayer({
           paint={{
             "line-color": RIVER_BODY_COLOR,
             "line-width": 5,
-            "line-opacity": 1,
+            "line-opacity": deemphasized ? 0.24 : 1,
             "line-trim-offset": mainstemTrimOffset,
           }}
           layout={{

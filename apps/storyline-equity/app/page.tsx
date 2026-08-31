@@ -37,7 +37,8 @@ export default function StoryContainer() {
     activeSection === "GoldRush" ||
     activeSection === "Infrastructure" ||
     activeSection === "ClimateResilience" ||
-    activeSection === "Transparency"
+    activeSection === "Transparency" ||
+    activeSection === "Conclusion"
 
   return (
     <>

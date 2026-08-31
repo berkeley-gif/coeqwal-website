@@ -220,6 +220,8 @@ export {
   max,
   mean,
   min,
+  packEnclose,
+  packSiblings,
   range,
   scaleBand,
   scaleLinear,

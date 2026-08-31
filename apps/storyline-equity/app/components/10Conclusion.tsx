@@ -1,8 +1,15 @@
 "use client"
 
-import { ScrollElement, StickyScrollSection } from "@repo/scrollytelling"
+import {
+  ScrollElement,
+  StickyScrollSection,
+  useScrollProgress,
+} from "@repo/scrollytelling"
+import { motion, useTransform } from "@repo/motion"
 import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
+import { themeValues } from "@repo/ui/themes/theme"
+import { FloatingBubbles } from "./01Opener"
 
 const conclusionText = {
   en: {
@@ -11,26 +18,20 @@ const conclusionText = {
       [
         [
           {
-            text: "COEQWAL is a platform that brings a distributional equity lens to real-world water decisions.",
+            text: "Within COEQWAL's broader approach to equity, the shared evaluation framework helps us understand distributional equity: how benefits and impacts are shared across people, places, and ecosystems.",
           },
           {
-            text: "Making trade-offs visible through a shared framework, it gives communities, Tribes, and decision-makers a clearer understanding of who benefits, who is strained, and what alternatives exist.",
-          },
-          {
-            text: "COEQWAL creates a transparent, shared space where choices can be weighed using the same evidence.",
+            text: "The same water management strategy can produce very different conditions depending on where you are and what you depend on. This distributional lens complements other dimensions of equity by making those differences visible.",
           },
         ],
       ],
       [
         [
           {
-            text: "By translating complex model outputs into clear, comparable tiers, COEQWAL provides a shared language for understanding impacts, evaluating trade-offs, and advocating for more equitable water futures.",
+            text: "By making trade-offs and their impacts visible and comparable, COEQWAL gives communities, Tribes, and decision-makers a clearer understanding of who benefits, who faces greater risk, and what alternatives exist.",
           },
           {
-            text: "When the impacts on Tribes, rural communities, and ecosystems become visible, their needs can move from the margins to the center of decision-making.",
-          },
-          {
-            text: "With COEQWAL, users can carry clear, credible insights into hearings, planning meetings, and negotiations, advocating for water futures that are not only resilient but also fairer and more just.",
+            text: "These insights can help bring the needs of communities and ecosystems more clearly into water planning and decision-making.",
           },
         ],
       ],
@@ -48,6 +49,7 @@ export default function Conclusion() {
       stickyHeight="70vh"
       offset={["start start", "end center"]}
     >
+      <ConclusionVisual />
       <Box
         className="container text-section"
         sx={{
@@ -75,7 +77,7 @@ export default function Conclusion() {
                   <SectionTitle text={conclusionText.en.title} />
                 </Box>
               ) : null}
-              <Stack component="section" spacing={2}>
+              <Stack component="section" spacing={3.5}>
                 {groups.map((sentences, paragraphIndex) => (
                   <Box key={paragraphIndex} component="article">
                     <Paragraph blocks={sentences} />
@@ -87,5 +89,39 @@ export default function Conclusion() {
         })}
       </Box>
     </StickyScrollSection>
+  )
+}
+
+function ConclusionVisual() {
+  const progress = useScrollProgress()
+  const openerVisualOpacity = useTransform(progress, [0.64, 0.76], [0, 1])
+  const openerVisualScale = useTransform(progress, [0.64, 0.78], [0.82, 1])
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{
+        position: "fixed",
+        top: "50%",
+        right: "-1dvw",
+        width: "30dvw",
+        maxWidth: "52rem",
+        aspectRatio: "1 / 1",
+        y: "-50%",
+        opacity: openerVisualOpacity,
+        scale: openerVisualScale,
+        transformOrigin: "50% 50%",
+        pointerEvents: "none",
+      }}
+    >
+      <FloatingBubbles
+        iconColorsBySrc={{
+          "/map-icons/urban.svg": themeValues.palette.tiers.tier1,
+          "/map-icons/agriculture.svg": themeValues.palette.tiers.tier2,
+          "/map-icons/wetland.svg": themeValues.palette.tiers.tier3,
+          "/map-icons/salmon.svg": themeValues.palette.tiers.tier4,
+        }}
+      />
+    </motion.div>
   )
 }

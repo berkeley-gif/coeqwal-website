@@ -2,9 +2,14 @@
 
 import { ReactNode, useEffect, useRef } from "react"
 import { Box } from "@repo/ui/mui"
+import { motion } from "@repo/motion"
 import { Map, useMap } from "@repo/map"
 import "./mapboxControlStyles.css"
-import { useCameraView } from "../../../store"
+import {
+  useActiveSectionStore,
+  useCameraView,
+  useConclusionProgress,
+} from "../../../store"
 import { CALIFORNIA_VIEW } from "../config/cameraPresets"
 
 // ============================================================================
@@ -33,6 +38,12 @@ export default function MapInstance({
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const map = useMap()
   const cameraView = useCameraView()
+  const activeSection = useActiveSectionStore()
+  const conclusionProgress = useConclusionProgress()
+  const conclusionMapOpacity =
+    activeSection === "Conclusion"
+      ? 1 - Math.min(1, Math.max(0, (conclusionProgress - 0.48) / 0.16))
+      : 1
   const prevCameraRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -43,11 +54,27 @@ export default function MapInstance({
       cameraView.zoom,
       cameraView.bearing ?? 0,
       cameraView.pitch ?? 0,
+      cameraView.bounds?.flat().join(",") ?? "",
+      cameraView.boundsPadding
+        ? Object.values(cameraView.boundsPadding).join(",")
+        : "",
     ].join(":")
 
     if (prevCameraRef.current === cameraKey) return
 
     prevCameraRef.current = cameraKey
+
+    if (cameraView.bounds) {
+      map.mapRef.current.fitBounds(cameraView.bounds, {
+        padding: cameraView.boundsPadding,
+        bearing: cameraView.bearing ?? 0,
+        pitch: cameraView.pitch ?? 0,
+        duration: 1500,
+        easing: (t: number) => t * (2 - t),
+      })
+      return
+    }
+
     map.mapRef.current.easeTo({
       center: [cameraView.longitude, cameraView.latitude],
       zoom: cameraView.zoom,
@@ -72,20 +99,25 @@ export default function MapInstance({
         backgroundColor: "#172a48",
       }}
     >
-      <Map
-        mapboxToken={token}
-        mapStyle={"mapbox://styles/coeqwal/cmsizk292001101sr3mby7byk"}
-        //mapStyle={"mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"}
-        //mapStyle={EMPTY_MAP_STYLE as unknown as string}
-        initialViewState={CALIFORNIA_VIEW}
-        maxBounds={MAP_BOUNDS}
-        style={{ width: "100%", height: "100%" }}
-        interactive={false}
-        navigationControl={false}
-        dragPan={false}
+      <Box
+        component={motion.div}
+        animate={{ opacity: conclusionMapOpacity }}
+        transition={{ duration: 0.08, ease: "linear" }}
+        sx={{ position: "absolute", inset: 0 }}
       >
-        {children}
-      </Map>
+        <Map
+          mapboxToken={token}
+          mapStyle={"mapbox://styles/coeqwal/cmsizk292001101sr3mby7byk"}
+          initialViewState={CALIFORNIA_VIEW}
+          maxBounds={MAP_BOUNDS}
+          style={{ width: "100%", height: "100%" }}
+          interactive={false}
+          navigationControl={false}
+          dragPan={false}
+        >
+          {children}
+        </Map>
+      </Box>
     </Box>
   )
 }

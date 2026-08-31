@@ -21,6 +21,7 @@
     "@repo/state": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
+    "@repo/viz": "workspace:*",
     "d3": "^7.8.5",
     "next": "^15.2.1",
     "react": "^19.0.0",

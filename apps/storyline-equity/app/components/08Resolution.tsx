@@ -17,6 +17,7 @@ import cwsTiers from "../../public/data/community-water-systems/tiers.json"
 import agricultureTiers from "../../public/data/agriculture/tiers.json"
 import { FreshWaterColor } from "./helpers/colorPalette"
 import { useStorylineTierAssignments } from "./hooks/useStorylineTierAssignments"
+import { useUrbanIcon } from "../store"
 
 const optimalTierColor = themeValues.palette.tiers.tier1
 const atRiskTierColor = themeValues.palette.tiers.tier3
@@ -32,14 +33,6 @@ const tierNames: Record<number, string> = {
   3: "At-risk",
   4: "Critical",
 }
-const scenarioNames: Record<string, readonly string[]> = {
-  s0020: ["Current operations"],
-  s0035: [
-    "Prioritize human health delivery levels",
-    "to community water systems",
-  ],
-  s0027: ["Groundwater pumping limits", "in the Central Valley"],
-}
 const visualizationCopy = {
   focusTreemap: {
     title: "Drinking Water Delivery across Communities",
@@ -54,7 +47,7 @@ const visualizationCopy = {
   demandMet: {
     title: "Annual Drinking Water Demand Met for a Community",
     caption:
-      "Annual delivery is expressed as a percentage of drinking-water demand.",
+      "Annual delivery is expressed as a percentage of drinking-water demand. This outcome reflects the reliability of surface-water deliveries modeled in CalSim. It does not account for other water sources a community may use, such as groundwater, and therefore does not represent the community’s overall water security.",
   },
   distribution: {
     title: "Distribution of Annual Demand Met",
@@ -64,37 +57,36 @@ const visualizationCopy = {
   optimal: {
     title: "Optimal Water Delivery Conditions",
     caption:
-      "COEQWAL define thresholds to interpret and evaluate complex Calsim water allocation simulation outcomes.",
+      "COEQWAL researchers define thresholds that reflect the risk of water scarcity for communities and ecosystems.",
   },
   atRisk: {
     title: "At-risk Water Delivery Conditions",
-    caption:
-      "The same outcomes are evaluated against the At-risk decision boundaries.",
+    caption: "The same outcomes are evaluated against the At-risk thresholds.",
   },
   tierTreemap: {
-    title: "Drinking Water Outcome across Communities in Tiers",
+    title: "Drinking Water Outcome across Communities",
     caption:
-      "Each community retains its area, scaled by its typical annual surface-water delivery (median), and is colored by its assigned tiers.",
+      "Each community retains its area, scaled by its typical annual surface-water delivery (median), and is shown according to its performance category.",
   },
   cwsTierRows: {
-    title: "Community water systems grouped by tier",
+    title: "Community water systems grouped by performance",
     caption:
-      "Equal-size rectangles emphasize how many community water systems fall within each tier.",
+      "Equal-size rectangles show how many community water systems fall within each performance category",
   },
   crossGroupComparison: {
-    title: "Comparing tiers across water-user groups",
+    title: "Comparing performance across water-user groups",
     caption:
-      "Community water systems and agricultural areas are shown with equal-size units and a shared tier scale.",
+      "Community water systems and agricultural areas are shown as equal-size units using the same performance scale.",
   },
   continuousComparison: {
-    title: "Position within each tier",
+    title: "Position within each performance category",
     caption:
-      "Each unit moves to its continuous tier value, showing whether its outcome tends toward the better or worse edge of its discrete tier.",
+      "Each unit moves to its continuous performance value, showing whether its outcome tends toward the better or worse edge of its category.",
   },
   scenarioComparison: {
     title: "Comparing system-wide outcomes across management strategies",
     caption:
-      "Each scenario shows how the same locations are distributed across tiers, revealing changes in overall system performance and who benefits or faces greater risk.",
+      "Comparing this system-wide view across scenarios shows how performance shifts under different management strategies, making it easier to see who benefits, who is at risk, and how those patterns change under different decisions.",
   },
 } as const
 const narrativeMarkSx = {
@@ -115,18 +107,27 @@ const storyFrames = [
     paragraphs: [
       [
         {
-          text: "COEQWAL cannot undo historical inequities, but it can make their impacts visible and support more informed decisions.",
+          text: "So far, we've looked at how inequity in California water has developed over time.",
         },
         {
-          text: "Under the stress of climate change, communities and ecosystems can respond differently to water decisions.",
+          text: "While COEQWAL cannot undo historical inequities, it can make their impacts visible and support more informed and equitable decisions moving forward.",
         },
         {
-          text: "To understand how these responses shape water equity, COEQWAL simulates and evaluates the water allocation outcomes across different strategies, known as scenarios. ",
+          text: "COEQWAL is a platform and process designed to make California’s water trade-offs visible, comparable, and accessible.",
+        },
+        {
+          text: "Trade-offs are unavoidable in water management, and balancing the needs of all is not easy. But impacts do not have to fall hardest on the same groups.",
         },
       ],
       [
         {
-          text: "Let's focus on one community in one community water system in one scenario to see how COEQWAL interprets drinking water futures.",
+          text: "COEQWAL simulates and evaluates water allocation outcomes across different management strategies, known as scenarios, to show how communities and ecosystems may respond differently to water decisions.",
+        },
+        {
+          text: "Models can help us predict how communities and ecosystems will respond to the stress of climate change. To understand how these responses shape water equity, COEQWAL simulates a range of climate scenarios. It then evaluates water allocation outcomes across different strategies, known as scenarios.",
+        },
+        {
+          text: "To see how this works, let’s focus on community water systems.",
         },
       ],
     ],
@@ -139,19 +140,18 @@ const storyFrames = [
         },
         {
           segments: [
-            {
-              text: "For each year, COEQWAL compares annual surface-water ",
-            },
+            { text: "For each year, COEQWAL compares annual surface water " },
             { text: "delivery", mark: "strong" },
-            {
-              text: " with annual drinking-water ",
-            },
+            { text: " with annual drinking-water " },
             { text: "demand", mark: "strong" },
             { text: "." },
           ],
         },
         {
-          text: "Each comparison becomes the percentage of demand met, which together show the reliability of deliveries and the severity of shortfalls.",
+          text: "Each comparison becomes the percentage of drinking water demand met, showing how reliably a community’s water needs are met by surface water deliveries.",
+        },
+        {
+          text: "When deliveries fall below demand, this does not necessarily mean a community experiences a drinking water shortage. COEQWAL evaluates surface water deliveries from major water projects, not a community’s complete water supply portfolio, which may include other sources such as groundwater, local surface water, or stored water.",
         },
       ],
     ],
@@ -163,31 +163,30 @@ const storyFrames = [
         {
           segments: [
             {
-              text: "Looking at the possible range of annual allocation outcomes through Calsim simulations, COEQWAL researchers define ",
+              text: "Looking across the range of annual water allocation outcomes simulated by CalSim, COEQWAL researchers define ",
             },
             { text: "thresholds", mark: "strong" },
             {
-              text: " that reflect the risk of water scarcity for communities and ecosystems.",
+              text: " that reflect how water shortages affect communities and ecosystems.",
             },
           ],
         },
-
         {
-          text: "In community water systems, these thresholds take into account the reliability of water deliveries and the severity of shortfalls.",
+          text: "For community water systems, these thresholds consider how reliably modeled surface-water deliveries meet demand and the severity of shortfalls.",
         },
       ],
       [
         {
           segments: [
             { text: "For example, a community is considered " },
-            { text: "optimal", mark: "optimalName" },
+            { text: "Optimal", mark: "optimalName" },
             { text: " if " },
             {
-              text: "more than 90% of demand is met in at least 90 years, and no year falls below 70%",
+              text: "more than 90% of demand is met in at least 90 years of the 100 simulated years, and no year falls below 70% of demand",
               mark: "optimalDefinition",
             },
             {
-              text: ", which is not the case for this community in this scenario.",
+              text: ". This community does not meet those conditions under this scenario.",
             },
           ],
         },
@@ -197,19 +196,17 @@ const storyFrames = [
   {
     title: [
       { text: "Interpreting water allocation through " },
-      { text: "tiers", mark: "strong" },
+      { text: "outcome levels", mark: "strong" },
     ],
     paragraphs: [
       [
         {
           segments: [
-            {
-              text: "In COEQWAL, this community is considered ",
-            },
-            { text: "at risk", mark: "atRiskName" },
+            { text: "In this scenario, the community is considered " },
+            { text: "At-risk", mark: "atRiskName" },
             { text: ", meaning that " },
             {
-              text: "it is not meeting its water needs in a significant number of years",
+              text: "modeled surface-water deliveries fall short of demand in a significant number of simulated years",
               mark: "atRiskDefinition",
             },
             { text: "." },
@@ -219,9 +216,9 @@ const storyFrames = [
       [
         {
           segments: [
-            { text: "This is how COEQWAL translates these outcomes into " },
-            { text: "4 tiers", mark: "strong" },
-            { text: " \u2014 " },
+            { text: "COEQWAL uses " },
+            { text: "four performance categories", mark: "strong" },
+            { text: ": " },
             { text: "Optimal", mark: "tier1Name" },
             { text: ", " },
             { text: "Acceptable", mark: "tier2Name" },
@@ -233,25 +230,25 @@ const storyFrames = [
           ],
         },
         {
-          text: "The tiers offer a shared scale to compare conditions of different drinking water communities within one scenario, allowing us to understand overall performance of community water systems.",
+          text: "These outcome levels provide a shared scale for comparing conditions across community water system locations under the same scenario.",
         },
       ],
     ],
   },
   {
-    title: "Tiers: A common yardstick for distributional equity",
+    title: "A common yardstick for distributional equity",
     paragraphs: [
       [
         {
           text: "Communities and ecosystems experience water decisions in different ways.",
         },
         {
-          text: "Those outcomes are measured in different units and scales, making them difficult to compare.",
+          text: "Those outcomes are measured in different ways, such as community water deliveries, agricultural production, river flows, salmon abundance, salinity, and water storage, making them difficult to compare directly.",
         },
       ],
       [
         {
-          text: "COEQWAL translates these diverse outcomes into tiers, allowing us to see how impacts are distributed across communities and ecosystems.",
+          text: "COEQWAL uses a common framework to interpret these diverse outcomes, allowing us to compare conditions across communities, water users, and ecosystems.",
         },
       ],
     ],
@@ -260,10 +257,10 @@ const storyFrames = [
     paragraphs: [
       [
         {
-          text: "By placing outcomes for different water users on the same tier scale, COEQWAL can bring them together into a system-wide view.",
+          text: "By placing outcomes for different water users on a shared performance scale, COEQWAL can bring them together into a system-wide view.",
         },
         {
-          text: "Comparing that view across scenarios shows how the overall water system performs under different water- management strategies, making it easier to see who benefits, who is at risk, and how those patterns shift under different decisions. ",
+          text: "Comparing that view across scenarios shows how the overall water system performs under different water management strategies, making it easier to see who benefits, who is at risk, and how those patterns shift under different decisions.",
         },
       ],
     ],
@@ -296,6 +293,7 @@ type CwsTreemapDatum = {
 
 type TileLayout = { x: number; y: number; width: number; height: number }
 type ScenarioTierDatum = { id: string; tierLevel: number }
+type ScenarioTileLayout = TileLayout & { tierLevel: number }
 
 const comparisonTileSize = 14
 const comparisonTileGap = 3
@@ -372,11 +370,54 @@ function continuousTileLayouts(
   return layouts
 }
 
+function getMainScenarioTargetLayouts(
+  sourceLayouts: ReadonlyMap<string, ScenarioTileLayout>,
+  targetCws: readonly ScenarioTierDatum[],
+  targetAgriculture: readonly ScenarioTierDatum[],
+) {
+  const layouts = new Map<string, ScenarioTileLayout>()
+
+  const addGroup = (
+    group: "cws" | "agriculture",
+    records: readonly ScenarioTierDatum[],
+    xStart: number,
+  ) => {
+    ;([1, 2, 3, 4] as const).forEach((tierLevel) => {
+      records
+        .filter((record) => record.tierLevel === tierLevel)
+        .sort((a, b) => {
+          const aChanged =
+            sourceLayouts.get(`${group}:${a.id}`)?.tierLevel !== a.tierLevel
+          const bChanged =
+            sourceLayouts.get(`${group}:${b.id}`)?.tierLevel !== b.tierLevel
+
+          return Number(bChanged) - Number(aChanged) || a.id.localeCompare(b.id)
+        })
+        .forEach((record, index) => {
+          layouts.set(`${group}:${record.id}`, {
+            x: xStart + (index % 16) * (comparisonTileSize + comparisonTileGap),
+            y:
+              105 +
+              (tierLevel - 1) * 130 +
+              Math.floor(index / 16) * (comparisonTileSize + comparisonTileGap),
+            width: comparisonTileSize,
+            height: comparisonTileSize,
+            tierLevel,
+          })
+        })
+    })
+  }
+
+  addGroup("cws", targetCws, 105)
+  addGroup("agriculture", targetAgriculture, 405)
+  return layouts
+}
+
 export default function Resolution() {
   return (
     <StickyScrollSection
       id="frame-7"
-      ariaLabel="How COEQWAL translates modeled outcomes into tiers"
+      ariaLabel="How COEQWAL translates modeled outcomes into performance categories"
       height={`${frameCount * 200}vh`}
     >
       <Box
@@ -459,6 +500,7 @@ export default function Resolution() {
 
 function UnitVisualization() {
   const progress = useScrollProgress()
+  const urbanIcon = useUrbanIcon()
   const { byScenario: tierQueries } = useStorylineTierAssignments()
   const s0020TierResults = tierQueries.s0020.data?.results
   const cwsTierLocations = useMemo(
@@ -503,20 +545,11 @@ function UnitVisualization() {
           tierQueries.s0035.data?.results.AG_REV?.locations,
         ),
       },
-      s0027: {
-        cws: toScenarioTierData(
-          tierQueries.s0027.data?.results.CWS_DEL?.locations,
-        ),
-        agriculture: toScenarioTierData(
-          tierQueries.s0027.data?.results.AG_REV?.locations,
-        ),
-      },
     }),
     [
       agricultureTierLocations,
       cwsTierLocations,
       s0020TierResults,
-      tierQueries.s0027.data,
       tierQueries.s0035.data,
     ],
   )
@@ -628,6 +661,40 @@ function UnitVisualization() {
       }
     })
   }, [agricultureTierLocations])
+  const scenarioSourceLayouts = useMemo(() => {
+    const layouts = new Map<string, ScenarioTileLayout>()
+
+    scenarioComparisons.s0020.cws.forEach((record) => {
+      const layout = equalTileLayouts.get(record.id)
+      if (layout)
+        layouts.set(`cws:${record.id}`, {
+          ...layout,
+          tierLevel: record.tierLevel,
+        })
+    })
+    agricultureTiles.forEach((tile) => {
+      layouts.set(`agriculture:${tile.id}`, {
+        ...tile.discrete,
+        tierLevel: tile.tierLevel,
+      })
+    })
+
+    return layouts
+  }, [agricultureTiles, equalTileLayouts, scenarioComparisons.s0020.cws])
+  const scenarioTargetLayouts = useMemo(() => {
+    const targetCws = scenarioComparisons.s0035.cws.length
+      ? scenarioComparisons.s0035.cws
+      : scenarioComparisons.s0020.cws
+    const targetAgriculture = scenarioComparisons.s0035.agriculture.length
+      ? scenarioComparisons.s0035.agriculture
+      : scenarioComparisons.s0020.agriculture
+
+    return getMainScenarioTargetLayouts(
+      scenarioSourceLayouts,
+      targetCws,
+      targetAgriculture,
+    )
+  }, [scenarioComparisons, scenarioSourceLayouts])
   const occupiedContinuousTicks = useMemo(() => {
     const ticks = new Set([1, 2, 3, 4])
     const addTick = (value: number) => {
@@ -722,6 +789,12 @@ function UnitVisualization() {
   const outlineRadius = useTransform(progress, [0, 0.01, 0.025], [110, 12, 0])
   const outlineOpacity = useTransform(progress, [0, 0.025, 0.04], [1, 1, 0])
   const iconOpacity = useTransform(progress, [0, 0.012, 0.025], [1, 1, 0])
+  // The icon fades out before the outline circle (rx 110, centered at
+  // 360,460) morphs into the treemap, so it can be sized for that circle.
+  // urban.svg has built-in padding around the artwork, so iconContentFill
+  // compensates to get the visible artwork itself to fill 90% of the circle.
+  const openingIconContentFill = 0.75
+  const openingIconSize = (2 * 110 * 0.9) / openingIconContentFill
   const treemapOpacity = useTransform(
     progress,
     [0.025, 0.04, 0.105, 0.125],
@@ -733,22 +806,15 @@ function UnitVisualization() {
   // The storyline now moves directly from discrete tiers into scenario
   // comparison; keep the former continuous-tier morph dormant.
   const continuousTierProgress = useTransform(progress, [0, 1], [0, 0])
-  const scenarioComparisonProgress = useTransform(
-    progress,
-    [0.86, 0.89],
-    [0, 1],
-  )
-  const s0035RevealProgress = useTransform(progress, [0.89, 0.91], [0, 1])
-  const s0035MoveProgress = useTransform(progress, [0.91, 0.96], [0, 1])
-  const s0027RevealProgress = useTransform(progress, [0.96, 0.975], [0, 1])
-  const s0027MoveProgress = useTransform(progress, [0.975, 0.998], [0, 1])
+  const finalFrameCaptionProgress = useTransform(progress, [0.86, 0.89], [0, 1])
+  const scenarioOverlayOpacity = useTransform(progress, [0.865, 0.87], [0, 1])
+  const baselineTileOpacity = useTransform(progress, [0.865, 0.87], [1, 0])
+  const scenarioMoveProgress = useTransform(progress, [0.87, 0.97], [0, 1])
   const discreteTierGuideOpacity = useTransform(
     () => equalTileProgress.get() * (1 - continuousTierProgress.get()),
   )
-  const combinedTreemapOpacity = useTransform(
-    () =>
-      Math.max(treemapOpacity.get(), tierTreemapProgress.get()) *
-      (1 - scenarioComparisonProgress.get()),
+  const combinedTreemapOpacity = useTransform(() =>
+    Math.max(treemapOpacity.get(), tierTreemapProgress.get()),
   )
   const tierTreemapScale = useTransform(
     progress,
@@ -872,9 +938,9 @@ function UnitVisualization() {
     () =>
       agricultureLayoutProgress.get() *
       (1 - continuousTierProgress.get()) *
-      (1 - scenarioComparisonProgress.get()),
+      (1 - finalFrameCaptionProgress.get()),
   )
-  const scenarioComparisonTitleOpacity = scenarioComparisonProgress
+  const scenarioComparisonTitleOpacity = finalFrameCaptionProgress
   return (
     <Box
       component="figure"
@@ -981,6 +1047,7 @@ function UnitVisualization() {
                 tileCount={tiles.length}
                 layoutProgress={equalTileProgress}
                 continuousProgress={continuousTierProgress}
+                scenarioOpacity={baselineTileOpacity}
               />
             ) : null
           })}
@@ -1083,7 +1150,7 @@ function UnitVisualization() {
                 fontSize="12"
                 transform="rotate(-90 24 365)"
               >
-                Continuous tier
+                Continuous performance
               </text>
             </motion.g>
             <text
@@ -1115,6 +1182,7 @@ function UnitVisualization() {
                   continuous={tile.continuous}
                   color={tierColors[tile.tierLevel] ?? "#fcfbfa"}
                   continuousProgress={continuousTierProgress}
+                  scenarioOpacity={baselineTileOpacity}
                 />
               ) : null,
             )}
@@ -1131,6 +1199,13 @@ function UnitVisualization() {
           </motion.g>
         </motion.g>
 
+        <MovingScenarioTiles
+          sourceLayouts={scenarioSourceLayouts}
+          targetLayouts={scenarioTargetLayouts}
+          progress={scenarioMoveProgress}
+          opacity={scenarioOverlayOpacity}
+        />
+
         <motion.rect
           x={outlineX}
           y={outlineY}
@@ -1142,17 +1217,24 @@ function UnitVisualization() {
           strokeWidth="7"
           style={{ opacity: outlineOpacity }}
         />
-        <motion.image
-          href="/map-icons/urban/water_user_urban-01.svg"
-          x="285"
-          y="385"
-          width="150"
-          height="150"
-          style={{
-            opacity: iconOpacity,
-            filter: "drop-shadow(0 14px 22px rgba(0, 0, 0, 0.35))",
-          }}
-        />
+        <foreignObject
+          x={360 - openingIconSize / 2}
+          y={460 - openingIconSize / 2}
+          width={openingIconSize}
+          height={openingIconSize}
+        >
+          <motion.div
+            style={{
+              width: "100%",
+              height: "100%",
+              opacity: iconOpacity,
+              backgroundColor: tierColors[1],
+              mask: `url(${urbanIcon}) center / contain no-repeat`,
+              WebkitMask: `url(${urbanIcon}) center / contain no-repeat`,
+              filter: "drop-shadow(0 14px 22px rgba(0, 0, 0, 0.35))",
+            }}
+          />
+        </foreignObject>
 
         <motion.g
           style={{ opacity: demandChartOpacity }}
@@ -1629,59 +1711,6 @@ function UnitVisualization() {
           </motion.g>
         </motion.g>
 
-        <motion.g style={{ opacity: scenarioComparisonProgress }}>
-          <MiniScenarioTierPanel
-            scenarioId="s0020"
-            x={42}
-            y={180}
-            width={286}
-            height={380}
-            cws={scenarioComparisons.s0020.cws}
-            agriculture={scenarioComparisons.s0020.agriculture}
-            revealProgress={scenarioComparisonProgress}
-          />
-          <MiniScenarioTierPanel
-            scenarioId="s0035"
-            x={382}
-            y={82}
-            width={308}
-            height={300}
-            cws={scenarioComparisons.s0035.cws}
-            agriculture={scenarioComparisons.s0035.agriculture}
-            revealProgress={s0035RevealProgress}
-            showTiles={false}
-          />
-          <MovingScenarioTiles
-            source={{ x: 42, y: 180, width: 286, height: 380 }}
-            target={{ x: 382, y: 82, width: 308, height: 300 }}
-            sourceCws={scenarioComparisons.s0020.cws}
-            sourceAgriculture={scenarioComparisons.s0020.agriculture}
-            targetCws={scenarioComparisons.s0035.cws}
-            targetAgriculture={scenarioComparisons.s0035.agriculture}
-            progress={s0035MoveProgress}
-          />
-          <MiniScenarioTierPanel
-            scenarioId="s0027"
-            x={382}
-            y={410}
-            width={308}
-            height={300}
-            cws={scenarioComparisons.s0027.cws}
-            agriculture={scenarioComparisons.s0027.agriculture}
-            revealProgress={s0027RevealProgress}
-            showTiles={false}
-          />
-          <MovingScenarioTiles
-            source={{ x: 42, y: 180, width: 286, height: 380 }}
-            target={{ x: 382, y: 410, width: 308, height: 300 }}
-            sourceCws={scenarioComparisons.s0020.cws}
-            sourceAgriculture={scenarioComparisons.s0020.agriculture}
-            targetCws={scenarioComparisons.s0027.cws}
-            targetAgriculture={scenarioComparisons.s0027.agriculture}
-            progress={s0027MoveProgress}
-          />
-        </motion.g>
-
         <VisualizationTitleOverlay
           {...visualizationCopy.focusTreemap}
           opacity={focusTreemapTitleOpacity}
@@ -1725,116 +1754,49 @@ function UnitVisualization() {
         <VisualizationTitleOverlay
           {...visualizationCopy.scenarioComparison}
           opacity={scenarioComparisonTitleOpacity}
-          x={42}
+          x={98}
         />
       </Box>
     </Box>
   )
 }
 
-type MiniScenarioBounds = {
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
-const miniScenarioLabelWidth = 72
-const miniScenarioHeaderHeight = 48
-const miniScenarioFooterHeight = 42
-
-function getMiniScenarioTileLayouts(
-  bounds: MiniScenarioBounds,
-  cws: readonly ScenarioTierDatum[],
-  agriculture: readonly ScenarioTierDatum[],
-) {
-  const labelWidth = miniScenarioLabelWidth
-  const headerHeight = miniScenarioHeaderHeight
-  const footerHeight = miniScenarioFooterHeight
-  const plotTop = bounds.y + headerHeight
-  const plotHeight = bounds.height - headerHeight - footerHeight
-  const rowHeight = plotHeight / 4
-  const plotLeft = bounds.x + labelWidth
-  const plotWidth = bounds.width - labelWidth
-  const groupWidth = plotWidth / 2
-  const tileSize = 6
-  const tileGap = 1.5
-  const columns = Math.max(
-    1,
-    Math.floor((groupWidth - 12) / (tileSize + tileGap)),
-  )
-  const layouts = new Map<string, TileLayout & { tierLevel: number }>()
-
-  const addGroup = (
-    group: "cws" | "agriculture",
-    records: readonly ScenarioTierDatum[],
-    groupX: number,
-  ) => {
-    ;([1, 2, 3, 4] as const).forEach((tierLevel) => {
-      records
-        .filter((record) => record.tierLevel === tierLevel)
-        .forEach((record, index) => {
-          layouts.set(`${group}:${record.id}`, {
-            x: groupX + 6 + (index % columns) * (tileSize + tileGap),
-            y:
-              plotTop +
-              (tierLevel - 1) * rowHeight +
-              8 +
-              Math.floor(index / columns) * (tileSize + tileGap),
-            width: tileSize,
-            height: tileSize,
-            tierLevel,
-          })
-        })
-    })
-  }
-
-  addGroup("cws", cws, plotLeft)
-  addGroup("agriculture", agriculture, plotLeft + groupWidth)
-  return layouts
-}
-
 function MovingScenarioTiles({
-  source,
-  target,
-  sourceCws,
-  sourceAgriculture,
-  targetCws,
-  targetAgriculture,
+  sourceLayouts,
+  targetLayouts,
   progress,
+  opacity,
 }: {
-  source: MiniScenarioBounds
-  target: MiniScenarioBounds
-  sourceCws: readonly ScenarioTierDatum[]
-  sourceAgriculture: readonly ScenarioTierDatum[]
-  targetCws: readonly ScenarioTierDatum[]
-  targetAgriculture: readonly ScenarioTierDatum[]
+  sourceLayouts: ReadonlyMap<string, ScenarioTileLayout>
+  targetLayouts: ReadonlyMap<string, ScenarioTileLayout>
   progress: MotionValue<number>
+  opacity: MotionValue<number>
 }) {
-  const sourceLayouts = useMemo(
-    () => getMiniScenarioTileLayouts(source, sourceCws, sourceAgriculture),
-    [source, sourceAgriculture, sourceCws],
-  )
-  const targetLayouts = useMemo(
-    () => getMiniScenarioTileLayouts(target, targetCws, targetAgriculture),
-    [target, targetAgriculture, targetCws],
+  const orderedTiles = [...targetLayouts.entries()].sort(
+    ([aKey, a], [bKey, b]) => {
+      const aSource = sourceLayouts.get(aKey) ?? a
+      const bSource = sourceLayouts.get(bKey) ?? b
+      return (
+        Number(aSource.tierLevel !== a.tierLevel) -
+          Number(bSource.tierLevel !== b.tierLevel) || aKey.localeCompare(bKey)
+      )
+    },
   )
 
   return (
-    <g>
-      {[...targetLayouts.entries()].map(([key, targetLayout]) => {
-        const sourceLayout = sourceLayouts.get(key)
+    <motion.g style={{ opacity }}>
+      {orderedTiles.map(([key, target]) => {
+        const source = sourceLayouts.get(key) ?? target
         return (
           <MovingScenarioTile
-            key={`s0020-to-s0035-${key}`}
-            source={sourceLayout ?? targetLayout}
-            target={targetLayout}
+            key={`scenario-move-${key}`}
+            source={source}
+            target={target}
             progress={progress}
-            enters={!sourceLayout}
           />
         )
       })}
-    </g>
+    </motion.g>
   )
 }
 
@@ -1842,188 +1804,64 @@ function MovingScenarioTile({
   source,
   target,
   progress,
-  enters,
 }: {
   source: TileLayout & { tierLevel: number }
   target: TileLayout & { tierLevel: number }
   progress: MotionValue<number>
-  enters: boolean
 }) {
-  const x = useTransform(progress, [0, 1], [source.x, target.x])
-  const y = useTransform(progress, [0, 1], [source.y, target.y])
+  const changed = source.tierLevel !== target.tierLevel
+  const movingUp = target.tierLevel < source.tierLevel
   const fill = useTransform(
     progress,
     [0, 1],
     [tierColors[source.tierLevel], tierColors[target.tierLevel]],
   )
-  const opacity = useTransform(
-    progress,
-    [0, 0.15, 1],
-    enters ? [0, 1, 1] : [1, 1, 1],
-  )
+  const opacity = useTransform(progress, [0, 1], changed ? [1, 1] : [1, 0.5])
+  const path = useTransform(progress, (amount) => {
+    const left = source.x + (target.x - source.x) * amount
+    const top = source.y + (target.y - source.y) * amount
+    const right = left + target.width
+    const bottom = top + target.height
+    const centerX = left + target.width / 2
+    const rectangle = [
+      [left, top],
+      [right, top],
+      [right, bottom],
+      [left, bottom],
+    ]
+    const triangle = movingUp
+      ? [
+          [centerX, top],
+          [right, bottom],
+          [left, bottom],
+          [left, bottom],
+        ]
+      : [
+          [left, top],
+          [right, top],
+          [centerX, bottom],
+          [centerX, bottom],
+        ]
+    const points = changed
+      ? rectangle.map(([rectX, rectY], index) => {
+          const [triangleX, triangleY] = triangle[index]!
+          return [
+            rectX! + (triangleX! - rectX!) * amount,
+            rectY! + (triangleY! - rectY!) * amount,
+          ]
+        })
+      : rectangle
+    return `M ${points.map(([pointX, pointY]) => `${pointX},${pointY}`).join(" L ")} Z`
+  })
 
   return (
-    <motion.rect
-      x={x}
-      y={y}
-      width={target.width}
-      height={target.height}
+    <motion.path
+      d={path}
       fill={fill}
-      stroke="rgba(252, 251, 250, 0.58)"
-      strokeWidth="0.7"
+      stroke="rgba(252, 251, 250, 0.42)"
+      strokeWidth="1"
       style={{ opacity }}
     />
-  )
-}
-
-function MiniScenarioTierPanel({
-  scenarioId,
-  x,
-  y,
-  width,
-  height,
-  cws,
-  agriculture,
-  revealProgress,
-  showTiles = true,
-}: {
-  scenarioId: string
-  x: number
-  y: number
-  width: number
-  height: number
-  cws: readonly ScenarioTierDatum[]
-  agriculture: readonly ScenarioTierDatum[]
-  revealProgress: MotionValue<number>
-  showTiles?: boolean
-}) {
-  const labelWidth = miniScenarioLabelWidth
-  const headerHeight = miniScenarioHeaderHeight
-  const footerHeight = miniScenarioFooterHeight
-  const plotTop = y + headerHeight
-  const plotHeight = height - headerHeight - footerHeight
-  const rowHeight = plotHeight / 4
-  const plotLeft = x + labelWidth
-  const plotWidth = width - labelWidth
-  const groupWidth = plotWidth / 2
-  const dividerX = plotLeft + groupWidth
-  const tileSize = 6
-  const tileGap = 1.5
-  const columns = Math.max(
-    1,
-    Math.floor((groupWidth - 12) / (tileSize + tileGap)),
-  )
-  const revealHeight = useTransform(revealProgress, [0, 1], [0, height])
-  const clipId = `scenario-tier-panel-${scenarioId}`
-
-  const renderTiles = (records: readonly ScenarioTierDatum[], groupX: number) =>
-    ([1, 2, 3, 4] as const).flatMap((tierLevel) =>
-      records
-        .filter((record) => record.tierLevel === tierLevel)
-        .map((record, index) => (
-          <rect
-            key={`${scenarioId}-${groupX}-${record.id}`}
-            x={groupX + 6 + (index % columns) * (tileSize + tileGap)}
-            y={
-              plotTop +
-              (tierLevel - 1) * rowHeight +
-              8 +
-              Math.floor(index / columns) * (tileSize + tileGap)
-            }
-            width={tileSize}
-            height={tileSize}
-            fill={tierColors[tierLevel]}
-            stroke="rgba(252, 251, 250, 0.42)"
-            strokeWidth="0.6"
-          />
-        )),
-    )
-
-  return (
-    <g>
-      <defs>
-        <clipPath id={clipId}>
-          <motion.rect x={x} y={y} width={width} height={revealHeight} />
-        </clipPath>
-      </defs>
-      <g clipPath={`url(#${clipId})`}>
-        <text x={x} y={y + 14} fill="#fcfbfa" fontSize="14" fontWeight="700">
-          {(scenarioNames[scenarioId] ?? [scenarioId]).map((line, index) => (
-            <tspan key={line} x={x} dy={index === 0 ? 0 : 16}>
-              {line}
-            </tspan>
-          ))}
-        </text>
-        {[1, 2, 3, 4].map((tierLevel) => {
-          const rowY = plotTop + (tierLevel - 1) * rowHeight
-
-          return (
-            <g key={`${scenarioId}-tier-${tierLevel}`}>
-              <rect
-                x={plotLeft}
-                y={rowY}
-                width={plotWidth}
-                height={rowHeight}
-                fill={tierColors[tierLevel]}
-                fillOpacity="0.055"
-              />
-              <text
-                x={plotLeft - 8}
-                y={rowY + 17}
-                textAnchor="end"
-                fill={tierColors[tierLevel]}
-                fontSize="13"
-                fontWeight="700"
-              >
-                {tierNames[tierLevel]}
-              </text>
-              <line
-                x1={plotLeft}
-                x2={x + width}
-                y1={rowY}
-                y2={rowY}
-                stroke={tierColors[tierLevel]}
-                strokeOpacity="0.55"
-                strokeWidth="0.7"
-              />
-            </g>
-          )
-        })}
-        <line
-          x1={dividerX}
-          x2={dividerX}
-          y1={plotTop}
-          y2={plotTop + plotHeight}
-          stroke="rgba(252, 251, 250, 0.5)"
-          strokeWidth="0.8"
-        />
-        {showTiles ? renderTiles(cws, plotLeft) : null}
-        {showTiles ? renderTiles(agriculture, dividerX) : null}
-        <text
-          x={plotLeft + groupWidth / 2}
-          y={y + height - 22}
-          textAnchor="middle"
-          fill="#fcfbfa"
-          fontSize="12"
-          fontWeight="700"
-        >
-          <tspan x={plotLeft + groupWidth / 2}>Community water</tspan>
-          <tspan x={plotLeft + groupWidth / 2} dy="14">
-            systems
-          </tspan>
-        </text>
-        <text
-          x={dividerX + groupWidth / 2}
-          y={y + height - 15}
-          textAnchor="middle"
-          fill="#fcfbfa"
-          fontSize="12"
-          fontWeight="700"
-        >
-          Agriculture
-        </text>
-      </g>
-    </g>
   )
 }
 
@@ -2131,11 +1969,13 @@ function AgricultureTierTile({
   continuous,
   color,
   continuousProgress,
+  scenarioOpacity,
 }: {
   discrete: TileLayout
   continuous: TileLayout
   color: string
   continuousProgress: MotionValue<number>
+  scenarioOpacity: MotionValue<number>
 }) {
   const x = useTransform(continuousProgress, [0, 1], [discrete.x, continuous.x])
   const y = useTransform(continuousProgress, [0, 1], [discrete.y, continuous.y])
@@ -2159,6 +1999,7 @@ function AgricultureTierTile({
       fill={color}
       stroke="rgba(252, 251, 250, 0.42)"
       strokeWidth="1"
+      style={{ opacity: scenarioOpacity }}
     />
   )
 }
@@ -2177,6 +2018,7 @@ function TierTreemapTile({
   tileCount,
   layoutProgress,
   continuousProgress,
+  scenarioOpacity,
 }: {
   locationId: string
   sourceX: number
@@ -2191,6 +2033,7 @@ function TierTreemapTile({
   tileCount: number
   layoutProgress: MotionValue<number>
   continuousProgress: MotionValue<number>
+  scenarioOpacity: MotionValue<number>
 }) {
   const discreteX = useTransform(layoutProgress, [0, 1], [sourceX, target.x])
   const discreteY = useTransform(layoutProgress, [0, 1], [sourceY, target.y])
@@ -2237,7 +2080,7 @@ function TierTreemapTile({
   )
 
   return (
-    <g>
+    <motion.g style={{ opacity: scenarioOpacity }}>
       <motion.rect
         x={x}
         y={y}
@@ -2252,10 +2095,10 @@ function TierTreemapTile({
         width={width}
         height={height}
         fill="none"
-        stroke={isFocus ? "#fcfbfa" : "rgba(252, 251, 250, 0.42)"}
-        strokeWidth={isFocus ? 5 : 1.5}
+        stroke="rgba(252, 251, 250, 0.42)"
+        strokeWidth="1.5"
       />
-    </g>
+    </motion.g>
   )
 }
 
