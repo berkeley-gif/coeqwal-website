@@ -20,6 +20,7 @@ import {
   VIEW_LABELS,
   type VariableView,
 } from "../../tools/panels/dataInDepth/config/variableRegistry"
+import { getStableSeriesColors } from "../../tools/panels/dataInDepth/config/seriesColorAssignment"
 import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"
 import { shareFigureFooter } from "../figureFooter"
 import { thumbnailAspectRatioFor } from "../thumbnailAspect"
@@ -27,6 +28,20 @@ import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"
 
 type DataItem = ShareItemOfType<"data">
+
+/** How the compared members read in the facts block, singular and plural. */
+const COMPARE_NOUNS: Record<string, [string, string]> = {
+  scenarios: ["scenario", "scenarios"],
+  climates: ["climate future", "climate futures"],
+  locations: ["location", "locations"],
+}
+
+/** "1 scenario" / "3 scenarios"; unknown axes fall back to their own id. */
+function comparedSummary(compareBy: string, count: number): string {
+  const nouns = COMPARE_NOUNS[compareBy]
+  if (!nouns) return `${count} ${compareBy}`
+  return `${count} ${count === 1 ? nouns[0] : nouns[1]}`
+}
 
 const DIST_LABELS: Record<string, string> = {
   exceedance: "Exceedance",
@@ -57,34 +72,76 @@ const dataHandler: VariantHandler<DataItem> = {
   rasterDimensionsKey: "data",
 
   renderCard(item, ctx) {
-    const variableName = getVariable(item.variableId)?.name ?? item.variableId
+    const variable = getVariable(item.variableId)
+    const variableName = variable?.name ?? item.variableId
     // The standardized figure title captured with the chart leads the card
     // (and therefore the exported PNG/SVG, which raster the card chrome);
     // URL-restored items without cached chart data fall back to the
     // variable name.
-    const figureTitle = (
-      item.cachedChartData as { figureTitle?: string } | undefined
-    )?.figureTitle
+    const chartData = item.cachedChartData as
+      | {
+          figureTitle?: string
+          waterYearTypesLabel?: string
+          unitLabel?: string
+        }
+      | undefined
+    const figureTitle = chartData?.figureTitle
+
+    // Color key for the plotted members. Items staged before the card
+    // carried a legend, and URL-restored items, have no persisted colors;
+    // the deterministic assignment reproduces them from the same scope and
+    // ids the chart used.
+    const colors =
+      item.memberColors ??
+      getStableSeriesColors(
+        item.compareBy === "locations"
+          ? `locations:${variable?.locationGroup ?? ""}`
+          : item.compareBy,
+        item.memberIds,
+      )
+    const legend = item.memberLabels.map((label, i) => ({
+      label,
+      color: colors[i] ?? "",
+    }))
+
+    // What the figure shows, in the reader's terms. The hydroclimate is on
+    // the badge below and the held location is inside the standardized
+    // title, so neither is repeated here.
+    const figureFacts = [
+      { label: "Variable", value: variableName },
+      { label: "View", value: viewLabelFor(item) },
+      {
+        label: "Compared",
+        value: comparedSummary(item.compareBy, item.memberLabels.length),
+      },
+      {
+        label: "Water years",
+        value: chartData?.waterYearTypesLabel ?? "All years",
+      },
+      ...(chartData?.unitLabel
+        ? [{ label: "Units", value: chartData.unitLabel }]
+        : []),
+    ]
     return React.createElement(ShareSnapshotCard, {
       id: item.id,
       toolLabel: "Data in depth",
       title: figureTitle ?? variableName,
-      // A title that counts its members ("3 scenarios") names them here so
-      // the figure reads on its own.
-      subtitle:
-        item.memberLabels.length > 1
-          ? `${viewLabelFor(item)}. Compared: ${item.memberLabels.join(", ")}.`
-          : viewLabelFor(item),
+      // The members are named in the color legend below the chart, so the
+      // subtitle carries the view only instead of repeating the whole list.
+      subtitle: viewLabelFor(item),
       figureFooter: shareFigureFooter(item),
       thumbnailAspectRatio: thumbnailAspectRatioFor(item),
+      // The members moved to the color legend below the thumbnail, so the
+      // chip row carries provenance only.
       chips: [
         item.source === "mixed"
           ? "Mixed data"
           : item.source === "live"
             ? "Live data"
             : "Sample data",
-        ...item.memberLabels,
       ],
+      legend,
+      figureFacts,
       hydroclimate: item.hydroclimate,
       cachedSvg: item.cachedSvg,
       cachedImageDataUrl: item.cachedImageDataUrl,
