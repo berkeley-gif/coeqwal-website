@@ -25,7 +25,7 @@ export default function AboutPage() {
     {
       imgSrc: "/images/about/approach-person-whiteboard.png",
       imgAlt: "A person writing on a whiteboard",
-      text: "Our work is structured around a participatory scenario planning approach. It is an iterative process that involves the use of a water resources planning model (CalSim) to develop and analyze a broad range of alternative water management strategies for the state.",
+      text: "Our work is structured around a participatory scenario planning approach. It is an iterative process that involves the use of a water resources planning model (CalSim3) to develop and analyze a broad range of alternative water management strategies for the state.",
       imagePosition: "left",
     },
     {
