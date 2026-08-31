@@ -53,8 +53,7 @@ export default function ChooseScenariosPanel() {
           }}
         >
           SHARE
-        </Typography>
-        <icons.IosShare sx={{ fontSize: "1rem", ml: 0.5 }} fontWeight={600} />{" "}
+        </Typography>{" "}
         section of the site.
       </Typography>
     </PanelShell>
