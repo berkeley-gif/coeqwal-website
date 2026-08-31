@@ -37,6 +37,20 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   await expect(addToStory).toBeVisible()
   await addToStory.click()
 
+  // The share-URL and PDF exports were retired: both buttons rendered but
+  // neither did anything. The two image and data exports beside them work
+  // and stay. These assert on the visible labels: the export bar wraps its
+  // buttons in a tooltip, which injects its own text as the accessible
+  // name, so a name-based role query would pass here for the wrong reason.
+  await expect(page.getByText("Copy link", { exact: true })).toHaveCount(0)
+  await expect(page.getByText("Download PDF", { exact: true })).toHaveCount(0)
+  await expect(
+    page.getByText("Download all images", { exact: true }),
+  ).toBeVisible()
+  await expect(
+    page.getByText("Download all data", { exact: true }),
+  ).toBeVisible()
+
   // Download the CSV from the story card and check its body.
   const downloadPromise = page.waitForEvent("download")
   await page.getByRole("button", { name: "Download data" }).click()
