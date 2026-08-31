@@ -237,7 +237,7 @@ export function Footer() {
               onClick={() => router.push("/about")}
               sx={footerLinkButtonSx}
             >
-              About Us
+              ABOUT
             </Typography>{" "}
             to learn how COEQWAL scenarios were developed.
           </Typography>
