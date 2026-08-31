@@ -103,6 +103,29 @@ function InlineLegendText({
   children: ReactNode
 }) {
   const shape = legend.shape ?? "circle"
+  const legendMark = (
+    <Box
+      component="span"
+      aria-hidden
+      sx={{
+        width: shape === "line" ? "1.7em" : "0.75em",
+        height: shape === "line" ? 2 : "0.75em",
+        borderRadius: shape === "circle" ? "50%" : 0,
+        backgroundColor: shape === "triangle" ? "transparent" : legend.color,
+        ...(shape === "triangle"
+          ? {
+              width: 0,
+              height: 0,
+              borderLeft: "0.42em solid transparent",
+              borderRight: "0.42em solid transparent",
+              borderBottom: `0.75em solid ${legend.color}`,
+            }
+          : {}),
+        display: "inline-block",
+        flex: "0 0 auto",
+      }}
+    />
+  )
 
   return (
     <Box
@@ -114,19 +137,9 @@ function InlineLegendText({
         whiteSpace: "nowrap",
       }}
     >
-      <Box
-        component="span"
-        aria-hidden
-        sx={{
-          width: shape === "line" ? "1.7em" : "0.75em",
-          height: shape === "line" ? 2 : "0.75em",
-          borderRadius: shape === "circle" ? "50%" : 0,
-          backgroundColor: legend.color,
-          display: "inline-block",
-          flex: "0 0 auto",
-        }}
-      />
+      {legend.position !== "after" ? legendMark : null}
       {children || legend.label}
+      {legend.position === "after" ? legendMark : null}
     </Box>
   )
 }

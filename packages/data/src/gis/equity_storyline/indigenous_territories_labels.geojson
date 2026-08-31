@@ -1,0 +1,485 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Achumawi" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.2023946438133, 41.3899522744246]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Atsugewi" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.14115836975017, 40.74975184808528]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Cahto" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.51507373105349, 39.76498264972268]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Chemehuevi" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.32606532205766, 34.549067441535]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Chimariko" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.25529983110007, 40.82516353332771]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Chumash" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-119.76017894947412, 34.75420328995054]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Coast Miwok" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.64247750148462, 38.155583935780385]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Ohlone" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.76326594436924, 37.160182396662]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Cupeño" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-116.62107645119244, 33.32311541650972]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Esselen" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.58559505962545, 36.26670435542127]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Foothill Yokuts" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-118.99644615442273, 36.463880311561375]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Gabrieliño" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-117.92859021511975, 34.020779892697604]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Halchidhoma" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-114.76140880586763, 33.85878404001343]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Hupa" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.52732175561732, 40.94806769911196]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Juaneño" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-117.52888904638121, 33.561845323830184]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Karuk" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.41393059208453, 41.592210813606634]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Kawaiisu" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-117.29790771885264, 35.858591520220045]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Kitanemuk" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-118.33563940235223, 35.121137911721114]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Konkow" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.61171834410493, 39.70467223785716]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Kumeyaay" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-116.16930086320022, 32.95231928317391]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Lake Miwok" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.48189887427742, 38.79727502850457]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Lassik" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.39362740728039, 40.204450613001576]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Luiseño" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-117.13411052215216, 33.501578586176706]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Maidu" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120.76909438685564, 40.168473011336204]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Mattole" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-124.17787606507073, 40.35830228847375]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Miwok" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120.09689922123009, 38.036541819481506]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Modoc" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.5876199392383, 41.687854753126]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Mojave" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-114.74385988861056, 34.751106150230925]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Mono Lake Northern Paiute" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-119.12489809574092, 38.12216974335442]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Nisenan" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.05495916056724, 39.16376799956148]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Nomlaki" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.48201243722039, 39.92091750830183]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Nongatl" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.65973954416455, 40.45703794465504]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Northern Paiute" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120.17462646187172, 40.993177232521575]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Northern Valley Yokuts" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120.64040366059822, 37.25860601068884]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Owens Valley Paiute-Shoshone" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-118.6783473803327, 37.15234892675551]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Patwin" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.02480187175792, 38.77352709424204]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Pomo" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.13725224684211, 38.95852943591882]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Quechan" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.02067407213741, 33.12988943839516]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Salinan" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120.82881450959168, 35.892703346429215]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Serrano" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-117.07284258952218, 34.63895949833727]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Shasta" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.73470707317796, 41.45203655451742]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Sinkyone" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.94675154968989, 40.14932198315112]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Southern Paiute" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-116.07677433760085, 35.6927368295743]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Southern Valley Yokuts" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-119.61724173269161, 35.96288920887248]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Tataviam" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-118.57600456358301, 34.64017113873007]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Tolowa" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.90596554231477, 41.774840095547106]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Tubatulabal" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-118.37111113526835, 36.11010674775416]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Wailaka" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.40563753965822, 40.00422271954728]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Wappo" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.44584122311909, 38.5598590249582]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Washoe" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120.16241106462402, 39.11852535333587]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Western Mono" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-119.04928237324029, 36.88329791686232]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Western Shoshone" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-117.56833097475732, 36.62594619466449]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Whilkut" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.7872525968291, 40.79685898740463]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Wintu" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.58337469443465, 40.812912123700656]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Wiyot" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-124.07214908830927, 40.759250521398286]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Yana" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.81236478890798, 40.38660607547638]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Yuki" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.11272875340926, 39.7862872519044]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Yurok" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.83942665457728, 41.331351572351295]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Cahuilla" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-116.13263881936359, 33.73239826600946]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "mapname": "Chilula" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-123.81578456496692, 41.10589894552267]
+      }
+    }
+  ]
+}

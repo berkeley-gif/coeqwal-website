@@ -41,11 +41,15 @@ export { default as sanJoaquinRiverMainstem } from "./gis/san_joaquin_river_main
 export { default as salmonMigrationPath } from "./gis/equity_storyline/salmon_migration_path.geojson"
 export { default as mcCloudRiver } from "./gis/equity_storyline/mccloud_river.geojson"
 export { default as metroRiversEdited } from "./gis/equity_storyline/major_river_metro.geojson"
+export { default as metroMapV0 } from "./gis/equity_storyline/metromap_v0.json"
+export { default as riverNetwork } from "./gis/equity_storyline/river_network.geojson"
+export { default as canalNetwork } from "./gis/equity_storyline/canal_network.geojson"
 export { default as centralValleyBoundary } from "./gis/central_valley_boundary.geojson"
 export { default as deltaLegalBoundary } from "./gis/delta_legal_boundary.geojson"
 export { default as flowDrinkingRivers } from "./gis/owens_toulumne_colorado_rivers.geojson"
 export { default as flowDrinkingAqueducts } from "./gis/hetchy_la_colorado_aqueducts.geojson"
 export { default as yubaRiver } from "./gis/equity_storyline/yuba_river.geojson"
+export { default as indigenousTerritoriesLabels } from "./gis/equity_storyline/indigenous_territories_labels.geojson"
 
 // Re-export commonly used utilities for convenience
 // (Full exports available via subpath imports)

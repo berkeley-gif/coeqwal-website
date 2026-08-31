@@ -45,6 +45,8 @@ export const RiverWaterColor = RiverWaterCandidates[4]
 export const SnowWaterColor = SnowWaterCandidates[3]
 export const OffWhiteColor = "#fcfbfa" // Used to replace pure white color
 export const InfrastructureColor = InfrastructureCandidates[2] // Used for infrastructure
+export const InfrastructureOutlineColor = "#f2f0ef"
+export const InfrastructureOutlineOpacity = 0.45
 export const WetlandColor = WetlandCandidates[2] // Used for wetland
 
 const MapFreshWaterColor = FreshWaterCandidates[5] // Used for map, but not for the website

@@ -8,36 +8,26 @@ const historicalContextText = {
   title: { text: "How Indigenous communities relate to water" },
   opening: [
     {
-      text: "For thousands of years, California’s Indigenous communities have lived in sync with the seasons, rivers, and wildlife.",
+      text: "Across California, Indigenous communities have lived in sync with the seasons, rivers, fish and wildlife for millennia.",
+    },
+  ],
+  tribalRelations: [
+    {
+      text: "To many California Tribes, salmon are relatives and rivers are sacred places.",
     },
     {
-      text: "To many California Tribes, salmon are relatives and rivers are sacred sites.",
+      text: "Through place-based ecological knowledge and practices, Tribes have sustained relationships with rivers and wildlife as kin. Indigenous names for rivers and other places reflect these enduring relationships, carrying histories, knowledge, and responsibilities that today’s commonly used names often obscure.",
     },
   ],
   mcCloud: [
     {
-      text: 'For the Winnemem Wintu of the McCloud "Middle Water" River, cold-water springs of Mount Shasta gave birth to humans and the Nur.',
+      text: 'For the Winnemem Wintu of the McCloud "Middle Water" River, cold-water springs of Mount Shasta gave birth to humans and the Nur. In the creation story, the Nur (Winter-Run Chinook Salmon) gave their voice to humans. In return, the Winnemem People speak for the salmon.',
     },
     {
-      text: "In the creation story, these Winter-Run Chinook Salmon gave their voice to humans.",
-    },
-    {
-      text: "In return, the Winnemem People feel an obligation to speak for the salmon.",
-    },
-    {
-      text: "Through fishing practices, traditions, and ceremonies, the Winnemem Wintu honor the Nur as relatives.",
-    },
-    {
-      text: "By protecting their springs and rivers, they protect salmon and their Tribe’s traditional way of life.",
+      text: "Through fishing practices, traditions, and ceremonies, the Winnemem Wintu honor the Nur as relatives. By protecting their springs and rivers, they protect salmon and their Tribe’s traditional way of life.",
     },
   ],
   closing: [
-    {
-      text: "Across California, Tribes have managed their waters collectively according to traditional ecological knowledge.",
-    },
-    {
-      text: "These locally-adapted practices sustained their people for millennia.",
-    },
     {
       text: "With the arrival of European settlers, forced removal of Indigenous communities from their homelands severed their sacred relationship with water as a source of life.",
     },
@@ -68,41 +58,44 @@ export default function HistoricalContext() {
       >
         <ScrollElement
           enter={[0, 0.04]}
-          hold={[0.04, 0.18]}
-          exit={[0.18, 0.22]}
+          hold={[0.04, 0.42]}
+          exit={[0.42, 0.44]}
           animation="slideUp"
           style={{ gridArea: "1 / 1" }}
         >
           <Box component="header">
             <SectionTitle text={historicalContextText.title} />
           </Box>
-          <Stack component="section" spacing={1.25}>
-            <Paragraph blocks={historicalContextText.opening} />
+          <Stack component="section" spacing={3.5}>
+            <Box component="article">
+              <Paragraph blocks={historicalContextText.opening} />
+            </Box>
+            <ScrollElement
+              enter={[0.26, 0.3]}
+              hold={[0.3, 0.42]}
+              exit={[0.42, 0.44]}
+              animation="slideUp"
+            >
+              <Box component="article">
+                <Paragraph blocks={historicalContextText.tribalRelations} />
+              </Box>
+            </ScrollElement>
           </Stack>
         </ScrollElement>
 
         <ScrollElement
-          enter={[0.22, 0.26]}
-          hold={[0.26, 0.68]}
+          enter={[0.44, 0.48]}
+          hold={[0.48, 0.68]}
           exit={[0.68, 0.72]}
           animation="slideUp"
           style={{ gridArea: "1 / 1" }}
         >
-          <Stack component="section" spacing={1.25}>
-            {historicalContextText.mcCloud.slice(1).map((sentence, index) => {
-              const start = 0.3 + index * 0.07
-
-              return (
-                <ScrollElement
-                  key={sentence.text}
-                  enter={[start, start + 0.035]}
-                  hold={[start + 0.035, 0.68]}
-                  exit={[0.68, 0.72]}
-                >
-                  <Paragraph blocks={[sentence]} />
-                </ScrollElement>
-              )
-            })}
+          <Stack component="section" spacing={3.5}>
+            {historicalContextText.mcCloud.map((sentence) => (
+              <Box key={sentence.text} component="article">
+                <Paragraph blocks={[sentence]} />
+              </Box>
+            ))}
           </Stack>
         </ScrollElement>
 
@@ -113,10 +106,12 @@ export default function HistoricalContext() {
           style={{ gridArea: "1 / 1" }}
         >
           <Stack component="section" spacing={3.5}>
-            <Stack spacing={1.25}>
-              <Paragraph blocks={historicalContextText.closing.slice(0, 3)} />
-            </Stack>
-            <Paragraph blocks={[historicalContextText.closing[3]]} />
+            <Box component="article">
+              <Paragraph blocks={historicalContextText.closing.slice(0, 1)} />
+            </Box>
+            <Box component="article">
+              <Paragraph blocks={[historicalContextText.closing[1]]} />
+            </Box>
           </Stack>
         </ScrollElement>
       </Box>

@@ -5,7 +5,6 @@ import { useTierLocationAssignmentsBatch } from "@repo/data/coeqwal/hooks"
 export const storylineScenarioIds = [
   "s0020",
   "s0035",
-  "s0027",
   "s0031",
   "s0042",
 ] as const
@@ -24,11 +23,10 @@ const outcomeCodes = [...distributionOutcomeCodes]
 export function useStorylineTierAssignments() {
   const s0020 = useTierLocationAssignmentsBatch("s0020", outcomeCodes)
   const s0035 = useTierLocationAssignmentsBatch("s0035", outcomeCodes)
-  const s0027 = useTierLocationAssignmentsBatch("s0027", outcomeCodes)
   const s0031 = useTierLocationAssignmentsBatch("s0031", outcomeCodes)
   const s0042 = useTierLocationAssignmentsBatch("s0042", outcomeCodes)
 
-  const byScenario = { s0020, s0035, s0027, s0031, s0042 } as const
+  const byScenario = { s0020, s0035, s0031, s0042 } as const
 
   return {
     byScenario,

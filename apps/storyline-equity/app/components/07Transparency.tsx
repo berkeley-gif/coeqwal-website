@@ -11,42 +11,31 @@ const transparencyText = {
       [
         [
           {
-            text: "Today, water managers rely on complex technical models, such as CalSim, to guide allocation decisions.",
+            text: "Today, California relies on complex models such as CalSim3 to evaluate water-management strategies and inform decisions about water storage, flows, and deliveries.",
           },
           {
-            text: "These tools are powerful, but they are also highly technical and difficult for non-experts to interpret.",
+            text: "These models are powerful, but their simplified structure can hide the assumptions and priorities that shape how water is allocated, and reproduce existing inequities.",
+          },
+        ],
+        [
+          {
+            text: "Because few people can run and interpret these models, communities often cannot see how decisions are represented, whose needs are prioritized, or how alternative management strategies could produce different outcomes.",
           },
         ],
       ],
       [
         [
           {
-            text: "As a result, many communities cannot easily see how decisions are made, what assumptions shape outcomes, or whose priorities are embedded in the models.",
-          },
-          {
-            text: "For example, a rule that allows more water to be diverted during dry periods may increase supplies for farms and cities, while reducing river flows needed for fish and ecosystems.",
-          },
-        ],
-      ],
-      [
-        [
-          {
-            text: "It also becomes difficult to understand how conditions differ across the system, from upstream sources to downstream communities and ecosystems.",
+            text: "This lack of transparency limits meaningful participation in decisions that directly affect communities and ecosystems.",
           },
         ],
         [
           {
-            text: "Without transparency, communities are marginalized from planning and negotiation.",
+            text: "If knowledge is power, everyone needs insight into water management decisions.",
           },
           {
-            text: "Their needs, values, and vulnerabilities remain invisible, even as decisions directly affect their water security.",
-          },
-        ],
-      ],
-      [
-        [
-          {
-            text: "Understanding California's water system, both historically and technically, is essential for building a future that is resilient, fair, and shared.",
+            text: "COEQWAL makes these decisions, assumptions, and consequences more visible and accessible.",
+            mark: "strong",
           },
         ],
       ],
@@ -91,12 +80,33 @@ export default function Transparency() {
                   <SectionTitle text={transparencyText.en.title} />
                 </Box>
               ) : null}
-              <Stack component="section" spacing={2}>
-                {groups.map((sentences, paragraphIndex) => (
-                  <Box key={paragraphIndex} component="article">
-                    <Paragraph blocks={sentences} />
-                  </Box>
-                ))}
+              <Stack component="section" spacing={3.5}>
+                {groups.map((sentences, paragraphIndex) => {
+                  let revealRange: [number, number] | null = null
+                  if (index === 0 && paragraphIndex === 1) {
+                    revealRange = [0.18, 0.22]
+                  } else if (index === 1 && paragraphIndex === 1) {
+                    revealRange = [0.72, 0.76]
+                  }
+
+                  const paragraph = (
+                    <Box key={paragraphIndex} component="article">
+                      <Paragraph blocks={sentences} />
+                    </Box>
+                  )
+
+                  return revealRange ? (
+                    <ScrollElement
+                      key={paragraphIndex}
+                      enter={revealRange}
+                      hold={[revealRange[1], 1]}
+                    >
+                      {paragraph}
+                    </ScrollElement>
+                  ) : (
+                    paragraph
+                  )
+                })}
               </Stack>
             </ScrollElement>
           )

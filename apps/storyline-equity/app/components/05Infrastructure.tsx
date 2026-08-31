@@ -3,6 +3,7 @@
 import { ScrollElement, StickyScrollSection } from "@repo/scrollytelling"
 import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
+import { InfrastructureColor } from "./helpers/colorPalette"
 
 const infrastructureText = {
   en: {
@@ -19,35 +20,61 @@ const infrastructureText = {
         ],
         [
           {
-            text: "These dams, reservoirs, and canals expanded water supplies for agricultural water districts and growing cities, fueling economic growth and population expansion.",
+            segments: [
+              { text: "These " },
+              {
+                text: "dams",
+                mark: "infrastructure",
+                legend: {
+                  color: InfrastructureColor,
+                  shape: "triangle",
+                  position: "after",
+                },
+              },
+              { text: ", " },
+              {
+                text: "pumps",
+                mark: "infrastructure",
+                legend: {
+                  color: InfrastructureColor,
+                  shape: "circle",
+                  position: "after",
+                },
+              },
+              { text: ", and " },
+              {
+                text: "canals",
+                mark: "infrastructure",
+                legend: {
+                  color: InfrastructureColor,
+                  shape: "line",
+                  position: "after",
+                },
+              },
+              {
+                text: " expanded water supplies for agricultural water districts and growing cities, fueling economic growth and population expansion.",
+              },
+            ],
           },
           {
-            text: "Over time, these systems reshaped how water flows through the landscape, redirecting rivers, interrupting natural pathways, and prioritizing some uses over others.",
+            text: "But the benefits of this infrastructure were not shared equally. Over time, these systems reshaped how water flows through the landscape, redirecting rivers and interrupting natural pathways.",
           },
         ],
       ],
       [
         [
           {
-            text: "But these systems further preserved and intensified inequities in water access.",
-          },
-          {
-            text: "Senior water-rights holders, largely large farms and landowners, were guaranteed supplies.",
-          },
-          {
-            text: "Meanwhile, many Tribes, small rural communities, and disadvantaged areas were left behind.",
+            text: "The environmental costs of this transformation were also substantial.",
           },
         ],
-      ],
-      [
         [
-          { text: "The environmental costs were also largely overlooked." },
           {
-            text: "Dams blocked more than 95% of the historical habitat used by salmon.",
+            text: "Nowhere is this change more visible than in the Delta. The Delta was once a vast landscape of tidal wetlands, floodplains, and branching waterways. Much of it was diked and drained, while levees and canals reshaped how water moves through the landscape.",
           },
-          { text: "Rivers were dewatered and fragmented." },
+        ],
+        [
           {
-            text: "California's freshwater ecosystems have suffered from degradation of water quality, loss of wetlands, fish population declines, and the extinction of species.",
+            text: "Today, the Delta is both a living ecosystem and a critical hub in California’s engineered water system.",
           },
         ],
       ],
@@ -92,10 +119,18 @@ export default function Infrastructure() {
                   <SectionTitle text={infrastructureText.en.title} />
                 </Box>
               ) : null}
-              <Stack component="section" spacing={2}>
+              <Stack component="section" spacing={3.5}>
                 {groups.map((sentences, paragraphIndex) => (
                   <Box key={paragraphIndex} component="article">
-                    <Paragraph blocks={sentences} />
+                    <Paragraph
+                      blocks={sentences}
+                      markSx={{
+                        infrastructure: {
+                          color: InfrastructureColor,
+                          fontWeight: 700,
+                        },
+                      }}
+                    />
                   </Box>
                 ))}
               </Stack>
