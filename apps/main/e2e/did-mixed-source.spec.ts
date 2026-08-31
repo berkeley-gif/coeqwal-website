@@ -33,12 +33,12 @@ const SCENARIOS_FIXTURE = [
     hydroclimate_id: 2,
     sibling_group: "s0065",
   },
-  // The same two strategies under the "Moderate risk" hydroclimate (ecv,
+  // The same two strategies under the "Moderate stress" hydroclimate (ecv,
   // API id 7): one variant per climate, as the real listing has.
   {
     name: "Current operations",
     short_code: "s0047",
-    short_description: "spec fixture, Moderate risk variant",
+    short_description: "spec fixture, Moderate stress",
     is_active: true,
     hydroclimate_id: 7,
     sibling_group: "s0020",
@@ -46,7 +46,8 @@ const SCENARIOS_FIXTURE = [
   {
     name: "Delta Conveyance Project",
     short_code: "s0157",
-    short_description: "spec fixture, Moderate risk variant, no salmon results",
+    short_description:
+      "spec fixture, Moderate stress variant, no salmon results",
     is_active: true,
     hydroclimate_id: 7,
     sibling_group: "s0065",
@@ -54,7 +55,7 @@ const SCENARIOS_FIXTURE = [
 ]
 
 const SALMON_VALUE = 55
-/** Served value for the Moderate risk variant of Current operations. */
+/** Served value for the Moderate stress variant of Current operations. */
 const SALMON_VALUE_ECV = 40
 const SERVED: Record<string, number> = {
   s0020: SALMON_VALUE,
@@ -258,7 +259,7 @@ test("pinning a hydroclimate other than the workspace climate keeps the scenario
     .check({ timeout: 10_000 })
   await expect(page.getByText("no data", { exact: true })).toHaveCount(1)
 
-  // Pin "Moderate risk" while the workspace stays on Historical. Before this
+  // Pin "Moderate stress" while the workspace stays on Historical. Before this
   // change the whole card dropped to sample data here and drew an invented
   // curve for the DCP scenario under a "Sample data" badge.
   await page
@@ -266,9 +267,9 @@ test("pinning a hydroclimate other than the workspace climate keeps the scenario
     .filter({ hasText: /^Historical$/ })
     .first()
     .click()
-  await page.getByRole("option", { name: "Moderate risk" }).click()
+  await page.getByRole("option", { name: "Moderate stress" }).click()
 
-  // Each compared scenario is requested as its Moderate risk variant.
+  // Each compared scenario is requested as its Moderate stress variant.
   await expect
     .poll(() => requestedScenarios.some((s) => s.includes("s0047")))
     .toBe(true)
@@ -282,18 +283,18 @@ test("pinning a hydroclimate other than the workspace climate keeps the scenario
   await expect(page.getByText("no data", { exact: true })).toHaveCount(1)
   const curves = page.locator('svg path[stroke-width="2"][fill="none"][stroke]')
   await expect.poll(() => curves.count()).toBe(1)
-  // The sentence quotes the Moderate risk variant's served value (40 percent
+  // The sentence quotes the Moderate stress variant's served value (40 percent
   // served, shown as a proportion) and still names the unmodeled scenario.
   await expect(
     page.getByText(
-      /under the Moderate risk hydroclimate occupy 40%.*no data available for Delta Conveyance Project/,
+      /under the Moderate stress hydroclimate occupy 40%.*no data available for Delta Conveyance Project/,
     ),
   ).toBeVisible()
 
   // Back to Historical: the Historical variants are requested again.
   await page
     .getByRole("combobox")
-    .filter({ hasText: /^Moderate risk$/ })
+    .filter({ hasText: /^Moderate stress$/ })
     .first()
     .click()
   await page.getByRole("option", { name: "Historical" }).click()
