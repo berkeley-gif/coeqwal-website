@@ -70,6 +70,11 @@ import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
 import type { NavDropdownOption } from "./NavDropdown"
 import {
+  getActiveWaterStory,
+  getWaterStoryOptions,
+  type WaterStoryKey,
+} from "./baseHeaderLinks"
+import {
   motion,
   useScroll,
   useTransform,
@@ -87,9 +92,6 @@ const MOBILE_BREAKPOINT = 900
 const MIN_TOUCH_TARGET = 44
 // ID for drawer (used by aria-controls)
 const MOBILE_DRAWER_ID = "mobile-nav-drawer"
-// Active water story - determined by current URL hostname
-type ActiveWaterStory = "flow" | "climate" | "managed" | "equity" | null
-
 // Translation types
 type HeaderTranslations = {
   buttons: {
@@ -208,9 +210,9 @@ const translations: TranslationsMap = {
         "Reference guides about California water issues and dynamics.",
     },
     waterStories: {
-      flow: "How water flows through California",
-      climate: "How climate affects California water",
-      managed: "How California water is managed",
+      flow: "How water moves through California",
+      climate: "How climate change affects California water",
+      managed: "How water is managed in California",
       equity: "How equity shapes California water",
     },
   },
@@ -234,16 +236,6 @@ const translations: TranslationsMap = {
       equity: "Cómo la equidad moldea el agua de California",
     },
   },
-}
-
-/* ========================================
- * URL CONFIGURATION
- * ======================================== */
-const URLS = {
-  flow: "https://flow.coeqwal.org",
-  climate: "https://climate.coeqwal.org",
-  managed: "https://management.coeqwal.org",
-  equity: "https://equity.coeqwal.org",
 }
 
 export function BaseHeader({
@@ -308,23 +300,12 @@ export function BaseHeader({
    * Auto-detect which water story site we're on based on hostname
    * ======================================== */
   const [activeWaterStory, setActiveWaterStory] =
-    useState<ActiveWaterStory>(null)
+    useState<WaterStoryKey | null>(null)
 
   useEffect(() => {
     if (typeof window === "undefined") return
 
-    const hostname = window.location.hostname
-
-    // Detect which water story site we're on (production only)
-    if (hostname.includes("flow.coeqwal")) {
-      setActiveWaterStory("flow")
-    } else if (hostname.includes("climate.coeqwal")) {
-      setActiveWaterStory("climate")
-    } else if (hostname.includes("management.coeqwal")) {
-      setActiveWaterStory("managed")
-    } else if (hostname.includes("equity.coeqwal")) {
-      setActiveWaterStory("equity")
-    }
+    setActiveWaterStory(getActiveWaterStory(window.location.hostname))
     // Note: On localhost, no water story is active (dev environment)
   }, [])
 
@@ -421,6 +402,10 @@ export function BaseHeader({
   const { locale, isLoading } = useTranslation()
   const safeLocale = !locale || isLoading ? "en" : locale
   const t = translations[safeLocale as keyof TranslationsMap] || translations.en
+  const waterStoryOptions = getWaterStoryOptions({
+    labels: t.waterStories,
+    activeKey: activeWaterStory,
+  })
 
   /* ========================================
    * RENDER
@@ -555,32 +540,7 @@ export function BaseHeader({
                   label="Water Stories"
                   menuDescription={t.dropdownIntros.guides}
                   disableRipple
-                  options={[
-                    {
-                      key: "flow",
-                      label: t.waterStories.flow,
-                      onClick: () => (window.location.href = URLS.flow),
-                      active: activeWaterStory === "flow",
-                    },
-                    {
-                      key: "climate",
-                      label: t.waterStories.climate,
-                      onClick: () => (window.location.href = URLS.climate),
-                      active: activeWaterStory === "climate",
-                    },
-                    {
-                      key: "managed",
-                      label: t.waterStories.managed,
-                      onClick: () => (window.location.href = URLS.managed),
-                      active: activeWaterStory === "managed",
-                    },
-                    {
-                      key: "equity",
-                      label: t.waterStories.equity,
-                      onClick: () => (window.location.href = URLS.equity),
-                      active: activeWaterStory === "equity",
-                    },
-                  ]}
+                  options={waterStoryOptions}
                   variant="text"
                   sx={buttonStyle}
                 />
@@ -806,170 +766,53 @@ export function BaseHeader({
 
               {/* Water story sub-items */}
               <List disablePadding>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => {
-                      window.location.href = URLS.flow
-                      handleMobileMenuClose()
-                    }}
-                    selected={activeWaterStory === "flow"}
-                    // WCAG 2.4.8: Current page indication
-                    aria-current={
-                      activeWaterStory === "flow" ? "page" : undefined
-                    }
-                    sx={{
-                      pl: 4,
-                      pr: 2,
-                      // WCAG 2.5.5: Minimum 44px touch target
-                      minHeight: MIN_TOUCH_TARGET,
-                      // WCAG 2.4.7: Focus visible indicator
-                      "&:focus-visible": {
-                        outline: `2px solid ${theme.palette.text.primary}`,
-                        outlineOffset: -2,
-                      },
-                      // WCAG 1.4.1: Active state uses bold text (not just color)
-                      ...(activeWaterStory === "flow" && {
-                        fontWeight: theme.typography.fontWeightBold,
-                      }),
-                    }}
-                  >
-                    {activeWaterStory === "flow" && (
-                      <ActiveBullet color={theme.palette.text.primary} />
-                    )}
-                    <ListItemText
-                      primary={t.waterStories.flow}
-                      slotProps={{
-                        primary: {
-                          sx: {
-                            ...theme.typography.caption,
-                            // Bold when active (non-color indicator)
-                            fontWeight:
-                              activeWaterStory === "flow"
+                {waterStoryOptions.map((option) => (
+                  <ListItem key={option.key} disablePadding>
+                    <ListItemButton
+                      disabled={option.disabled}
+                      onClick={() => {
+                        option.onClick()
+                        handleMobileMenuClose()
+                      }}
+                      selected={option.active}
+                      // WCAG 2.4.8: Current page indication
+                      aria-current={option.active ? "page" : undefined}
+                      sx={{
+                        pl: 4,
+                        pr: 2,
+                        // WCAG 2.5.5: Minimum 44px touch target
+                        minHeight: MIN_TOUCH_TARGET,
+                        // WCAG 2.4.7: Focus visible indicator
+                        "&:focus-visible": {
+                          outline: `2px solid ${theme.palette.text.primary}`,
+                          outlineOffset: -2,
+                        },
+                        // WCAG 1.4.1: Active state uses bold text (not just color)
+                        ...(option.active && {
+                          fontWeight: theme.typography.fontWeightBold,
+                        }),
+                      }}
+                    >
+                      {option.active && (
+                        <ActiveBullet color={theme.palette.text.primary} />
+                      )}
+                      <ListItemText
+                        primary={option.label}
+                        slotProps={{
+                          primary: {
+                            sx: {
+                              ...theme.typography.caption,
+                              // Bold when active (non-color indicator)
+                              fontWeight: option.active
                                 ? theme.typography.fontWeightBold
                                 : theme.typography.fontWeightRegular,
+                            },
                           },
-                        },
-                      }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => {
-                      window.location.href = URLS.climate
-                      handleMobileMenuClose()
-                    }}
-                    selected={activeWaterStory === "climate"}
-                    aria-current={
-                      activeWaterStory === "climate" ? "page" : undefined
-                    }
-                    sx={{
-                      pl: 4,
-                      pr: 2,
-                      minHeight: MIN_TOUCH_TARGET,
-                      "&:focus-visible": {
-                        outline: `2px solid ${theme.palette.text.primary}`,
-                        outlineOffset: -2,
-                      },
-                    }}
-                  >
-                    {activeWaterStory === "climate" && (
-                      <ActiveBullet color={theme.palette.text.primary} />
-                    )}
-                    <ListItemText
-                      primary={t.waterStories.climate}
-                      slotProps={{
-                        primary: {
-                          sx: {
-                            ...theme.typography.caption,
-                            fontWeight:
-                              activeWaterStory === "climate"
-                                ? theme.typography.fontWeightBold
-                                : theme.typography.fontWeightRegular,
-                          },
-                        },
-                      }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => {
-                      window.location.href = URLS.managed
-                      handleMobileMenuClose()
-                    }}
-                    selected={activeWaterStory === "managed"}
-                    aria-current={
-                      activeWaterStory === "managed" ? "page" : undefined
-                    }
-                    sx={{
-                      pl: 4,
-                      pr: 2,
-                      minHeight: MIN_TOUCH_TARGET,
-                      "&:focus-visible": {
-                        outline: `2px solid ${theme.palette.text.primary}`,
-                        outlineOffset: -2,
-                      },
-                    }}
-                  >
-                    {activeWaterStory === "managed" && (
-                      <ActiveBullet color={theme.palette.text.primary} />
-                    )}
-                    <ListItemText
-                      primary={t.waterStories.managed}
-                      slotProps={{
-                        primary: {
-                          sx: {
-                            ...theme.typography.caption,
-                            fontWeight:
-                              activeWaterStory === "managed"
-                                ? theme.typography.fontWeightBold
-                                : theme.typography.fontWeightRegular,
-                          },
-                        },
-                      }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => {
-                      window.location.href = URLS.equity
-                      handleMobileMenuClose()
-                    }}
-                    selected={activeWaterStory === "equity"}
-                    aria-current={
-                      activeWaterStory === "equity" ? "page" : undefined
-                    }
-                    sx={{
-                      pl: 4,
-                      pr: 2,
-                      minHeight: MIN_TOUCH_TARGET,
-                      "&:focus-visible": {
-                        outline: `2px solid ${theme.palette.text.primary}`,
-                        outlineOffset: -2,
-                      },
-                    }}
-                  >
-                    {activeWaterStory === "equity" && (
-                      <ActiveBullet color={theme.palette.text.primary} />
-                    )}
-                    <ListItemText
-                      primary={t.waterStories.equity}
-                      slotProps={{
-                        primary: {
-                          sx: {
-                            ...theme.typography.caption,
-                            fontWeight:
-                              activeWaterStory === "equity"
-                                ? theme.typography.fontWeightBold
-                                : theme.typography.fontWeightRegular,
-                          },
-                        },
-                      }}
-                    />
-                  </ListItemButton>
-                </ListItem>
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
               </List>
             </ListItem>
 

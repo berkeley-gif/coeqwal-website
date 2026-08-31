@@ -16,7 +16,7 @@ import Resolution from "./components/08Resolution"
 import Conclusion from "./components/10Conclusion"
 import {
   BaseHeader,
-  getStorylineWaterThemesOptions,
+  getWaterThemeOptions,
   goToMainAbout,
   goToMainData,
   goToMainHome,
@@ -29,10 +29,9 @@ import { useMemo } from "react"
 import { useActiveSectionStore, type SectionId } from "./store"
 
 export default function StoryContainer() {
-  const waterThemesOptions = useMemo(() => getStorylineWaterThemesOptions(), [])
+  const waterThemesOptions = useMemo(() => getWaterThemeOptions(), [])
   const activeSection = useActiveSectionStore()
   const showDynamicMap =
-    activeSection === "Opener" ||
     activeSection === "Background" ||
     activeSection === "HistoricalContext" ||
     activeSection === "GoldRush" ||
