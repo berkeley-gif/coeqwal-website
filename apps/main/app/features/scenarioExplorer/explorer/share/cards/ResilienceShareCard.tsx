@@ -5,6 +5,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import type { ShareItem } from "../../store"
 import ShareSnapshotCard from "./ShareSnapshotCard"
 import { shareFigureFooter } from "../figureFooter"
+import { toolFigureTitle } from "../figureTitle"
 import { thumbnailAspectRatioFor } from "../thumbnailAspect"
 import ShareResilienceLiveChart from "../live/ShareResilienceLiveChart"
 import {
@@ -100,6 +101,10 @@ export default function ResilienceShareCard({
       id={item.id}
       toolLabel="Resilience"
       title={model.headline}
+      standardTitle={toolFigureTitle({
+        toolName: "Resilience heatmap",
+        memberSummary: model.headline,
+      })}
       scenarioDefinition={model.scenarioDefinition}
       subtitle={model.subtitle}
       chips={model.chips}

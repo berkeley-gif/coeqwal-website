@@ -8,6 +8,12 @@ import HydroclimateBadge from "./HydroclimateBadge"
 import ChartThumbnail from "./ChartThumbnail"
 
 interface ShareRadarCardProps {
+  /** Uppercase tool label above the title, matching the other share cards. */
+  toolLabel?: string
+  /** Standardized figure-title line, shown under the card's own heading so
+   *  an exported figure names its tool, members and hydroclimate the same
+   *  way a Data in Depth figure does. */
+  standardTitle?: string
   scenarioNames: string[]
   scenarioDefinitions?: string[]
   scenarioColors?: string[]
@@ -39,6 +45,8 @@ interface ShareRadarCardProps {
 }
 
 export default function ShareRadarCard({
+  toolLabel,
+  standardTitle,
   scenarioNames,
   scenarioDefinitions,
   scenarioColors,
@@ -76,6 +84,22 @@ export default function ShareRadarCard({
       onNoteChange={onNoteChange}
       removeAriaLabel="Remove radar from share tray"
     >
+      {toolLabel && (
+        <Typography
+          variant="caption"
+          sx={{
+            display: "block",
+            color: theme.palette.blue.bright,
+            fontWeight: 600,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            mb: 0.25,
+          }}
+        >
+          {toolLabel}
+        </Typography>
+      )}
+
       {isSingle ? (
         <>
           {/* Single scenario: name + definition, same style as bar chart scorecard */}
@@ -156,6 +180,20 @@ export default function ShareRadarCard({
             ))}
           </Box>
         </>
+      )}
+
+      {standardTitle && (
+        <Typography
+          sx={{
+            fontSize: "0.6875rem",
+            lineHeight: 1.35,
+            color: theme.palette.grey[600],
+            mt: 0.25,
+            pr: onRemove ? 2.5 : 0,
+          }}
+        >
+          {standardTitle}
+        </Typography>
       )}
 
       {/* Hydroclimate badge + chart type label + toggle states */}
