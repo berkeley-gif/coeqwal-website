@@ -1,74 +1,94 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-<title>Separating the effects of strategy and hydroclimate in COEQWAL results — COEQWAL Findings</title>
-<meta name="description" content="A COEQWAL reference brief on reading modeled results: how a scenario's difference from the baseline — current operations under the historical hydroclimate — can be separated into a hydroclimate effect and an operations effect, two parts that add exactly to the whole difference.">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>
+      Separating the effects of strategy and hydroclimate in COEQWAL results —
+      COEQWAL Findings
+    </title>
+    <meta
+      name="description"
+      content="A COEQWAL reference brief on reading modeled results: how a scenario's difference from the baseline — current operations under the historical hydroclimate — can be separated into a hydroclimate effect and an operations effect, two parts that add exactly to the whole difference."
+    />
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400;500;700&family=DM+Sans:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400;500;700&family=DM+Sans:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
 
-<style>
-:root {
-  --paper:        #fdfbf5;
-  --ink:          #1a1a1a;
-  --ink-soft:     #4a4a4a;
-  --ink-faint:    #8a8a8a;
-  --rule:         #d8d4c8;
-  --accent:       #3a4574;   /* canonical blue.darkest, per COEQWAL_Visual_Design_Spec */
-  --accent-faint: #e8eef5;
-  --serif:        'Spectral', 'Hoefler Text', Georgia, serif;
-  --sans:         'DM Sans', 'Helvetica Neue', sans-serif;
-  --mono:         'JetBrains Mono', 'SF Mono', Menlo, monospace;
-  /* Matches the scenario-results set's .wrap and the builder's dev builds
+    <style>
+      :root {
+        --paper: #fdfbf5;
+        --ink: #1a1a1a;
+        --ink-soft: #4a4a4a;
+        --ink-faint: #8a8a8a;
+        --rule: #d8d4c8;
+        --accent: #3a4574; /* canonical blue.darkest, per COEQWAL_Visual_Design_Spec */
+        --accent-faint: #e8eef5;
+        --serif: "Spectral", "Hoefler Text", Georgia, serif;
+        --sans: "DM Sans", "Helvetica Neue", sans-serif;
+        --mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+        /* Matches the scenario-results set's .wrap and the builder's dev builds
      (60rem), so every COEQWAL brief reads at the same width. The 38rem
      reading measure predates the wide figures (Eric, 2026-07-28). */
-  --measure:      60rem;
-}
+        --measure: 60rem;
+      }
 
-* { box-sizing: border-box; }
-html { background: var(--paper); }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        background: var(--paper);
+      }
 
-body {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 1.65;
-  color: var(--ink);
-  background: var(--paper);
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+      body {
+        font-family: var(--serif);
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 1.65;
+        color: var(--ink);
+        background: var(--paper);
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
 
-.brief {
-  max-width: var(--measure);
-  margin: 0 auto;
-  padding: 2.4rem 1.4rem 5rem;
-}
+      .brief {
+        max-width: var(--measure);
+        margin: 0 auto;
+        padding: 2.4rem 1.4rem 5rem;
+      }
 
-/* ── Masthead ───────────────────────────────────────────────────── */
-.masthead {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-family: var(--sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  padding-bottom: 1.1rem;
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 3rem;
-}
-.masthead .brand { font-weight: 700; color: var(--ink); letter-spacing: 0.2em; }
-.masthead .meta  { color: var(--ink-faint); margin-left: auto; }
-/* ── Download PDF button (screen-only) ──────────────────────────── */
-/* A109 requirement 1, rolled out to this page 2026-08-29 (A152). The
+      /* ── Masthead ───────────────────────────────────────────────────── */
+      .masthead {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-family: var(--sans);
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        padding-bottom: 1.1rem;
+        border-bottom: 1px solid var(--rule);
+        margin-bottom: 3rem;
+      }
+      .masthead .brand {
+        font-weight: 700;
+        color: var(--ink);
+        letter-spacing: 0.2em;
+      }
+      .masthead .meta {
+        color: var(--ink-faint);
+        margin-left: auto;
+      }
+      /* ── Download PDF button (screen-only) ──────────────────────────── */
+      /* A109 requirement 1, rolled out to this page 2026-08-29 (A152). The
    strategy documentation family has carried this since A121 and this is the
    same button: same placement, third item on the masthead line; same label;
    same screen-only behaviour. The href is RELATIVE, pdf/<frozen base
@@ -78,598 +98,2124 @@ body {
    Requirement 2 is the print rule further down: the button must not appear in
    the PDF, which would otherwise offer to download itself. The site nav rows
    are NOT print-hidden and deliberately do print. */
-.pdf-button {
-  margin-left: 1.2rem;
-  padding: 0.25rem 0.7rem;
-  border: 1px solid var(--accent);
-  border-radius: 3px;
-  font-family: var(--sans);
-  font-size: 0.66rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--accent);
-  text-decoration: none;
-  transition: color 0.2s, background-color 0.2s;
-}
-.pdf-button:hover { color: #fff; background-color: var(--accent); }
+      .pdf-button {
+        margin-left: 1.2rem;
+        padding: 0.25rem 0.7rem;
+        border: 1px solid var(--accent);
+        border-radius: 3px;
+        font-family: var(--sans);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        color: var(--accent);
+        text-decoration: none;
+        transition:
+          color 0.2s,
+          background-color 0.2s;
+      }
+      .pdf-button:hover {
+        color: #fff;
+        background-color: var(--accent);
+      }
 
-/* ── Eyebrow + Title ────────────────────────────────────────────── */
-.eyebrow {
-  font-family: var(--sans);
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 1rem;
-}
+      /* ── Eyebrow + Title ────────────────────────────────────────────── */
+      .eyebrow {
+        font-family: var(--sans);
+        font-size: 0.78rem;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 1rem;
+      }
 
-h1 {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-size: 2.05rem;
-  line-height: 1.2;
-  letter-spacing: -0.012em;
-  margin: 0 0 3rem;
-  color: var(--ink);
-}
-h1 .subtitle {
-  display: block;
-  font-size: 1.15rem;
-  line-height: 1.4;
-  letter-spacing: 0;
-  color: var(--ink-soft);
-  font-weight: 400;
-  margin-top: 0.55rem;
-}
+      h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 2.05rem;
+        line-height: 1.2;
+        letter-spacing: -0.012em;
+        margin: 0 0 3rem;
+        color: var(--ink);
+      }
+      h1 .subtitle {
+        display: block;
+        font-size: 1.15rem;
+        line-height: 1.4;
+        letter-spacing: 0;
+        color: var(--ink-soft);
+        font-weight: 400;
+        margin-top: 0.55rem;
+      }
 
-/* ── Section structure ──────────────────────────────────────────── */
-section { margin: 3.2rem 0; }
+      /* ── Section structure ──────────────────────────────────────────── */
+      section {
+        margin: 3.2rem 0;
+      }
 
-h2 {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink);
-  margin: 0 0 1.1rem;
-}
-h2 .num {
-  display: inline-block;
-  width: 1.9em;
-  color: var(--ink-faint);
-  font-weight: 500;
-}
+      h2 {
+        font-family: var(--sans);
+        font-weight: 700;
+        font-size: 0.78rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink);
+        margin: 0 0 1.1rem;
+      }
+      h2 .num {
+        display: inline-block;
+        width: 1.9em;
+        color: var(--ink-faint);
+        font-weight: 500;
+      }
 
-p { margin: 0 0 1.1rem; }
-em { font-style: italic; color: var(--ink); }
+      p {
+        margin: 0 0 1.1rem;
+      }
+      em {
+        font-style: italic;
+        color: var(--ink);
+      }
 
-/* ── References note (run-ID table, footer-adjacent) ────────────── */
-.refs-intro {
-  font-size: 0.96rem;
-  color: var(--ink-soft);
-}
-table.refs {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--sans);
-  font-size: 0.82rem;
-  margin: 0.4rem 0 0.2rem;
-}
-table.refs thead th {
-  text-align: left;
-  padding: 0.5rem 0.7rem;
-  font-weight: 700;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--ink);
-  border-bottom: 2px solid var(--ink-soft);
-}
-table.refs tbody td {
-  padding: 0.5rem 0.7rem;
-  border-bottom: 1px solid var(--rule);
-  vertical-align: top;
-}
-table.refs td.runid {
-  font-family: var(--mono);
-  font-size: 0.88em;
-  color: var(--ink-soft);
-  white-space: nowrap;
-}
+      /* ── References note (run-ID table, footer-adjacent) ────────────── */
+      .refs-intro {
+        font-size: 0.96rem;
+        color: var(--ink-soft);
+      }
+      table.refs {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--sans);
+        font-size: 0.82rem;
+        margin: 0.4rem 0 0.2rem;
+      }
+      table.refs thead th {
+        text-align: left;
+        padding: 0.5rem 0.7rem;
+        font-weight: 700;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink);
+        border-bottom: 2px solid var(--ink-soft);
+      }
+      table.refs tbody td {
+        padding: 0.5rem 0.7rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      table.refs td.runid {
+        font-family: var(--mono);
+        font-size: 0.88em;
+        color: var(--ink-soft);
+        white-space: nowrap;
+      }
 
-/* ── Disclaimer ─────────────────────────────────────────────────── */
-.disclaimer {
-  font-size: 0.96rem;
-  color: var(--ink-soft);
-  line-height: 1.65;
-}
+      /* ── Disclaimer ─────────────────────────────────────────────────── */
+      .disclaimer {
+        font-size: 0.96rem;
+        color: var(--ink-soft);
+        line-height: 1.65;
+      }
 
-/* ── Inline prose links ─────────────────────────────────────────── */
-section p a:not(.explore-link) {
-  color: var(--accent);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
-section p a:not(.explore-link):hover { color: var(--ink); }
+      /* ── Inline prose links ─────────────────────────────────────────── */
+      section p a:not(.explore-link) {
+        color: var(--accent);
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 2px;
+      }
+      section p a:not(.explore-link):hover {
+        color: var(--ink);
+      }
 
-
-/* ── Scope note (§2) ────────────────────────────────────────────── */
-/* The Background family carries no stock disclaimer block. This note is the
+      /* ── Scope note (§2) ────────────────────────────────────────────── */
+      /* The Background family carries no stock disclaimer block. This note is the
    ruled replacement for it (Eric, 2026-08-30) and sits inside the opening
    section rather than at the foot, where a reader meets it before the
    method rather than after. */
-p.scopenote {
-  font-style: italic;
-  color: var(--ink-soft);
-  border-left: 3px solid var(--rule);
-  padding: 0.15rem 0 0.15rem 1.4rem;
-  margin: 1.7rem 0;
-}
-p.scopenote em { font-style: italic; color: var(--ink-soft); }
+      p.scopenote {
+        font-style: italic;
+        color: var(--ink-soft);
+        border-left: 3px solid var(--rule);
+        padding: 0.15rem 0 0.15rem 1.4rem;
+        margin: 1.7rem 0;
+      }
+      p.scopenote em {
+        font-style: italic;
+        color: var(--ink-soft);
+      }
 
-/* ── Figures ────────────────────────────────────────────────────── */
-/* Every figure on this page is inline SVG with no raster and no script, so it
+      /* ── Figures ────────────────────────────────────────────────────── */
+      /* Every figure on this page is inline SVG with no raster and no script, so it
    renders identically on screen and in the PDF. Nothing is encoded by colour
    alone: each arrow carries its own name and value as text, and the two are
    further separated by line style and by direction. */
-figure.fig {
-  margin: 2.1rem 0 2.6rem;
-  padding: 0;
-}
-figure.fig svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  font-family: var(--sans);
-}
-/* The four single-lane panels are drawn on a 520-wide viewBox where the
+      figure.fig {
+        margin: 2.1rem 0 2.6rem;
+        padding: 0;
+      }
+      figure.fig svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        font-family: var(--sans);
+      }
+      /* The four single-lane panels are drawn on a 520-wide viewBox where the
    two-lane figures use 760, so they are held to 520/760 of the column and
    every figure on the page renders at one axis scale. */
-figure.fig.narrow svg { width: 68.42%; }
-figure.fig figcaption {
-  font-size: 0.96rem;
-  line-height: 1.6;
-  color: var(--ink-soft);
-  margin-top: 0.35rem;
-}
-figure.fig figcaption .lead { font-weight: 500; color: var(--ink); }
+      figure.fig.narrow svg {
+        width: 68.42%;
+      }
+      figure.fig figcaption {
+        font-size: 0.96rem;
+        line-height: 1.6;
+        color: var(--ink-soft);
+        margin-top: 0.35rem;
+      }
+      figure.fig figcaption .lead {
+        font-weight: 500;
+        color: var(--ink);
+      }
 
-/* ── References note ────────────────────────────────────────────── */
-/* The family's refs table puts its labels in cells; this one puts them in row
+      /* ── References note ────────────────────────────────────────────── */
+      /* The family's refs table puts its labels in cells; this one puts them in row
    headers, so they need the left alignment the head rule gives the column
    headers and the browser default does not give a th. */
-table.refs tbody th {
-  text-align: left;
-  font-weight: 500;
-  padding: 0.5rem 0.7rem;
-  border-bottom: 1px solid var(--rule);
-  vertical-align: top;
-}
+      table.refs tbody th {
+        text-align: left;
+        font-weight: 500;
+        padding: 0.5rem 0.7rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
 
-/* ── Site navigation (header + footer rows) ─────────────────────── */
-.sitenav {
-  max-width: var(--measure);
-  margin: 0 auto;
-  padding: 0.6rem 1.4rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-  font-family: var(--sans);
-  font-size: 0.78rem;
-}
-.sitenav a { color: var(--accent); text-decoration: none; }
-.sitenav a:hover { text-decoration: underline; }
-.sitenav-top    { border-bottom: 1px solid var(--rule); }
-.sitenav-bottom { border-top: 1px solid var(--rule); }
+      /* ── Site navigation (header + footer rows) ─────────────────────── */
+      .sitenav {
+        max-width: var(--measure);
+        margin: 0 auto;
+        padding: 0.6rem 1.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1rem;
+        font-family: var(--sans);
+        font-size: 0.78rem;
+      }
+      .sitenav a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .sitenav a:hover {
+        text-decoration: underline;
+      }
+      .sitenav-top {
+        border-bottom: 1px solid var(--rule);
+      }
+      .sitenav-bottom {
+        border-top: 1px solid var(--rule);
+      }
 
-/* ── Footer ─────────────────────────────────────────────────────── */
-.footer {
-  margin-top: 4rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--rule);
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--ink-faint);
-  line-height: 1.7;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1.2rem;
-}
-.footer code { font-family: var(--mono); color: var(--ink-soft); }
-.footer .meta-row { display: flex; gap: 1.4em; flex-wrap: wrap; }
+      /* ── Footer ─────────────────────────────────────────────────────── */
+      .footer {
+        margin-top: 4rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--rule);
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--ink-faint);
+        line-height: 1.7;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+      }
+      .footer code {
+        font-family: var(--mono);
+        color: var(--ink-soft);
+      }
+      .footer .meta-row {
+        display: flex;
+        gap: 1.4em;
+        flex-wrap: wrap;
+      }
 
-/* ── Print hint (screen-only) ──────────────────────────────────── */
-.print-hint {
-  max-width: var(--measure);
-  margin: 1rem auto 0;
-  padding: 0.85rem 2.5rem 0;
-  font-family: var(--sans);
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: var(--ink-faint);
-  letter-spacing: 0.01em;
-}
-.print-hint kbd {
-  font-family: var(--mono);
-  font-size: 0.74rem;
-  padding: 1px 5px;
-  border: 1px solid var(--rule);
-  border-radius: 3px;
-  background: #faf6ec;
-  color: var(--ink-soft);
-}
+      /* ── Print hint (screen-only) ──────────────────────────────────── */
+      .print-hint {
+        max-width: var(--measure);
+        margin: 1rem auto 0;
+        padding: 0.85rem 2.5rem 0;
+        font-family: var(--sans);
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: var(--ink-faint);
+        letter-spacing: 0.01em;
+      }
+      .print-hint kbd {
+        font-family: var(--mono);
+        font-size: 0.74rem;
+        padding: 1px 5px;
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        background: #faf6ec;
+        color: var(--ink-soft);
+      }
 
-/* ── Print ──────────────────────────────────────────────────────── */
-@media print {
-  @page { size: letter; margin: 0.7in 0.85in; }
-  html, body { background: white; }
-  .brief { max-width: none; padding: 0; margin: 0; }
-  .masthead { margin-bottom: 1.5rem; padding-bottom: 0.7rem; }
-  h1 { font-size: 1.6rem; margin-bottom: 1.5rem; }
-  section { margin: 1.6rem 0; break-inside: avoid; }
-  h1, h2 { break-after: avoid; }
-  p { orphans: 3; widows: 3; }
-  table.refs { font-size: 0.74rem; break-inside: avoid; }
-  table.refs thead { display: table-header-group; }
-  table.refs tr { break-inside: avoid; }
-  .print-hint, .pdf-button { display: none; }
-  figure.fig { break-inside: avoid; margin: 1.4rem 0 1.7rem; }
-  figure.fig figcaption { font-size: 0.86rem; }
-  .footer { margin-top: 2.5rem; }
-  a[href]::after { content: ' (' attr(href) ')'; font-size: 0.8em; color: #888; }
-}
+      /* ── Print ──────────────────────────────────────────────────────── */
+      @media print {
+        @page {
+          size: letter;
+          margin: 0.7in 0.85in;
+        }
+        html,
+        body {
+          background: white;
+        }
+        .brief {
+          max-width: none;
+          padding: 0;
+          margin: 0;
+        }
+        .masthead {
+          margin-bottom: 1.5rem;
+          padding-bottom: 0.7rem;
+        }
+        h1 {
+          font-size: 1.6rem;
+          margin-bottom: 1.5rem;
+        }
+        section {
+          margin: 1.6rem 0;
+          break-inside: avoid;
+        }
+        h1,
+        h2 {
+          break-after: avoid;
+        }
+        p {
+          orphans: 3;
+          widows: 3;
+        }
+        table.refs {
+          font-size: 0.74rem;
+          break-inside: avoid;
+        }
+        table.refs thead {
+          display: table-header-group;
+        }
+        table.refs tr {
+          break-inside: avoid;
+        }
+        .print-hint,
+        .pdf-button {
+          display: none;
+        }
+        figure.fig {
+          break-inside: avoid;
+          margin: 1.4rem 0 1.7rem;
+        }
+        figure.fig figcaption {
+          font-size: 0.86rem;
+        }
+        .footer {
+          margin-top: 2.5rem;
+        }
+        a[href]::after {
+          content: " (" attr(href) ")";
+          font-size: 0.8em;
+          color: #888;
+        }
+      }
 
-/* ── Mobile ─────────────────────────────────────────────────────── */
-@media (max-width: 640px) {
-  .brief { padding: 2.5rem 1.2rem 4rem; }
-  body { font-size: 17px; }
-  h1 { font-size: 1.55rem; }
-  table.refs { font-size: 0.74rem; }
-  .footer { flex-direction: column; }
-  /* The masthead is three items on one line at desktop width; at 640px the
+      /* ── Mobile ─────────────────────────────────────────────────────── */
+      @media (max-width: 640px) {
+        .brief {
+          padding: 2.5rem 1.2rem 4rem;
+        }
+        body {
+          font-size: 17px;
+        }
+        h1 {
+          font-size: 1.55rem;
+        }
+        table.refs {
+          font-size: 0.74rem;
+        }
+        .footer {
+          flex-direction: column;
+        }
+        /* The masthead is three items on one line at desktop width; at 640px the
      Download PDF button no longer fits beside the label, so the row is
      allowed to wrap rather than overflow. */
-  .masthead { font-size: 0.65rem; flex-wrap: wrap; row-gap: 0.6rem; }
-  .pdf-button { margin-left: 0.8rem; }
-}
-</style>
-</head>
-<body>
-<nav class="sitenav sitenav-top"><a href="https://coeqwal.org">COEQWAL</a><a href="https://coeqwal.org/data">Return to COEQWAL Documentation</a></nav>
+        .masthead {
+          font-size: 0.65rem;
+          flex-wrap: wrap;
+          row-gap: 0.6rem;
+        }
+        .pdf-button {
+          margin-left: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="sitenav sitenav-top">
+      <a href="https://coeqwal.org">COEQWAL</a
+      ><a href="https://coeqwal.org/data">Return to COEQWAL Documentation</a>
+    </nav>
 
+    <article class="brief">
+      <!-- ─── MASTHEAD ─────────────────────────────────────────────── -->
+      <header class="masthead">
+        <span class="brand">COEQWAL</span>
+        <span class="meta">Reference Brief · Background</span>
+        <a
+          class="pdf-button"
+          href="pdf/strategy_hydroclimate_decomposition_brief.pdf"
+          >Download PDF</a
+        >
+      </header>
 
-<article class="brief">
+      <!-- ─── §1 HEADLINE ──────────────────────────────────────────── -->
+      <div class="eyebrow">Reference Brief · Reading the Results</div>
+      <h1>
+        Separating the effects of strategy and hydroclimate in COEQWAL results
+      </h1>
 
-  <!-- ─── MASTHEAD ─────────────────────────────────────────────── -->
-  <header class="masthead">
-    <span class="brand">COEQWAL</span>
-    <span class="meta">Reference Brief · Background</span>
-    <a class="pdf-button" href="pdf/strategy_hydroclimate_decomposition_brief.pdf">Download PDF</a>
-  </header>
+      <!-- ─── §2 WHAT THIS PAGE IS ─────────────────────────────────── -->
+      <section>
+        <h2><span class="num">§2</span> What this page is</h2>
+        <p>
+          Every COEQWAL scenario combines two components: a management strategy
+          and a hydroclimate. The strategy is the set of water management
+          choices people can make. The hydroclimate is the pattern of
+          temperature, precipitation, and flow conditions that no one controls.
+          When a modeled result differs from one scenario to another, either
+          component, or both, can be behind the difference.
+        </p>
+        <p>
+          This page explains how that difference can be separated into a part
+          associated with the hydroclimate and a part associated with
+          operations. It walks through simplified illustrations first, then
+          shows one example from actual modeled results.
+        </p>
+        <p class="scopenote">
+          This page explains a method for reading modeled results from the
+          COEQWAL ensemble; the numeric values in its illustrations are invented
+          for teaching and the single worked example reports one modeled case.
+          Splitting a difference into parts does not indicate whether any part,
+          or the difference itself, is acceptable. COEQWAL does not recommend
+          any course of action.
+        </p>
+      </section>
 
-  <!-- ─── §1 HEADLINE ──────────────────────────────────────────── -->
-  <div class="eyebrow">Reference Brief · Reading the Results</div>
-  <h1>Separating the effects of strategy and hydroclimate in COEQWAL results</h1>
+      <!-- ─── §3 TWO COMPONENTS, ONE BASELINE ──────────────────────── -->
+      <section>
+        <h2><span class="num">§3</span> Two components, one baseline</h2>
+        <p>
+          All comparisons start from one scenario, the baseline: current
+          operations under the historical hydroclimate. It is the reference
+          point every other result is read against. Every other scenario in the
+          COEQWAL library changes the strategy, the hydroclimate, or both, and a
+          scenario's difference from the baseline splits into two parts. The
+          split holds operations fixed first: it uses current operations under
+          the scenario's hydroclimate as a second reference point, so that each
+          strategy is compared with current operations under the same
+          hydroclimate.
+        </p>
+        <p>
+          The hydroclimate effect is the difference between current operations
+          under that hydroclimate and the baseline. It answers: what changes if
+          operations stay the same but the hydroclimate is different? The
+          operations effect is the difference between the scenario and current
+          operations under that same hydroclimate. It answers: what changes if
+          the hydroclimate is the same but operations are different? The two
+          effects add exactly to the scenario's difference from the baseline:
+          baseline value + hydroclimate effect + operations effect = scenario
+          value.
+        </p>
+        <p>
+          Two consequences follow. If a scenario keeps current operations, its
+          operations effect is zero; if it keeps the historical hydroclimate,
+          its hydroclimate effect is zero. And because the operations effect is
+          measured under the scenario's own hydroclimate, the same strategy can
+          have a different operations effect under different hydroclimates. That
+          variation is how the interplay between strategy and hydroclimate shows
+          up in results, and it is why the briefs report the operations effect
+          separately for each hydroclimate.
+        </p>
+        <p>
+          Three notes for careful readers. First, the split applies only to
+          continuous outcome values, not to outcome level categories; when a
+          result crosses a level boundary, the crossing is caused jointly by
+          everything that moved the value, and is not attributed to operations
+          alone or the hydroclimate alone. Second, the split could be built the
+          other way round, measuring the strategy first under the historical
+          hydroclimate; COEQWAL uses the route through current operations so
+          that every strategy is compared with current operations under the same
+          hydroclimate. Third, the split describes where a modeled difference
+          comes from. It does not say whether the difference matters, which is a
+          judgment the framework leaves to the reader.
+        </p>
+      </section>
 
-  <!-- ─── §2 WHAT THIS PAGE IS ─────────────────────────────────── -->
-  <section>
-    <h2><span class="num">§2</span> What this page is</h2>
-    <p>
-      Every COEQWAL scenario combines two components: a management strategy and a hydroclimate. The strategy is the set of water management choices people can make. The hydroclimate is the pattern of temperature, precipitation, and flow conditions that no one controls. When a modeled result differs from one scenario to another, either component, or both, can be behind the difference.
+      <!-- ─── §4 WHAT THE SPLIT CAN LOOK LIKE ──────────────────────── -->
+      <section>
+        <h2><span class="num">§4</span> What the split can look like</h2>
+        <p>
+          The values in the five panels below are invented for illustration.
+          They are not modeled results. Each panel is drawn the way the summary
+          briefs draw their figures: Level 1 at the top, the baseline as a
+          dashed line, a warm arrow for the hydroclimate effect, a blue arrow
+          for the operations effect, and a solid mark where the scenario value
+          lands.
+        </p>
+
+        <figure class="fig narrow">
+          <svg
+            class="panel"
+            viewBox="0 0 520 400"
+            role="img"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-labelledby="p1-t p1-d"
+            aria-label="Panel 1, operations effect only. A flat tick stands in place of the warm arrow, so there is no hydroclimate effect, and a long blue arrow runs from the baseline to the solid scenario line, carrying the whole difference from the baseline. No numbers are shown."
+          >
+            <title id="p1-t">
+              Panel 1: the operations effect alone moves the value.
+            </title>
+            <desc id="p1-d">
+              One lane on the level axis. A warm arrow marks the hydroclimate
+              effect, a blue arrow marks the operations effect, the dashed line
+              is the baseline and the solid line is where the scenario value
+              lands. Level 1 is at the top and the four shaded bands are the
+              levels. A short flat tick sits on the baseline in place of a warm
+              arrow, so the hydroclimate effect is none. A blue arrow runs from
+              the baseline up the axis to the solid scenario line, which sits a
+              long way from the baseline.
+            </desc>
+            <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c">
+              <tspan font-weight="700" fill="#c28433">warm arrow</tspan>
+              = hydroclimate effect &nbsp;&middot;&nbsp;
+              <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan>
+              = operations effect
+            </text>
+            <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">
+              dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this
+              scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no
+              effect
+            </text>
+            <rect
+              x="60.0"
+              y="34.00"
+              width="452.00"
+              height="76.69"
+              fill="#dcefe1"
+              opacity="0.5"
+              data-band="1"
+            />
+            <text
+              x="54.0"
+              y="75.35"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#16774a"
+            >
+              Level 1
+            </text>
+            <text
+              x="54.0"
+              y="87.35"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Optimal
+            </text>
+            <rect
+              x="60.0"
+              y="110.69"
+              width="452.00"
+              height="76.69"
+              fill="#d8eef2"
+              opacity="0.5"
+              data-band="2"
+            />
+            <text
+              x="54.0"
+              y="152.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#1f7c8c"
+            >
+              Level 2
+            </text>
+            <text
+              x="54.0"
+              y="164.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Acceptable
+            </text>
+            <rect
+              x="60.0"
+              y="187.38"
+              width="452.00"
+              height="76.69"
+              fill="#fbe7d4"
+              opacity="0.5"
+              data-band="3"
+            />
+            <text
+              x="54.0"
+              y="228.73"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#b5651d"
+            >
+              Level 3
+            </text>
+            <text
+              x="54.0"
+              y="240.73"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              At-risk
+            </text>
+            <rect
+              x="60.0"
+              y="264.08"
+              width="452.00"
+              height="75.92"
+              fill="#fbdcd3"
+              opacity="0.5"
+              data-band="4"
+            />
+            <text
+              x="54.0"
+              y="305.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#c2412a"
+            >
+              Level 4
+            </text>
+            <text
+              x="54.0"
+              y="317.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Critical
+            </text>
+            <line
+              x1="120.00"
+              y1="156.71"
+              x2="220.00"
+              y2="156.71"
+              stroke="#9b9384"
+              stroke-width="1.8"
+              stroke-dasharray="3 3"
+            />
+            <line
+              x1="163.10"
+              y1="156.71"
+              x2="168.30"
+              y2="156.71"
+              stroke="#c28433"
+              stroke-width="1.9"
+              stroke-linecap="round"
+              data-flat="yes"
+            />
+            <line
+              x1="174.30"
+              y1="156.71"
+              x2="174.30"
+              y2="77.55"
+              stroke="#3d7db5"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 174.30 72.35 L 171.30 77.55 L 177.30 77.55 Z"
+              fill="#3d7db5"
+              data-flat="no"
+            />
+            <line
+              x1="122.00"
+              y1="72.35"
+              x2="218.00"
+              y2="72.35"
+              stroke="#43403a"
+              stroke-width="2"
+            />
+            <text x="232.0" y="75.85" font-size="10.5" fill="#1c1a17">
+              <tspan x="232.0" dy="0" font-weight="700">scenario</tspan>
+            </text>
+            <text x="232.0" y="118.03" font-size="10.5" fill="#3d7db5">
+              <tspan x="232.0" dy="0" font-weight="700">
+                operations effect
+              </tspan>
+            </text>
+            <text x="232.0" y="160.21" font-size="10.5" fill="#5c554c">
+              <tspan x="232.0" dy="0" font-weight="700">baseline</tspan>
+            </text>
+            <text x="232.0" y="179.21" font-size="10.5" fill="#c28433">
+              <tspan x="232.0" dy="0" font-weight="700">
+                no hydroclimate effect
+              </tspan>
+            </text>
+            <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">
+              Continuous level value, Level 1 at the top; the shaded bands are
+              the four levels.
+            </text>
+          </svg>
+          <figcaption>
+            <span class="lead">Panel 1, operations effect only.</span> The
+            scenario keeps the historical hydroclimate, so there is no
+            hydroclimate arrow. The operations arrow carries the whole
+            difference from the baseline.
+          </figcaption>
+        </figure>
+
+        <figure class="fig narrow">
+          <svg
+            class="panel"
+            viewBox="0 0 520 400"
+            role="img"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-labelledby="p2-t p2-d"
+            aria-label="Panel 2, hydroclimate effect only. A long warm arrow runs from the baseline and a flat tick stands in place of the blue arrow, so there is no operations effect and the solid scenario line sits where the warm arrow ends. No numbers are shown."
+          >
+            <title id="p2-t">
+              Panel 2: the hydroclimate effect alone moves the value.
+            </title>
+            <desc id="p2-d">
+              One lane on the level axis. A warm arrow marks the hydroclimate
+              effect, a blue arrow marks the operations effect, the dashed line
+              is the baseline and the solid line is where the scenario value
+              lands. Level 1 is at the top and the four shaded bands are the
+              levels. A warm arrow runs from the baseline down the axis; a short
+              flat tick sits at its head in place of a blue arrow, so the
+              operations effect is none. The solid scenario line sits where the
+              warm arrow ends.
+            </desc>
+            <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c">
+              <tspan font-weight="700" fill="#c28433">warm arrow</tspan>
+              = hydroclimate effect &nbsp;&middot;&nbsp;
+              <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan>
+              = operations effect
+            </text>
+            <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">
+              dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this
+              scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no
+              effect
+            </text>
+            <rect
+              x="60.0"
+              y="34.00"
+              width="452.00"
+              height="76.69"
+              fill="#dcefe1"
+              opacity="0.5"
+              data-band="1"
+            />
+            <text
+              x="54.0"
+              y="75.35"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#16774a"
+            >
+              Level 1
+            </text>
+            <text
+              x="54.0"
+              y="87.35"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Optimal
+            </text>
+            <rect
+              x="60.0"
+              y="110.69"
+              width="452.00"
+              height="76.69"
+              fill="#d8eef2"
+              opacity="0.5"
+              data-band="2"
+            />
+            <text
+              x="54.0"
+              y="152.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#1f7c8c"
+            >
+              Level 2
+            </text>
+            <text
+              x="54.0"
+              y="164.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Acceptable
+            </text>
+            <rect
+              x="60.0"
+              y="187.38"
+              width="452.00"
+              height="76.69"
+              fill="#fbe7d4"
+              opacity="0.5"
+              data-band="3"
+            />
+            <text
+              x="54.0"
+              y="228.73"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#b5651d"
+            >
+              Level 3
+            </text>
+            <text
+              x="54.0"
+              y="240.73"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              At-risk
+            </text>
+            <rect
+              x="60.0"
+              y="264.08"
+              width="452.00"
+              height="75.92"
+              fill="#fbdcd3"
+              opacity="0.5"
+              data-band="4"
+            />
+            <text
+              x="54.0"
+              y="305.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#c2412a"
+            >
+              Level 4
+            </text>
+            <text
+              x="54.0"
+              y="317.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Critical
+            </text>
+            <line
+              x1="120.00"
+              y1="156.71"
+              x2="220.00"
+              y2="156.71"
+              stroke="#9b9384"
+              stroke-width="1.8"
+              stroke-dasharray="3 3"
+            />
+            <line
+              x1="165.70"
+              y1="156.71"
+              x2="165.70"
+              y2="243.54"
+              stroke="#c28433"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 165.70 248.74 L 162.70 243.54 L 168.70 243.54 Z"
+              fill="#c28433"
+              data-flat="no"
+            />
+            <line
+              x1="171.70"
+              y1="248.74"
+              x2="176.90"
+              y2="248.74"
+              stroke="#3d7db5"
+              stroke-width="1.9"
+              stroke-linecap="round"
+              data-flat="yes"
+            />
+            <line
+              x1="122.00"
+              y1="248.74"
+              x2="218.00"
+              y2="248.74"
+              stroke="#43403a"
+              stroke-width="2"
+            />
+            <text x="232.0" y="160.21" font-size="10.5" fill="#5c554c">
+              <tspan x="232.0" dy="0" font-weight="700">baseline</tspan>
+            </text>
+            <text x="232.0" y="206.22" font-size="10.5" fill="#c28433">
+              <tspan x="232.0" dy="0" font-weight="700">
+                hydroclimate effect
+              </tspan>
+            </text>
+            <text x="232.0" y="252.24" font-size="10.5" fill="#3d7db5">
+              <tspan x="232.0" dy="0" font-weight="700">
+                no operations effect
+              </tspan>
+            </text>
+            <text x="232.0" y="271.24" font-size="10.5" fill="#1c1a17">
+              <tspan x="232.0" dy="0" font-weight="700">scenario</tspan>
+            </text>
+            <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">
+              Continuous level value, Level 1 at the top; the shaded bands are
+              the four levels.
+            </text>
+          </svg>
+          <figcaption>
+            <span class="lead">Panel 2, hydroclimate effect only.</span> The
+            scenario keeps current operations under a different hydroclimate.
+            The hydroclimate arrow carries the whole difference and there is no
+            operations arrow.
+          </figcaption>
+        </figure>
+
+        <figure class="fig narrow">
+          <svg
+            class="panel"
+            viewBox="0 0 520 400"
+            role="img"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-labelledby="p3-t p3-d"
+            aria-label="Panel 3, both effects in the same direction. The warm arrow and the blue arrow point the same way and are laid end to end, and the solid scenario line sits further from the baseline than either arrow alone. No numbers are shown."
+          >
+            <title id="p3-t">
+              Panel 3: both effects run the same way and the parts add.
+            </title>
+            <desc id="p3-d">
+              One lane on the level axis. A warm arrow marks the hydroclimate
+              effect, a blue arrow marks the operations effect, the dashed line
+              is the baseline and the solid line is where the scenario value
+              lands. Level 1 is at the top and the four shaded bands are the
+              levels. A warm arrow runs from the baseline down the axis and a
+              blue arrow continues from its head in the same direction. The
+              solid scenario line sits where the blue arrow ends, further from
+              the baseline than either arrow alone.
+            </desc>
+            <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c">
+              <tspan font-weight="700" fill="#c28433">warm arrow</tspan>
+              = hydroclimate effect &nbsp;&middot;&nbsp;
+              <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan>
+              = operations effect
+            </text>
+            <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">
+              dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this
+              scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no
+              effect
+            </text>
+            <rect
+              x="60.0"
+              y="34.00"
+              width="452.00"
+              height="76.69"
+              fill="#dcefe1"
+              opacity="0.5"
+              data-band="1"
+            />
+            <text
+              x="54.0"
+              y="75.35"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#16774a"
+            >
+              Level 1
+            </text>
+            <text
+              x="54.0"
+              y="87.35"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Optimal
+            </text>
+            <rect
+              x="60.0"
+              y="110.69"
+              width="452.00"
+              height="76.69"
+              fill="#d8eef2"
+              opacity="0.5"
+              data-band="2"
+            />
+            <text
+              x="54.0"
+              y="152.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#1f7c8c"
+            >
+              Level 2
+            </text>
+            <text
+              x="54.0"
+              y="164.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Acceptable
+            </text>
+            <rect
+              x="60.0"
+              y="187.38"
+              width="452.00"
+              height="76.69"
+              fill="#fbe7d4"
+              opacity="0.5"
+              data-band="3"
+            />
+            <text
+              x="54.0"
+              y="228.73"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#b5651d"
+            >
+              Level 3
+            </text>
+            <text
+              x="54.0"
+              y="240.73"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              At-risk
+            </text>
+            <rect
+              x="60.0"
+              y="264.08"
+              width="452.00"
+              height="75.92"
+              fill="#fbdcd3"
+              opacity="0.5"
+              data-band="4"
+            />
+            <text
+              x="54.0"
+              y="305.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#c2412a"
+            >
+              Level 4
+            </text>
+            <text
+              x="54.0"
+              y="317.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Critical
+            </text>
+            <line
+              x1="120.00"
+              y1="126.03"
+              x2="220.00"
+              y2="126.03"
+              stroke="#9b9384"
+              stroke-width="1.8"
+              stroke-dasharray="3 3"
+            />
+            <line
+              x1="165.70"
+              y1="195.05"
+              x2="174.30"
+              y2="195.05"
+              stroke="#b9b1a4"
+              stroke-width="0.9"
+              stroke-dasharray="1.5 1.5"
+            />
+            <line
+              x1="165.70"
+              y1="126.03"
+              x2="165.70"
+              y2="189.85"
+              stroke="#c28433"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 165.70 195.05 L 162.70 189.85 L 168.70 189.85 Z"
+              fill="#c28433"
+              data-flat="no"
+            />
+            <line
+              x1="174.30"
+              y1="195.05"
+              x2="174.30"
+              y2="251.21"
+              stroke="#3d7db5"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 174.30 256.41 L 171.30 251.21 L 177.30 251.21 Z"
+              fill="#3d7db5"
+              data-flat="no"
+            />
+            <line
+              x1="122.00"
+              y1="256.41"
+              x2="218.00"
+              y2="256.41"
+              stroke="#43403a"
+              stroke-width="2"
+            />
+            <text x="232.0" y="129.53" font-size="10.5" fill="#5c554c">
+              <tspan x="232.0" dy="0" font-weight="700">baseline</tspan>
+            </text>
+            <text x="232.0" y="164.04" font-size="10.5" fill="#c28433">
+              <tspan x="232.0" dy="0" font-weight="700">
+                hydroclimate effect
+              </tspan>
+            </text>
+            <text x="232.0" y="192.30" font-size="10.5" fill="#5c554c">
+              <tspan x="232.0" dy="0">current operations under</tspan>
+              <tspan x="232.0" dy="12.5">
+                the scenario&#x27;s hydroclimate
+              </tspan>
+            </text>
+            <text x="232.0" y="229.23" font-size="10.5" fill="#3d7db5">
+              <tspan x="232.0" dy="0" font-weight="700">
+                operations effect
+              </tspan>
+            </text>
+            <text x="232.0" y="259.91" font-size="10.5" fill="#1c1a17">
+              <tspan x="232.0" dy="0" font-weight="700">scenario</tspan>
+            </text>
+            <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">
+              Continuous level value, Level 1 at the top; the shaded bands are
+              the four levels.
+            </text>
+          </svg>
+          <figcaption>
+            <span class="lead">Panel 3, both effects, same direction.</span> The
+            two arrows point the same way and the parts add. The scenario value
+            differs from the baseline by the sum of the two effects.
+          </figcaption>
+        </figure>
+
+        <figure class="fig narrow">
+          <svg
+            class="panel"
+            viewBox="0 0 520 400"
+            role="img"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-labelledby="p4-t p4-d"
+            aria-label="Panel 4, both effects in opposite directions. The warm arrow and the blue arrow point opposite ways and are nearly the same length, and the solid scenario line lands close to the dashed baseline even though both arrows are long. No numbers are shown."
+          >
+            <title id="p4-t">
+              Panel 4: the two effects run opposite ways and largely offset.
+            </title>
+            <desc id="p4-d">
+              One lane on the level axis. A warm arrow marks the hydroclimate
+              effect, a blue arrow marks the operations effect, the dashed line
+              is the baseline and the solid line is where the scenario value
+              lands. Level 1 is at the top and the four shaded bands are the
+              levels. A warm arrow runs from the baseline down the axis and a
+              blue arrow runs back from its head in the opposite direction,
+              almost as far. The solid scenario line sits close to the dashed
+              baseline.
+            </desc>
+            <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c">
+              <tspan font-weight="700" fill="#c28433">warm arrow</tspan>
+              = hydroclimate effect &nbsp;&middot;&nbsp;
+              <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan>
+              = operations effect
+            </text>
+            <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">
+              dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this
+              scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no
+              effect
+            </text>
+            <rect
+              x="60.0"
+              y="34.00"
+              width="452.00"
+              height="76.69"
+              fill="#dcefe1"
+              opacity="0.5"
+              data-band="1"
+            />
+            <text
+              x="54.0"
+              y="75.35"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#16774a"
+            >
+              Level 1
+            </text>
+            <text
+              x="54.0"
+              y="87.35"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Optimal
+            </text>
+            <rect
+              x="60.0"
+              y="110.69"
+              width="452.00"
+              height="76.69"
+              fill="#d8eef2"
+              opacity="0.5"
+              data-band="2"
+            />
+            <text
+              x="54.0"
+              y="152.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#1f7c8c"
+            >
+              Level 2
+            </text>
+            <text
+              x="54.0"
+              y="164.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Acceptable
+            </text>
+            <rect
+              x="60.0"
+              y="187.38"
+              width="452.00"
+              height="76.69"
+              fill="#fbe7d4"
+              opacity="0.5"
+              data-band="3"
+            />
+            <text
+              x="54.0"
+              y="228.73"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#b5651d"
+            >
+              Level 3
+            </text>
+            <text
+              x="54.0"
+              y="240.73"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              At-risk
+            </text>
+            <rect
+              x="60.0"
+              y="264.08"
+              width="452.00"
+              height="75.92"
+              fill="#fbdcd3"
+              opacity="0.5"
+              data-band="4"
+            />
+            <text
+              x="54.0"
+              y="305.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#c2412a"
+            >
+              Level 4
+            </text>
+            <text
+              x="54.0"
+              y="317.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Critical
+            </text>
+            <line
+              x1="120.00"
+              y1="179.71"
+              x2="220.00"
+              y2="179.71"
+              stroke="#9b9384"
+              stroke-width="1.8"
+              stroke-dasharray="3 3"
+            />
+            <line
+              x1="165.70"
+              y1="264.08"
+              x2="174.30"
+              y2="264.08"
+              stroke="#b9b1a4"
+              stroke-width="0.9"
+              stroke-dasharray="1.5 1.5"
+            />
+            <line
+              x1="165.70"
+              y1="179.71"
+              x2="165.70"
+              y2="258.88"
+              stroke="#c28433"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 165.70 264.08 L 162.70 258.88 L 168.70 258.88 Z"
+              fill="#c28433"
+              data-flat="no"
+            />
+            <line
+              x1="174.30"
+              y1="264.08"
+              x2="174.30"
+              y2="181.08"
+              stroke="#3d7db5"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 174.30 175.88 L 171.30 181.08 L 177.30 181.08 Z"
+              fill="#3d7db5"
+              data-flat="no"
+            />
+            <line
+              x1="122.00"
+              y1="175.88"
+              x2="218.00"
+              y2="175.88"
+              stroke="#43403a"
+              stroke-width="2"
+            />
+            <text x="232.0" y="179.38" font-size="10.5" fill="#1c1a17">
+              <tspan x="232.0" dy="0" font-weight="700">scenario</tspan>
+            </text>
+            <text x="232.0" y="198.38" font-size="10.5" fill="#5c554c">
+              <tspan x="232.0" dy="0" font-weight="700">baseline</tspan>
+            </text>
+            <text x="232.0" y="223.48" font-size="10.5" fill="#3d7db5">
+              <tspan x="232.0" dy="0" font-weight="700">
+                operations effect
+              </tspan>
+            </text>
+            <text x="232.0" y="242.48" font-size="10.5" fill="#c28433">
+              <tspan x="232.0" dy="0" font-weight="700">
+                hydroclimate effect
+              </tspan>
+            </text>
+            <text x="232.0" y="261.48" font-size="10.5" fill="#5c554c">
+              <tspan x="232.0" dy="0">current operations under</tspan>
+              <tspan x="232.0" dy="12.5">
+                the scenario&#x27;s hydroclimate
+              </tspan>
+            </text>
+            <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">
+              Continuous level value, Level 1 at the top; the shaded bands are
+              the four levels.
+            </text>
+          </svg>
+          <figcaption>
+            <span class="lead"
+              >Panel 4, both effects, opposite directions.</span
+            >
+            The arrows point opposite ways and largely offset. The scenario
+            value lands near the baseline even though both parts are sizeable.
+            This is the case worth pausing on: a result that looks nearly
+            unchanged can contain two substantial parts pulling against each
+            other.
+          </figcaption>
+        </figure>
+
+        <figure class="fig">
+          <svg
+            class="panel"
+            viewBox="0 0 760 400"
+            role="img"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-labelledby="p5-t p5-d"
+            aria-label="Panel 5, the same strategy under two hydroclimates. The left lane, under the historical hydroclimate, has a flat tick in place of the warm arrow and one blue arrow; the right lane, under a stressed hydroclimate, has a warm arrow and a blue arrow about half as long as the blue arrow in the first lane. No numbers are shown."
+          >
+            <title id="p5-t">
+              Panel 5: the same strategy under two hydroclimates, with
+              operations arrows of different lengths.
+            </title>
+            <desc id="p5-d">
+              Two lanes side by side on one level axis, the same strategy in
+              each. A warm arrow marks the hydroclimate effect, a blue arrow
+              marks the operations effect, the dashed line is the baseline and
+              the solid line is where the scenario value lands. Level 1 is at
+              the top and the four shaded bands are the levels. In the left
+              lane, under the historical hydroclimate, a short flat tick stands
+              in place of a warm arrow and a blue arrow runs from the baseline
+              to the solid scenario line. In the right lane, under a stressed
+              hydroclimate, a warm arrow runs from the baseline and a blue arrow
+              continues back from its head, and that blue arrow is about half
+              the length of the one in the first lane.
+            </desc>
+            <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c">
+              <tspan font-weight="700" fill="#c28433">warm arrow</tspan>
+              = hydroclimate effect &nbsp;&middot;&nbsp;
+              <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan>
+              = operations effect
+            </text>
+            <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">
+              dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this
+              scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no
+              effect
+            </text>
+            <rect
+              x="60.0"
+              y="34.00"
+              width="692.00"
+              height="76.69"
+              fill="#dcefe1"
+              opacity="0.5"
+              data-band="1"
+            />
+            <text
+              x="54.0"
+              y="75.35"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#16774a"
+            >
+              Level 1
+            </text>
+            <text
+              x="54.0"
+              y="87.35"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Optimal
+            </text>
+            <rect
+              x="60.0"
+              y="110.69"
+              width="692.00"
+              height="76.69"
+              fill="#d8eef2"
+              opacity="0.5"
+              data-band="2"
+            />
+            <text
+              x="54.0"
+              y="152.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#1f7c8c"
+            >
+              Level 2
+            </text>
+            <text
+              x="54.0"
+              y="164.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Acceptable
+            </text>
+            <rect
+              x="60.0"
+              y="187.38"
+              width="692.00"
+              height="76.69"
+              fill="#fbe7d4"
+              opacity="0.5"
+              data-band="3"
+            />
+            <text
+              x="54.0"
+              y="228.73"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#b5651d"
+            >
+              Level 3
+            </text>
+            <text
+              x="54.0"
+              y="240.73"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              At-risk
+            </text>
+            <rect
+              x="60.0"
+              y="264.08"
+              width="692.00"
+              height="75.92"
+              fill="#fbdcd3"
+              opacity="0.5"
+              data-band="4"
+            />
+            <text
+              x="54.0"
+              y="305.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#c2412a"
+            >
+              Level 4
+            </text>
+            <text
+              x="54.0"
+              y="317.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Critical
+            </text>
+            <line
+              x1="120.00"
+              y1="156.71"
+              x2="220.00"
+              y2="156.71"
+              stroke="#9b9384"
+              stroke-width="1.8"
+              stroke-dasharray="3 3"
+            />
+            <line
+              x1="420.00"
+              y1="156.71"
+              x2="520.00"
+              y2="156.71"
+              stroke="#9b9384"
+              stroke-width="1.8"
+              stroke-dasharray="3 3"
+            />
+            <line
+              x1="163.10"
+              y1="156.71"
+              x2="168.30"
+              y2="156.71"
+              stroke="#c28433"
+              stroke-width="1.9"
+              stroke-linecap="round"
+              data-flat="yes"
+            />
+            <line
+              x1="174.30"
+              y1="156.71"
+              x2="174.30"
+              y2="92.88"
+              stroke="#3d7db5"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 174.30 87.68 L 171.30 92.88 L 177.30 92.88 Z"
+              fill="#3d7db5"
+              data-flat="no"
+            />
+            <line
+              x1="122.00"
+              y1="87.68"
+              x2="218.00"
+              y2="87.68"
+              stroke="#43403a"
+              stroke-width="2"
+            />
+            <text
+              x="170.00"
+              y="358.00"
+              text-anchor="middle"
+              font-size="10.5"
+              font-weight="600"
+              fill="#1c1a17"
+            >
+              Historical hydroclimate
+            </text>
+            <line
+              x1="465.70"
+              y1="256.41"
+              x2="474.30"
+              y2="256.41"
+              stroke="#b9b1a4"
+              stroke-width="0.9"
+              stroke-dasharray="1.5 1.5"
+            />
+            <line
+              x1="465.70"
+              y1="156.71"
+              x2="465.70"
+              y2="251.21"
+              stroke="#c28433"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 465.70 256.41 L 462.70 251.21 L 468.70 251.21 Z"
+              fill="#c28433"
+              data-flat="no"
+            />
+            <line
+              x1="474.30"
+              y1="256.41"
+              x2="474.30"
+              y2="227.09"
+              stroke="#3d7db5"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 474.30 221.89 L 471.30 227.09 L 477.30 227.09 Z"
+              fill="#3d7db5"
+              data-flat="no"
+            />
+            <line
+              x1="422.00"
+              y1="221.89"
+              x2="518.00"
+              y2="221.89"
+              stroke="#43403a"
+              stroke-width="2"
+            />
+            <text
+              x="470.00"
+              y="358.00"
+              text-anchor="middle"
+              font-size="10.5"
+              font-weight="600"
+              fill="#1c1a17"
+            >
+              High climate stress
+            </text>
+            <text x="232.0" y="91.18" font-size="10.5" fill="#1c1a17">
+              <tspan x="232.0" dy="0" font-weight="700">scenario</tspan>
+            </text>
+            <text x="232.0" y="125.70" font-size="10.5" fill="#3d7db5">
+              <tspan x="232.0" dy="0" font-weight="700">
+                operations effect
+              </tspan>
+            </text>
+            <text x="232.0" y="160.21" font-size="10.5" fill="#c28433">
+              <tspan x="232.0" dy="0" font-weight="700">
+                no hydroclimate effect
+              </tspan>
+            </text>
+            <text x="532.0" y="160.21" font-size="10.5" fill="#5c554c">
+              <tspan x="532.0" dy="0" font-weight="700">baseline</tspan>
+            </text>
+            <text x="532.0" y="210.06" font-size="10.5" fill="#c28433">
+              <tspan x="532.0" dy="0" font-weight="700">
+                hydroclimate effect
+              </tspan>
+            </text>
+            <text x="532.0" y="229.06" font-size="10.5" fill="#1c1a17">
+              <tspan x="532.0" dy="0" font-weight="700">scenario</tspan>
+            </text>
+            <text x="532.0" y="248.06" font-size="10.5" fill="#3d7db5">
+              <tspan x="532.0" dy="0" font-weight="700">
+                operations effect
+              </tspan>
+            </text>
+            <text x="532.0" y="267.06" font-size="10.5" fill="#5c554c">
+              <tspan x="532.0" dy="0">current operations under</tspan>
+              <tspan x="532.0" dy="12.5">High climate stress</tspan>
+            </text>
+            <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">
+              Continuous level value, Level 1 at the top; the shaded bands are
+              the four levels.
+            </text>
+          </svg>
+          <figcaption>
+            <span class="lead">Panel 5, same strategy, two hydroclimates.</span>
+            Two lanes side by side, the same strategy in each. Under the
+            historical hydroclimate there is only an operations arrow. Under a
+            stressed hydroclimate the hydroclimate arrow appears, and the
+            operations arrow is a different length than it was in the first
+            lane. The operations effect of a strategy depends on the
+            hydroclimate it is run under.
+          </figcaption>
+        </figure>
+
+        <p>
+          The offsetting case in Panel 4 is why some COEQWAL summary tables
+          outline cells where the hydroclimate and operations effects point in
+          opposite directions. An outlined cell is a signal that the single
+          number shown is the net of two parts, not the whole story.
+        </p>
+      </section>
+
+      <!-- ─── §5 ONE EXAMPLE FROM ACTUAL RESULTS ───────────────────── -->
+      <section>
+        <h2><span class="num">§5</span> One example from actual results</h2>
+        <p>
+          The clean panels above are teaching cases. Actual modeled results are
+          usually messier: both effects present, and the operations effect
+          changing size from one hydroclimate to the next. The figure below
+          shows one actual result from the COEQWAL ensemble, drawn as two lanes.
+        </p>
+
+        <figure class="fig">
+          <svg
+            class="panel"
+            viewBox="0 0 760 400"
+            role="img"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-labelledby="ex-t ex-d"
+            aria-label="Freshwater for Delta exports at Banks Pumping Plant under winter-run refuge flows, drawn as two lanes. The baseline is 2.7. Under the historical hydroclimate the hydroclimate effect is 0.0 and the operations effect is minus 1.4, landing at 1.3. Under Extreme climate stress the hydroclimate effect is plus 1.4 and the operations effect is minus 0.8, landing at 3.3."
+          >
+            <title id="ex-t">
+              Freshwater for Delta exports at Banks Pumping Plant under
+              winter-run refuge flows, in two hydroclimates.
+            </title>
+            <desc id="ex-d">
+              Two lanes side by side on one level axis, winter-run refuge flows
+              in each. A warm arrow marks the hydroclimate effect, a blue arrow
+              marks the operations effect, the dashed line is the baseline and
+              the solid line is where the scenario value lands. Level 1 is at
+              the top and the four shaded bands are the levels. The baseline is
+              2.7. In the left lane, under the historical hydroclimate, a flat
+              tick stands in place of the warm arrow, the hydroclimate effect
+              being 0.0, and a blue arrow of minus 1.4 runs from the baseline to
+              a solid scenario line at 1.3. In the right lane, under Extreme
+              climate stress, a warm arrow of plus 1.4 runs from the baseline to
+              current operations under Extreme climate stress at 4.1, and a blue
+              arrow of minus 0.8 runs back from there to a solid scenario line
+              at 3.3.
+            </desc>
+            <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c">
+              <tspan font-weight="700" fill="#c28433">warm arrow</tspan>
+              = hydroclimate effect &nbsp;&middot;&nbsp;
+              <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan>
+              = operations effect
+            </text>
+            <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">
+              dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this
+              scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no
+              effect
+            </text>
+            <rect
+              x="60.0"
+              y="34.00"
+              width="692.00"
+              height="76.69"
+              fill="#dcefe1"
+              opacity="0.5"
+              data-band="1"
+            />
+            <text
+              x="54.0"
+              y="75.35"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#16774a"
+            >
+              Level 1
+            </text>
+            <text
+              x="54.0"
+              y="87.35"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Optimal
+            </text>
+            <rect
+              x="60.0"
+              y="110.69"
+              width="692.00"
+              height="76.69"
+              fill="#d8eef2"
+              opacity="0.5"
+              data-band="2"
+            />
+            <text
+              x="54.0"
+              y="152.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#1f7c8c"
+            >
+              Level 2
+            </text>
+            <text
+              x="54.0"
+              y="164.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Acceptable
+            </text>
+            <rect
+              x="60.0"
+              y="187.38"
+              width="692.00"
+              height="76.69"
+              fill="#fbe7d4"
+              opacity="0.5"
+              data-band="3"
+            />
+            <text
+              x="54.0"
+              y="228.73"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#b5651d"
+            >
+              Level 3
+            </text>
+            <text
+              x="54.0"
+              y="240.73"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              At-risk
+            </text>
+            <rect
+              x="60.0"
+              y="264.08"
+              width="692.00"
+              height="75.92"
+              fill="#fbdcd3"
+              opacity="0.5"
+              data-band="4"
+            />
+            <text
+              x="54.0"
+              y="305.04"
+              text-anchor="end"
+              font-size="10.5"
+              font-weight="600"
+              fill="#c2412a"
+            >
+              Level 4
+            </text>
+            <text
+              x="54.0"
+              y="317.04"
+              text-anchor="end"
+              font-size="8.5"
+              fill="#5c554c"
+            >
+              Critical
+            </text>
+            <line
+              x1="120.00"
+              y1="165.91"
+              x2="220.00"
+              y2="165.91"
+              stroke="#9b9384"
+              stroke-width="1.8"
+              stroke-dasharray="3 3"
+            />
+            <line
+              x1="420.00"
+              y1="165.91"
+              x2="520.00"
+              y2="165.91"
+              stroke="#9b9384"
+              stroke-width="1.8"
+              stroke-dasharray="3 3"
+            />
+            <line
+              x1="163.10"
+              y1="165.91"
+              x2="168.30"
+              y2="165.91"
+              stroke="#c28433"
+              stroke-width="1.9"
+              stroke-linecap="round"
+              data-flat="yes"
+            />
+            <line
+              x1="174.30"
+              y1="165.91"
+              x2="174.30"
+              y2="63.74"
+              stroke="#3d7db5"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 174.30 58.54 L 171.30 63.74 L 177.30 63.74 Z"
+              fill="#3d7db5"
+              data-flat="no"
+            />
+            <line
+              x1="122.00"
+              y1="58.54"
+              x2="218.00"
+              y2="58.54"
+              stroke="#43403a"
+              stroke-width="2"
+            />
+            <text
+              x="170.00"
+              y="358.00"
+              text-anchor="middle"
+              font-size="10.5"
+              font-weight="600"
+              fill="#1c1a17"
+            >
+              Historical hydroclimate
+            </text>
+            <line
+              x1="465.70"
+              y1="272.66"
+              x2="474.30"
+              y2="272.66"
+              stroke="#b9b1a4"
+              stroke-width="0.9"
+              stroke-dasharray="1.5 1.5"
+            />
+            <line
+              x1="465.70"
+              y1="165.91"
+              x2="465.70"
+              y2="267.46"
+              stroke="#c28433"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 465.70 272.66 L 462.70 267.46 L 468.70 267.46 Z"
+              fill="#c28433"
+              data-flat="no"
+            />
+            <line
+              x1="474.30"
+              y1="272.66"
+              x2="474.30"
+              y2="218.51"
+              stroke="#3d7db5"
+              stroke-width="1.9"
+              stroke-linecap="butt"
+            />
+            <path
+              d="M 474.30 213.31 L 471.30 218.51 L 477.30 218.51 Z"
+              fill="#3d7db5"
+              data-flat="no"
+            />
+            <line
+              x1="422.00"
+              y1="213.31"
+              x2="518.00"
+              y2="213.31"
+              stroke="#43403a"
+              stroke-width="2"
+            />
+            <text
+              x="470.00"
+              y="358.00"
+              text-anchor="middle"
+              font-size="10.5"
+              font-weight="600"
+              fill="#1c1a17"
+            >
+              Extreme climate stress
+            </text>
+            <text x="232.0" y="62.04" font-size="10.5" fill="#1c1a17">
+              <tspan x="232.0" dy="0" font-weight="700">scenario 1.3</tspan>
+            </text>
+            <text x="232.0" y="115.73" font-size="10.5" fill="#3d7db5">
+              <tspan x="232.0" dy="0" font-weight="700">
+                operations effect −1.4
+              </tspan>
+            </text>
+            <text x="232.0" y="169.41" font-size="10.5" fill="#c28433">
+              <tspan x="232.0" dy="0" font-weight="700">
+                hydroclimate effect 0.0
+              </tspan>
+            </text>
+            <text x="532.0" y="169.41" font-size="10.5" fill="#5c554c">
+              <tspan x="532.0" dy="0" font-weight="700">baseline 2.7</tspan>
+            </text>
+            <text x="532.0" y="216.81" font-size="10.5" fill="#1c1a17">
+              <tspan x="532.0" dy="0" font-weight="700">scenario 3.3</tspan>
+            </text>
+            <text x="532.0" y="235.81" font-size="10.5" fill="#c28433">
+              <tspan x="532.0" dy="0" font-weight="700">
+                hydroclimate effect +1.4
+              </tspan>
+            </text>
+            <text x="532.0" y="254.81" font-size="10.5" fill="#3d7db5">
+              <tspan x="532.0" dy="0" font-weight="700">
+                operations effect −0.8
+              </tspan>
+            </text>
+            <text x="532.0" y="273.81" font-size="10.5" fill="#5c554c">
+              <tspan x="532.0" dy="0">current operations under</tspan>
+              <tspan x="532.0" dy="12.5">Extreme climate stress 4.1</tspan>
+            </text>
+            <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">
+              Continuous level value, Level 1 at the top; the shaded bands are
+              the four levels.
+            </text>
+          </svg>
+          <figcaption>
+            In CalSim 3 simulations, freshwater for Delta exports at Banks
+            Pumping Plant sits at 2.7 under the baseline. Under the historical
+            hydroclimate, winter-run refuge flows shift the value by −1.4 (the
+            operations effect; there is no hydroclimate effect). Under Extreme
+            climate stress, current operations shift the value by +1.4 (the
+            hydroclimate effect) and winter-run refuge flows shift it by a
+            further −0.8 (the operations effect), landing at 3.3. The operations
+            effect is −1.4 under one hydroclimate and −0.8 under the other. This
+            example was chosen to show a case in which both effects are visible
+            and the operations effect differs between hydroclimates.
+          </figcaption>
+        </figure>
+      </section>
+
+      <!-- ─── §6 WHERE THIS APPEARS IN COEQWAL ─────────────────────── -->
+      <section>
+        <h2><span class="num">§6</span> Where this appears in COEQWAL</h2>
+        <p>
+          Readers will encounter this idea in the summary briefs on the Data
+          page, where outlined table cells mark offsetting effects in the
+          two-part form described above, and in comparisons across the Explore
+          section, where the same result can be read against different
+          strategies or different hydroclimates. The decomposition is a way of
+          reading those materials, not a separate dataset.
+        </p>
+      </section>
+
+      <!-- ─── REFERENCES NOTE ──────────────────────────────────────── -->
+      <section class="refs">
+        <h2><span class="num">§7</span> References</h2>
+        <p class="refs-intro">
+          The worked example in §5 is read from the COEQWAL data snapshot of
+          August 29, 2026, at the continuous value the model reports rather than
+          at the level band it falls in. Values are shown to one decimal,
+          floored rather than rounded, and each effect is the difference between
+          the one-decimal values, so the two effects and the baseline add
+          exactly to the scenario value as printed. The four CalSim 3 runs
+          behind the example, and the internal codes for the key outcome and the
+          location, are listed here for citation. They are internal identifiers,
+          not public names.
+        </p>
+        <table class="refs">
+          <thead>
+            <tr>
+              <th scope="col">Cell of the example</th>
+              <th scope="col">Run</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Current operations, Historical hydroclimate</th>
+              <td class="runid">s0020</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                Winter-run refuge flows, Historical hydroclimate
+              </th>
+              <td class="runid">s0031</td>
+            </tr>
+            <tr>
+              <th scope="row">Current operations, Extreme climate stress</th>
+              <td class="runid">s0108</td>
+            </tr>
+            <tr>
+              <th scope="row">
+                Winter-run refuge flows, Extreme climate stress
+              </th>
+              <td class="runid">s0118</td>
+            </tr>
+            <tr>
+              <th scope="row">Key outcome, Freshwater for Delta exports</th>
+              <td class="runid">FW_EXP</td>
+            </tr>
+            <tr>
+              <th scope="row">Location, Banks Pumping Plant</th>
+              <td class="runid">CAA003</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ─── FOOTER (metadata) ────────────────────────────────────── -->
+      <footer class="footer">
+        <div class="meta-row">
+          <span>COEQWAL · Collaboratory for Equity in Water Allocation</span>
+        </div>
+        <div class="meta-row">
+          <span
+            >Supported by the California Climate Action Initiative · UC Grant
+            <code>R02CM7222</code></span
+          >
+          <span>Updated August 30, 2026</span>
+        </div>
+      </footer>
+    </article>
+
+    <!-- ─── PRINT HINT (screen-only) ──────────────────────────────── -->
+    <p class="print-hint">
+      Save this brief as a PDF — open your browser's print menu (<kbd>⌘P</kbd>
+      on Mac, <kbd>Ctrl</kbd>+<kbd>P</kbd> on Windows) and choose "Save as PDF"
+      as the destination.
     </p>
-    <p>
-      This page explains how that difference can be separated into a part associated with the hydroclimate and a part associated with operations. It walks through simplified illustrations first, then shows one example from actual modeled results.
-    </p>
-    <p class="scopenote">
-      This page explains a method for reading modeled results from the COEQWAL ensemble; the numeric values in its illustrations are invented for teaching and the single worked example reports one modeled case. Splitting a difference into parts does not indicate whether any part, or the difference itself, is acceptable. COEQWAL does not recommend any course of action.
-    </p>
-  </section>
 
-  <!-- ─── §3 TWO COMPONENTS, ONE BASELINE ──────────────────────── -->
-  <section>
-    <h2><span class="num">§3</span> Two components, one baseline</h2>
-    <p>
-      All comparisons start from one scenario, the baseline: current operations under the historical hydroclimate. It is the reference point every other result is read against. Every other scenario in the COEQWAL library changes the strategy, the hydroclimate, or both, and a scenario's difference from the baseline splits into two parts. The split holds operations fixed first: it uses current operations under the scenario's hydroclimate as a second reference point, so that each strategy is compared with current operations under the same hydroclimate.
-    </p>
-    <p>
-      The hydroclimate effect is the difference between current operations under that hydroclimate and the baseline. It answers: what changes if operations stay the same but the hydroclimate is different? The operations effect is the difference between the scenario and current operations under that same hydroclimate. It answers: what changes if the hydroclimate is the same but operations are different? The two effects add exactly to the scenario's difference from the baseline: baseline value + hydroclimate effect + operations effect = scenario value.
-    </p>
-    <p>
-      Two consequences follow. If a scenario keeps current operations, its operations effect is zero; if it keeps the historical hydroclimate, its hydroclimate effect is zero. And because the operations effect is measured under the scenario's own hydroclimate, the same strategy can have a different operations effect under different hydroclimates. That variation is how the interplay between strategy and hydroclimate shows up in results, and it is why the briefs report the operations effect separately for each hydroclimate.
-    </p>
-    <p>
-      Three notes for careful readers. First, the split applies only to continuous outcome values, not to outcome level categories; when a result crosses a level boundary, the crossing is caused jointly by everything that moved the value, and is not attributed to operations alone or the hydroclimate alone. Second, the split could be built the other way round, measuring the strategy first under the historical hydroclimate; COEQWAL uses the route through current operations so that every strategy is compared with current operations under the same hydroclimate. Third, the split describes where a modeled difference comes from. It does not say whether the difference matters, which is a judgment the framework leaves to the reader.
-    </p>
-  </section>
-
-  <!-- ─── §4 WHAT THE SPLIT CAN LOOK LIKE ──────────────────────── -->
-  <section>
-    <h2><span class="num">§4</span> What the split can look like</h2>
-    <p>
-      The values in the five panels below are invented for illustration. They are not modeled results. Each panel is drawn the way the summary briefs draw their figures: Level 1 at the top, the baseline as a dashed line, a warm arrow for the hydroclimate effect, a blue arrow for the operations effect, and a solid mark where the scenario value lands.
-    </p>
-
-  <figure class="fig narrow">
-<svg class="panel" viewBox="0 0 520 400" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="p1-t p1-d" aria-label="Panel 1, operations effect only. A flat tick stands in place of the warm arrow, so there is no hydroclimate effect, and a long blue arrow runs from the baseline to the solid scenario line, carrying the whole difference from the baseline. No numbers are shown.">
-  <title id="p1-t">Panel 1: the operations effect alone moves the value.</title>
-  <desc id="p1-d">One lane on the level axis. A warm arrow marks the hydroclimate effect, a blue arrow marks the operations effect, the dashed line is the baseline and the solid line is where the scenario value lands. Level 1 is at the top and the four shaded bands are the levels. A short flat tick sits on the baseline in place of a warm arrow, so the hydroclimate effect is none. A blue arrow runs from the baseline up the axis to the solid scenario line, which sits a long way from the baseline.</desc>
-  <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c"><tspan font-weight="700" fill="#c28433">warm arrow</tspan> = hydroclimate effect &nbsp;&middot;&nbsp; <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan> = operations effect</text>
-  <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no effect</text>
-  <rect x="60.0" y="34.00" width="452.00" height="76.69" fill="#dcefe1" opacity="0.5" data-band="1"/>
-  <text x="54.0" y="75.35" text-anchor="end" font-size="10.5" font-weight="600" fill="#16774a">Level 1</text>
-  <text x="54.0" y="87.35" text-anchor="end" font-size="8.5" fill="#5c554c">Optimal</text>
-  <rect x="60.0" y="110.69" width="452.00" height="76.69" fill="#d8eef2" opacity="0.5" data-band="2"/>
-  <text x="54.0" y="152.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#1f7c8c">Level 2</text>
-  <text x="54.0" y="164.04" text-anchor="end" font-size="8.5" fill="#5c554c">Acceptable</text>
-  <rect x="60.0" y="187.38" width="452.00" height="76.69" fill="#fbe7d4" opacity="0.5" data-band="3"/>
-  <text x="54.0" y="228.73" text-anchor="end" font-size="10.5" font-weight="600" fill="#b5651d">Level 3</text>
-  <text x="54.0" y="240.73" text-anchor="end" font-size="8.5" fill="#5c554c">At-risk</text>
-  <rect x="60.0" y="264.08" width="452.00" height="75.92" fill="#fbdcd3" opacity="0.5" data-band="4"/>
-  <text x="54.0" y="305.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#c2412a">Level 4</text>
-  <text x="54.0" y="317.04" text-anchor="end" font-size="8.5" fill="#5c554c">Critical</text>
-  <line x1="120.00" y1="156.71" x2="220.00" y2="156.71" stroke="#9b9384" stroke-width="1.8" stroke-dasharray="3 3"/>
-  <line x1="163.10" y1="156.71" x2="168.30" y2="156.71" stroke="#c28433" stroke-width="1.9" stroke-linecap="round" data-flat="yes"/>
-  <line x1="174.30" y1="156.71" x2="174.30" y2="77.55" stroke="#3d7db5" stroke-width="1.9" stroke-linecap="butt"/><path d="M 174.30 72.35 L 171.30 77.55 L 177.30 77.55 Z" fill="#3d7db5" data-flat="no"/>
-  <line x1="122.00" y1="72.35" x2="218.00" y2="72.35" stroke="#43403a" stroke-width="2"/>
-  <text x="232.0" y="75.85" font-size="10.5" fill="#1c1a17"><tspan x="232.0" dy="0" font-weight="700">scenario</tspan></text>
-  <text x="232.0" y="118.03" font-size="10.5" fill="#3d7db5"><tspan x="232.0" dy="0" font-weight="700">operations effect</tspan></text>
-  <text x="232.0" y="160.21" font-size="10.5" fill="#5c554c"><tspan x="232.0" dy="0" font-weight="700">baseline</tspan></text>
-  <text x="232.0" y="179.21" font-size="10.5" fill="#c28433"><tspan x="232.0" dy="0" font-weight="700">no hydroclimate effect</tspan></text>
-  <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">Continuous level value, Level 1 at the top; the shaded bands are the four levels.</text>
-</svg>
-    <figcaption><span class="lead">Panel 1, operations effect only.</span> The scenario keeps the historical hydroclimate, so there is no hydroclimate arrow. The operations arrow carries the whole difference from the baseline.</figcaption>
-  </figure>
-
-  <figure class="fig narrow">
-<svg class="panel" viewBox="0 0 520 400" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="p2-t p2-d" aria-label="Panel 2, hydroclimate effect only. A long warm arrow runs from the baseline and a flat tick stands in place of the blue arrow, so there is no operations effect and the solid scenario line sits where the warm arrow ends. No numbers are shown.">
-  <title id="p2-t">Panel 2: the hydroclimate effect alone moves the value.</title>
-  <desc id="p2-d">One lane on the level axis. A warm arrow marks the hydroclimate effect, a blue arrow marks the operations effect, the dashed line is the baseline and the solid line is where the scenario value lands. Level 1 is at the top and the four shaded bands are the levels. A warm arrow runs from the baseline down the axis; a short flat tick sits at its head in place of a blue arrow, so the operations effect is none. The solid scenario line sits where the warm arrow ends.</desc>
-  <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c"><tspan font-weight="700" fill="#c28433">warm arrow</tspan> = hydroclimate effect &nbsp;&middot;&nbsp; <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan> = operations effect</text>
-  <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no effect</text>
-  <rect x="60.0" y="34.00" width="452.00" height="76.69" fill="#dcefe1" opacity="0.5" data-band="1"/>
-  <text x="54.0" y="75.35" text-anchor="end" font-size="10.5" font-weight="600" fill="#16774a">Level 1</text>
-  <text x="54.0" y="87.35" text-anchor="end" font-size="8.5" fill="#5c554c">Optimal</text>
-  <rect x="60.0" y="110.69" width="452.00" height="76.69" fill="#d8eef2" opacity="0.5" data-band="2"/>
-  <text x="54.0" y="152.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#1f7c8c">Level 2</text>
-  <text x="54.0" y="164.04" text-anchor="end" font-size="8.5" fill="#5c554c">Acceptable</text>
-  <rect x="60.0" y="187.38" width="452.00" height="76.69" fill="#fbe7d4" opacity="0.5" data-band="3"/>
-  <text x="54.0" y="228.73" text-anchor="end" font-size="10.5" font-weight="600" fill="#b5651d">Level 3</text>
-  <text x="54.0" y="240.73" text-anchor="end" font-size="8.5" fill="#5c554c">At-risk</text>
-  <rect x="60.0" y="264.08" width="452.00" height="75.92" fill="#fbdcd3" opacity="0.5" data-band="4"/>
-  <text x="54.0" y="305.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#c2412a">Level 4</text>
-  <text x="54.0" y="317.04" text-anchor="end" font-size="8.5" fill="#5c554c">Critical</text>
-  <line x1="120.00" y1="156.71" x2="220.00" y2="156.71" stroke="#9b9384" stroke-width="1.8" stroke-dasharray="3 3"/>
-  <line x1="165.70" y1="156.71" x2="165.70" y2="243.54" stroke="#c28433" stroke-width="1.9" stroke-linecap="butt"/><path d="M 165.70 248.74 L 162.70 243.54 L 168.70 243.54 Z" fill="#c28433" data-flat="no"/>
-  <line x1="171.70" y1="248.74" x2="176.90" y2="248.74" stroke="#3d7db5" stroke-width="1.9" stroke-linecap="round" data-flat="yes"/>
-  <line x1="122.00" y1="248.74" x2="218.00" y2="248.74" stroke="#43403a" stroke-width="2"/>
-  <text x="232.0" y="160.21" font-size="10.5" fill="#5c554c"><tspan x="232.0" dy="0" font-weight="700">baseline</tspan></text>
-  <text x="232.0" y="206.22" font-size="10.5" fill="#c28433"><tspan x="232.0" dy="0" font-weight="700">hydroclimate effect</tspan></text>
-  <text x="232.0" y="252.24" font-size="10.5" fill="#3d7db5"><tspan x="232.0" dy="0" font-weight="700">no operations effect</tspan></text>
-  <text x="232.0" y="271.24" font-size="10.5" fill="#1c1a17"><tspan x="232.0" dy="0" font-weight="700">scenario</tspan></text>
-  <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">Continuous level value, Level 1 at the top; the shaded bands are the four levels.</text>
-</svg>
-    <figcaption><span class="lead">Panel 2, hydroclimate effect only.</span> The scenario keeps current operations under a different hydroclimate. The hydroclimate arrow carries the whole difference and there is no operations arrow.</figcaption>
-  </figure>
-
-  <figure class="fig narrow">
-<svg class="panel" viewBox="0 0 520 400" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="p3-t p3-d" aria-label="Panel 3, both effects in the same direction. The warm arrow and the blue arrow point the same way and are laid end to end, and the solid scenario line sits further from the baseline than either arrow alone. No numbers are shown.">
-  <title id="p3-t">Panel 3: both effects run the same way and the parts add.</title>
-  <desc id="p3-d">One lane on the level axis. A warm arrow marks the hydroclimate effect, a blue arrow marks the operations effect, the dashed line is the baseline and the solid line is where the scenario value lands. Level 1 is at the top and the four shaded bands are the levels. A warm arrow runs from the baseline down the axis and a blue arrow continues from its head in the same direction. The solid scenario line sits where the blue arrow ends, further from the baseline than either arrow alone.</desc>
-  <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c"><tspan font-weight="700" fill="#c28433">warm arrow</tspan> = hydroclimate effect &nbsp;&middot;&nbsp; <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan> = operations effect</text>
-  <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no effect</text>
-  <rect x="60.0" y="34.00" width="452.00" height="76.69" fill="#dcefe1" opacity="0.5" data-band="1"/>
-  <text x="54.0" y="75.35" text-anchor="end" font-size="10.5" font-weight="600" fill="#16774a">Level 1</text>
-  <text x="54.0" y="87.35" text-anchor="end" font-size="8.5" fill="#5c554c">Optimal</text>
-  <rect x="60.0" y="110.69" width="452.00" height="76.69" fill="#d8eef2" opacity="0.5" data-band="2"/>
-  <text x="54.0" y="152.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#1f7c8c">Level 2</text>
-  <text x="54.0" y="164.04" text-anchor="end" font-size="8.5" fill="#5c554c">Acceptable</text>
-  <rect x="60.0" y="187.38" width="452.00" height="76.69" fill="#fbe7d4" opacity="0.5" data-band="3"/>
-  <text x="54.0" y="228.73" text-anchor="end" font-size="10.5" font-weight="600" fill="#b5651d">Level 3</text>
-  <text x="54.0" y="240.73" text-anchor="end" font-size="8.5" fill="#5c554c">At-risk</text>
-  <rect x="60.0" y="264.08" width="452.00" height="75.92" fill="#fbdcd3" opacity="0.5" data-band="4"/>
-  <text x="54.0" y="305.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#c2412a">Level 4</text>
-  <text x="54.0" y="317.04" text-anchor="end" font-size="8.5" fill="#5c554c">Critical</text>
-  <line x1="120.00" y1="126.03" x2="220.00" y2="126.03" stroke="#9b9384" stroke-width="1.8" stroke-dasharray="3 3"/>
-  <line x1="165.70" y1="195.05" x2="174.30" y2="195.05" stroke="#b9b1a4" stroke-width="0.9" stroke-dasharray="1.5 1.5"/>
-  <line x1="165.70" y1="126.03" x2="165.70" y2="189.85" stroke="#c28433" stroke-width="1.9" stroke-linecap="butt"/><path d="M 165.70 195.05 L 162.70 189.85 L 168.70 189.85 Z" fill="#c28433" data-flat="no"/>
-  <line x1="174.30" y1="195.05" x2="174.30" y2="251.21" stroke="#3d7db5" stroke-width="1.9" stroke-linecap="butt"/><path d="M 174.30 256.41 L 171.30 251.21 L 177.30 251.21 Z" fill="#3d7db5" data-flat="no"/>
-  <line x1="122.00" y1="256.41" x2="218.00" y2="256.41" stroke="#43403a" stroke-width="2"/>
-  <text x="232.0" y="129.53" font-size="10.5" fill="#5c554c"><tspan x="232.0" dy="0" font-weight="700">baseline</tspan></text>
-  <text x="232.0" y="164.04" font-size="10.5" fill="#c28433"><tspan x="232.0" dy="0" font-weight="700">hydroclimate effect</tspan></text>
-  <text x="232.0" y="192.30" font-size="10.5" fill="#5c554c"><tspan x="232.0" dy="0">current operations under</tspan><tspan x="232.0" dy="12.5">the scenario&#x27;s hydroclimate</tspan></text>
-  <text x="232.0" y="229.23" font-size="10.5" fill="#3d7db5"><tspan x="232.0" dy="0" font-weight="700">operations effect</tspan></text>
-  <text x="232.0" y="259.91" font-size="10.5" fill="#1c1a17"><tspan x="232.0" dy="0" font-weight="700">scenario</tspan></text>
-  <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">Continuous level value, Level 1 at the top; the shaded bands are the four levels.</text>
-</svg>
-    <figcaption><span class="lead">Panel 3, both effects, same direction.</span> The two arrows point the same way and the parts add. The scenario value differs from the baseline by the sum of the two effects.</figcaption>
-  </figure>
-
-  <figure class="fig narrow">
-<svg class="panel" viewBox="0 0 520 400" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="p4-t p4-d" aria-label="Panel 4, both effects in opposite directions. The warm arrow and the blue arrow point opposite ways and are nearly the same length, and the solid scenario line lands close to the dashed baseline even though both arrows are long. No numbers are shown.">
-  <title id="p4-t">Panel 4: the two effects run opposite ways and largely offset.</title>
-  <desc id="p4-d">One lane on the level axis. A warm arrow marks the hydroclimate effect, a blue arrow marks the operations effect, the dashed line is the baseline and the solid line is where the scenario value lands. Level 1 is at the top and the four shaded bands are the levels. A warm arrow runs from the baseline down the axis and a blue arrow runs back from its head in the opposite direction, almost as far. The solid scenario line sits close to the dashed baseline.</desc>
-  <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c"><tspan font-weight="700" fill="#c28433">warm arrow</tspan> = hydroclimate effect &nbsp;&middot;&nbsp; <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan> = operations effect</text>
-  <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no effect</text>
-  <rect x="60.0" y="34.00" width="452.00" height="76.69" fill="#dcefe1" opacity="0.5" data-band="1"/>
-  <text x="54.0" y="75.35" text-anchor="end" font-size="10.5" font-weight="600" fill="#16774a">Level 1</text>
-  <text x="54.0" y="87.35" text-anchor="end" font-size="8.5" fill="#5c554c">Optimal</text>
-  <rect x="60.0" y="110.69" width="452.00" height="76.69" fill="#d8eef2" opacity="0.5" data-band="2"/>
-  <text x="54.0" y="152.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#1f7c8c">Level 2</text>
-  <text x="54.0" y="164.04" text-anchor="end" font-size="8.5" fill="#5c554c">Acceptable</text>
-  <rect x="60.0" y="187.38" width="452.00" height="76.69" fill="#fbe7d4" opacity="0.5" data-band="3"/>
-  <text x="54.0" y="228.73" text-anchor="end" font-size="10.5" font-weight="600" fill="#b5651d">Level 3</text>
-  <text x="54.0" y="240.73" text-anchor="end" font-size="8.5" fill="#5c554c">At-risk</text>
-  <rect x="60.0" y="264.08" width="452.00" height="75.92" fill="#fbdcd3" opacity="0.5" data-band="4"/>
-  <text x="54.0" y="305.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#c2412a">Level 4</text>
-  <text x="54.0" y="317.04" text-anchor="end" font-size="8.5" fill="#5c554c">Critical</text>
-  <line x1="120.00" y1="179.71" x2="220.00" y2="179.71" stroke="#9b9384" stroke-width="1.8" stroke-dasharray="3 3"/>
-  <line x1="165.70" y1="264.08" x2="174.30" y2="264.08" stroke="#b9b1a4" stroke-width="0.9" stroke-dasharray="1.5 1.5"/>
-  <line x1="165.70" y1="179.71" x2="165.70" y2="258.88" stroke="#c28433" stroke-width="1.9" stroke-linecap="butt"/><path d="M 165.70 264.08 L 162.70 258.88 L 168.70 258.88 Z" fill="#c28433" data-flat="no"/>
-  <line x1="174.30" y1="264.08" x2="174.30" y2="181.08" stroke="#3d7db5" stroke-width="1.9" stroke-linecap="butt"/><path d="M 174.30 175.88 L 171.30 181.08 L 177.30 181.08 Z" fill="#3d7db5" data-flat="no"/>
-  <line x1="122.00" y1="175.88" x2="218.00" y2="175.88" stroke="#43403a" stroke-width="2"/>
-  <text x="232.0" y="179.38" font-size="10.5" fill="#1c1a17"><tspan x="232.0" dy="0" font-weight="700">scenario</tspan></text>
-  <text x="232.0" y="198.38" font-size="10.5" fill="#5c554c"><tspan x="232.0" dy="0" font-weight="700">baseline</tspan></text>
-  <text x="232.0" y="223.48" font-size="10.5" fill="#3d7db5"><tspan x="232.0" dy="0" font-weight="700">operations effect</tspan></text>
-  <text x="232.0" y="242.48" font-size="10.5" fill="#c28433"><tspan x="232.0" dy="0" font-weight="700">hydroclimate effect</tspan></text>
-  <text x="232.0" y="261.48" font-size="10.5" fill="#5c554c"><tspan x="232.0" dy="0">current operations under</tspan><tspan x="232.0" dy="12.5">the scenario&#x27;s hydroclimate</tspan></text>
-  <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">Continuous level value, Level 1 at the top; the shaded bands are the four levels.</text>
-</svg>
-    <figcaption><span class="lead">Panel 4, both effects, opposite directions.</span> The arrows point opposite ways and largely offset. The scenario value lands near the baseline even though both parts are sizeable. This is the case worth pausing on: a result that looks nearly unchanged can contain two substantial parts pulling against each other.</figcaption>
-  </figure>
-
-  <figure class="fig">
-<svg class="panel" viewBox="0 0 760 400" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="p5-t p5-d" aria-label="Panel 5, the same strategy under two hydroclimates. The left lane, under the historical hydroclimate, has a flat tick in place of the warm arrow and one blue arrow; the right lane, under a stressed hydroclimate, has a warm arrow and a blue arrow about half as long as the blue arrow in the first lane. No numbers are shown.">
-  <title id="p5-t">Panel 5: the same strategy under two hydroclimates, with operations arrows of different lengths.</title>
-  <desc id="p5-d">Two lanes side by side on one level axis, the same strategy in each. A warm arrow marks the hydroclimate effect, a blue arrow marks the operations effect, the dashed line is the baseline and the solid line is where the scenario value lands. Level 1 is at the top and the four shaded bands are the levels. In the left lane, under the historical hydroclimate, a short flat tick stands in place of a warm arrow and a blue arrow runs from the baseline to the solid scenario line. In the right lane, under a stressed hydroclimate, a warm arrow runs from the baseline and a blue arrow continues back from its head, and that blue arrow is about half the length of the one in the first lane.</desc>
-  <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c"><tspan font-weight="700" fill="#c28433">warm arrow</tspan> = hydroclimate effect &nbsp;&middot;&nbsp; <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan> = operations effect</text>
-  <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no effect</text>
-  <rect x="60.0" y="34.00" width="692.00" height="76.69" fill="#dcefe1" opacity="0.5" data-band="1"/>
-  <text x="54.0" y="75.35" text-anchor="end" font-size="10.5" font-weight="600" fill="#16774a">Level 1</text>
-  <text x="54.0" y="87.35" text-anchor="end" font-size="8.5" fill="#5c554c">Optimal</text>
-  <rect x="60.0" y="110.69" width="692.00" height="76.69" fill="#d8eef2" opacity="0.5" data-band="2"/>
-  <text x="54.0" y="152.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#1f7c8c">Level 2</text>
-  <text x="54.0" y="164.04" text-anchor="end" font-size="8.5" fill="#5c554c">Acceptable</text>
-  <rect x="60.0" y="187.38" width="692.00" height="76.69" fill="#fbe7d4" opacity="0.5" data-band="3"/>
-  <text x="54.0" y="228.73" text-anchor="end" font-size="10.5" font-weight="600" fill="#b5651d">Level 3</text>
-  <text x="54.0" y="240.73" text-anchor="end" font-size="8.5" fill="#5c554c">At-risk</text>
-  <rect x="60.0" y="264.08" width="692.00" height="75.92" fill="#fbdcd3" opacity="0.5" data-band="4"/>
-  <text x="54.0" y="305.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#c2412a">Level 4</text>
-  <text x="54.0" y="317.04" text-anchor="end" font-size="8.5" fill="#5c554c">Critical</text>
-  <line x1="120.00" y1="156.71" x2="220.00" y2="156.71" stroke="#9b9384" stroke-width="1.8" stroke-dasharray="3 3"/>
-  <line x1="420.00" y1="156.71" x2="520.00" y2="156.71" stroke="#9b9384" stroke-width="1.8" stroke-dasharray="3 3"/>
-  <line x1="163.10" y1="156.71" x2="168.30" y2="156.71" stroke="#c28433" stroke-width="1.9" stroke-linecap="round" data-flat="yes"/>
-  <line x1="174.30" y1="156.71" x2="174.30" y2="92.88" stroke="#3d7db5" stroke-width="1.9" stroke-linecap="butt"/><path d="M 174.30 87.68 L 171.30 92.88 L 177.30 92.88 Z" fill="#3d7db5" data-flat="no"/>
-  <line x1="122.00" y1="87.68" x2="218.00" y2="87.68" stroke="#43403a" stroke-width="2"/>
-  <text x="170.00" y="358.00" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1c1a17">Historical hydroclimate</text>
-  <line x1="465.70" y1="256.41" x2="474.30" y2="256.41" stroke="#b9b1a4" stroke-width="0.9" stroke-dasharray="1.5 1.5"/>
-  <line x1="465.70" y1="156.71" x2="465.70" y2="251.21" stroke="#c28433" stroke-width="1.9" stroke-linecap="butt"/><path d="M 465.70 256.41 L 462.70 251.21 L 468.70 251.21 Z" fill="#c28433" data-flat="no"/>
-  <line x1="474.30" y1="256.41" x2="474.30" y2="227.09" stroke="#3d7db5" stroke-width="1.9" stroke-linecap="butt"/><path d="M 474.30 221.89 L 471.30 227.09 L 477.30 227.09 Z" fill="#3d7db5" data-flat="no"/>
-  <line x1="422.00" y1="221.89" x2="518.00" y2="221.89" stroke="#43403a" stroke-width="2"/>
-  <text x="470.00" y="358.00" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1c1a17">High climate stress</text>
-  <text x="232.0" y="91.18" font-size="10.5" fill="#1c1a17"><tspan x="232.0" dy="0" font-weight="700">scenario</tspan></text>
-  <text x="232.0" y="125.70" font-size="10.5" fill="#3d7db5"><tspan x="232.0" dy="0" font-weight="700">operations effect</tspan></text>
-  <text x="232.0" y="160.21" font-size="10.5" fill="#c28433"><tspan x="232.0" dy="0" font-weight="700">no hydroclimate effect</tspan></text>
-  <text x="532.0" y="160.21" font-size="10.5" fill="#5c554c"><tspan x="532.0" dy="0" font-weight="700">baseline</tspan></text>
-  <text x="532.0" y="210.06" font-size="10.5" fill="#c28433"><tspan x="532.0" dy="0" font-weight="700">hydroclimate effect</tspan></text>
-  <text x="532.0" y="229.06" font-size="10.5" fill="#1c1a17"><tspan x="532.0" dy="0" font-weight="700">scenario</tspan></text>
-  <text x="532.0" y="248.06" font-size="10.5" fill="#3d7db5"><tspan x="532.0" dy="0" font-weight="700">operations effect</tspan></text>
-  <text x="532.0" y="267.06" font-size="10.5" fill="#5c554c"><tspan x="532.0" dy="0">current operations under</tspan><tspan x="532.0" dy="12.5">High climate stress</tspan></text>
-  <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">Continuous level value, Level 1 at the top; the shaded bands are the four levels.</text>
-</svg>
-    <figcaption><span class="lead">Panel 5, same strategy, two hydroclimates.</span> Two lanes side by side, the same strategy in each. Under the historical hydroclimate there is only an operations arrow. Under a stressed hydroclimate the hydroclimate arrow appears, and the operations arrow is a different length than it was in the first lane. The operations effect of a strategy depends on the hydroclimate it is run under.</figcaption>
-  </figure>
-
-    <p>
-      The offsetting case in Panel 4 is why some COEQWAL summary tables outline cells where the hydroclimate and operations effects point in opposite directions. An outlined cell is a signal that the single number shown is the net of two parts, not the whole story.
-    </p>
-  </section>
-
-  <!-- ─── §5 ONE EXAMPLE FROM ACTUAL RESULTS ───────────────────── -->
-  <section>
-    <h2><span class="num">§5</span> One example from actual results</h2>
-    <p>
-      The clean panels above are teaching cases. Actual modeled results are usually messier: both effects present, and the operations effect changing size from one hydroclimate to the next. The figure below shows one actual result from the COEQWAL ensemble, drawn as two lanes.
-    </p>
-
-  <figure class="fig">
-<svg class="panel" viewBox="0 0 760 400" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="ex-t ex-d" aria-label="Freshwater for Delta exports at Banks Pumping Plant under winter-run refuge flows, drawn as two lanes. The baseline is 2.7. Under the historical hydroclimate the hydroclimate effect is 0.0 and the operations effect is minus 1.4, landing at 1.3. Under Extreme climate stress the hydroclimate effect is plus 1.4 and the operations effect is minus 0.8, landing at 3.3.">
-  <title id="ex-t">Freshwater for Delta exports at Banks Pumping Plant under winter-run refuge flows, in two hydroclimates.</title>
-  <desc id="ex-d">Two lanes side by side on one level axis, winter-run refuge flows in each. A warm arrow marks the hydroclimate effect, a blue arrow marks the operations effect, the dashed line is the baseline and the solid line is where the scenario value lands. Level 1 is at the top and the four shaded bands are the levels. The baseline is 2.7. In the left lane, under the historical hydroclimate, a flat tick stands in place of the warm arrow, the hydroclimate effect being 0.0, and a blue arrow of minus 1.4 runs from the baseline to a solid scenario line at 1.3. In the right lane, under Extreme climate stress, a warm arrow of plus 1.4 runs from the baseline to current operations under Extreme climate stress at 4.1, and a blue arrow of minus 0.8 runs back from there to a solid scenario line at 3.3.</desc>
-  <text x="70.0" y="10.0" font-size="9.5" fill="#5c554c"><tspan font-weight="700" fill="#c28433">warm arrow</tspan> = hydroclimate effect &nbsp;&middot;&nbsp; <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan> = operations effect</text>
-  <text x="70.0" y="22.0" font-size="9.5" fill="#5c554c">dashed line = the baseline &nbsp;&middot;&nbsp; solid line = this scenario &nbsp;&middot;&nbsp; flat tick in place of an arrow = no effect</text>
-  <rect x="60.0" y="34.00" width="692.00" height="76.69" fill="#dcefe1" opacity="0.5" data-band="1"/>
-  <text x="54.0" y="75.35" text-anchor="end" font-size="10.5" font-weight="600" fill="#16774a">Level 1</text>
-  <text x="54.0" y="87.35" text-anchor="end" font-size="8.5" fill="#5c554c">Optimal</text>
-  <rect x="60.0" y="110.69" width="692.00" height="76.69" fill="#d8eef2" opacity="0.5" data-band="2"/>
-  <text x="54.0" y="152.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#1f7c8c">Level 2</text>
-  <text x="54.0" y="164.04" text-anchor="end" font-size="8.5" fill="#5c554c">Acceptable</text>
-  <rect x="60.0" y="187.38" width="692.00" height="76.69" fill="#fbe7d4" opacity="0.5" data-band="3"/>
-  <text x="54.0" y="228.73" text-anchor="end" font-size="10.5" font-weight="600" fill="#b5651d">Level 3</text>
-  <text x="54.0" y="240.73" text-anchor="end" font-size="8.5" fill="#5c554c">At-risk</text>
-  <rect x="60.0" y="264.08" width="692.00" height="75.92" fill="#fbdcd3" opacity="0.5" data-band="4"/>
-  <text x="54.0" y="305.04" text-anchor="end" font-size="10.5" font-weight="600" fill="#c2412a">Level 4</text>
-  <text x="54.0" y="317.04" text-anchor="end" font-size="8.5" fill="#5c554c">Critical</text>
-  <line x1="120.00" y1="165.91" x2="220.00" y2="165.91" stroke="#9b9384" stroke-width="1.8" stroke-dasharray="3 3"/>
-  <line x1="420.00" y1="165.91" x2="520.00" y2="165.91" stroke="#9b9384" stroke-width="1.8" stroke-dasharray="3 3"/>
-  <line x1="163.10" y1="165.91" x2="168.30" y2="165.91" stroke="#c28433" stroke-width="1.9" stroke-linecap="round" data-flat="yes"/>
-  <line x1="174.30" y1="165.91" x2="174.30" y2="63.74" stroke="#3d7db5" stroke-width="1.9" stroke-linecap="butt"/><path d="M 174.30 58.54 L 171.30 63.74 L 177.30 63.74 Z" fill="#3d7db5" data-flat="no"/>
-  <line x1="122.00" y1="58.54" x2="218.00" y2="58.54" stroke="#43403a" stroke-width="2"/>
-  <text x="170.00" y="358.00" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1c1a17">Historical hydroclimate</text>
-  <line x1="465.70" y1="272.66" x2="474.30" y2="272.66" stroke="#b9b1a4" stroke-width="0.9" stroke-dasharray="1.5 1.5"/>
-  <line x1="465.70" y1="165.91" x2="465.70" y2="267.46" stroke="#c28433" stroke-width="1.9" stroke-linecap="butt"/><path d="M 465.70 272.66 L 462.70 267.46 L 468.70 267.46 Z" fill="#c28433" data-flat="no"/>
-  <line x1="474.30" y1="272.66" x2="474.30" y2="218.51" stroke="#3d7db5" stroke-width="1.9" stroke-linecap="butt"/><path d="M 474.30 213.31 L 471.30 218.51 L 477.30 218.51 Z" fill="#3d7db5" data-flat="no"/>
-  <line x1="422.00" y1="213.31" x2="518.00" y2="213.31" stroke="#43403a" stroke-width="2"/>
-  <text x="470.00" y="358.00" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1c1a17">Extreme climate stress</text>
-  <text x="232.0" y="62.04" font-size="10.5" fill="#1c1a17"><tspan x="232.0" dy="0" font-weight="700">scenario 1.3</tspan></text>
-  <text x="232.0" y="115.73" font-size="10.5" fill="#3d7db5"><tspan x="232.0" dy="0" font-weight="700">operations effect −1.4</tspan></text>
-  <text x="232.0" y="169.41" font-size="10.5" fill="#c28433"><tspan x="232.0" dy="0" font-weight="700">hydroclimate effect 0.0</tspan></text>
-  <text x="532.0" y="169.41" font-size="10.5" fill="#5c554c"><tspan x="532.0" dy="0" font-weight="700">baseline 2.7</tspan></text>
-  <text x="532.0" y="216.81" font-size="10.5" fill="#1c1a17"><tspan x="532.0" dy="0" font-weight="700">scenario 3.3</tspan></text>
-  <text x="532.0" y="235.81" font-size="10.5" fill="#c28433"><tspan x="532.0" dy="0" font-weight="700">hydroclimate effect +1.4</tspan></text>
-  <text x="532.0" y="254.81" font-size="10.5" fill="#3d7db5"><tspan x="532.0" dy="0" font-weight="700">operations effect −0.8</tspan></text>
-  <text x="532.0" y="273.81" font-size="10.5" fill="#5c554c"><tspan x="532.0" dy="0">current operations under</tspan><tspan x="532.0" dy="12.5">Extreme climate stress 4.1</tspan></text>
-  <text x="70.0" y="384.00" font-size="9.5" fill="#5c554c">Continuous level value, Level 1 at the top; the shaded bands are the four levels.</text>
-</svg>
-    <figcaption>In CalSim 3 simulations, freshwater for Delta exports at Banks Pumping Plant sits at 2.7 under the baseline. Under the historical hydroclimate, winter-run refuge flows shift the value by −1.4 (the operations effect; there is no hydroclimate effect). Under Extreme climate stress, current operations shift the value by +1.4 (the hydroclimate effect) and winter-run refuge flows shift it by a further −0.8 (the operations effect), landing at 3.3. The operations effect is −1.4 under one hydroclimate and −0.8 under the other. This example was chosen to show a case in which both effects are visible and the operations effect differs between hydroclimates.</figcaption>
-  </figure>
-  </section>
-
-  <!-- ─── §6 WHERE THIS APPEARS IN COEQWAL ─────────────────────── -->
-  <section>
-    <h2><span class="num">§6</span> Where this appears in COEQWAL</h2>
-    <p>
-      Readers will encounter this idea in the summary briefs on the Data page, where outlined table cells mark offsetting effects in the two-part form described above, and in comparisons across the Explore section, where the same result can be read against different strategies or different hydroclimates. The decomposition is a way of reading those materials, not a separate dataset.
-    </p>
-  </section>
-
-  <!-- ─── REFERENCES NOTE ──────────────────────────────────────── -->
-  <section class="refs">
-    <h2><span class="num">§7</span> References</h2>
-    <p class="refs-intro">
-      The worked example in §5 is read from the COEQWAL data snapshot of August 29, 2026, at the continuous value the model reports rather than at the level band it falls in. Values are shown to one decimal, floored rather than rounded, and each effect is the difference between the one-decimal values, so the two effects and the baseline add exactly to the scenario value as printed. The four CalSim 3 runs behind the example, and the internal codes for the key outcome and the location, are listed here for citation. They are internal identifiers, not public names.
-    </p>
-    <table class="refs">
-      <thead>
-        <tr><th scope="col">Cell of the example</th><th scope="col">Run</th></tr>
-      </thead>
-      <tbody>
-        <tr><th scope="row">Current operations, Historical hydroclimate</th><td class="runid">s0020</td></tr>
-        <tr><th scope="row">Winter-run refuge flows, Historical hydroclimate</th><td class="runid">s0031</td></tr>
-        <tr><th scope="row">Current operations, Extreme climate stress</th><td class="runid">s0108</td></tr>
-        <tr><th scope="row">Winter-run refuge flows, Extreme climate stress</th><td class="runid">s0118</td></tr>
-        <tr><th scope="row">Key outcome, Freshwater for Delta exports</th><td class="runid">FW_EXP</td></tr>
-        <tr><th scope="row">Location, Banks Pumping Plant</th><td class="runid">CAA003</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- ─── FOOTER (metadata) ────────────────────────────────────── -->
-  <footer class="footer">
-    <div class="meta-row">
-      <span>COEQWAL · Collaboratory for Equity in Water Allocation</span>
-    </div>
-    <div class="meta-row">
-      <span>Supported by the California Climate Action Initiative · UC Grant <code>R02CM7222</code></span>
-      <span>Updated August 30, 2026</span>
-    </div>
-  </footer>
-
-</article>
-
-<!-- ─── PRINT HINT (screen-only) ──────────────────────────────── -->
-<p class="print-hint">
-  Save this brief as a PDF — open your browser's print menu
-  (<kbd>⌘P</kbd> on Mac, <kbd>Ctrl</kbd>+<kbd>P</kbd> on Windows)
-  and choose "Save as PDF" as the destination.
-</p>
-
-<nav class="sitenav sitenav-bottom"><a href="https://coeqwal.org">COEQWAL</a><a href="https://coeqwal.org/data">Return to COEQWAL Documentation</a></nav>
-</body>
+    <nav class="sitenav sitenav-bottom">
+      <a href="https://coeqwal.org">COEQWAL</a
+      ><a href="https://coeqwal.org/data">Return to COEQWAL Documentation</a>
+    </nav>
+  </body>
 </html>
