@@ -26,6 +26,8 @@ export interface TieredImageTextProps {
   body1: string
   /** Second body paragraph (optional) */
   body2: string
+  /** Third body paragraph (optional) */
+  body3: string
   /** Footer logo */
   logoSrc: string
   /** Footer logo alt text */
@@ -44,6 +46,7 @@ export function TieredImageText({
   title,
   body1,
   body2,
+  body3,
   logoSrc,
   logoAlt,
   logoText,
@@ -126,6 +129,17 @@ export function TieredImageText({
             }}
           >
             {body2}
+          </Typography>
+
+          {/* Body text 3 */}
+          <Typography
+            variant="body1"
+            sx={{
+              flex: "3 1 0",
+              minWidth: 0,
+            }}
+          >
+            {body3}
           </Typography>
         </Box>
       </Box>

@@ -25,7 +25,7 @@ export default function AboutPage() {
     {
       imgSrc: "/images/about/approach-person-whiteboard.png",
       imgAlt: "A person writing on a whiteboard",
-      text: "Our work is structured around a participatory scenario planning approach. It is an iterative process that involves the use of a water resources planning model (CalSim) to develop and analyze a broad range of alternative water management strategies for the state.",
+      text: "Our work is structured around a participatory scenario planning approach. It is an iterative process that involves the use of a water resources planning model (CalSim3) to develop and analyze a broad range of alternative water management strategies for the state.",
       imagePosition: "left",
     },
     {
@@ -121,8 +121,10 @@ export default function AboutPage() {
         id="projectGoals"
         ariaLabel="project goals"
         title="Project Goals"
-        body1="Our overall project goal is to make data used in water planning and decision-making more accessible. Our website invites visitors to learn about California’s water system and explore how alternative water management strategies affect outcomes for cities, agriculture, and the environment."
+        body1="Our overall project goal is to make data used in water planning and decision-making more accessible. Our website invites visitors to learn about California's water system and explore how alternative water management strategies affect outcomes for cities, agriculture, and the environment."
         body2="Tools on the sites are designed to guide visitors to specific scenarios that align with their interests. We aim to help users to better understand the nature of trade-offs among management objectives and to provide data that empower communities to shape our water future."
+        // Link to add below "https://uckeepresearching.org/california-climate-action/"
+        body3="This project is supported by funds from the California Climate Action Seed and Matching Grants of the University of California, Grant Number R02CM7222. This funding is part of the California Climate Action Initiative, a $100 million investment in climate action research and innovation projects in the California State Budget Act of 2022-23."
         imgSrc="/images/about/tiered-image-text-hills.png"
         imgAlt="Photo of hills and farmland in california"
         logoSrc="/images/about/logo-uc-ri.png"
