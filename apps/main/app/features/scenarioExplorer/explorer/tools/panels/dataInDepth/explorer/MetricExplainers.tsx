@@ -2,8 +2,8 @@
 
 /**
  * MetricExplainers - the explainer accordions under the chart card: what the
- * metric is and how to read the current chart. Copy is ported from the
- * team's design prototype (registry + interpretiveText); this component only
+ * variable is and how to read the current chart. Copy comes from the
+ * registry (`plain` and `tech`) and interpretiveText; this component only
  * lays it out.
  */
 
@@ -30,7 +30,7 @@ export default function MetricExplainers() {
   const items: { key: string; title: string; body: React.ReactNode }[] = [
     {
       key: "what",
-      title: "What is this metric?",
+      title: "What is this variable?",
       body: (
         <>
           <Typography variant="body2" sx={{ mb: 1 }}>

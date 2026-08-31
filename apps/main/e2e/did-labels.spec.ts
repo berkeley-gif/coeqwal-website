@@ -112,3 +112,15 @@ test("scenario short labels match the Content Summary sheet for the three correc
     "Current operations with historical land use",
   )
 })
+
+// The explainer accordion under the chart asks about the VARIABLE, matching
+// the term the rest of the tool uses (the sector rail lists variables, and
+// the registry keys are variable ids). The question mark stays, matching the
+// sibling accordion "How do I read this chart?".
+test("the explainer accordion asks about the variable, not the metric", async ({
+  page,
+}) => {
+  await openDataInDepth(page)
+  await expect(page.getByText("What is this variable?")).toBeVisible()
+  await expect(page.getByText("What is this metric?")).toHaveCount(0)
+})
