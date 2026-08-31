@@ -14,18 +14,18 @@ import type { TourStep } from "../../../tour/types"
 export const LIST_TOUR: TourStep[] = [
   {
     id: "list.hero",
-    eyebrow: "start here",
-    title: "Home View",
-    body: "The Home view lets you select the scenarios that you want to compare",
+    eyebrow: "START HERE",
+    title: "Start here",
+    body: "If this is your first time using the Explore Tool, we recommend visiting the Get Started section of the site before beginning your exploration.",
   },
 
   // Orientation + details for the scenario-list controls band.
   {
     id: "list.step0.scenarioArea",
     anchorId: "list.scenarioArea",
-    eyebrow: "get oriented",
+    eyebrow: "HOME VIEW",
     title: "These controls tune the scenario list below",
-    body: "Everything in this band filters or rearranges the scenario sidebar rows below.",
+    body: "The Home view displays the list of all scenarios that can be explored.",
     placement: "bottom-start",
   },
   {
