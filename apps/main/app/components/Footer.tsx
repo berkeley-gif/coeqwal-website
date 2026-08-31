@@ -33,6 +33,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useTabNavigation } from "../hooks/useTabNavigation"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import { WATER_THEMES } from "../content/themes"
+import { normalizePathname } from "../lib/routePath"
 
 // TODO: swap placeholder logos/credit text for real COEQWAL partner assets
 const PARTNER_LOGOS = [
@@ -97,7 +98,9 @@ export function Footer() {
   // below must come AFTER this block, or navigating between a tabs
   // route and a marketing route mid-session throws "rendered more
   // hooks than during the previous render."
-  const pathname = usePathname()
+  // Normalized: the export serves directory-style URLs, so the live pathname
+  // can be "/explore/" while the comparison below uses "/explore".
+  const pathname = normalizePathname(usePathname())
   const theme = useTheme()
   const router = useRouter()
   const { navigateToTab } = useTabNavigation()
