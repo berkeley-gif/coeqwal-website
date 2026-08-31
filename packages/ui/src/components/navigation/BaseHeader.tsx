@@ -203,9 +203,9 @@ const translations: TranslationsMap = {
     },
     dropdownIntros: {
       guides:
-        "Topical guides about California water in a scrolling story format.",
+        "Learn about California water topics in a scrolling story format.",
       waterThemes:
-        "Reference guides about California water issues and dynamics.",
+        "Learn about the water issues explored by COEQWAL.",
     },
     waterStories: {
       flow: "How water flows through California",

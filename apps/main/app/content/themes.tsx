@@ -6,6 +6,9 @@
  */
 
 import type { ScenarioTheme } from "./scenarios"
+import type { ReactNode } from "react"
+import { Typography } from "@repo/ui/mui"
+import { InlineNavLink } from "../components/InlineNavLink"
 
 // =============================================================================
 // Block types: content blocks for theme sections
@@ -13,7 +16,9 @@ import type { ScenarioTheme } from "./scenarios"
 
 export type ParagraphBlock = {
   type: "paragraph"
-  text: string
+  /** Plain string gets **bold** markdown parsing. Pass JSX (e.g. with
+   * InlineNavLink or GlossaryTermLink) when the paragraph needs a link. */
+  text: ReactNode
 }
 
 export type ListBlock = {
@@ -25,7 +30,11 @@ export type ImageBlock = {
   type: "image"
   src: string
   alt: string
-  caption?: string // USAGE NOTE: Use \n to create paragraph-like breaks between lines
+  /** Bold heading shown above the caption — a Figure Box's title line */
+  title?: ReactNode
+  /** Plain string gets \n-separated paragraph breaks. Pass JSX when one
+   * of the caption's paragraphs needs a link. */
+  caption?: ReactNode
 }
 
 export type ContentBlock = ParagraphBlock | ListBlock | ImageBlock
@@ -136,6 +145,325 @@ export const ACTIVE_THEMES: ScenarioTheme[] = [
 // =============================================================================
 
 export const WATER_THEMES: Theme[] = [
+  {
+    id: "baseline",
+    label: "Understanding today's\nwater system",
+    shortLabel: "Understanding today's water system",
+    description:
+      "Whether California's current water management — the Central Valley Project and State Water Project — performs reliably for communities, agriculture, and the environment, now and under future climate conditions",
+    heroImage: "/images/themes/baseline_hero.jpg",
+    inquiry:
+      "How do California's major water projects in the Central Valley perform under current and future climate conditions?",
+    sections: [
+      {
+        id: "intro",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "This water issue provides a foundation for understanding the strengths, vulnerabilities, trade-offs, and inequities in California's current water system, with a focus on the Central Valley Project and State Water Project, and how those conditions may change under future climates. It also examines different representations of current operations used by state and federal agencies in their models, and how those differences can influence our understanding of impacts on communities, agriculture, and the environment.",
+            },
+          ],
+        },
+      },
+      {
+        id: "why-this-matters",
+        content: {
+          type: "mixed",
+          gap: "40px",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "California's Central Valley water system reflects more than a century of investments in reservoirs, canals, levees, groundwater development, environmental regulations, water rights, contracts, and operating agreements. Together, this infrastructure and these management decisions shape how water is stored, moved, allocated, and managed across the state.",
+            },
+            {
+              type: "paragraph",
+              text: "The current system supports millions of Californians, one of the world's most productive agricultural economies, and diverse freshwater and estuarine ecosystems. At the same time, it faces ongoing challenges, including drought, groundwater depletion, ecosystem declines, water quality concerns, and unequal impacts across communities and regions.",
+            },
+            {
+              type: "paragraph",
+              text: "Future climate conditions add another layer of uncertainty. While water managers can influence how water is managed, they cannot control future precipitation, temperature, snowpack, or drought frequency. Understanding how today's system performs under both historical and future hydroclimates can reveal which parts of the system are relatively resilient, where vulnerabilities already exist, and where adaptation may be needed.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/baseline-fig-01.svg",
+              alt: "California's interconnected water system",
+              title: "California's interconnected water system",
+              caption:
+                "California's major water projects connect reservoirs, rivers, groundwater basins, and the Delta to an extensive network of water users. Decisions about how water is stored and moved through this system affects communities, agriculture, and the environment. The map highlights key parts of the system represented in COEQWAL, including major reservoirs and rivers, groundwater aquifers, the Delta, water deliveries and exports, and ecological conditions.",
+            },
+          ],
+        },
+      },
+      {
+        id: "what-this-theme-focuses-on",
+        content: {
+          type: "mixed",
+          gap: "40px",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "**A reference point for comparison** – The representation of current operations provides a common reference point for comparison. Comparing alternative water management strategies to current operations reveals management-driven changes, while comparing the same operations across hydroclimates reveals climate-driven changes. Together, these comparisons help distinguish the effects of management decisions, climate change, and their interactions.",
+            },
+            {
+              type: "paragraph",
+              text: "**Alternative representations of current operations** – Policies governing Central Valley water management are continually evolving, making the precise definition of \"current operations\" challenging. State and federal agencies may represent current operations differently based on the regulations, land-use conditions, operational assumptions, and other information incorporated into their models. Comparing these representations helps reveal how those choices influence modeled system performance.",
+            },
+            {
+              type: "paragraph",
+              text: "**Historical and future hydroclimates** – Climate change will affect how much water is available, when it is available, and water needs across the system. Comparing performance under historical and plausible future hydroclimates helps reveal how climate change may stress different parts of the water system.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/baseline-fig-02.svg",
+              alt: "Operations of the Central Valley Project and State Water Project",
+              title: "Operations of the Central Valley Project and State Water Project",
+              caption:
+                "The CalSim3 water systems model used in COEQWAL focuses on operations of the Central Valley Project and State Water Project. While other features of California's integrated water system are represented, most of the information shared on the COEQWAL platform focuses on water supplied to the San Francisco Bay-Delta watershed (Contributing Watershed Area), water distributed to users within the Sacramento and San Joaquin Valley (Central Valley Model Area), and water exported to water users in the Tulare Basin, Southern California, and coast.",
+            },
+
+          ],
+        },
+      },
+      {
+        id: "what-to-keep-in-mind",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "list",
+              items: [
+                "Current operations provide a representation of today's water management system. They are not a neutral starting point, but reflect decades of infrastructure investments, policies, regulations, water rights, contracts, and negotiated trade-offs.",
+                "COEQWAL uses CalSim3, the water allocation model used by state and federal agencies to plan and manage the Central Valley Project and State Water Project. Using the same model makes this decision-making space more accessible to a broader range of people and perspectives.",
+                "Models are a simplification of reality. The CalSim3 water allocation model used by COEQWAL focuses on operations of the Central Valley Project and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.",
+                "There is no single model representation of \"current operations\". State and federal agencies use different assumptions about land use, system operations, regulations, and other conditions, and these representations change as policies and operations evolve.",
+                "Differences between hydroclimates under the same management strategy help reveal climate-driven changes, while differences between management strategies under the same hydroclimate help reveal management-driven changes.",
+                "Current operations already contain benefits, trade-offs, and inequities. Comparing other scenarios to current operations therefore shows how management changes redistribute benefits relative to current conditions, not to a neutral starting point.",
+                "Future hydroclimates are not predictions. They represent plausible alternative futures that help test how the system responds to different climate conditions. Results describe patterns across many modeled years rather than predicting conditions in any single year.",
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: "what-management-strategies-are-explored",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "This water issue compares alternative representations of current operations and provides a foundation for understanding the broader range of management strategies explored by COEQWAL. The scenarios vary assumptions about operating rules, agricultural land use, and Temporary Urgency Change Petitions (TUCPs), which can temporarily modify certain water-right requirements during drought or other urgent conditions.",
+            },
+            {
+              type: "paragraph",
+              text: "This water issue specifically compares the following representations of current operations:",
+            },
+            {
+              type: "list",
+              items: [
+                "Current operations, with DWR (2023) operating rules, recent (2020) land use, and allowing for TUCP actions",
+                "Current operations with historical agricultural land use, with DWR (2023) operating rules, historical (2004-2013) land use, and allowing for TUCP actions",
+                "Current operations without TUCPs, with DWR (2023) operating rules and recent (2020) land use, but without TUCP actions",
+                "Current USBR operations, with U.S. Bureau of Reclamation (2024) operating rules, recent (2020) land use, and TUCPs",
+                "Current USBR operations without TUCPs, with U.S. Bureau of Reclamation (2024) operating rules and recent (2020) land use, but without TUCPs",
+              ],
+            },
+            {
+              type: "paragraph",
+              text: (
+                <>
+                  For more information about each of these, and other, scenarios,
+                  visit{" "}
+                  <InlineNavLink to="/data">DATA AND DOCUMENTATION</InlineNavLink>.
+                </>
+              ),
+            },
+          ],
+        },
+      },
+      {
+        id: "what-the-models-show",
+        content: {
+          type: "mixed",
+          gap: "40px",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "In the Explore Tool, different representations of current operations are grouped as \"baseline\" scenarios because they provide reference points for comparing alternative management strategies. The Explore Tool allows you to examine how outcomes differ across the baseline scenarios and under different hydroclimate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/baseline-fig-03.svg",
+              alt: "Trade-offs radar chart",
+              title: "Trade-offs",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    How do different management strategies affect overall system
+                    performance across multiple outcomes?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The radar chart in the Explore Tool summarizes performance across
+                    nine key outcomes, revealing broad system-level trade-offs within
+                    and between scenarios. The chart displays average performance
+                    across all locations of interest for each outcome. This example
+                    compares Current operations with Current operations with
+                    historical land use and Current operations without TUCPs under
+                    the historical hydroclimate. Outcomes are categorized into
+                    different performance classes: optimal, acceptable, at-risk, and
+                    critical. See{" "}
+                    <InlineNavLink to="/data">DATA AND DOCUMENTATION</InlineNavLink>{" "}
+                    for more information on how these categories are defined.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The radar plot highlights existing trade-offs among competing
+                    water uses and objectives under current operations. Community
+                    surface water deliveries are in optimal conditions, on average,
+                    while agricultural revenues, reservoir storage, groundwater
+                    storage, and freshwater for Delta exports and in-delta uses are,
+                    on average, in acceptable conditions. Environmental flows, Delta
+                    estuary ecology, and winter-run salmon generally are considered
+                    at-risk or in critical condition under the baseline scenarios.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The radar plot also indicates that representing current
+                    operations with historical land use produces similar outcomes to
+                    those with more recent land use for most outcomes, but
+                    agricultural revenues decline from acceptable to at-risk
+                    conditions, on average. This likely reflects the larger footprint
+                    of higher-value perennial crops under more recent conditions.
+                    There are also slight improvements in groundwater storage in the
+                    scenario with historical land use, suggesting that current
+                    agricultural water demands rely more on groundwater than they did
+                    historically. The radar plot shows that TUCPs have limited
+                    effects on overall system performance, but relative to the
+                    scenario without TUCPs, the Current operations scenario (with
+                    TUCPs) has slightly worse average conditions for In-Delta uses
+                    and slightly improved reservoir storage conditions.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Overall, the radar chart shows that the broad pattern of system
+                    performance is relatively consistent across these representations
+                    of current operations, but some outcomes are sensitive to
+                    differences in land-use assumptions and operating rules. The
+                    system-wide averages do not show how these conditions are
+                    distributed among individual locations, which is explored in the
+                    Distribution view below.
+                  </Typography>
+                </>
+              ),
+            },
+
+            {
+              type: "image",
+              src: "/images/themes/baseline-fig-04.svg",
+              alt: "Equity distribution view map",
+              title: "Equity",
+              caption:
+                "Where do benefits and impacts occur, and who is most affected?\nSystem-wide averages can hide important differences in current conditions across individual locations. Water availability, infrastructure, water rights, access to different water sources, and other characteristics vary considerably across California, meaning that the outcomes produced by current water management can differ substantially from place to place.\nThe Distribution view in the Explore Tool shows results for individual locations of interest. The figure below shows outcomes for Current operations under the historical hydroclimate, while the map highlights community surface water delivery locations in particular. The markers represent locations of interest, and the colors represent optimal (green), acceptable (blue), at-risk (orange), or critical (red) outcomes.\nThe Distribution view shows considerable variation among community surface water delivery locations and agricultural districts. Many locations experience optimal or acceptable conditions, while others fall into at-risk or critical conditions. Poor community surface water delivery outcomes are not concentrated in a single region, showing that vulnerabilities under current operations occur in different parts of the state. It is also important to keep in mind that the community surface water outcome only evaluates the reliability of water delivered from the state's major water projects and does not consider the contribution of other water sources to the water supplies of community water systems.\nOverall, the Distribution view reveals patterns hidden by system-wide averages and helps identify where vulnerabilities already exist under current operations and how unevenly those conditions are distributed.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/baseline-fig-05.svg",
+              alt: "Resilience heatmap across hydroclimate scenarios",
+              title: "Resilience",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    How consistently do management strategies perform under different
+                    climate futures?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Climate change is expected to place increasing stress on
+                    California's water system. A management strategy that performs
+                    well today may respond differently as droughts become more
+                    frequent, temperatures rise, and water availability changes. The
+                    Resilience heatmap in the Explore Tool examines how management
+                    strategies perform across a range of plausible hydroclimate
+                    futures, representing increasing levels of stress to the water
+                    system. See{" "}
+                    <InlineNavLink to="/data">DATA AND DOCUMENTATION</InlineNavLink>{" "}
+                    for more information about hydroclimate futures.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The Resilience heatmap summarizes performance across all nine
+                    outcomes under Historical conditions and under Moderate,
+                    Moderate-High, High and Extreme climate stress for Current
+                    Operations. Outcomes are categorized as optimal (green, 1.00 -
+                    1.99), acceptable (blue, 2.00 - 2.99), at-risk (orange, 3.00 -
+                    3.99), or critical (red, 4.00 - 4.99), with higher numerical
+                    values indicating worse performance.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The results show that climate stress affects different parts of
+                    the water system in different ways. Community surface water
+                    deliveries, agricultural revenues, and reservoir storage remain in
+                    optimal or acceptable conditions across most hydroclimates,
+                    although performance generally declines under the more stressful
+                    futures. Other outcomes are more sensitive to climate stress.
+                    Freshwater available for Delta exports and in-Delta uses
+                    deteriorates steadily as climate stress increases, reaching
+                    "Critical" conditions under Extreme stress. Environmental flows,
+                    Delta estuary ecology, and winter run salmon remain at risk or
+                    fall to critical conditions with greater climate stress.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Overall, the Resilience heatmap shows that some parts of today's
+                    water system remain relatively robust to climate stress across
+                    the hydroclimates examined, while others are already vulnerable
+                    under historical conditions or become increasingly vulnerable as
+                    climate conditions change. These patterns help identify where
+                    current operations may be less able to accommodate future climate
+                    stress and where adaptation may be needed.
+                  </Typography>
+                </>
+              ),
+            },
+          ],
+
+        },
+      },
+      {
+        id: "how-to-explore-further",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: (
+                <>
+                  Together, the views of scenario outcomes reveal the trade-offs,
+                  inequities, and vulnerabilities already present under current
+                  operations. They also show how results can vary depending on how
+                  current operations are represented, and how conditions may change
+                  under future hydroclimates. Visit the{" "}
+                  <InlineNavLink to="explore">Explore Tool</InlineNavLink> to examine
+                  these patterns in greater detail.
+                </>
+              ),
+            },
+            {
+              type: "paragraph",
+              text: "Understanding today's water system provides the reference point for interpreting alternative management strategies explored by COEQWAL.",
+            },
+            {
+              type: "paragraph",
+              text: (
+                <>
+                  If this is your first time using the Explore Tool, we recommend
+                  visiting the{" "}
+                  <InlineNavLink to="learn">Get Started section</InlineNavLink> of the
+                  site before beginning your exploration.
+                </>
+              ),
+            },
+
+          ],
+        },
+      },
+    ],
+  },
   {
     id: "cws",
     label: "Community\nwater systems",

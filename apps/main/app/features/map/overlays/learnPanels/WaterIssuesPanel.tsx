@@ -1,13 +1,48 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { Typography, useTheme } from "@repo/ui/mui"
 import { InfoCard, InfoCardGrid, WaterDroplet } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
 import { usePanelRoute } from "../../../../hooks/usePanelRoute"
 import { WATER_ISSUE_THEMES } from "../content"
+import { WATER_THEMES } from "../../../../content/themes"
 import { LinedList } from "@repo/ui"
 import { GlossaryTermLink } from "../../../glossary"
+
+// "How X..." explainer clauses for the intro bullet list, keyed by theme id.
+// Kept local (not in themes.ts) because they use "How..." phrasing and
+// embedded glossary links that themes.ts's plain-string `description`
+// field can't hold. Title text and list order still come from WATER_THEMES,
+// so a rename/reorder there is reflected here automatically — only these
+// clauses need to be kept in sync by hand.
+const WATER_ISSUE_BLURBS: Record<string, ReactNode> = {
+  baseline:
+    "How current management of California's water affects communities, agriculture, and the environment",
+  cws: "How people and communities can reliably access safe drinking water for daily life, health, and essential services",
+  ag_gw: (
+    <>
+      How agricultural water deliveries can sustain food production, while
+      preventing over-draft of{" "}
+      <GlossaryTermLink term="Groundwater basin">
+        groundwater basins
+      </GlossaryTermLink>
+    </>
+  ),
+  eco: (
+    <>
+      How rivers and{" "}
+      <GlossaryTermLink term="Winter-run Chinook salmon">
+        winter-run Chinook salmon
+      </GlossaryTermLink>{" "}
+      receive the flows they need to thrive
+    </>
+  ),
+  delta:
+    "How the Delta can be managed as a place where communities, farms, and ecosystems coexist and thrive",
+}
+
 
 export default function WaterIssuesPanel() {
   const theme = useTheme()
@@ -28,44 +63,15 @@ export default function WaterIssuesPanel() {
         such as:
       </Typography>
 
+
       <LinedList
-        items={[
-          {
-            label:
-              "Understanding today’s water system: How current management of California’s water affects communities, agriculture, and the environment",
-          },
-          {
-            label:
-              "Securing community water supplies: How people and communities can reliably access safe drinking water for daily life, health, and essential services",
-          },
-          {
-            label: (
-              <>
-                Sustaining farms and groundwater: How agricultural water
-                deliveries can sustain food production, while preventing
-                over-draft of{" "}
-                <GlossaryTermLink term="Groundwater basin">
-                  groundwater basins
-                </GlossaryTermLink>
-              </>
-            ),
-          },
-          {
-            label: (
-              <>
-                Protecting rivers and salmon: How rivers and{" "}
-                <GlossaryTermLink term="Winter-run Chinook salmon">
-                  winter-run Chinook salmon
-                </GlossaryTermLink>{" "}
-                receive the flows they need to thrive
-              </>
-            ),
-          },
-          {
-            label:
-              "Balancing needs in the Delta: How the Delta can be managed as a place where communities, farms, and ecosystems coexist and thrive",
-          },
-        ]}
+        items={WATER_THEMES.map((wt) => ({
+          label: (
+            <>
+              {wt.shortLabel}: {WATER_ISSUE_BLURBS[wt.id]}
+            </>
+          ),
+        }))}
         color={theme.palette.common.white}
         icon={dropletIcon}
         labelVariant="body2"

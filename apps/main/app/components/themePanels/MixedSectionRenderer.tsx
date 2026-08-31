@@ -20,6 +20,12 @@ function parseBoldText(text: string): React.ReactNode {
   )
 }
 
+// Plain strings get **bold** markdown parsing; JSX (e.g. containing an
+// InlineNavLink or GlossaryTermLink) is rendered as-is.
+function renderRichText(text: React.ReactNode): React.ReactNode {
+  return typeof text === "string" ? parseBoldText(text) : text
+}
+
 // Reusable alongside parseBoldText, splits on \n and inserts a space between lines or paragraphs.
 function parseCaptionBlocks(text: string): React.ReactNode {
   return text.split("\n").map((line, i) => (
@@ -57,7 +63,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                   maxWidth: themeValues.spacing.paragraphMaxWidth.default,
                 }}
               >
-                {parseBoldText(block.text)}
+                {renderRichText(block.text)}
               </Typography>
             )
           case "list":
@@ -91,8 +97,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                   borderRadius: muiTheme.borderRadius.md,
                   overflow: "hidden",
                   display: "flex",
-                  flexDirection: isMobile ? "column" : "row",
-                  alignItems: isMobile ? "stretch" : "center",
+                  flexDirection: "column",
                   mx: isMobile ? 0 : "30px",
                   my: isMobile ? "16px" : "30px",
                   padding: muiTheme.space.component.xl,
@@ -108,35 +113,37 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                   src={block.src}
                   alt={block.alt}
                   sx={{
-                    // On desktop: take up roughly half the card.
-                    // On mobile: full width of the card.
-                    width: isMobile ? "100%" : block.caption ? "50%" : "100%",
-                    flexShrink: 0,
+                    width: "100%",
                     height: "auto",
                     display: "block",
                   }}
                 />
-                {block.caption && (
+                {(block.title || block.caption) && (
                   <Box
                     component="figcaption"
                     sx={{
-                      flexGrow: 1,
                       color: muiTheme.palette.text.primary,
-                      p: isMobile
+                      pt: isMobile
                         ? muiTheme.space.listGap.md
                         : muiTheme.space.listGap.lg,
-
-                      // On desktop: left-align reads naturally beside the image.
-                      // On mobile: center reads better as a label under a full-width image.
                       gap: muiTheme.space.listGap.sm,
                       textAlign: isMobile ? "center" : "left",
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
                       flexDirection: "column",
                     }}
                   >
-                    {parseCaptionBlocks(block.caption)}
+                    {block.title && (
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ fontWeight: 700, color: "inherit" }}
+                      >
+                        {block.title}
+                      </Typography>
+                    )}
+                    {block.caption &&
+                      (typeof block.caption === "string"
+                        ? parseCaptionBlocks(block.caption)
+                        : block.caption)}
                   </Box>
                 )}
               </Box>
