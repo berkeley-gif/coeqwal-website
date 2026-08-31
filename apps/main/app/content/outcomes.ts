@@ -303,25 +303,8 @@ export const OUTCOME_FOOTER_PREFIXES: Partial<Record<OutcomeCode, string>> = {
     "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery.",
   WRC_SALMON_AB:
     "The lowest outcome level corresponds to approximately 3,000 total returning female spawners. Below this level, changes in commercial harvest practices are required to mitigate impacts to the population.",
-}
-
-export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
-  CWS_DEL:
-    "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery. For more information, see technical documentation on **Data** page.",
-  AG_REV: "For more information, see technical documentation on **Data** page.",
-  ENV_FLOWS:
-    "For more information, see technical documentation on **Data** page.",
   RES_STOR:
-    "For more information, see technical documentation on **Data** page.",
-  GW_STOR:
-    "For more information, see technical documentation on **Data** page.",
-  DELTA_ECO:
-    "For more information, see technical documentation on **Data** page.",
-  FW_EXP: "For more information, see technical documentation on **Data** page.",
-  FW_DELTA_USES:
-    "For more information, see technical documentation on **Data** page.",
-  WRC_SALMON_AB:
-    "The lowest outcome level corresponds to approximately 3,000 total returning female spawners. Below this level, changes in commercial harvest practices are required to mitigate impacts to the population. For more information, see technical documentation on **Data** page.",
+    "Note that the Central Valley Project and State Water Project portions of San Luis Reservoir are evaluated separately.",
 }
 
 export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
@@ -374,85 +357,85 @@ export interface TierValueDefinitions {
 export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   CWS_DEL: {
     tier1:
-      "Surface water deliveries satisfy associated drinking water demands in nearly all years, with no years with significant shortfalls (**> 90%** of drinking water demand satisfied in **≥ 90%** of years, with no shortfall years **< 70%** of demand).",
+      "Optimal: Surface water deliveries satisfy associated drinking water demands in nearly all years, with no years with significant shortfalls (**> 90%** of drinking water demand satisfied in **≥ 90%** of years, with no shortfall years **< 70%** of demand).",
     tier2:
-      "Surface water deliveries satisfy associated drinking water demands in majority of years, with no years with critical shortfalls (**> 90%** of drinking water demand satisfied in **≥ 50%** of years, with no shortfall years **< 50%** of demand).",
+      "Acceptable: Surface water deliveries satisfy associated drinking water demands in majority of years, with no years with critical shortfalls (**> 90%** of drinking water demand satisfied in **≥ 50%** of years, with no shortfall years **< 50%** of demand).",
     tier3:
-      "Surface water deliveries satisfy associated drinking water demands in majority of years, with some years with critical shortfalls (**> 90%** of drinking water demand satisfied in **≥ 50%** of years, with no more than **20%** of shortfall years **< 50%** of demand).",
+      "At-risk: Surface water deliveries satisfy associated drinking water demands in majority of years, with some years with critical shortfalls (**> 90%** of drinking water demand satisfied in **≥ 50%** of years, with no more than **20%** of shortfall years **< 50%** of demand).",
     tier4:
-      "None of the above criteria met (**> 90%** of estimated potable demand met in **< 50%** of years and/or **> 20%** of years in which **50%** of demand is not satisfied).",
+      "Critical: None of the above criteria met (**> 90%** of estimated potable demand met in **< 50%** of years and/or **> 20%** of years in which **50%** of demand is not satisfied).",
   },
   AG_REV: {
-    tier1: "Agricultural revenue increases (**≥ 0%**).",
-    tier2: "Agricultural revenue declines **< 5%**.",
-    tier3: "Agricultural revenue declines between **5% and 20%**.",
-    tier4: "Agricultural revenue declines **> 20%**.",
+    tier1: "Optimal: Agricultural revenue increases (**≥ 0%**).",
+    tier2: "Acceptable: Agricultural revenue declines **< 5%**.",
+    tier3: "At-risk: Agricultural revenue declines between **5% and 20%**.",
+    tier4: "Critical: Agricultural revenue declines **> 20%**.",
   },
   ENV_FLOWS: {
     tier1:
-      "Flows meet or exceed all seasonal functional flow targets in at least **95%** of years.",
+      "Optimal: Flows meet or exceed all seasonal functional flow targets in at least **95%** of years.",
     tier2:
-      "Flows meet or exceed all seasonal functional flow targets set for dry years in at least **90%** of years.",
+      "Acceptable: Flows meet or exceed all seasonal functional flow targets set for dry years in at least **90%** of years.",
     tier3:
-      "Flows meet or exceed functional flow targets for wet and dry season baseflows in dry years in at least **90%** of years",
-    tier4: "None of the above criteria are satisfied.",
+      "At-risk: Flows meet or exceed functional flow targets for wet and dry season baseflows in dry years in at least **90%** of years",
+    tier4: "Critical: None of the above criteria are satisfied.",
   },
   RES_STOR: {
     tier1:
-      "Reservoir storage is frequently high (There is a **90%** chance that end-of-April reservoir storage is greater than the long-term median value).",
+      "Optimal: Reservoir storage is frequently high (In more than 9 out of 10 years, end-of-April reservoir storage is greater than the long-term median value).",
     tier2:
-      "Reservoir storage is similar to recent history (In more than two out of three years, end-of-April storage exceeds the **33rd** percentile of long-term values).",
+      "Acceptable: Reservoir storage is similar to recent history (In more than two out of three years, end-of-April storage exceeds the **33rd** percentile of long-term values).",
     tier3:
-      "Reservoir storage is slightly lower than recent history (In more than three out of ten years, end-of-April storage exceeds the **33rd** percentile of long-term values).",
+      "At-risk: Reservoir storage is slightly lower than recent history (In more than three out of ten years, end-of-April storage exceeds the **33rd** percentile of long-term values).",
     tier4:
-      "Reservoir storage is much lower than recent history (In fewer than three out of ten years, end-of-April storage exceeds the **33rd** percentile of long-term values).",
+      "Critical: Reservoir storage is much lower than recent history (In fewer than three out of ten years, end-of-April storage exceeds the **33rd** percentile of long-term values).",
   },
   GW_STOR: {
     tier1:
-      "Groundwater trend is stable or increasing and average total storage is greater than historical.",
+      "Optimal: Groundwater trend is stable or increasing and is greater than the historical trend.",
     tier2:
-      "Groundwater trend is stable or increasing and average total storage is less than historical.",
-    tier3: "Groundwater trend is declining at a moderate rate.",
-    tier4: "Groundwater trend is declining at a rapid rate.",
+      "Acceptable: Groundwater trend is stable or increasing but is less than the historical trend.",
+    tier3: "At-risk: Groundwater trend is declining at a moderate rate.",
+    tier4: "Critical: Groundwater trend is declining at a rapid rate.",
   },
   DELTA_ECO: {
     tier1:
-      "Flows support ecological indicators in best possible conditions (low SAV, high turbidity, seasonally fresh conditions, expanded microhabitats in most years, representing **upper 25%** of indicator values).",
+      "Optimal: Flows support ecological indicators in best possible conditions (low SAV, high turbidity, seasonally fresh conditions, expanded microhabitats in most years, representing **upper 25%** of indicator values).",
     tier2:
-      "Flows support ecological indicators in moderate conditions (moderate SAV, high turbidity, seasonally fresh conditions, some microhabitats available in most years, representing **25-50%** of indicator values).",
+      "Acceptable: Flows support ecological indicators in moderate conditions (moderate SAV, high turbidity, seasonally fresh conditions, some microhabitats available in most years, representing **25-50%** of indicator values).",
     tier3:
-      "Flows support ecological indicators in poor conditions (moderate SAV, moderate turbidity, moderate salinity, few microhabitats available in most years, representing **lower 50%-75%** of indicator values).",
+      "At-risk: Flows support ecological indicators in poor conditions (moderate SAV, moderate turbidity, moderate salinity, few microhabitats available in most years, representing **lower 50%-75%** of indicator values).",
     tier4:
-      "Flows are insufficient to maintain beneficial ecological processes (moderate SAV, low turbidity, moderate to high salinity, few microhabitats available in most years, representing **lowest 25%** of indicator values).",
+      "Critical: Flows are insufficient to maintain beneficial ecological processes (moderate SAV, low turbidity, moderate to high salinity, few microhabitats available in most years, representing **lowest 25%** of indicator values).",
   },
   FW_EXP: {
     tier1:
-      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **greater than 505 million acre-feet**.",
+      "Optimal: Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **> 505 million acre-feet**.",
     tier2:
-      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **greater than 465 million acre-feet but less than 505 million acre-feet**",
+      "Acceptable: Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **> 465 million acre-feet but <= 505 million acre-feet**",
     tier3:
-      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **greater than 400 million acre-feet but less than 465 million acre-feet**",
+      "At-risk: Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **> 400 million acre-feet but <= 465 million acre-feet**",
     tier4:
-      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **less than 400 million acre-feet.**",
+      "Critical: Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **< 400 million acre-feet.**",
   },
   FW_DELTA_USES: {
     tier1:
-      "Water is fresh enough for human use with no restrictions in at least **75%** of all months, and unusable no more than in **5%** of all months.",
+      "Optimal: Water is fresh enough for human use with no restrictions in ≥ **75%** of all months, and unusable in ≤ **5%** of all months.",
     tier2:
-      "Water is fresh enough for human use with no restrictions in at least **65%** of all months, fresh enough for human use with some treatment or cropping adjustments in at least **75%** of months, and unusable in no more than **12%** of all months.",
+      "Acceptable: Water is fresh enough for human use with no restrictions in ≥ **65%** of all months, fresh enough for human use with some treatment or cropping adjustments in ≥ **75%** of months, and unusable in ≤ **12%** of all months.",
     tier3:
-      "Water is fresh enough for human use with no restrictions in at least **55%** of all months, fresh enough for human use with some treatment or cropping adjustments in at least **65%** of months, and unusable in no more than **20%** of all months.",
+      "At-risk: Water is fresh enough for human use with no restrictions in ≥ **55%** of all months, fresh enough for human use with some treatment or cropping adjustments in ≥ **65%** of months, and unusable in ≤ **20%** of all months.",
     tier4:
-      "Water is fresh enough for human use with no restrictions in less than **55%** of all months and/or is unusable in more than **20%** of all months.",
+      "Critical: Water is fresh enough for human use with no restrictions in ≤ **55%** of all months and/or is unusable in ≥ **20%** of all months.",
   },
   WRC_SALMON_AB: {
     tier1:
-      "There is at least an **80%** chance that greater than **50%** of maximum available spawning habitat is utilized.",
+      "Optimal: There is ≥ **80%** chance that > **50%** of maximum available spawning habitat is utilized.",
     tier2:
-      "There is at least an **80%** chance that between **18 and 50%** of maximum available spawning habitat is utilized.",
+      "Acceptable: There is ≥ **80%** chance that between **18% and 50%** of maximum available spawning habitat is utilized.",
     tier3:
-      "There is at least an **80%** chance that between **6 and 18%** of maximum available spawning habitat is utilized.",
+      "At-risk: There is ≥ **80%** chance that between **6% and 18%** of maximum available spawning habitat is utilized.",
     tier4:
-      "There is at least an **80%** chance that less than **6%** of maximum available spawning habitat is utilized.",
+      "Critical: There is ≥ **80%** chance that < **6%** of maximum available spawning habitat is utilized.",
   },
 }

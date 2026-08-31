@@ -20,8 +20,7 @@ export default function KeyOutcomesPanel() {
     <>
       <PanelShell background={exploreBg}>
         <PanelHeading
-          title="Key outcomes"
-          kicker="How are scenario results described?"
+          title="How are scenario results described?"
           lead="The results of each scenario are summarized by nine key outcomes:"
         />
 

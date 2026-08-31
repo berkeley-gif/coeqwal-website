@@ -255,7 +255,7 @@ export default function SearchAndChips({
           </Box>
           <Box ref={themeGroupAnchorRef} sx={{ display: "inline-flex" }}>
             <ToggleChip
-              label="group by theme"
+              label="group by issue"
               active={groupByTheme}
               onClick={() => setGroupByTheme(!groupByTheme)}
             />

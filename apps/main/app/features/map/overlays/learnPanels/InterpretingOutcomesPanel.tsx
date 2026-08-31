@@ -32,7 +32,7 @@ export default function InterpretingOutcomesPanel() {
           >
             The different data views provide insight into how different{" "}
             <GlossaryTermLink>management strategies</GlossaryTermLink> and{" "}
-            <GlossaryTermLink>hydroclimate</GlossaryTermLink> conditions affect:
+            <GlossaryTermLink>hydroclimate</GlossaryTermLink> affect:
           </Typography>
           <LinedList
             items={INTERPRETING_LENSES.map(({ label, description }) => ({

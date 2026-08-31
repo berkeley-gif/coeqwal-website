@@ -17,8 +17,8 @@ import {
   CircularProgress,
   SelectChangeEvent,
   Alert,
-  alpha,
   useTheme,
+  icons,
 } from "@repo/ui/mui"
 import { CircularArrowButton, ScenarioBadge } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
@@ -31,6 +31,16 @@ import {
 import { type ScenarioTheme } from "../content/scenarios"
 import { useScenarioList } from "../features/scenarios/hooks"
 import { THEME_LABEL_CONFIG } from "../content/themes"
+import {
+  STRATEGY_DOCUMENTS,
+  getStrategyDocumentUrl,
+} from "../content/waterManagementStrategies"
+import {
+  OUTCOME_LEVEL_DOCUMENTS,
+  getOutcomeLevelDocumentUrl,
+} from "../content/outcomeLevelMethodology"
+
+const { OpenInNew: OpenInNewIcon } = icons
 
 const THEME_ORDER: ScenarioTheme[] = [
   "baseline",
@@ -202,6 +212,128 @@ function ThemeSubheader({ themeKey }: { themeKey: ScenarioTheme }) {
   )
 }
 
+/**
+ * Flat (non-grouped) Select for the water management strategy documents.
+ * Options are just {id, label} pairs — no theme grouping needed since these
+ * PDFs aren't scenario-resolved.
+ */
+function StrategyDocumentSelect({
+  id,
+  value,
+  onChange,
+}: {
+  id: string
+  value: string
+  onChange: (event: SelectChangeEvent<string>) => void
+}) {
+  const theme = useTheme()
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        mt: 0.5,
+        backgroundColor: "common.white",
+        boxShadow: theme.shadow.sm,
+        border: `1px solid ${theme.palette.grey[200]}`,
+        borderRadius: theme.borderRadius.md,
+        "& .MuiMenuItem-root": {
+          py: 1,
+          whiteSpace: "normal" as const,
+          wordBreak: "break-word" as const,
+          "&:hover": { backgroundColor: theme.palette.grey[50] },
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.grey[100],
+            "&:hover": { backgroundColor: theme.palette.grey[100] },
+          },
+        },
+      },
+    },
+  }
+
+  return (
+    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
+      <Select
+        id={id}
+        value={value}
+        onChange={onChange}
+        displayEmpty
+        sx={SELECT_SX}
+        MenuProps={menuProps}
+        renderValue={(v) => {
+          const doc = STRATEGY_DOCUMENTS.find((d) => d.id === v)
+          return doc ? doc.label : "Choose a strategy"
+        }}
+      >
+        {STRATEGY_DOCUMENTS.map((doc) => (
+          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
+            {doc.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  )
+}
+
+/**
+ * Flat (non-grouped) Select for the outcome level methodology documents.
+ * Options are just {id, label} pairs — no theme grouping needed since these
+ * PDFs aren't scenario-resolved.
+ */
+function OutcomeLevelDocumentSelect({
+  id,
+  value,
+  onChange,
+}: {
+  id: string
+  value: string
+  onChange: (event: SelectChangeEvent<string>) => void
+}) {
+  const theme = useTheme()
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        mt: 0.5,
+        backgroundColor: "common.white",
+        boxShadow: theme.shadow.sm,
+        border: `1px solid ${theme.palette.grey[200]}`,
+        borderRadius: theme.borderRadius.md,
+        "& .MuiMenuItem-root": {
+          py: 1,
+          whiteSpace: "normal" as const,
+          wordBreak: "break-word" as const,
+          "&:hover": { backgroundColor: theme.palette.grey[50] },
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.grey[100],
+            "&:hover": { backgroundColor: theme.palette.grey[100] },
+          },
+        },
+      },
+    },
+  }
+
+  return (
+    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
+      <Select
+        id={id}
+        value={value}
+        onChange={onChange}
+        displayEmpty
+        sx={SELECT_SX}
+        MenuProps={menuProps}
+        renderValue={(v) => {
+          const doc = OUTCOME_LEVEL_DOCUMENTS.find((d) => d.id === v)
+          return doc ? doc.label : "Choose an outcome level brief"
+        }}
+      >
+        {OUTCOME_LEVEL_DOCUMENTS.map((doc) => (
+          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
+            {doc.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  )
+}
+
 const SELECT_SX = {
   backgroundColor: "common.white",
   "& .MuiOutlinedInput-notchedOutline": {
@@ -219,6 +351,8 @@ const SELECT_SX = {
 export default function DataPage() {
   const [selectedZipDataset, setSelectedZipDataset] = useState("")
   const [selectedCsvDataset, setSelectedCsvDataset] = useState("")
+  const [selectedStrategyDoc, setSelectedStrategyDoc] = useState("")
+  const [selectedOutcomeLevelDoc, setSelectedOutcomeLevelDoc] = useState("")
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -266,6 +400,14 @@ export default function DataPage() {
     setSelectedCsvDataset(event.target.value)
   }
 
+  const handleStrategyDocChange = (event: SelectChangeEvent<string>) => {
+    setSelectedStrategyDoc(event.target.value)
+  }
+
+  const handleOutcomeLevelDocChange = (event: SelectChangeEvent<string>) => {
+    setSelectedOutcomeLevelDoc(event.target.value)
+  }
+
   // Filter scenarios that have zip files
   const zipScenarios = scenarios.filter((scenario) => scenario.files.zip)
 
@@ -306,6 +448,12 @@ export default function DataPage() {
   )
   const selectedCsvScenario = scenarios.find(
     (s) => s.scenario_id === selectedCsvDataset,
+  )
+  const selectedStrategyDocument = STRATEGY_DOCUMENTS.find(
+    (d) => d.id === selectedStrategyDoc,
+  )
+  const selectedOutcomeLevelDocument = OUTCOME_LEVEL_DOCUMENTS.find(
+    (d) => d.id === selectedOutcomeLevelDoc,
   )
 
   return (
@@ -367,7 +515,7 @@ export default function DataPage() {
                   top: 4,
                 }}
               />
-              <Typography variant="h4">Data & downloads</Typography>
+              <Typography variant="h4">Data & Documents</Typography>
             </Box>
 
             {error && (
@@ -389,9 +537,18 @@ export default function DataPage() {
                 pointerEvents: "auto",
               }}
             >
-              {/* Full run data Section */}
+              {/* Data column */}
+
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <Box>
+                <Typography
+                  variant="h4"
+                  sx={{ mb: (theme) => theme.space.section.md }}
+                >
+                  Data
+                </Typography>
+
+                {/* Full run data Section */}
+                <Box sx={{ mb: (theme) => theme.space.section.lg }}>
                   <Typography
                     variant="h5"
                     sx={{ mb: (theme) => theme.space.component.lg }}
@@ -443,10 +600,8 @@ export default function DataPage() {
                     </>
                   )}
                 </Box>
-              </Grid>
 
-              {/* Scenario data section */}
-              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                {/* Scenario data section */}
                 <Box>
                   <Typography
                     variant="h5"
@@ -533,8 +688,130 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
-              {/* API access section */}
+              {/* Documents column */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                <Typography
+                  variant="h4"
+                  sx={{ mb: (theme) => theme.space.section.md }}
+                >
+                  Documents
+                </Typography>
+
+                {/* Water management strategies section */}
+                <Box sx={{ mb: (theme) => theme.space.section.lg }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
+                    Water management strategies
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: (theme) => theme.space.section.sm,
+                    }}
+                  >
+                    Documentation of COEQWAL&apos;s water management strategies
+                    and CalSim3 model specifications.
+                  </Typography>
+
+                  <StrategyDocumentSelect
+                    id="strategy-doc-select"
+                    value={selectedStrategyDoc}
+                    onChange={handleStrategyDocChange}
+                  />
+
+                  {selectedStrategyDocument && (
+                    <Box sx={{ mb: (theme) => theme.space.section.xs }}>
+                      <DownloadButton
+                        fileId={selectedStrategyDocument.id}
+                        filename={selectedStrategyDocument.file}
+                        downloadUrl={getStrategyDocumentUrl(
+                          selectedStrategyDocument.file,
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        icon={<OpenInNewIcon />}
+                      >
+                        View {selectedStrategyDocument.label}
+                      </DownloadButton>
+                    </Box>
+                  )}
+                </Box>
+
+                {/* Outcome level methodology section */}
+                <Box sx={{ mb: (theme) => theme.space.section.lg }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
+                    Outcome level methodology
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: (theme) => theme.space.section.sm,
+                    }}
+                  >
+                    Documentation of methodology used to calculate outcome
+                    levels.
+                  </Typography>
+
+                  <OutcomeLevelDocumentSelect
+                    id="outcome-level-doc-select"
+                    value={selectedOutcomeLevelDoc}
+                    onChange={handleOutcomeLevelDocChange}
+                  />
+
+                  {selectedOutcomeLevelDocument && (
+                    <Box sx={{ mb: (theme) => theme.space.section.xs }}>
+                      <DownloadButton
+                        fileId={selectedOutcomeLevelDocument.id}
+                        filename={selectedOutcomeLevelDocument.file}
+                        downloadUrl={getOutcomeLevelDocumentUrl(
+                          selectedOutcomeLevelDocument.file,
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        icon={<OpenInNewIcon />}
+                      >
+                        View {selectedOutcomeLevelDocument.label}
+                      </DownloadButton>
+                    </Box>
+                  )}
+                </Box>
+
+                {/* Hydroclimates section */}
+                <Box sx={{ mb: (theme) => theme.space.section.lg }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
+                    Hydroclimates
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: (theme) => theme.space.section.sm,
+                    }}
+                  >
+                    Documentation of COEQWAL&apos;s CalSim3 hydroclimates and
+                    methodology.
+                  </Typography>
+
+                  <DownloadButton
+                    fileId="hydroclimates"
+                    filename="hydroclimates.pdf"
+                    downloadUrl="/documents/hydroclimates.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    icon={<OpenInNewIcon />}
+                  >
+                    COEQWAL hydroclimates brief
+                  </DownloadButton>
+                </Box>
+
+                {/* API access section */}
                 <Box>
                   <Typography
                     variant="h5"
@@ -545,127 +822,23 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: (theme) => theme.space.component.lg,
+                      mb: (theme) => theme.space.section.sm,
                     }}
                   >
                     REST API endpoints for programmatic access to scenario data,
                     model outputs, and COEQWAL resources.
                   </Typography>
-                  <Typography
-                    component="a"
-                    href="https://api.coeqwal.org/docs"
+
+                  <DownloadButton
+                    fileId="api-docs"
+                    filename="api-docs"
+                    downloadUrl="https://api.coeqwal.org/docs"
                     target="_blank"
                     rel="noopener noreferrer"
-                    variant="body2"
-                    sx={{
-                      display: "inline-block",
-                      mb: (theme) => theme.space.section.sm,
-                      color: "common.white",
-                      textDecoration: "underline",
-                      textDecorationColor: (theme) =>
-                        alpha(theme.palette.common.white, 0.4),
-                      textUnderlineOffset: "3px",
-                      "&:hover": {
-                        textDecorationColor: (theme) =>
-                          alpha(theme.palette.common.white, 0.8),
-                      },
-                    }}
+                    icon={<OpenInNewIcon />}
                   >
                     API documentation
-                  </Typography>
-                </Box>
-              </Grid>
-
-              {/* Companion sites section */}
-              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <Box>
-                  <Typography
-                    variant="h5"
-                    sx={{ mb: (theme) => theme.space.component.lg }}
-                  >
-                    Companion sites
-                  </Typography>
-                  <Typography
-                    component="a"
-                    href="https://huggingface.co/spaces/COEQWAL/water-data-dashboard"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variant="body2"
-                    sx={{
-                      color: "common.white",
-                      textDecoration: "underline",
-                      textDecorationColor: (theme) =>
-                        alpha(theme.palette.common.white, 0.4),
-                      textUnderlineOffset: "3px",
-                      "&:hover": {
-                        textDecorationColor: (theme) =>
-                          alpha(theme.palette.common.white, 0.8),
-                      },
-                    }}
-                  >
-                    COEQWAL modeling team data dashboard
-                  </Typography>
-                </Box>
-              </Grid>
-
-              {/* Model documentation section */}
-              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <Box>
-                  <Typography
-                    variant="h5"
-                    sx={{ mb: (theme) => theme.space.component.lg }}
-                  >
-                    Model documentation
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.space.component.lg,
-                    }}
-                  >
-                    Comprehensive documentation for the COEQWAL CalSim3 model,
-                    including technical specifications, user guides, and
-                    methodology.
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[300],
-                    }}
-                  >
-                    Coming soon
-                  </Typography>
-                </Box>
-              </Grid>
-
-              {/* Research publications section */}
-              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <Box>
-                  <Typography
-                    variant="h5"
-                    sx={{ mb: (theme) => theme.space.component.lg }}
-                  >
-                    Research publications
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.space.component.lg,
-                    }}
-                  >
-                    Peer-reviewed publications and research papers related to
-                    the COEQWAL project and CalSim3 modeling efforts.
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[300],
-                    }}
-                  >
-                    Coming soon
-                  </Typography>
+                  </DownloadButton>
                 </Box>
               </Grid>
             </Grid>

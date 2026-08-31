@@ -11,10 +11,7 @@ export default function DataInDepthPanel() {
 
   return (
     <PanelShell background={theme.palette.nature.forest}>
-      <PanelHeading
-        title="Data in depth"
-        kicker="What are the data behind these key outcomes?"
-      />
+      <PanelHeading title="What are the data behind these key outcomes?" />
 
       <Box sx={{ maxWidth: "50%" }}>
         <Typography variant="body2" color="text.secondary">

@@ -192,6 +192,30 @@ export function Footer() {
           <Typography variant="compactSubtitle" sx={{ display: "block" }}>
             © COEQWAL 2026
           </Typography>
+          <Typography variant="dashboard">
+            All data and graphics retrieved from this website may be freely
+            reproduced and distributed. Any use of the data or content provided
+            should be cited as:
+          </Typography>
+          <Typography variant="compactSubtitle" sx={{ display: "block" }}>
+            COEQWAL. 2026. COEQWAL data platform, https://coeqwal.org/, accessed
+            &lt;date&gt;
+          </Typography>
+          <Typography variant="dashboard">
+            All content on this website is provided &quot;as is&quot;, without
+            warranty of any kind, either express or implied. COEQWAL scenarios
+            are exploratory model runs and are not intended for direct use in
+            legal or regulatory proceedings. Visit{" "}
+            <Typography
+              variant="dashboard"
+              component="button"
+              onClick={() => router.push("/about")}
+              sx={footerLinkButtonSx}
+            >
+              ABOUT
+            </Typography>{" "}
+            to learn how COEQWAL scenarios were developed.
+          </Typography>
         </Box>
       </Box>
 

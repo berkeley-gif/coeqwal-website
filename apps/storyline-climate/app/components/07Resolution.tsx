@@ -41,7 +41,7 @@ const hydroclimateDescription = [
       { text: "These hydroclimates represent " },
       { text: "different levels of risk to our water system", mark: "yellow" },
       {
-        text: ' that we should be prepared for. For example, a "moderate risk" hydroclimate future represents a change in conditions that are likely to occur, while the "extreme risk" hydroclimate future is less likely, but possible.',
+        text: ' that we should be prepared for. For example, a "moderate stress" hydroclimate future represents a change in conditions that are likely to occur, while the "extreme stress" hydroclimate future is less likely, but possible.',
       },
     ],
   },

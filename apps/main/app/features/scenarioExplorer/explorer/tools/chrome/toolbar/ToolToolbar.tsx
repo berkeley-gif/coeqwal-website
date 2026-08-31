@@ -145,7 +145,7 @@ export default function ToolToolbar({
                   whiteSpace: "nowrap",
                 }}
               >
-                View by climate
+                View by hydroclimate
               </Typography>
               <HydroclimateChooser
                 layout="horizontal"
