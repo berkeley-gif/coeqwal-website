@@ -46,7 +46,8 @@ const SCENARIOS_FIXTURE = [
   {
     name: "Delta Conveyance Project",
     short_code: "s0157",
-    short_description: "spec fixture, Moderate stress variant, no salmon results",
+    short_description:
+      "spec fixture, Moderate stress variant, no salmon results",
     is_active: true,
     hydroclimate_id: 7,
     sibling_group: "s0065",
