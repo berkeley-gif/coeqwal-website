@@ -424,55 +424,17 @@ export const WATER_THEMES: Theme[] = [
 
         },
       },
-      {
-        id: "how-to-explore-further",
-        content: {
-          type: "mixed",
-          blocks: [
-            {
-              type: "paragraph",
-              text: (
-                <>
-                  Together, the views of scenario outcomes reveal the trade-offs,
-                  inequities, and vulnerabilities already present under current
-                  operations. They also show how results can vary depending on how
-                  current operations are represented, and how conditions may change
-                  under future hydroclimates. Visit the{" "}
-                  <InlineNavLink to="explore">Explore Tool</InlineNavLink> to examine
-                  these patterns in greater detail.
-                </>
-              ),
-            },
-            {
-              type: "paragraph",
-              text: "Understanding today's water system provides the reference point for interpreting alternative management strategies explored by COEQWAL.",
-            },
-            {
-              type: "paragraph",
-              text: (
-                <>
-                  If this is your first time using the Explore Tool, we recommend
-                  visiting the{" "}
-                  <InlineNavLink to="learn">Get Started section</InlineNavLink> of the
-                  site before beginning your exploration.
-                </>
-              ),
-            },
-
-          ],
-        },
-      },
     ],
   },
   {
     id: "cws",
-    label: "Community\nwater systems",
-    shortLabel: "Community water systems",
+    label: "Securing community\nwater supplies",
+    shortLabel: "Securing community water supplies",
     description:
-      "Whether people and communities can reliably access safe drinking water for daily life, health, and essential services",
+      "Whether California's community water systems can reliably deliver safe drinking water to the people who depend on them, in wet years, dry years, and a changing climate",
     heroImage: "/images/themes/cws_hero_cred_dan_bacher.jpg",
     inquiry:
-      "Can California's communities reliably access safe and affordable drinking water — in wet years, dry years, and a changing climate?",
+      "How can we ensure reliable drinking water access for Californians in wet years, dry years, and a changing climate?",
     sections: [
       {
         id: "intro",
@@ -481,31 +443,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Millions of Californians depend on community water systems for daily life, for drinking, cooking, bathing, schools, hospitals, and local businesses. When these systems are stressed, the impacts are immediate and personal.",
-            },
-            {
-              type: "image",
-              src: "/images/themes/water_supply-01.svg",
-              alt: "Community water systems",
-              caption: "",
-            },
-            {
-              type: "image",
-              src: "/images/themes/water_supply-02.svg",
-              alt: "Community water systems",
-              caption: "",
-            },
-            {
-              type: "image",
-              src: "/images/themes/water_supply-03.svg",
-              alt: "Community water systems",
-              caption: "",
-            },
-            {
-              type: "image",
-              src: "/images/themes/water_supply-04.svg",
-              alt: "Community water systems",
-              caption: "",
+              text: "Almost 38 million Californians, 97% of the state's population, depend on community water systems to provide water for drinking, cooking, bathing, schools, hospitals, and local businesses. When these systems are stressed, the impacts are immediate and personal.",
             },
           ],
         },
@@ -518,19 +456,27 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Community water systems serve cities, towns, and rural communities across California. Some rely on surface water delivered through rivers and canals, while others depend heavily on groundwater wells, many use a combination of both.",
+              text: "Community water systems serve cities, towns, and rural communities across California. Some rely on surface water delivered through rivers and canals, while others depend on groundwater wells. Many use a combination of both.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/cws-fig-01.svg",
+              alt: "Different water sources shape community resilience",
+              title: "Different water sources shape community resilience",
+              caption:
+                "Some communities rely primarily on surface water delivered through rivers, reservoirs, pipes, and canals, while others draw from both surface water and groundwater wells. Access to multiple water sources can provide greater flexibility when one source becomes less available, while reliance on a single source can leave communities more vulnerable to drought, infrastructure disruptions, and other changes in water supply.",
             },
             {
               type: "paragraph",
-              text: "In wet years, water supplies are generally more stable. In dry years, shortages can emerge, especially when reservoir storage is low or groundwater levels decline. Smaller and rural systems are often more vulnerable because they have fewer backup options and limited financial resources.",
+              text: "In wet years, water supplies are generally more abundant. In dry years, shortages can emerge, especially when reservoir storage is low or groundwater levels decline. Smaller and rural systems are often more vulnerable because they have limited financial resources and infrastructure to access alternative water sources.",
             },
             {
               type: "paragraph",
-              text: "Water rights and operating rules also shape outcomes. Senior water rights holders may continue to receive deliveries even when supplies shrink, while lower-priority users may face larger reductions. This can create uneven impacts across communities.",
+              text: "Surface water deliveries are shaped by a complex combination of water rights, contracts, operating rules, infrastructure, and water availability. These arrangements affect how shortages are distributed, meaning that some community water systems may experience larger reductions in project deliveries than others.",
             },
             {
               type: "paragraph",
-              text: "Climate change adds new uncertainty. Snowpack is declining, heat increases evaporation, and droughts may become longer and more severe. These shifts affect how much water is available and when. Understanding how reliable water supplies are under changing conditions helps communities anticipate risks, plan ahead, and ensure consistent access to water.",
+              text: "Climate change adds new uncertainty. Snowpack is declining, higher temperatures increase evaporation, and droughts may become longer and more severe. These shifts affect how much water is available. Understanding how reliable different water supplies are under changing conditions helps communities anticipate risks, plan ahead, and ensure consistent access to water.",
             },
           ],
         },
@@ -538,25 +484,38 @@ export const WATER_THEMES: Theme[] = [
       {
         id: "what-this-theme-focuses-on",
         content: {
-          type: "boxes",
-          items: [
+          type: "mixed",
+          gap: "40px",
+          blocks: [
             {
-              title: "Water sources & system diversity",
-              paragraphs: [
-                "Community water systems rely on different combinations of surface water and groundwater. These differences shape how systems experience risk. Surface water systems are sensitive to changes in reservoir storage and delivery conditions, while groundwater-dependent systems are influenced by aquifer levels, recharge rates, and pumping patterns.",
-              ],
+              type: "image",
+              src: "/images/themes/cws-fig-02.svg",
+              alt: "Surface water deliveries from large water projects to communities",
+              title:
+                "Surface water deliveries from large water projects to communities",
+              caption:
+                "Community water systems rely on surface water, groundwater, or a combination of sources to meet their needs. This water issue focuses on surface water delivered from California's major water projects to major metropolitan areas around the Bay Area, Sacramento, and Los Angeles, as well as smaller communities throughout the Central Valley and Southern California. These deliveries represent only a subset of California's community water systems and drinking water supplies.",
             },
             {
-              title: "Storage, groundwater & drought response",
-              paragraphs: [
-                "Reservoir storage and groundwater act as buffers during dry periods. When surface water deliveries decline, systems may increase groundwater pumping or rely on stored supplies. However, groundwater responds slowly and if pumping exceeds recharge over time, water levels can drop, increasing costs and long-term risks.",
-              ],
+              type: "image",
+              src: "/images/themes/cws-fig-03.svg",
+              alt: "Community drinking water deliveries as represented in CalSim3",
+              title:
+                "Community drinking water deliveries as represented in CalSim3",
+              caption:
+                "The CalSim3 water systems model that is used in COEQWAL simulates surface water deliveries from the major water projects to community water systems at 74 locations of interest throughout California, shown on the map below.",
             },
             {
-              title: "Water rights & distribution of impacts",
-              paragraphs: [
-                "Water deliveries are often determined by contracts and water rights, not just need. During shortages, senior rights holders are more likely to maintain deliveries, while lower-priority users may face greater reductions. This creates uneven impacts across regions and communities, with implications for fairness and equity.",
-              ],
+              type: "paragraph",
+              text: "**Assessing delivery reliability and the distribution of impacts** – Surface water deliveries are not determined by community need alone. Water rights, contracts, operating rules, infrastructure, and patterns of water availability all influence how project water is distributed and how reductions in deliveries are experienced across communities.",
+            },
+            {
+              type: "paragraph",
+              text: "To evaluate these deliveries in the context of community needs, COEQWAL compares modeled surface water deliveries with recent potable (drinking water) demands. This provides a measure of how reliably the modeled project supplies can contribute to meeting community water needs under different management and climate conditions.",
+            },
+            {
+              type: "paragraph",
+              text: "This analysis also shows how reliability varies among locations, revealing which community water systems consistently receive reliable project deliveries and which remain more vulnerable.",
             },
           ],
         },
@@ -569,13 +528,10 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Community water systems depend on different water sources — risks are not the same everywhere.",
-                "A shortage does not necessarily mean taps run dry. Systems can adapt by drawing on water storage, purchases, operational changes, or demand management.",
-                "Reliability reflects patterns over time, not just single-year conditions.",
-                "Multiple consecutive drought years tend to have greater impacts than a single dry year, as stresses on both surface water and groundwater systems accumulate over time.",
-                "Water deliveries are shaped by contracts and water rights, not necessarily actual demand.",
-                "Impacts are not evenly distributed across systems. Smaller and lower-priority systems often experience greater variability in water supply.",
-                "Big-picture summaries show overall trends, but local differences remain important.",
+                "Community water systems may rely on surface water, groundwater, stored water, or combinations of different sources. Access to these alternative sources varies considerably among systems. COEQWAL evaluates surface water deliveries from major water projects to select community water systems, not each community's complete water supply portfolio.",
+                "Community surface water deliveries are evaluated relative to recent potable water demands, provided by the State Water Resources Control Board's Division of Drinking Water. Project deliveries are influenced by water availability, contracts, water rights, infrastructure, and operating rules and may not fully meet these demands.",
+                "When modeled project deliveries fall below demand, this does not necessarily mean that a community experiences a drinking water shortage. Systems with access to groundwater, local surface water, or other alternatives may be better able to respond to reduced project deliveries than systems with fewer options.",
+                "Community water systems respond to both the severity and frequency of shortages. Water system stress can result from a significant delivery shortfall in a single year or repeated shortfalls over multiple years.",
               ],
             },
           ],
@@ -588,21 +544,30 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This theme allows you to explore how different water management choices affect:",
+              text: "This water issue explores two scenarios that prioritize surface water deliveries for community use:",
             },
             {
               type: "list",
               items: [
-                "Drinking water delivery reliability",
-                "Reservoir storage patterns",
-                "Groundwater availability and trends",
-                "Regional differences across communities",
-                "Performance during drought and extreme conditions",
+                "Prioritizing human health water deliveries to community water systems",
+                "Prioritizing full demands of community water systems",
               ],
             },
             {
               type: "paragraph",
-              text: "Looking at these factors together helps show how communities experience water security under different conditions.",
+              text: "Together, these scenarios examine how different levels of priority for community water deliveries affect the broader water system, including agricultural water supplies, reservoir storage, environmental flows, and other outcomes.",
+            },
+            {
+              type: "paragraph",
+              text: (
+                <>
+                  For more information about each of these scenarios, visit{" "}
+                  <InlineNavLink to="/data">
+                    DATA AND DOCUMENTATION
+                  </InlineNavLink>
+                  .
+                </>
+              ),
             },
           ],
         },
@@ -615,27 +580,137 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "**Trade-offs** – Water is limited. Protecting reservoir storage may improve long-term drought reliability but reduce short-term deliveries. Increasing deliveries in one region may reduce availability elsewhere. When supply declines, reductions are distributed across users, often unevenly.",
+              text: "The Explore Tool allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
             },
             {
-              type: "paragraph",
-              text: "**Equity** – Water rights priorities and geographic differences shape who is affected most. Senior contractors often maintain deliveries, while lower-priority users may face larger reductions. Smaller or groundwater-dependent systems may experience different risks than large urban suppliers.",
+              type: "image",
+              src: "/images/themes/cws-fig-04.svg",
+              alt: "Trade-offs radar chart",
+              title: "Trade-offs",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    How do different management strategies affect overall
+                    system performance across multiple outcomes?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The radar chart in the Explore Tool summarizes
+                    performance across nine key outcomes, revealing broad
+                    system-level trade-offs within and between scenarios. The
+                    chart displays the average performance across all
+                    locations of interest for each scenario, providing a
+                    system-wide view of how these management strategies
+                    influence multiple outcomes simultaneously. The chart
+                    view below specifically compares Current operations
+                    (black), Prioritizing human health delivery levels to
+                    community water systems (blue), and Prioritizing full
+                    demands of community water systems (red) under the
+                    historical hydroclimate.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The points show the average condition across all
+                    locations of interest for each outcome, classified into
+                    four outcome levels: optimal, acceptable, at-risk, and
+                    critical. See{" "}
+                    <InlineNavLink to="/data">
+                      DATA AND DOCUMENTATION
+                    </InlineNavLink>{" "}
+                    for more information on how these categories are
+                    defined.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The results show that community surface water deliveries
+                    perform well on average under Current Operations and
+                    improve further under both scenarios that prioritize
+                    community water needs. The results also reveal that
+                    these improvements in community surface water outcomes
+                    are not associated with notable impacts to other parts
+                    of the system. The performance of winter-run salmon does
+                    decline in the scenario that prioritizes human health
+                    delivery levels, suggesting that additional community
+                    water deliveries limit water needed by this salmon
+                    population. However, the average values for all other
+                    outcomes are similar between the baseline and the two
+                    scenarios that prioritize water deliveries to community
+                    water systems.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The radar chart shows system-wide performance of
+                    outcomes, while the Distribution view reveals the
+                    specific locations where benefits or impacts occur.
+                  </Typography>
+                </>
+              ),
             },
             {
-              type: "paragraph",
-              text: "**Resilience** – A resilient community water system can handle drought, heat, and variability without severe disruption. Resilience is influenced by many factors, which can include diversified supplies, stable groundwater levels, reservoir carryover storage, and flexible management strategies. Results reflect patterns over many years. They are not predictions of any single year, but tools to understand relative reliability and vulnerability under different conditions.",
+              type: "image",
+              src: "/images/themes/cws-fig-05.svg",
+              alt: "Distribution view map of community water delivery outcomes",
+              title: "Equity",
+              caption:
+                "Where do benefits and impacts occur, and who is most affected?\nSystem-wide averages can hide important differences in scenario impacts. Water availability and access can vary substantially between regions and served systems, meaning that the same management strategy can produce different outcomes in different places.\nThe Distribution view in the Explore Tool shows results for individual locations of interest. This figure displays outcomes for community surface water deliveries for Prioritizing human health delivery levels to community water systems, relative to Current operations. Arrows indicate the direction of change relative to current operations, and color represents optimal (green), acceptable (blue), at-risk (orange), or critical (red) outcomes for the scenario. Circles represent locations that did not change condition relative to current operations.\nThe results show that surface water deliveries to most locations of interest are \"Optimal\" or \"Acceptable\" under the human health priority scenario, and deliveries improve for many systems. However, seven locations remain \"At-risk\" or \"Critical\" and do not improve relative to Current operations. This shows that prioritizing community water deliveries across the system does not benefit every community equally or eliminate existing vulnerabilities.\nBecause communities differ in their access to groundwater, local storage, alternative supplies, financial resources, and other sources of resilience, similar surface water delivery outcomes may have different implications in different places. Overall, the Distribution view reveals patterns hidden by the system-wide averages and helps identify which locations benefit from changes in management and which remain vulnerable.",
             },
-          ],
-        },
-      },
-      {
-        id: "how-to-explore-further",
-        content: {
-          type: "mixed",
-          blocks: [
             {
-              type: "paragraph",
-              text: "Explore how water management choices affect community water reliability across regions, water sources, and climate conditions, and how these differences shape community outcomes.",
+              type: "image",
+              src: "/images/themes/cws-fig-06.svg",
+              alt: "Resilience heatmap across hydroclimate scenarios",
+              title: "Resilience",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    How consistently do management strategies perform under
+                    different climate futures?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Climate change is expected to place increasing stress on
+                    California's water system. A management strategy that
+                    performs well today may respond differently as droughts
+                    become more frequent, temperatures rise, and water
+                    availability changes. The Resilience heatmap in the
+                    Explore Tool examines how management strategies perform
+                    across a range of plausible hydroclimate futures,
+                    representing increasing levels of stress to the water
+                    system. Visit{" "}
+                    <InlineNavLink to="/data">
+                      DATA AND DOCUMENTATION
+                    </InlineNavLink>{" "}
+                    for more information about hydroclimate futures.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    This Resilience heatmap summarizes community surface
+                    water deliveries under the historical hydroclimate and
+                    future hydroclimates representing Moderate,
+                    Moderate-High, High and Extreme levels of climate stress
+                    for Current Operations and Prioritizing human health
+                    delivery levels to community water systems. Outcomes are
+                    categorized as optimal (1.00 - 1.99), acceptable (2.00 -
+                    2.99), at-risk (3.00 - 3.99), or critical (4.00 - 4.99),
+                    with higher numerical values indicating worse
+                    performance.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Community surface water deliveries decline as climate
+                    stress increases under both management strategies. Under
+                    Current operations, average performance remains
+                    "Optimal" from the historical through Moderate-High
+                    hydroclimates, before declining to "Acceptable" under
+                    High and Extreme climate stress. Prioritizing human
+                    health delivery levels improves average community
+                    surface water delivery performance under every
+                    hydroclimate examined. However, performance still
+                    declines as climate stress increases, shifting from
+                    "Optimal" through Moderate-High stress to "Acceptable"
+                    under High and Extreme stress.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    These results suggest that prioritizing essential
+                    community water needs improves the resilience of
+                    modeled surface water deliveries across a range of
+                    climate futures, but cannot fully offset the effects of
+                    increasingly severe water scarcity.
+                  </Typography>
+                </>
+              ),
             },
           ],
         },
@@ -644,13 +719,13 @@ export const WATER_THEMES: Theme[] = [
   },
   {
     id: "ag_gw",
-    label: "Farms and\ngroundwater",
-    shortLabel: "Farms and groundwater",
+    label: "Sustaining farms\nand groundwater",
+    shortLabel: "Sustaining farms and groundwater",
     description:
-      "Whether agricultural water deliveries can sustain food protection, while preventing over-draft of groundwater basins",
+      "Whether California's agricultural water use can be sustained without depleting the groundwater that farms, communities, and ecosystems depend on",
     heroImage: "/images/themes/farms-groundwater_hero.jpg",
     inquiry:
-      "How can California continue to grow food and support farming communities, while protecting groundwater and sustaining the system for the future?",
+      "How can California continue to grow food and support farming communities, while protecting groundwater for the future?",
     sections: [
       {
         id: "intro",
@@ -659,7 +734,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Farms need reliable water to grow crops and stay economically viable. This water comes from two main sources, surface water from rivers and reservoirs and groundwater stored underground. These two sources are closely connected. When one becomes limited, the other is used more heavily. During droughts or periods of high demand, farmers often rely more on groundwater. If too much groundwater is pumped, it can become unsustainable, putting farms, drinking water supplies, and ecosystems at risk.",
+              text: "Farms need water to grow crops and stay economically viable. Agricultural water comes primarily from surface water diverted from rivers and reservoirs, and from groundwater pumped from aquifers. These sources are closely connected. When surface water becomes limited, farmers often rely more heavily on groundwater, particularly during droughts or periods of high demand. Water from rivers and irrigation can percolate through the soil and help recharge aquifers. But if groundwater pumping exceeds recharge over time, groundwater overdraft occurs, putting farms, drinking water supplies, and ecosystems at risk.",
             },
           ],
         },
@@ -672,26 +747,24 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "California grows a large share of the nation's fruits, nuts, and vegetables. Farming supports jobs, local economies, and food systems across the country. But agriculture is also one of the largest water users in the state.",
+              text: "California grows a large share of the nation's fruits, nuts, and vegetables. Farming supports jobs, local economies, and food systems across the country. But agriculture is also the largest water user in the state.",
             },
             {
               type: "paragraph",
-              text: "In wet years, farms receive more surface water deliveries from reservoirs and canals. In dry years, when surface supplies are reduced, farmers often pump more groundwater to make up the difference. Over time, heavy groundwater pumping can lower water tables, increase costs for farmers, and cause land subsidence. Some regions, especially in the San Joaquin Valley, have seen long-term groundwater declines.",
+              text: "Over time, heavy groundwater pumping can lower groundwater tables. When pumping persistently exceeds recharge, groundwater overdraft can cause wells to go dry, increase pumping costs, contribute to land subsidence, and reduce groundwater contributions to rivers and freshwater ecosystems. These problems have been particularly acute in parts of the San Joaquin Valley. At the same time, climate change is reducing snowpack and increasing drought intensity, which makes surface water supplies less reliable. These changes make the long-term sustainability of groundwater increasingly important.",
             },
             {
               type: "paragraph",
-              text: "New groundwater laws, such as the Sustainable Groundwater Management Act (SGMA), require regions to bring groundwater use into balance over time. This may involve reducing pumping, shifting crops, or retiring land. At the same time, climate change is reducing snowpack and increasing drought intensity, making surface water supplies less reliable.",
-            },
-            {
-              type: "paragraph",
-              text: "Understanding how surface water deliveries, groundwater use, agricultural production, and climate stress interact is essential for planning a stable and sustainable food future.",
+              text: "California's Sustainable Groundwater Management Act (SGMA) requires groundwater basins to achieve long-term balance between pumping and recharge. Meeting SGMA requirements may involve reducing pumping alongside other changes in agricultural water and land management. Understanding how surface water deliveries, groundwater use, and agricultural production change as groundwater restrictions are put in place is essential for planning for a sustainable agricultural future.",
             },
             {
               type: "image",
-              src: "/images/themes/Groundwater_theme.svg",
-              alt: "Groundwater diagram",
+              src: "/images/themes/ag_gw-fig-01.svg",
+              alt: "Relationships between agricultural water use, groundwater levels, agricultural revenues, and groundwater-dependent ecosystems over time",
+              title:
+                "Relationships between agricultural water use, groundwater levels, and agricultural revenues, and groundwater-dependent ecosystems over time under two hypothetical scenarios",
               caption:
-                "Agricultural water demand is met by surface water and groundwater. During droughts, surface water supply falls short and groundwater pumping fills the gap. In response, water tables decline. The Sustainable Groundwater Management Act (SGMA) introduces pumping limits to protect aquifers and agricultural land uses over decades.\nThe graphics compare two scenarios over 10 years. Without pumping limits (Scenario 1), groundwater use increases during drought, causing significant declines in groundwater levels. With limits (Scenario 2), some agricultural water demand goes unmet in during drought, but groundwater levels remain relatively stable.\nThese tradeoffs affect the economics of Central Valley agriculture. Pumping limits can agricultural reduce revenue during drought, but help sustain groundwater and support productive land use over the long term.",
+                "When no restrictions on groundwater pumping are imposed (Scenario 1), groundwater use increases during drought, causing declines in groundwater levels. With reductions in groundwater use (Scenario 2), groundwater can still help mitigate agricultural losses during the worst drought years, while groundwater levels remain more stable over the long term. However, reduced access to groundwater during drought can lead to unmet agricultural water demand and lower agricultural revenues.\nOver the longer term, maintaining more sustainable groundwater levels can reduce problems associated with overdraft, including land subsidence, dry wells, and reductions in groundwater contributions to surface waters. Groundwater-dependent ecosystems can also benefit, as more stable groundwater levels can help sustain native vegetation and support recovery following drought.",
             },
           ],
         },
@@ -699,25 +772,53 @@ export const WATER_THEMES: Theme[] = [
       {
         id: "what-this-theme-focuses-on",
         content: {
-          type: "boxes",
-          items: [
+          type: "mixed",
+          gap: "40px",
+          blocks: [
             {
-              title: "Surface water and groundwater as a connected system",
-              paragraphs: [
-                "Surface water and groundwater are part of a single, connected system. Reservoir storage determines how much water can be delivered through canals. When surface deliveries are reduced, farmers often rely more heavily on groundwater. Over time, this can lead to declining groundwater levels if pumping exceeds recharge.",
-              ],
+              type: "paragraph",
+              text: "**Groundwater sustainability and agricultural adaptation** – As groundwater management requirements are implemented, some regions may need to reduce pumping. Farmers may respond by fallowing land, changing crops, improving irrigation efficiency, developing or shifting to alternative water supplies where alternatives are available, or making other long-term changes to farming operations. These changes can affect agricultural production, farm employment, and local economies, particularly when reductions persist over multiple years.",
             },
             {
-              title: "Groundwater sustainability and agricultural adaptation",
-              paragraphs: [
-                "Groundwater changes slowly over time. Long-term trends matter more than single years. As groundwater laws are implemented, some regions may need to reduce pumping. Farmers may respond by fallowing land, changing crops, improving efficiency, or shifting water sources. These changes can affect both production and local economies.",
-              ],
+              type: "paragraph",
+              text: "**Surface water and groundwater as a connected system** – Surface water and groundwater are connected parts of California's water system, but access to each source varies considerably across agricultural regions and individual farms. Where groundwater is available, pumping often increases when surface water deliveries decline. Over time, increased pumping can lead to declining groundwater levels.",
             },
             {
-              title: "System connections and trade-offs",
-              paragraphs: [
-                "Decisions about groundwater, land use, and surface water deliveries affect multiple parts of the system. Reducing groundwater pumping may improve long-term sustainability but can reduce agricultural production in the short term. Changes in one region may also shift pressures to other regions or water sources, creating complex system-wide responses.",
-              ],
+              type: "paragraph",
+              text: "**System connections and trade-offs** – Decisions about groundwater, land use, and surface water deliveries affect multiple parts of the system. Reducing groundwater pumping may increase pressure on surface water supplies. Changes in one region may shift demands or impacts to other regions or water sources. Reduced water availability, particularly during multi-year droughts, can have lasting effects on agricultural production, farm employment, local economies, and communities.",
+            },
+            {
+              type: "paragraph",
+              text: "These connections also extend to ecosystems. In the Sacramento Valley, for example, working agricultural lands such as rice fields provide important habitat, and irrigation districts deliver water to wildlife refuges and other managed habitat areas. Groundwater-dependent ecosystems, including wetlands and streamside forests, support regional biodiversity and native fish and wildlife. Declining groundwater levels can threaten these ecosystems and the functions they provide. Changes in agricultural water use and groundwater management therefore have environmental as well as economic consequences. Protecting groundwater over the long term is important for agriculture, communities, and ecosystems.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/ag_gw-fig-02.svg",
+              alt: "Groundwater storage and agricultural demand units",
+              title: "Groundwater storage and agricultural demand units",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The CalSim3 water systems model used in COEQWAL
+                    simulates groundwater storage conditions in 42 aquifer
+                    regions across the Central Valley (see left map below).
+                    Agricultural revenues are evaluated separately for 134
+                    agricultural demand units within the modeled area (see
+                    right map), each representing agricultural land with
+                    specific water demand characteristics.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The colors of the polygons indicate conditions under
+                    current operations and represent whether outcomes are
+                    optimal, acceptable, at-risk, or critical (red). See{" "}
+                    <InlineNavLink to="/data">
+                      DATA AND DOCUMENTATION
+                    </InlineNavLink>{" "}
+                    for more information on how these performance levels are
+                    defined.
+                  </Typography>
+                </>
+              ),
             },
           ],
         },
@@ -730,12 +831,14 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Farms rely on both surface water and groundwater. When surface water is limited, groundwater often helps fill the gap, but when groundwater is restricted, surface supplies usually cannot increase, leading to shortages.",
-                "Groundwater systems respond slowly. Conditions over multiple years (3–5 years) matter more than single wet or dry years.",
-                "Results reflect long-term patterns across many years, rather than predictions for any one year, and highlight risks when dry conditions persist.",
-                "Farmers can adapt by shifting crops, using stored water, or reducing acreage, but many of these decisions require long-term planning.",
-                "Perennial crops (such as nuts and fruit trees) require continuous water and years of investment, making them difficult to adjust in response to short-term shortages.",
-                "Impacts vary by region. The Sacramento Valley and San Joaquin Valley face different groundwater conditions and constraints, so system-wide averages can mask important local challenges.",
+                "Across the Central Valley, farms often rely on a combination of surface water and groundwater. When surface water is limited, groundwater can sometimes be used to fill this gap. When groundwater is also constrained, however, additional surface water may not be available to make up the difference, leading to agricultural water shortages.",
+                "Agricultural revenues change year-to-year in response to water availability and the crops planted. Annual crops generally yield lower revenues than perennial crops but offer more flexibility to adjust planting from year to year. Higher-value perennial crops (such as nuts and fruit trees) require water every year and long-term investment, making them difficult to adjust in response to short-term shortages.",
+                "Groundwater systems change slowly. Reversing long-term trends in declining groundwater levels may require concerted management over many years or decades. Severe groundwater depletion and land subsidence can also make recovery more difficult.",
+                "Farmers can adapt to reductions in groundwater access by shifting crops, changing water management practices, or retiring farmland, but many of these decisions require long-term planning.",
+                "Impacts vary by region. The Sacramento Valley and San Joaquin Valley face different groundwater conditions and constraints, so system-wide averages can mask important local impacts.",
+                "The models used by COEQWAL primarily focus on the Sacramento and San Joaquin River basins. The Tulare Basin and other parts of the southern San Joaquin Valley are only partially represented, and changes in groundwater storage and agricultural revenues are not evaluated in these regions.",
+                "COEQWAL explores the broader effects of limiting groundwater pumping. Because SGMA is implemented through individual basin plans that use different strategies to achieve groundwater sustainability, these scenarios do not represent how SGMA will be implemented or predict future conditions in individual basins. For more details about SGMA, visit the California Department of Water Resources.",
+                "Some important management options and system connections are not evaluated here. These include managed aquifer recharge and environmental benefits associated with working agricultural lands, such as habitat provided by flooded rice fields and water delivered throughout agricultural infrastructure to wildlife refuges.",
               ],
             },
           ],
@@ -748,22 +851,32 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This theme allows you to explore how different water management choices affect:",
+              text: "This water issue compares water management strategies that reduce groundwater use through direct pumping limits and/or reductions in irrigated crop acreage, including:",
             },
             {
               type: "list",
               items: [
-                "Agricultural production and revenue",
-                "Groundwater pumping limits",
-                "Changes in irrigated acreage",
-                "Surface water deliveries to farms",
-                "Reservoir storage patterns",
-                "Long-term groundwater storage trends",
+                "Groundwater pumping limits in the San Joaquin Valley",
+                "Groundwater pumping limits via reduced crop acreage in the San Joaquin Valley",
+                "Groundwater pumping limits in the Sacramento and San Joaquin Valley",
+                "Groundwater pumping limits via reduced crop acreage in the Sacramento and San Joaquin Valley",
               ],
             },
             {
               type: "paragraph",
-              text: "Some scenarios explore groundwater pumping restrictions in the San Joaquin Valley or across the Central Valley. Others explore land-use changes or combined strategies that include both groundwater limits and changes to surface water management. Looking at these strategies together helps reveal how farms respond under different policy, climate, and operational conditions.",
+              text: "Together, these examine how the geographic extent of groundwater management (San Joaquin Valley versus both Sacramento and San Joaquin Valley) and different strategies to reduce groundwater use (direct pumping restrictions versus reduced crop acreage) influence water system performance under current and future climates.",
+            },
+            {
+              type: "paragraph",
+              text: (
+                <>
+                  For more information about each of these scenarios, visit{" "}
+                  <InlineNavLink to="/data">
+                    DATA AND DOCUMENTATION
+                  </InlineNavLink>
+                  .
+                </>
+              ),
             },
           ],
         },
@@ -776,27 +889,167 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "**Trade-offs** – Restricting groundwater pumping can improve groundwater storage over time but may reduce agricultural production in some regions. In some cases, limits in one area may shift pressure to other water sources or regions. Climate stress can intensify these trade-offs. Under warmer and drier conditions, surface water supplies decline, increasing reliance on groundwater just as it is being constrained.",
+              text: "The Explore Tool allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
             },
             {
-              type: "paragraph",
-              text: "**Equity** – Impacts are not evenly distributed. Adverse effects are often concentrated in regions like the San Joaquin Valley, where groundwater declines have historically been more severe. Other regions, such as parts of the Sacramento Valley, may experience more stable conditions under certain scenarios. Water rights and infrastructure also influence who experiences shortages or reliability.",
+              type: "image",
+              src: "/images/themes/ag_gw-fig-03.svg",
+              alt: "Trade-offs radar chart",
+              title: "Trade-offs",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    How do different management strategies affect system
+                    performance across multiple outcomes?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The radar chart in the Explore Tool summarizes
+                    performance across nine key outcomes, revealing broad
+                    system-level trade-offs within and between scenarios.
+                    The chart displays the average performance across all
+                    locations of interest for each scenario, providing a
+                    system-wide view of how these management strategies
+                    influence multiple outcomes simultaneously.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    This chart specifically compares Current operations
+                    (black), Groundwater pumping limits in the Central
+                    Valley (blue), and Groundwater pumping limits via
+                    reduced crop acreage in the Central Valley (red) under
+                    the historical hydroclimate. Agricultural revenues are
+                    distinguished for water districts north-of-Delta
+                    (Sacramento Valley) and south-of-Delta (San Joaquin
+                    Valley). The points show the average condition across
+                    all locations of interest for each outcome, classified
+                    into four outcome levels: optimal, acceptable, at-risk,
+                    and critical. See{" "}
+                    <InlineNavLink to="/data">
+                      DATA AND DOCUMENTATION
+                    </InlineNavLink>{" "}
+                    for more information on how these categories are
+                    defined.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The results show slight improvements in the average
+                    groundwater storage performance levels for Groundwater
+                    pumping limits in the Central Valley, which corresponds
+                    to a decrease in agricultural revenue. A larger
+                    improvement in groundwater storage occurs when
+                    groundwater use is limited through reductions in crop
+                    acreage. These groundwater benefits, however, come with
+                    larger reductions in agricultural revenues, particularly
+                    in the Sacramento Valley (North of Delta), where
+                    conditions fall from "acceptable" to "at risk".
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Reservoir storage improves under both groundwater
+                    management strategies, showing that changes in
+                    groundwater use can have effects elsewhere in the
+                    interconnected water system. Winter-run salmon also show
+                    modest improvements relative to current operations.
+                    Community water deliveries and Delta estuary conditions
+                    change relatively little on average. Water exports from
+                    the Delta substantially increase under the reduced crop
+                    acreage scenario. This may reflect lower agricultural
+                    water demands in the Sacramento Valley and changes in
+                    Sacramento River inflows associated with groundwater
+                    contributions. The increase in exports may also help
+                    buffer impacts to agricultural revenues in the San
+                    Joaquin Valley (South of Delta).
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    These results illustrate a central trade-off in
+                    groundwater management. Direct pumping limits produce
+                    relatively modest improvements in the average
+                    groundwater storage performance level across locations,
+                    but also smaller impacts on agricultural revenues.
+                    Reducing crop acreage produces larger groundwater
+                    benefits, but also larger economic impacts, particularly
+                    in the Sacramento Valley. This illustrates how
+                    groundwater outcomes depend not only on pumping
+                    constraints, but also on how agricultural systems adapt
+                    to reduced water availability.
+                  </Typography>
+                </>
+              ),
             },
             {
-              type: "paragraph",
-              text: "**Resilience** – Resilience in this system means balancing short-term reliability with long-term sustainability. A system that relies heavily on groundwater during drought may maintain production in the short term but risk long-term depletion. A system that stabilizes groundwater but significantly reduces production may face economic challenges. Resilience depends on the ability to adapt to changing conditions while maintaining both agricultural viability and groundwater health.",
+              type: "image",
+              src: "/images/themes/ag_gw-fig-04.svg",
+              alt: "Distribution view map of groundwater and agricultural revenue outcomes",
+              title: "Equity",
+              caption:
+                "Where do benefits and impacts occur, and who is most affected?\nSystem-wide averages can hide important differences in scenario impacts. Water availability, groundwater conditions, agricultural systems, and management constraints vary considerably among agricultural water users across the areas represented in the analysis, meaning that the same management strategy can produce different outcomes in different places.\nThe Distribution view in the Explore Tool shows results for individual locations of interest. This figure compares outcomes for aquifer zones and agricultural districts for Groundwater pumping limits via reduced crop acreage in the Central Valley relative to the Current operations scenario under the historical hydroclimate. Arrows indicate the direction of change relative to current operations and color represents optimal, acceptable, at-risk, or critical outcomes for the scenario. Circles on the map indicate locations where the outcome level did not change relative to current operations.\nAgricultural revenue declines at most locations in the scenario with reduced crop acreage, with many falling into at-risk or critical conditions. In contrast, groundwater storage improves across most zones, with numerous locations moving into optimal condition and none remaining critical. The map indicates improvements in groundwater storage across much of the Sacramento and San Joaquin Valleys. Agricultural impacts are more uneven, with some of the largest declines in agricultural revenues occurring in the central and southern Sacramento Valley.\nComparing the two maps makes an important distributional trade-off visible: groundwater storage improves across much of the represented Central Valley, while agricultural revenues decline at many locations. The geographic patterns do not align perfectly because groundwater storage and agricultural revenues are evaluated using different spatial units, and the magnitude of benefits and impacts varies across regions.\nOverall, the Distribution view reveals regional patterns hidden by the system-wide averages and helps identify where management strategies create benefits, where they create burdens, and how evenly those effects are distributed.",
             },
-          ],
-        },
-      },
-      {
-        id: "how-to-explore-further",
-        content: {
-          type: "mixed",
-          blocks: [
             {
-              type: "paragraph",
-              text: "Explore how different water management choices affect agricultural production, groundwater storage, and water deliveries across regions and climate conditions.",
+              type: "image",
+              src: "/images/themes/ag_gw-fig-05.svg",
+              alt: "Resilience heatmap across hydroclimate scenarios",
+              title: "Resilience",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    How consistently do management strategies perform under
+                    different climate futures?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Climate change is expected to place increasing stress on
+                    California's water system. A management strategy that
+                    performs well today may respond differently as droughts
+                    become more frequent, temperatures rise, and water
+                    availability changes. The Resilience heatmap in the
+                    Explore Tool examines how management strategies perform
+                    across a range of plausible hydroclimate futures,
+                    representing increasing levels of stress to the water
+                    system. Visit{" "}
+                    <InlineNavLink to="/data">
+                      DATA AND DOCUMENTATION
+                    </InlineNavLink>{" "}
+                    for more information about hydroclimate futures.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    This Resilience heatmap summarizes changes in
+                    groundwater storage and agricultural revenues under
+                    Historical conditions and under Moderate, Moderate-High,
+                    High and Extreme climate stress for Current Operations
+                    and for Groundwater pumping limits via reduced crop
+                    acreage in the Central Valley. Outcomes are categorized
+                    as optimal (1.00 - 1.99), acceptable (2.00 - 2.99),
+                    at-risk (3.00 - 3.99), or critical (4.00 - 4.99), with
+                    higher numerical values indicating worse performance.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Groundwater pumping limits via reduced crop acreage in
+                    the Central Valley lowers agricultural revenues relative
+                    to Current operations under the historical climate and
+                    under future climates. However, agricultural revenues
+                    for Current operations respond more strongly to climate
+                    stress than for the scenario in which groundwater limits
+                    are imposed. This suggests a unique tradeoff between the
+                    two scenarios, in which the impacts of lower overall
+                    agricultural revenues are paired with a benefit of
+                    greater resilience to climate stress.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Groundwater storage shows a different pattern. Reducing
+                    crop acreage improves groundwater conditions under the
+                    historical hydroclimate, and much of this benefit
+                    persists under Moderate through High climate stress.
+                    Under Extreme stress, however, groundwater conditions
+                    deteriorate and much of the advantage over current
+                    operations is lost.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    These results suggest that reducing agricultural water
+                    demand can improve groundwater resilience across a wide
+                    range of climate conditions, but increasingly severe
+                    climate stress can erode those benefits. They also show
+                    that protecting groundwater does not eliminate the
+                    broader challenge of maintaining agricultural production
+                    as water becomes more limited.
+                  </Typography>
+                </>
+              ),
             },
           ],
         },
@@ -805,13 +1058,13 @@ export const WATER_THEMES: Theme[] = [
   },
   {
     id: "eco",
-    label: "Rivers, salmon and\nthe Delta ecosystem",
-    shortLabel: "Rivers, salmon and the Delta ecosystem",
+    label: "Protecting rivers\nand salmon",
+    shortLabel: "Protecting rivers and salmon",
     description:
-      "Whether rivers, salmon, and the Delta estuary receive the flows they need to remain functional and resilient",
+      "Whether California's rivers can support healthy ecosystems and salmon populations while continuing to provide water for people and farms",
     heroImage: "/images/themes/salmon_hero.jpg",
     inquiry:
-      "Can California's rivers support healthy salmon populations and functioning ecosystems, while also providing water for people and farms?",
+      "Can California's rivers support healthy ecosystems and salmon populations, while also providing water for people and farms?",
     sections: [
       {
         id: "intro",
@@ -820,7 +1073,19 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Rivers are essential sources of water, but they are more than channels that move water from mountains to farms and cities. They are also living systems supporting a great diversity of species. Salmon depend on cold water in rivers for spawning and rearing, and to migrate to and from the ocean. Wetlands, birds, other fish, and other wildlife depend on rivers too.",
+              text: "Rivers are essential sources of water, but they are more than channels that move water from mountains to farms and cities. They are also living systems that support a great diversity of species. Salmon depend on river flows, cold water, and connected habitat for spawning, rearing, and migration to and from the ocean. Wetlands, birds, other fish, and other wildlife depend on healthy rivers too.",
+            },
+            {
+              type: "paragraph",
+              text: "California's rivers are defined by strong seasonal and annual variation in flows. In the winter and spring, rivers swell with rain and snowmelt, sometimes spilling onto floodplains and moving sediment, nutrients, plants, and animals across the landscape. In summer, flows recede and waters warm. California's native freshwater species evolved with these changing conditions. Salmon, in particular, depend on different river conditions at different stages of their life cycle.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/eco-fig-01.svg",
+              alt: "Winter-run Chinook salmon life cycle",
+              title: "Winter-run Chinook salmon life cycle",
+              caption:
+                "Sacramento River winter-run Chinook have a unique life history. Spawning adults (age 2, 3, or 4 years old) enter the Sacramento River as early as November, and most migrate far up the Sacramento River, where they hold in the upper river for several months before spawning. After spawning, the eggs incubate in the gravel for approximately 3 months before emerging as fry.\nFry can rear in the freshwater environment for 5-10 months before transitioning to the smolt outmigration lifestage. From January through April, smolts migrate downstream and enter the Gulf of the Farallones. Once in the Pacific Ocean, they mature for 1-3 years before re-entering the Sacramento River to spawn again to start the next generation.",
             },
           ],
         },
@@ -833,48 +1098,41 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "California's rivers begin in the mountains and flow through valleys to the Delta and ocean. Along the way, they sustain ecosystems and provide water for farms and communities. River systems are deeply interconnected. Decisions about storage, environmental flows, and water deliveries create trade-offs, where changes in one part of the system can ripple elsewhere.",
+              text: "California's rivers begin in the mountains and flow through valleys to the Delta and ocean. Along the way, they sustain ecosystems and provide water for farms and communities. Rivers are deeply interconnected with California's water management system. Dams, reservoir operations, and water diversions have altered the timing and amount of river flows on which native species depend. Decisions about how much water to store, release, and deliver for different purposes therefore create trade-offs that can ripple across the system.",
             },
             {
               type: "paragraph",
-              text: "Salmon are central to this story. They travel hundreds of miles between rivers and the ocean and are part of Tribal traditions, fishing economies, our food supply, and California's natural heritage. When salmon struggle, it signals stress in the broader river system.",
+              text: "Salmon are among California's most iconic species. Different salmon runs migrate between rivers and the ocean at different times of the year, supporting Tribal cultural practices, recreational and commercial fisheries, local economies, and ecosystem health. Because salmon depend on river conditions throughout multiple life stages, they are often used as indicators of the overall health of river ecosystems and the effectiveness of environmental flow management.",
+            },
+            {
+              type: "paragraph",
+              text: "The tension between water operations and salmon conservation is particularly acute in the Sacramento River, where winter-run Chinook salmon are endangered and remain at high risk of extinction. Winter-run salmon historically spawned in cold, spring-fed headwaters and tributaries of the Sacramento River. Today, Shasta Dam blocks access to most of those habitats, and winter-run primarily spawn downstream of Shasta Dam during the warmest part of the year. Their egg survival now depends heavily on cold water stored in Shasta Reservoir and released downstream during summer.",
+            },
+            {
+              type: "paragraph",
+              text: "Reintroducing winter-run to cold-water habitat above Shasta Dam offers another potential pathway for recovery by giving fish access to habitat that is less dependent on reservoir releases. COEQWAL explores how this could change salmon outcomes alongside alternative flow-management strategies.",
+            },
+            {
+              type: "paragraph",
+              text: "Restoring important elements of natural flow patterns can benefit salmon and other freshwater species, but integrating environmental flows into a highly managed water system creates difficult choices. Climate change makes those choices harder. Shrinking snowpack, earlier snowmelt, intensifying drought, and higher temperatures affect both the amount and timing of river flows and the cold water available for salmon.",
             },
             {
               type: "image",
-              src: "/images/themes/RiversFishEco_Theme-01.svg",
-              alt: "Fish theme",
+              src: "/images/themes/eco-fig-02.svg",
+              alt: "Winter-run Chinook salmon depend on connected habitats throughout their life cycle",
+              title:
+                "Winter-run Chinook salmon depend on connected habitats throughout their life cycle",
               caption:
-                "Sacramento River winter-run Chinook have a unique life history. Spawning adults (age 2, 3, or 4 years old) enter the Sacramento River as early as November, and migrate far up the Sacramento River, where they hold in the upper river for several months before spawning.\nAfter spawning, the eggs incubate in the gravel for 3 months before emerging as fry. Fry can rear in freshwater environment for 5-10 months before transitioning to the smolt outmigration lifestage. From January through April, smolts migrate downstream and enter the Gulf of the Farallones. Once in the Pacific Ocean, they mature for 1-3 years before re-entering the Sacramento River to spawn again to start the next generation.",
-            },
-            {
-              type: "paragraph",
-              text: "Over time, dams, reservoirs, diversions, and land use changes have reshaped rivers. Spring floods that once spread across floodplains are now captured or confined. These changes have improved water reliability for people, but reduced habitat, changed temperatures, and altered the timing of flows.",
+                "Historically, most winter-run Chinook salmon spawned in cold headwater streams upstream of what is now Shasta Dam. Today, most spawn below the dam. Young salmon then move through the Sacramento River, floodplains, Delta, and Bay before reaching the ocean, while returning adults make the journey back upstream. Their survival depends on suitable flows, temperatures, and habitat at each stage of this life cycle.",
             },
             {
               type: "image",
-              src: "/images/themes/RiversFishEco_Theme-02.svg",
-              alt: "Fish theme",
+              src: "/images/themes/eco-fig-03.svg",
+              alt: "Winter-run Chinook salmon need different river conditions throughout the year",
+              title:
+                "Winter-run Chinook salmon need different river conditions throughout the year",
               caption:
-                "Functional flows capture important hydrological features, including natural patterns of seasonal baseflows and flows from rain and snowmelt. The life stages of Sacramento River winter-run Chinook have adapted with these natural flow patterns, and rely on sufficient water to provide habitat for rearing fry, and to aid in their migrations, including downstream outmigration as smolts head to the ocean, and upstream migration as adults navigate to their spawning grounds to deposit eggs. Shasta Dam blocks their historical access the cool headwaters of Mount Shasta, and now they rely on artificially regulated flows downstream of Shasta Dam to maintain cool water temperatures required for egg survival. ",
-            },
-            {
-              type: "paragraph",
-              text: "Rivers respond not only to single events, but to stress over time. Sustained drought and repeated dry years can have compounding effects on ecosystems and water availability.",
-            },
-            {
-              type: "paragraph",
-              text: "Climate change adds new pressures. Snowpack is shrinking, snow melts earlier, and droughts and heat waves are intensifying. These changes affect how much cold water is available and when it moves through the system.",
-            },
-            {
-              type: "paragraph",
-              text: "Understanding rivers as living ecosystems, not just water delivery systems, is essential for future water management. A key idea explored here is that river flows can be managed to better resemble natural patterns while still delivering water to people.",
-            },
-            {
-              type: "image",
-              src: "/images/themes/RiversFishEco_Theme-03.svg",
-              alt: "Fish theme",
-              caption:
-                "Historically, Sacramento River winter-run Chinook salmon spawned and deposited eggs in the cool headwater streams near Mount Shasta. The construction of Shasta Dam blocked access to these spawning grounds and they now spawn and deposit eggs near the town of Redding. Fry can rear in the mainstem Sacramento River, Yolo Bypass, Delta, and Bay before outmigrating to the Gulf of the Farallones.  \nFrom the gulf, they embark on an extensive migration in the Pacific Ocean before traversing the 300+ miles back to their spawning ground in the upper Sacramento River to start the next generation. Their success at each life stage is dependent on habitat – they need flow in the mainstem Sacramento and Delta for rearing and outmigration, and cool water temperatures from releases at Shasta Reservoir for their eggs to survive.",
+                "Winter-run chinook salmon depend on seasonal flows for migration and rearing and on cold summer water for successful spawning and egg survival. Because Shasta Dam blocks access to historical cold-water habitat, reservoir operations now play a critical role in maintaining suitable downstream temperatures.",
             },
           ],
         },
@@ -882,25 +1140,32 @@ export const WATER_THEMES: Theme[] = [
       {
         id: "what-this-theme-focuses-on",
         content: {
-          type: "boxes",
-          items: [
+          type: "mixed",
+          gap: "40px",
+          blocks: [
             {
-              title: "Seasonal flow & ecosystem rhythms",
-              paragraphs: [
-                "Wild rivers follow natural seasonal patterns. Winter and spring rains and snowmelt increase flows, sometimes spreading onto floodplains and creating habitat for fish and other species. In summer and fall, flows decrease and water temperatures rise. These seasonal rhythms support native ecosystems, including many salmon species, which evolved to depend on these changing conditions.",
-              ],
+              type: "paragraph",
+              text: "**Seasonal flow and year-to-year variability** – California's rivers exhibit distinct seasonal patterns. Winter and spring rains and snowmelt increase flows, sometimes spreading onto floodplains and creating habitat for fish and other species. In summer and fall, flows naturally decline and water temperatures rise. Native species have evolved with these seasonal changes.",
             },
             {
-              title: "Winter-run Chinook & cold-water refuges",
-              paragraphs: [
-                "Winter-run Chinook salmon are different. They spawn in summer, when rivers are warm, and evolved in cold, spring-fed habitats. Today, dams block access to these areas, and winter-run salmon depend on cold-water releases from reservoirs (like Shasta) to survive. If cold-water pools are depleted during hot months, their eggs may not survive, even if flow targets are met. This means both timing and temperature are critical for their survival.",
-              ],
+              type: "paragraph",
+              text: "California rivers vary considerably from year to year. Wet years, dry years, floods, and droughts are part of this natural variability, while modern water management often reduces or shifts these fluctuations to improve water-supply reliability and meet other objectives. Water allocated to rivers for ecosystem benefits are known as environmental flows. Environmental flows generally protect a minimum amount of water in rivers throughout the year. Functional environmental flows are designed to preserve key elements of these natural seasonal and year-to-year patterns.",
             },
             {
-              title: "System connections & trade-offs",
-              paragraphs: [
-                "River systems are deeply interconnected. Limited water means that decisions about reservoir storage, environmental flows, and water deliveries create trade-offs across multiple outcomes. Efforts to create more natural flow patterns, such as seasonal pulse flows, can improve habitat but may reduce water available for other uses. Choices in one part of the system can create ripple effects elsewhere.",
-              ],
+              type: "paragraph",
+              text: "**Cold-water needs of Winter-run Chinook salmon** – Winter-run Chinook salmon differ from most other California salmon runs. They spawn during summer, when river temperatures are naturally warm, and historically relied on cold spring-fed habitats at higher elevations to survive. Today, Shasta Dam blocks access to much of this habitat, making winter-run salmon highly dependent on cold-water releases from Shasta Reservoir.",
+            },
+            {
+              type: "paragraph",
+              text: "As a result, managing reservoir storage is not only a water supply issue, it is also a fish survival issue. If Shasta's cold-water pool becomes depleted during summer, egg mortality can increase even when river-flow targets are met. For winter-run salmon, the temperature and timing of water releases can therefore be as important as the amount of water released.",
+            },
+            {
+              type: "paragraph",
+              text: "Reintroduction above Shasta Dam could reduce this dependence by restoring access to cold, spring-fed habitat. COEQWAL examines how reintroduction could affect winter-run outcomes under different management and climate conditions.",
+            },
+            {
+              type: "paragraph",
+              text: "**System connections and trade-offs** – Rivers are deeply interconnected with California's water supply system. Water released from reservoirs for environmental flows can affect the amount and timing of water remaining in storage or available for other uses. For winter-run salmon, there can also be trade-offs within environmental management itself: releasing more water to restore natural flow patterns may reduce the cold-water storage needed to protect eggs during summer. These connections mean that a strategy that benefits one ecological process or life stage may create different effects elsewhere in the system.",
             },
           ],
         },
@@ -913,13 +1178,12 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Rivers are shaped not only by how much water flows, but by when it flows and water temperature. Timing and water temperature can be as important as quantity.",
-                "Salmon depend on different conditions at different life stages, including cold water, sufficient flow, and connected habitat.",
-                "Reservoirs improve water storage for people and farms, but they also alter natural flow patterns and temperatures.",
-                "River ecosystems respond to droughts, floods, and sequences of extreme years. Short periods of stress can have lasting impacts.",
-                "Improving flows alone does not fully restore ecosystems. Habitat conditions, landscape changes, and invasive species also play a role.",
-                "This theme focuses on flows, so scenarios that perform poorly here may still achieve better outcomes when paired with habitat restoration or other management actions.",
-                "For winter-run Chinook salmon, water temperature, especially cold water stored in reservoirs, can matter as much as flow volume.",
+                "River ecosystems are shaped not only by how much water flows, but when it flows and its temperature.",
+                "Reservoirs provide important water storage benefits for people and farms, but they also alter natural flow patterns, temperatures, and habitat conditions.",
+                "Minimum environmental-flow requirements generally maintain a baseline amount of water in rivers but may not preserve the seasonal and year-to-year variability important to ecosystem processes. Functional environmental flows are designed to restore key elements of that variability.",
+                "Salmon depend on different conditions at different life stages. Winter-run Chinook salmon are especially dependent on cold-water releases from Shasta Reservoir.",
+                "Improving environmental flows does not necessarily improve winter-run salmon outcomes. For winter-run, releasing more water at one time of year can reduce the cold-water storage needed at another.",
+                "Flow management alone cannot fully restore river ecosystems. Habitat conditions, water temperature, landscape changes, invasive species, and access to historical habitat also influence ecological outcomes.",
               ],
             },
           ],
@@ -932,21 +1196,52 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This theme allows you to explore how different water management choices affect:",
+              text: "This water issue explores strategies designed to improve river ecosystem conditions and winter-run Chinook salmon populations. Some scenarios establish functional environmental flows that preserve key elements of natural seasonal and year-to-year flow variability. Other strategies adjust reservoir operations to protect cold-water storage and flows that provide refuge for multiple life stages of winter-run salmon. Many of these scenarios are also evaluated with groundwater pumping limits and/or reintroduction of winter-run above Shasta Dam.",
+            },
+            {
+              type: "paragraph",
+              text: "This water issue focuses on the following scenarios:",
             },
             {
               type: "list",
               items: [
-                "Seasonal flow patterns in rivers",
-                "Storage in reservoirs",
-                "Winter-run Chinook salmon survival across life stages",
-                "Outflows to the Bay-Delta estuary",
-                "Water deliveries for communities and farms",
+                "Functional environmental flows",
+                "Functional environmental flows with reduced crop acreage",
+                "Winter-run refuge flows",
+                "Winter-run refuge flows with reduced crop acreage",
+                "No flow requirements",
               ],
             },
             {
               type: "paragraph",
-              text: "Looking at these factors together shows how river systems respond under different climate and water use conditions.",
+              text: "Scenarios with reintroduction of salmon above Shasta Reservoir include:",
+            },
+            {
+              type: "list",
+              items: [
+                "Current operations with reintroduction",
+                "Functional environmental flows with reintroduction",
+                "Functional environmental flows with reduced crop acreage and reintroduction",
+                "Winter-run refuge flows with reintroduction",
+                "Winter-run refuge flows with reduced crop acreage and reintroduction",
+              ],
+            },
+            {
+              type: "paragraph",
+              text: (
+                <>
+                  For more information about those scenarios, and additional
+                  scenarios modeled with reintroduction alternatives, visit{" "}
+                  <InlineNavLink to="/data">
+                    DATA AND DOCUMENTATION
+                  </InlineNavLink>
+                  .
+                </>
+              ),
+            },
+            {
+              type: "paragraph",
+              text: "Together, these scenarios examine how environmental flows, reservoir operations, groundwater management, and access to historical habitat influence river and salmon outcomes and create trade-offs elsewhere in the water system.",
             },
           ],
         },
@@ -959,33 +1254,211 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "**Trade-offs** – Water stored in reservoirs supports cities and farms, but can reduce natural winter and spring flows that benefit ecosystems. Releasing water to support salmon can limit storage needed later for temperature control or supply. For example, prioritizing cold-water storage in Shasta Reservoir can improve egg survival, but reduce flows for juvenile outmigration. Increasing flows can benefit juveniles, but deplete cold-water pools and increase egg mortality. Decisions about when and how much water to release shift outcomes across life stages, regions, and sectors.",
+              text: "The Explore Tool allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
             },
             {
-              type: "paragraph",
-              text: "**Equity** – River conditions affect communities differently. Tribal nations, fishing communities, farmers, and downstream towns may experience changes in distinct ways. Salmon declines can impact cultural practices, subsistence, and local economies. Water rights and location also shape who experiences shortages or protections first. For example, decisions that benefit one salmon life stage may help some communities while increasing risks for others who depend on salmon at different times.",
+              type: "image",
+              src: "/images/themes/eco-fig-04.svg",
+              alt: "Trade-offs radar chart",
+              title: "Trade-offs",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    How do different management strategies affect overall
+                    system performance across multiple outcomes?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The radar chart in the Explore Tool summarizes
+                    performance across nine key outcomes, revealing broad
+                    system-level trade-offs within and between scenarios.
+                    This example compares Current operations with two
+                    approaches to protecting rivers and salmon: Functional
+                    environmental flows, which seek to restore key elements
+                    of natural flow patterns, and Winter-run refuge flows,
+                    which prioritize cold-water releases from Shasta along
+                    with functional flows shaped to benefit winter-run
+                    Chinook salmon. The Functional environmental flows with
+                    reintroduction strategy is also included to show how
+                    reintroduction of winter-run Chinook salmon above Shasta
+                    Dam changes outcomes. The chart specifically compares
+                    Current operations (black), Functional environmental
+                    flows (red), Functional environmental flows with
+                    reintroduction (yellow), and Winter-run refuge flows
+                    (blue) under the historical hydroclimate. The points
+                    show the average conditions of all locations of
+                    interest for each outcome and are classified into four
+                    outcome levels: optimal, acceptable, at-risk, and
+                    critical. See{" "}
+                    <InlineNavLink to="/data">
+                      DATA AND DOCUMENTATION
+                    </InlineNavLink>{" "}
+                    for more information on how these categories are
+                    defined.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The results show that Functional environmental flows
+                    substantially improve the environmental flow outcome,
+                    shifting average conditions from "At-Risk" under current
+                    operations to "Optimal". This improvement is accompanied
+                    by lower reservoir storage and poorer conditions for
+                    winter-run salmon, unless functional environmental
+                    flows are paired with the reintroduction of winter-run
+                    Chinook salmon above Shasta. The result reflects an
+                    important challenge for winter-run: releasing water to
+                    restore more natural flow patterns can reduce the
+                    cold-water reserves in Shasta Reservoir needed to
+                    protect eggs during summer. However, if winter-run can
+                    spawn above Shasta where cool spring-fed tributaries
+                    support egg survival, then these actions are
+                    complementary with functional flows that can support
+                    instream rearing and outmigration habitat. As a result,
+                    all winter-run lifestages are supported with the
+                    Functional environmental flows with reintroduction
+                    scenario, and move winter-run from a "Critical" to
+                    "At-Risk" population.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The Winter-run refuge flows scenario also moves the
+                    winter-run population from "Critical" to "At-Risk", but
+                    does so by managing reservoir operations to protect
+                    Shasta's cold-water pool. It then allocates the
+                    remaining water to functional flows, adding pulse flows
+                    to support rearing habitat and salmon outmigration
+                    survival. While this scenario provides flows for later
+                    in-river lifestages in the mainstem Sacramento River, it
+                    has flow requirements at fewer locations than the
+                    Functional environmental flows scenario. As a result,
+                    the Winter-run refuge flows scenario improves reservoir
+                    storage and winter-run salmon outcomes relative to
+                    Functional environmental flows, but performs less well
+                    against the broader environmental-flow objective.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The scenarios also affect water availability elsewhere
+                    in the system. All scenarios increase freshwater
+                    available for in-Delta uses, relative to Current
+                    operations, while the Winter-run refuge flows produce a
+                    particularly large improvement in freshwater available
+                    for Delta exports. Agricultural revenue and community
+                    surface water deliveries change relatively little at
+                    the system-wide scale, as do groundwater storage and
+                    Delta estuary ecology.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Overall, these results show that strategies intended to
+                    protect rivers and winter-run salmon can produce
+                    different trade-offs depending on how water is managed.
+                    A strategy that improves broader river-flow conditions
+                    may not necessarily improve survival of winter-run
+                    salmon if it does not preserve cold-water storage
+                    needed for their early life stage. Reintroduction
+                    changes this relationship by reducing winter-run
+                    dependence on downstream cold-water releases from
+                    Shasta Reservoir.
+                  </Typography>
+                </>
+              ),
             },
             {
-              type: "paragraph",
-              text: "**Resilience** – Resilience means rivers can withstand droughts, floods, and warming while maintaining ecosystem health. Protecting cold-water storage, maintaining habitat connectivity, and managing flows across seasons all support this. Because salmon depend on multiple life stages, actions that help one stage but harm another can still lead to decline. River systems respond to average conditions, extreme events, and cumulative stress over time.",
+              type: "image",
+              src: "/images/themes/eco-fig-05.svg",
+              alt: "Distribution view map of environmental flow and salmon outcomes",
+              title: "Equity",
+              caption:
+                "Where do benefits and impacts occur, and who is most affected?\nSystem-wide averages can hide important differences in scenario impacts. River conditions, water availability, ecosystem needs, and competing demands vary considerably across the Central Valley, meaning that the same river management strategy can create different benefits and burdens in different places.\nThe Distribution view in the Explore Tool shows results for individual locations of interest. The figure summarizes how outcomes shift at all locations under the Functional environmental flows scenario relative to current operations. Arrows indicate direction of change relative to current operations and color represents optimal (green), acceptable (blue), at-risk (orange), or critical (red) outcomes for the scenario. Boxes represent locations for which the outcome results remain the same.\nCompared with Current operations, Functional environmental flows have mixed effects on community surface water deliveries and agricultural revenues. Conditions improve at some locations, decline at others, and remain the same at most locations. Environmental flow outcomes substantially improve, while groundwater storage, freshwater for in-Delta uses, Delta estuary ecology, and winter-run salmon generally remain at the same outcome level. Reservoir storage experiences mixed effects. In the Sacramento Valley, more water is released for functional flows and other uses and results in lower storage; the San Joaquin Valley sees some increases in reservoir storage and some declines.\nOverall, the Distribution view reveals spatial patterns hidden by system-wide averages and helps identify where a management strategy creates benefits, where it creates burdens, and how evenly those effects are distributed.",
             },
-          ],
-        },
-      },
-      {
-        id: "how-to-explore-further",
-        content: {
-          type: "mixed",
-          blocks: [
             {
-              type: "paragraph",
-              text: "Explore how different water management choices shape seasonal river flows, water temperature, salmon survival, and habitat conditions across regions and climate futures.",
+              type: "image",
+              src: "/images/themes/eco-fig-06.svg",
+              alt: "Resilience heatmap across hydroclimate scenarios",
+              title: "Resilience",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    How consistently do management strategies perform under
+                    different climate futures?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Climate change is expected to place increasing stress on
+                    California's water system. A management strategy that
+                    performs well today may respond differently as droughts
+                    become more frequent, temperatures rise, and water
+                    availability changes. The Resilience heatmap in the
+                    Explore Tool examines how management strategies perform
+                    across a range of plausible hydroclimate futures,
+                    representing increasing levels of stress to the water
+                    system. See{" "}
+                    <InlineNavLink to="/data">
+                      DATA AND DOCUMENTATION
+                    </InlineNavLink>{" "}
+                    for more information about hydroclimate futures.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The Resilience heatmap summarizes environmental flow and
+                    winter-run salmon outcomes for the Current operations,
+                    Functional environmental flows, and Functional
+                    environmental flows with reintroduction scenarios,
+                    under the historical hydroclimate and under future
+                    hydroclimates representing Moderate, Moderate-High,
+                    High and Extreme levels of stress. Outcomes are
+                    categorized as optimal (green, 1.00 - 1.99), acceptable
+                    (blue, 2.00 - 2.99), at-risk (orange, 3.00 - 3.99), or
+                    critical (red, 4.00 - 4.99), with higher numerical
+                    values indicating worse performance.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Under Current operations, environmental flows are "at
+                    risk" under historical climate and future climates
+                    representing Moderate, Moderate-high, and High stress
+                    to the water system. On average, environmental flows
+                    fall to critical levels under Extreme climate stress.
+                    Implementing functional environmental flows in Central
+                    Valley rivers substantially improves environmental
+                    flow outcomes across all climate futures. For the
+                    Functional environmental flows and Functional
+                    environmental flows with reintroduction scenarios,
+                    environmental flow outcomes remain "Acceptable", even
+                    under Extreme climate stress.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Under Current operations, winter-run salmon remain at
+                    critical levels across the majority of hydroclimates.
+                    This is also true for the Functional environmental
+                    flows scenario, where winter-run remains at critical
+                    levels across hydroclimate futures because functional
+                    flows deplete Shasta cold-water reserves and provide
+                    less protection for the egg lifestage. However, if
+                    functional flows are paired with reintroduction of
+                    winter-run above Shasta, access to cold-water habitat
+                    supports the egg lifestage and functional flows support
+                    rearing and migration lifestages in the Sacramento
+                    River. As a result, the winter-run population responds
+                    positively and moves out of "Critical" levels and into
+                    "At-Risk" levels for all hydroclimate futures. The
+                    results suggest that the combination of functional
+                    environmental flows and reintroduction can improve
+                    conditions for both environmental flow metrics and
+                    winter-run salmon under historical and future climates.
+                    This also underscores the potential importance of
+                    complementary approaches, such as reintroduction, for
+                    mitigating climate impacts to winter-run salmon.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Overall, the heatmap shows how the effectiveness of
+                    management strategies can change under different
+                    climate futures and helps identify where benefits
+                    remain robust and where they begin to break down as
+                    California's climate changes.
+                  </Typography>
+                </>
+              ),
             },
           ],
         },
       },
     ],
   },
+
   {
     id: "delta",
     label: "The Delta as\na living place",
@@ -1134,18 +1607,6 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "paragraph",
               text: "**Resilience** – Resilience means being able to handle stress and still function. For the Delta, this means handling droughts, floods, rising seas, heat, and changing water demand without losing ecosystem health, water reliability, or ways of life that depend on water. Flows, storage, temperature, salinity, and landscape shape all play a role. Understanding how they interact helps us think about what it takes to support the Delta over time, as both a working water system and a living estuary.",
-            },
-          ],
-        },
-      },
-      {
-        id: "how-to-explore-further",
-        content: {
-          type: "mixed",
-          blocks: [
-            {
-              type: "paragraph",
-              text: "Explore how water management choices influence salinity, reservoir storage, estuary health, and water deliveries – and how these changes affect communities and ecosystems across California.",
             },
           ],
         },

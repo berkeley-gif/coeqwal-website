@@ -25,6 +25,7 @@ import { CenteredTextSection } from "./CenteredTextSection"
 import { useWhichScrollSection } from "../hooks/useWhichScrollSection"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import { themeValues } from "@repo/ui/themes/theme"
+import { InlineNavLink } from "./InlineNavLink"
 
 interface ThemePanelProps {
   // All the theme content and information
@@ -535,10 +536,23 @@ export function ThemePanel({ theme }: ThemePanelProps) {
               <CenteredTextSection
                 id="conclusion"
                 ariaLabel="Conclusion"
-                text="Together, these views make trade-offs, equity, and resilience visible, providing a shared, data-grounded basis for comparison, discussion, and learning."
+                text={
+                  <>
+                    Together, these views make trade-offs, equity, and
+                    resilience visible, providing a shared, data-grounded
+                    basis for comparison, discussion, and learning. Visit
+                    the <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    to examine these patterns in greater detail. If this is
+                    your first time using the Explore Tool, we recommend
+                    visiting the{" "}
+                    <InlineNavLink to="learn">Get Started section</InlineNavLink>{" "}
+                    before beginning your exploration.
+                  </>
+                }
                 bgColor={muiTheme.palette.brand.water}
                 textColor={muiTheme.palette.text.secondary}
               />
+
             </Box>
           </motion.div>
         </>

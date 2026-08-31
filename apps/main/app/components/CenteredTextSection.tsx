@@ -7,6 +7,7 @@
  */
 
 import React from "react"
+import type { ReactNode } from "react"
 import { motion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { fadeIn } from "../lib/constants/motionAnimations"
@@ -20,7 +21,7 @@ export interface CenteredTextSectionProps {
   /** Title for the section */
   title?: string
   /** Logos for the grid */
-  text: string
+  text: ReactNode
   /** Email address */
   email?: string
   /** Background color */
