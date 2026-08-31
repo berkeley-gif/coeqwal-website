@@ -11,7 +11,7 @@
  * - The scenario compare-set is NOT stored here: in "compare by scenarios"
  *   mode the members are the workspace selection (`selectedScenarios`),
  *   resolved and capped at read time with Current Operations locked first.
- * - `pinnedScenario` / `pinnedClimate` / `pinnedLocationByGroup` hold the
+ * - `pinnedScenario` / `pinnedLocationByGroup` hold the
  *   single held-constant value used by the other two compare axes.
  * - `selectedClimates` / `selectedLocationsByGroup` hold the multi-member set
  *   for "compare by climates" / "compare by locations". Empty means "seed a
@@ -49,8 +49,6 @@ export interface DataState {
   selectedWaterYearTypes: number[]
   /** Held-constant scenario for climate/location compare (null -> reference) */
   pinnedScenario: string | null
-  /** Held-constant hydroclimate for scenario/location compare (null -> default) */
-  pinnedClimate: string | null
   /** Held-constant location per location group */
   pinnedLocationByGroup: Record<string, string>
   /** Multi-member set for "compare by climates" (empty -> seed default) */
@@ -67,7 +65,6 @@ export interface DataActions {
   setDistKind: (kind: DataDistKind) => void
   setCompareBy: (by: DataCompareBy) => void
   setPinnedScenario: (scenarioId: string | null) => void
-  setPinnedClimate: (climate: string | null) => void
   setPinnedLocation: (groupId: string, locationId: string) => void
   setSelectedClimates: (climates: string[]) => void
   setSelectedLocations: (groupId: string, locationIds: string[]) => void
@@ -85,7 +82,6 @@ export const dataInitialState: DataState = {
   compareBy: "scenarios",
   selectedWaterYearTypes: [],
   pinnedScenario: null,
-  pinnedClimate: null,
   pinnedLocationByGroup: defaultLocationSelection(),
   selectedClimates: [],
   selectedLocationsByGroup: {},
@@ -139,11 +135,6 @@ export function createDataSlice(
     setPinnedScenario: (scenarioId) =>
       set((state) => {
         state.pinnedScenario = scenarioId
-      }),
-
-    setPinnedClimate: (climate) =>
-      set((state) => {
-        state.pinnedClimate = climate
       }),
 
     setPinnedLocation: (groupId, locationId) =>

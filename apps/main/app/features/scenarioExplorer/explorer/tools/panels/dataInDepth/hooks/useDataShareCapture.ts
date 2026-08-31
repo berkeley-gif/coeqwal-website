@@ -37,13 +37,8 @@ export function useDataShareCapture(
 ): DataShareCapture {
   const theme = useTheme()
   const { addShareItem, hydroclimate } = useWorkspaceSlice()
-  const {
-    selectedVariableId,
-    compareBy,
-    distKind,
-    pinnedClimate,
-    selectedWaterYearTypes,
-  } = useDataSlice()
+  const { selectedVariableId, compareBy, distKind, selectedWaterYearTypes } =
+    useDataSlice()
 
   // The Stats style renders a composite of bar plots the offscreen capture
   // pipeline cannot draw yet (it captures a single chart SVG), so the save
@@ -82,11 +77,10 @@ export function useDataShareCapture(
       data.variable?.viewLabels?.[data.view as VariableView] ??
       VIEW_LABELS[data.view as VariableView] ??
       data.view
-    // Record the climate the chart was actually generated under: the pinned
-    // (held) climate when one is set, except on the climates axis where the
-    // members themselves are climates and the workspace value stands.
-    const capturedHydroclimate =
-      compareBy === "climates" ? hydroclimate : (pinnedClimate ?? hydroclimate)
+    // The chart is always generated under the workspace hydroclimate: the
+    // per-tool climate pin was removed, so "View by hydroclimate" is the
+    // only hydroclimate input, on every compare axis.
+    const capturedHydroclimate = hydroclimate
     const waterYearTypesLabel = !data.wytApplicable
       ? "Not applicable"
       : selectedWaterYearTypes.length > 0
@@ -140,7 +134,6 @@ export function useDataShareCapture(
     selectedVariableId,
     compareBy,
     distKind,
-    pinnedClimate,
     selectedWaterYearTypes,
     hydroclimate,
     addShareItem,
