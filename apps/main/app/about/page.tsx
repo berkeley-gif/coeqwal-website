@@ -28,7 +28,7 @@ export default function AboutPage() {
     {
       imgSrc: "/images/about/approach-person-projector.png",
       imgAlt: "A person on a podium with a projection behind",
-      text: "Using CalSim, we simulate how these strategies affect water allocation outcomes – the patterns and amounts of water allocated to different water users and the environment – under a range of possible climate futures. We then convene community partners in workshops to receive feedback on the scenarios that are run and how they are interpreted.",
+      text: "Using CalSim3, we simulate how these management strategies affect water allocation outcomes – the patterns and amounts of water allocated to different water users and the environment – under a range of possible climate futures. We then convene community partners in workshops to receive feedback on the scenarios that are run and how they are interpreted.",
       imagePosition: "right",
     },
     {
