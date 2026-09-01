@@ -1,7 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { Typography, useTheme } from "@repo/ui/mui"
+import { Typography, useTheme, Box } from "@repo/ui/mui"
 import { InfoCard, InfoCardGrid, WaterDroplet } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
@@ -45,7 +45,6 @@ export default function WaterIssuesPanel() {
   const theme = useTheme()
   const sp = theme.space.component
   const { openThemePanel } = usePanelRoute()
-  const dropletIcon = <WaterDroplet />
 
   return (
     <PanelShell background={theme.palette.blue.dark}>
@@ -58,19 +57,20 @@ export default function WaterIssuesPanel() {
         users in Los Angeles. <GlossaryTermLink>COEQWAL</GlossaryTermLink>{" "}
         considers how decisions affect the water issues that people care about.
       </Typography>
-
-      <InfoCardGrid columns={{ xs: 2, sm: 3, md: WATER_ISSUE_THEMES.length }}>
-        {WATER_ISSUE_THEMES.map(({ title, description, themeKey, dimmed }) => (
-          <InfoCard
-            key={themeKey}
-            title={title}
-            description={description}
-            onClick={dimmed ? undefined : () => openThemePanel(themeKey)}
-            dimmed={dimmed}
-            variant="onDark"
-          />
-        ))}
-      </InfoCardGrid>
+      <Box sx={{ mt: theme.space.listGap.sm }}>
+        <InfoCardGrid columns={{ xs: 2, sm: 3, md: WATER_ISSUE_THEMES.length }}>
+          {WATER_ISSUE_THEMES.map(({ title, description, themeKey, dimmed }) => (
+            <InfoCard
+              key={themeKey}
+              title={title}
+              description={description}
+              onClick={dimmed ? undefined : () => openThemePanel(themeKey)}
+              dimmed={dimmed}
+              variant="onDark"
+            />
+          ))}
+        </InfoCardGrid>
+      </Box>
     </PanelShell>
   )
 }

@@ -219,19 +219,10 @@ export default function LearnPanel() {
             variant="body1"
             sx={{ maxWidth: "75%", mt: theme.space.listGap.sm }}
           >
-            Water is important to all of us — from farmers in the Central Valley
-            to communities in the Delta, from salmon in the Sacramento River to
-            urban water users in Los Angeles. We can consider how decisions
-            affect the issues people care about.
+            Water is important to all of us – from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. COEQWAL considers how decisions affect the water issues that people care about.
+
           </Typography>
           <Box sx={{ mt: theme.space.listGap.sm }}>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: theme.space.listGap.xs }}
-            >
-              Click on each water issue to learn more.
-            </Typography>
             <InfoCardGrid
               columns={{ xs: 2, sm: 3, md: WATER_ISSUE_THEMES.length }}
             >
@@ -267,39 +258,33 @@ export default function LearnPanel() {
           }}
         >
           <Typography variant="h3" sx={{ maxWidth: "66%" }}>
-            Did you know that California has one of the most complex water
-            systems in the world?
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ maxWidth: "66%", mt: theme.space.listGap.sm }}
-          >
-            Here is a paragraph that will explain what the water stories cover
+            Do you know that California has one of the most complex water systems in the world?
           </Typography>
           <Box sx={{ mt: theme.space.listGap.sm }}>
             <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: theme.space.listGap.xs }}
+              variant="body1"
+              sx={{ maxWidth: "75%", mt: theme.space.listGap.sm }}
             >
-              Click on each water story to learn more.
+              Learn about how water flows through California’s Central Valley, how the state’s history influenced who has access to water today, and the ways in which climate change is affecting our water system.
             </Typography>
-            <InfoCardGrid columns={5}>
-              {WATER_STORIES.map(({ id, label, description, href, dimmed }) => (
-                <InfoCard
-                  key={id}
-                  title={label}
-                  description={description}
-                  onClick={
-                    dimmed || !href
-                      ? undefined
-                      : () => window.open(href, "_blank", "noopener,noreferrer")
-                  }
-                  dimmed={dimmed}
-                  variant="onDark"
-                />
-              ))}
-            </InfoCardGrid>
+            <Box sx={{ mt: theme.space.listGap.sm }}>
+              <InfoCardGrid columns={5}>
+                {WATER_STORIES.map(({ id, label, description, href, dimmed }) => (
+                  <InfoCard
+                    key={id}
+                    title={label}
+                    description={description}
+                    onClick={
+                      dimmed || !href
+                        ? undefined
+                        : () => window.open(href, "_blank", "noopener,noreferrer")
+                    }
+                    dimmed={dimmed}
+                    variant="onDark"
+                  />
+                ))}
+              </InfoCardGrid>
+            </Box>
           </Box>
         </Box>
       )}
