@@ -47,6 +47,7 @@ import {
   HYDROCLIMATE_SHORT_LABELS,
 } from "../../../../../../../content/scenarios"
 import { CompactSelect } from "@repo/ui"
+import { InlineTourAnchor } from "../../../tour"
 import { getVariable, LOCATION_GROUPS } from "../config/variableRegistry"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 import { getStableSeriesColors } from "../config/seriesColorAssignment"
@@ -261,26 +262,28 @@ export default function CompareControls() {
         >
           Compare by
         </Typography>
-        <ToggleButtonGroup
-          exclusive
-          size="small"
-          value={compareBy}
-          onChange={(_, next: DataCompareBy | null) => {
-            if (next) setCompareBy(next)
-          }}
-          aria-label="Compare by"
-        >
-          {COMPARE_OPTIONS.map((opt) => (
-            <ToggleButton
-              key={opt.value}
-              value={opt.value}
-              disabled={opt.value === "locations" && !multiLoc}
-              sx={{ textTransform: "none", px: 1.5 }}
-            >
-              {opt.label}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
+        <InlineTourAnchor anchorId="data.compareBy">
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            value={compareBy}
+            onChange={(_, next: DataCompareBy | null) => {
+              if (next) setCompareBy(next)
+            }}
+            aria-label="Compare by"
+          >
+            {COMPARE_OPTIONS.map((opt) => (
+              <ToggleButton
+                key={opt.value}
+                value={opt.value}
+                disabled={opt.value === "locations" && !multiLoc}
+                sx={{ textTransform: "none", px: 1.5 }}
+              >
+                {opt.label}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        </InlineTourAnchor>
       </Box>
 
       {compareBy === "scenarios" && (
