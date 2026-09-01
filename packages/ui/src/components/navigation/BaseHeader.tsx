@@ -88,6 +88,10 @@ const MotionAppBar = motion.create(AppBar)
 
 // Mobile breakpoint - below this width, show hamburger menu
 const MOBILE_BREAKPOINT = 900
+// Below this width, MobileNotSupported blocks /learn, /explore, /share.
+// Keep the Get Started / Tools drawer links in sync with that gate so
+// they never link to a page the user can't actually load.
+const TABS_BREAKPOINT = 600
 // WCAG: Minimum touch target size (44x44px)
 const MIN_TOUCH_TARGET = 44
 // ID for drawer (used by aria-controls)
@@ -198,16 +202,16 @@ const resolveOffset = (v: string | number | undefined): string =>
 const translations: TranslationsMap = {
   en: {
     buttons: {
-      waterStories: "Guides",
-      waterThemes: "Water themes",
-      getData: "Get data",
-      about: "About COEQWAL",
+      waterStories: "Water Stories",
+      waterThemes: "Water Issues",
+      getData: "Data",
+      about: "About",
     },
     dropdownIntros: {
       guides:
-        "Learn about California water topics in a scrolling story format.",
+        "Learn about California water topics in a scrolling story format",
       waterThemes:
-        "Learn about the water issues explored by COEQWAL.",
+        "Learn about the water issues explored by COEQWAL",
     },
     waterStories: {
       flow: "How water moves through California",
@@ -281,6 +285,9 @@ export function BaseHeader({
    * ======================================== */
   const isMobile = useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
   const isWideDesktop = useMediaQuery("(min-width: 1200px)")
+  const tabsUnavailable = useMediaQuery(
+    `(max-width: ${TABS_BREAKPOINT - 1}px)`,
+  )
   // WCAG 2.3.3: Respect user's motion preferences
   const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -700,32 +707,36 @@ export function BaseHeader({
           sx={{ color: theme.palette.text.primary, pt: 1 }}
         >
           <List disablePadding>
-            {/* Get Started */}
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={() => {
-                  onGetStartedClick?.()
-                  handleMobileMenuClose()
-                }}
-                sx={{
-                  px: 2,
-                  minHeight: MIN_TOUCH_TARGET,
-                  "&:focus-visible": {
-                    outline: `2px solid ${theme.palette.text.primary}`,
-                    outlineOffset: -2,
-                  },
-                }}
-              >
-                <ListItemText
-                  primary="Get Started"
-                  slotProps={{
-                    primary: { sx: { ...theme.typography.nav } },
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
+            {/* Get Started - hidden below TOOLS_BREAKPOINT, same as /learn's own gate */}
+            {!tabsUnavailable && (
+              <>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      onGetStartedClick?.()
+                      handleMobileMenuClose()
+                    }}
+                    sx={{
+                      px: 2,
+                      minHeight: MIN_TOUCH_TARGET,
+                      "&:focus-visible": {
+                        outline: `2px solid ${theme.palette.text.primary}`,
+                        outlineOffset: -2,
+                      },
+                    }}
+                  >
+                    <ListItemText
+                      primary="Get Started"
+                      slotProps={{
+                        primary: { sx: { ...theme.typography.nav } },
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
 
-            <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
+                <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
+              </>
+            )}
 
             {/* WCAG 1.3.1: Water Stories section with group semantics */}
             <ListItem
@@ -890,6 +901,37 @@ export function BaseHeader({
 
             {/* Spacing between sections */}
             <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
+
+            {/* Tools - hidden below TOOLS_BREAKPOINT, same as /explore's own gate */}
+            {!tabsUnavailable && (
+              <>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      onToolsClick?.()
+                      handleMobileMenuClose()
+                    }}
+                    sx={{
+                      px: 2,
+                      minHeight: MIN_TOUCH_TARGET,
+                      "&:focus-visible": {
+                        outline: `2px solid ${theme.palette.text.primary}`,
+                        outlineOffset: -2,
+                      },
+                    }}
+                  >
+                    <ListItemText
+                      primary="Tools"
+                      slotProps={{
+                        primary: { sx: { ...theme.typography.nav } },
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+
+                <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
+              </>
+            )}
 
             {/* Get data */}
             <ListItem disablePadding>
