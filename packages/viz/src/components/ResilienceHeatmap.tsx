@@ -302,12 +302,13 @@ const X_AXIS_LABEL_RESERVE_ROTATED = 58
 const HATCH_ID = "resilience-unavailable-hatch"
 
 /**
- * Truncate end-aligned y-axis tick text so it fits in the left margin.
- * Preserves a leading space indent (e.g. NOD / SOD rows). Returns
- * whether the string was shortened so the caller can add a native
- * `<title>` with the full label.
+ * Truncate an axis tick's text so it fits `maxWidth`, preserving a
+ * leading space indent when present (e.g. NOD / SOD row indent).
+ * Shared by the y-axis (row) and x-axis (column) tick renderers.
+ * Returns whether the string was shortened so the caller can add a
+ * native `<title>` with the full label.
  */
-function truncateResilienceYAxisTick(
+function truncateAxisTickText(
   textEl: SVGTextElement,
   maxWidth: number,
 ): boolean {
@@ -1395,7 +1396,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
 
           const textEl = node.node()
           if (textEl) {
-            const truncated = truncateResilienceYAxisTick(textEl, yAxisTickMaxW)
+            const truncated = truncateAxisTickText(textEl, yAxisTickMaxW)
             const wantNativeTitle =
               truncated ||
               (row.fullLabel != null && row.fullLabel.trim() !== label.trim())
@@ -1434,10 +1435,23 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           .append("g")
           .attr("class", "resilience-x-axis")
           .attr("transform", `translate(0,${xAxisY})`)
-        // Per-column tick labels (hydroclimate names). When column
-        // groups are present the ticks sit below the group band so the
-        // reading order top-down is group → rule → tick → plot.
+        // Per-column tick labels (hydroclimate names, or scenario names
+        // in the by-hydroclimate / by-outcome-transposed views). When
+        // column groups are present the ticks sit below the group band
+        // so the reading order top-down is group → rule → tick → plot.
         const tickY = hasColumnGroups ? 18 + COLUMN_GROUP_BAND : 18
+
+        // A rotated tick pivots on (cx, tickY); once rotated it runs
+        // symmetrically toward the SVG's top edge on one side and
+        // toward the plot on the other. The tighter of those two
+        // clearances bounds how long a rotated label can be before it
+        // clips. Derived from the same margin constants the layout
+        // above uses, so it stays correct if those ever change.
+        const rotatedHalfExtent = Math.min(
+          MARGIN.top + tickY,
+          xAxisLabelReserve - tickY,
+        )
+        const rotatedMaxWidth = rotatedHalfExtent * 2 - 8
         columns.forEach((col) => {
           const cx = (xScale(col.key) ?? 0) + bandW / 2
           const node = xAxis
@@ -1467,8 +1481,17 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             )
           }
 
-          if (col.fullLabel && col.fullLabel !== col.label) {
-            node.append("title").text(col.fullLabel)
+          const textEl = node.node()
+          if (textEl) {
+            const maxWidth =
+              columnLabelRotation !== 0 ? rotatedMaxWidth : bandW - 8
+            const truncated = truncateAxisTickText(textEl, maxWidth)
+            const wantNativeTitle =
+              truncated ||
+              (col.fullLabel != null && col.fullLabel !== col.label)
+            if (wantNativeTitle) {
+              node.append("title").text(col.fullLabel ?? col.label)
+            }
           }
 
           if (col.definitionTooltip && interactiveRef.current) {

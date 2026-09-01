@@ -332,13 +332,11 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
           <Box
             id="coeqwal"
             sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
               pointerEvents: "none",
               paddingLeft: defaultLeftPadding,
-              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
+              transition: defPaddingTransition,
+              my: theme.space.section.xl,
             }}
           >
             <WelcomePanel />
@@ -348,13 +346,11 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
           <Box
             id="water-issues"
             sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
               pointerEvents: "none",
               paddingLeft: defaultLeftPadding,
-              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
+              transition: defPaddingTransition,
+              my: theme.space.section.xl,
             }}
           >
             <WaterIssuesPanel />
@@ -365,13 +361,11 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
           <Box
             id="hydroclimates"
             sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
               pointerEvents: "none",
               paddingLeft: defaultLeftPadding,
-              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
+              transition: defPaddingTransition,
+              my: theme.space.section.xl,
             }}
           >
             <HydroclimateFuturesPanel />
@@ -381,12 +375,11 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
           <Box
             id="key-outcomes"
             sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
               pointerEvents: "none",
               paddingLeft: defaultLeftPadding,
               paddingRight: (theme) => theme.space.panel.padding,
+              transition: defPaddingTransition,
+              my: theme.space.section.xl,
             }}
           >
             <KeyOutcomesPanel />
@@ -406,7 +399,7 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
         */}
         <Step data={"outcomes-viz" as SubSectionId} progress>
           <StickyScrollSection
-            height="300vh"
+            height="200vh"
             stickyTop={theme.layout.headerHeight}
             stickyHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
             style={{
@@ -427,13 +420,11 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
           <Box
             id="data-in-depth-intro"
             sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
               pointerEvents: "none",
               paddingLeft: defaultLeftPadding,
-              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
+              transition: defPaddingTransition,
+              my: theme.space.section.xl,
             }}
           >
             <DataInDepthPanel />
@@ -444,13 +435,11 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
           <Box
             id="interpreting-outcomes"
             sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
               pointerEvents: "none",
               paddingLeft: defaultLeftPadding,
-              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
+              transition: defPaddingTransition,
+              my: theme.space.section.xl,
             }}
           >
             <InterpretingOutcomesPanel />
@@ -461,13 +450,11 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
           <Box
             id="choosing-scenarios"
             sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
               pointerEvents: "none",
               paddingLeft: defaultLeftPadding,
-              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
+              transition: defPaddingTransition,
+              my: theme.space.section.xl,
             }}
           >
             <ChooseScenariosPanel />
@@ -478,13 +465,11 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
           <Box
             id="before-exploring"
             sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
               pointerEvents: "none",
               paddingLeft: defaultLeftPadding,
-              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
+              transition: defPaddingTransition,
+              my: theme.space.section.xl,
             }}
           >
             <BeforeYouBeginPanel />

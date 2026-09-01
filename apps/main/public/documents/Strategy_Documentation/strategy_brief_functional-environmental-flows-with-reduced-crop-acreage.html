@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Functional environmental flows with reduced crop acreage — COEQWAL
+      Findings
+    </title>
+    <meta
+      name="description"
+      content="A COEQWAL strategy background brief describing “Functional environmental flows with reduced crop acreage”, one of 28 management strategies in the COEQWAL scenario library. The strategy employs functional flow requirements combined with reduced irrigated acreage across the Central Valley. Background only — no modeled results."
+    />
+
+    <!--
+  COEQWAL strategy brief — GENERATED DRAFT v0_1
+
+  Functional environmental flows with reduced crop acreage (web platform ID 3.3; sibling_group s0032).
+  Generated August 21, 2026 by generate_strategy_briefs.py. Template extracted from
+  strategy_brief_prototype_functional-environmental-flows_v0_4.html (locked
+  reference for structure, scaffold, tone, and reference-class framing).
+  Sources: coeqwal_cs3_scenario_descriptions1.docx (operational fields +
+  Description prose); _meta/COEQWAL_Strategy_Naming_Proposal.html (public name +
+  five run IDs); _meta/COEQWAL_Brief_Inventory.xlsx (theme tags).
+  Reference brief — no modeled results, no tier data.
+-->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400;500;700&family=DM+Sans:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --paper: #fdfbf5;
+        --ink: #1a1a1a;
+        --ink-soft: #4a4a4a;
+        --ink-faint: #8a8a8a;
+        --rule: #d8d4c8;
+        --accent: #3a4574; /* canonical blue.darkest, per COEQWAL_Visual_Design_Spec */
+        --accent-faint: #e8eef5;
+        --stub: #b0824a; /* warm amber for build-annotation / [TBD] markers */
+        --stub-bg: #fbf3e6;
+        --serif: "Spectral", "Hoefler Text", Georgia, serif;
+        --sans: "DM Sans", "Helvetica Neue", sans-serif;
+        --mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+        /* Matches the scenario-results set's .wrap and the builder's dev builds
+     (60rem), so every COEQWAL brief reads at the same width. The 38rem
+     reading measure predates the wide figures (Eric, 2026-07-28). */
+        --measure: 60rem;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        background: var(--paper);
+      }
+
+      body {
+        font-family: var(--serif);
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 1.65;
+        color: var(--ink);
+        background: var(--paper);
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .brief {
+        max-width: var(--measure);
+        margin: 0 auto;
+        padding: 2.4rem 1.4rem 5rem;
+      }
+
+      /* ── Masthead ───────────────────────────────────────────────────── */
+      .masthead {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-family: var(--sans);
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        padding-bottom: 1.1rem;
+        border-bottom: 1px solid var(--rule);
+        margin-bottom: 3rem;
+      }
+      .masthead .brand {
+        font-weight: 700;
+        color: var(--ink);
+        letter-spacing: 0.2em;
+      }
+      /* margin-left:auto rather than a third space-between child: with three
+   children space-between would spread them and push the kicker to the middle
+   of the line. This keeps the brand left and the kicker + button together on
+   the right, which is the placement ruled 2026-08-29. */
+      .masthead .meta {
+        color: var(--ink-faint);
+        margin-left: auto;
+      }
+
+      /* ── Download PDF button (screen-only) ──────────────────────────── */
+      /* A109 requirement 1: every HTML brief carries this, linking by RELATIVE path
+   to pdf/<same base name>.pdf. Requirement 2 is the print rule further down:
+   the button is an HTML-only affordance and must not appear in the PDF, which
+   would otherwise ship a document offering to download itself. The site nav
+   rows are NOT print-hidden and deliberately do print. */
+      .pdf-button {
+        margin-left: 1.2rem;
+        padding: 0.25rem 0.7rem;
+        border: 1px solid var(--accent);
+        border-radius: 3px;
+        font-family: var(--sans);
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        color: var(--accent);
+        text-decoration: none;
+        transition:
+          color 0.2s,
+          background-color 0.2s;
+      }
+      .pdf-button:hover {
+        color: #fff;
+        background-color: var(--accent);
+      }
+
+      /* ── Eyebrow + Title ────────────────────────────────────────────── */
+      .eyebrow {
+        font-family: var(--sans);
+        font-size: 0.78rem;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 2.05rem;
+        line-height: 1.2;
+        letter-spacing: -0.012em;
+        margin: 0 0 3rem;
+        color: var(--ink);
+      }
+      h1 .subtitle {
+        display: block;
+        font-size: 1.15rem;
+        line-height: 1.4;
+        letter-spacing: 0;
+        color: var(--ink-soft);
+        font-weight: 400;
+        margin-top: 0.55rem;
+      }
+
+      /* ── Section structure ──────────────────────────────────────────── */
+      section {
+        margin: 3.2rem 0;
+      }
+
+      h2 {
+        font-family: var(--sans);
+        font-weight: 700;
+        font-size: 0.78rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink);
+        margin: 0 0 1.1rem;
+      }
+      h2 .num {
+        display: inline-block;
+        width: 1.9em;
+        color: var(--ink-faint);
+        font-weight: 500;
+      }
+
+      p {
+        margin: 0 0 1.1rem;
+      }
+      em {
+        font-style: italic;
+        color: var(--ink);
+      }
+
+      /* ── TL;DR pull-quote ───────────────────────────────────────────── */
+      .tldr {
+        font-size: 1.18rem;
+        line-height: 1.55;
+        color: var(--ink);
+        border-left: 3px solid var(--accent);
+        padding: 0.4rem 0 0.4rem 1.5rem;
+        font-weight: 400;
+        margin: 0;
+      }
+
+      /* ── Identity sentence (follows the TL;DR) ──────────────────────── */
+      p.identity {
+        margin-top: 1.6rem;
+        color: var(--ink-soft);
+      }
+
+      /* ── §3 Configuration table ─────────────────────────────────────── */
+      table.config {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--sans);
+        font-size: 0.86rem;
+        margin: 0.4rem 0 0.2rem;
+      }
+      table.config thead th {
+        text-align: left;
+        padding: 0.6rem 0.8rem;
+        font-weight: 700;
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink);
+        border-bottom: 2px solid var(--ink-soft);
+      }
+      table.config tbody td {
+        padding: 0.65rem 0.8rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      table.config tbody tr.match td {
+        color: var(--ink-faint);
+      }
+      table.config tbody tr.diff td {
+        color: var(--ink);
+        font-weight: 500;
+        background: var(--accent-faint);
+      }
+      table.config tbody tr.diff td:first-child {
+        border-left: 3px solid var(--accent);
+      }
+      table.config tbody tr.match td:first-child {
+        border-left: 3px solid transparent;
+      }
+
+      /* ── §5 Related strategies ──────────────────────────────────────── */
+      .related h3 {
+        font-family: var(--sans);
+        font-weight: 700;
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin: 0.4rem 0 0.7rem;
+      }
+      ul.related-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-family: var(--serif);
+        font-size: 1rem;
+        line-height: 1.55;
+      }
+      ul.related-list li {
+        margin: 0.5rem 0;
+        color: var(--ink-soft);
+      }
+      ul.related-list .sname {
+        font-weight: 500;
+        color: var(--ink);
+      }
+
+      /* ── References note (run-ID table, footer-adjacent) ────────────── */
+      .refs-intro {
+        font-size: 0.96rem;
+        color: var(--ink-soft);
+      }
+      table.refs {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--sans);
+        font-size: 0.82rem;
+        margin: 0.4rem 0 0.2rem;
+      }
+      table.refs thead th {
+        text-align: left;
+        padding: 0.5rem 0.7rem;
+        font-weight: 700;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink);
+        border-bottom: 2px solid var(--ink-soft);
+      }
+      table.refs tbody td {
+        padding: 0.5rem 0.7rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      table.refs td.runid {
+        font-family: var(--mono);
+        font-size: 0.88em;
+        color: var(--ink-soft);
+        white-space: nowrap;
+      }
+
+      /* ── Disclaimer ─────────────────────────────────────────────────── */
+      .disclaimer {
+        font-size: 0.96rem;
+        color: var(--ink-soft);
+        line-height: 1.65;
+      }
+
+      /* ── Explore further link ───────────────────────────────────────── */
+      .explore-link {
+        display: inline-block;
+        font-family: var(--sans);
+        font-weight: 700;
+        font-size: 0.88rem;
+        letter-spacing: 0.04em;
+        color: var(--accent);
+        text-decoration: none;
+        border-bottom: 1.5px solid var(--accent);
+        padding-bottom: 0.1em;
+        transition:
+          color 0.2s,
+          border-color 0.2s;
+      }
+      .explore-link:hover {
+        color: var(--ink);
+        border-bottom-color: var(--ink);
+      }
+      .explore-link .arrow {
+        display: inline-block;
+        margin-left: 0.3em;
+        transition: transform 0.2s;
+      }
+      .explore-link:hover .arrow {
+        transform: translateX(3px);
+      }
+
+      /* ── Reintroduction paragraph (§1) ──────────────────────────────── */
+      .reintro,
+      .reintro-partner {
+        max-width: var(--measure);
+        font-size: 0.97rem;
+        color: var(--ink-soft);
+      }
+      .reintro-partner {
+        color: var(--ink-faint);
+      }
+
+      /* ── Site navigation (header + footer rows) ─────────────────────── */
+      .sitenav {
+        max-width: var(--measure);
+        margin: 0 auto;
+        padding: 0.6rem 1.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1rem;
+        font-family: var(--sans);
+        font-size: 0.78rem;
+      }
+      .sitenav a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .sitenav a:hover {
+        text-decoration: underline;
+      }
+      .sitenav-top {
+        border-bottom: 1px solid var(--rule);
+      }
+      .sitenav-bottom {
+        border-top: 1px solid var(--rule);
+      }
+
+      /* ── Footer ─────────────────────────────────────────────────────── */
+      .footer {
+        margin-top: 4rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--rule);
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--ink-faint);
+        line-height: 1.7;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+      }
+      .footer code {
+        font-family: var(--mono);
+        color: var(--ink-soft);
+      }
+      .footer .meta-row {
+        display: flex;
+        gap: 1.4em;
+        flex-wrap: wrap;
+      }
+      /* ── Print hint (screen-only) ──────────────────────────────────── */
+      .print-hint {
+        max-width: var(--measure);
+        margin: 1rem auto 0;
+        padding: 0.85rem 2.5rem 0;
+        font-family: var(--sans);
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: var(--ink-faint);
+        letter-spacing: 0.01em;
+      }
+      .print-hint kbd {
+        font-family: var(--mono);
+        font-size: 0.74rem;
+        padding: 1px 5px;
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        background: #faf6ec;
+        color: var(--ink-soft);
+      }
+
+      /* ── Print ──────────────────────────────────────────────────────── */
+      /* Print-only. Nothing in this block may affect screen rendering — the
+   screen layout is the delivered web layout and is pixel-frozen.
+
+   Two consumers, one stylesheet: readers who ⌘P from the browser (see
+   .print-hint), and builder/render_pdfs.py, which drives headless Chromium
+   for the delivered PDF set. The renderer passes its own page size and
+   margins (Chromium ignores @page margin unless preferCSSPageSize is set),
+   so the @page rule below governs the browser path and the renderer's
+   constants are kept in step with it. Page numbers cannot come from CSS —
+   Chromium does not implement @page margin boxes — so they come from the
+   renderer's footer template; see render_pdfs.py. */
+      @media print {
+        @page {
+          size: letter;
+          margin: 0.7in 0.85in;
+        }
+        html,
+        body {
+          background: white;
+        }
+        .brief {
+          max-width: none;
+          padding: 0;
+          margin: 0;
+        }
+        .masthead {
+          margin-bottom: 1.5rem;
+          padding-bottom: 0.7rem;
+        }
+        h1 {
+          font-size: 1.6rem;
+          margin-bottom: 1.5rem;
+        }
+        section {
+          margin: 1.6rem 0;
+        }
+        .tldr {
+          font-size: 1.05rem;
+        }
+        p {
+          orphans: 3;
+          widows: 3;
+        }
+
+        /* Screen-only chrome. The print hint is an instruction for the screen
+     reader and is meaningless once the page IS the PDF. The Download PDF
+     button is worse than meaningless there — A109 requirement 2 makes its
+     absence from the printed document a standing requirement, not a nicety.
+     Note what is NOT hidden here: the two .sitenav rows print by design and
+     supply the PDF's active links (A109 requirement 4, record §26 A110). */
+        .print-hint,
+        .pdf-button {
+          display: none;
+        }
+
+        /* Keep every heading with the content it introduces. .eyebrow is the
+     kicker above the h1 and must not be stranded either. */
+        .eyebrow {
+          break-after: avoid;
+        }
+        h1,
+        h2,
+        h3 {
+          break-after: avoid;
+          break-inside: avoid;
+        }
+
+        /* Atomic blocks. Sections themselves are allowed to break (a section
+     that cannot fit in the remaining space would otherwise be pushed
+     whole to the next page, leaving a half-blank one); the units that
+     must not be split are the ones below. */
+        .tldr,
+        p.identity,
+        .disclaimer,
+        .footer {
+          break-inside: avoid;
+        }
+
+        table.config {
+          font-size: 0.78rem;
+          break-inside: avoid;
+        }
+        table.config thead {
+          display: table-header-group;
+        }
+        table.config tr {
+          break-inside: avoid;
+        }
+        table.refs {
+          font-size: 0.74rem;
+          break-inside: avoid;
+        }
+        table.refs thead {
+          display: table-header-group;
+        }
+        table.refs tr {
+          break-inside: avoid;
+        }
+        /* thead is repeated on overflow, so a table longer than a page still
+     reads correctly rather than losing its column labels. */
+
+        /* §5 items and the references intro+table read as single entries. */
+        ul.related-list li {
+          break-inside: avoid;
+        }
+        .refs-intro {
+          break-after: avoid;
+          break-inside: avoid;
+        }
+
+        /* §3 marks rows that differ from current operations with a tinted
+     background, and the §3 intro sentence tells the reader so. Chromium
+     drops background colors in print by default, which would delete the
+     highlight and leave that sentence describing something not on the
+     page — so this one background is forced through. The page itself
+     still prints white (see html, body above). */
+        table.config tbody tr.diff td {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+
+        /* Tightening this further was tried and changed nothing: in the 8 briefs
+     whose footer lands on its own last page, the residual space under the
+     references table is smaller than the footer block itself, so the break
+     is forced by the atomic references table, not by this margin. Left at
+     the screen value rather than diverging from it for no gain. */
+        .footer {
+          margin-top: 2.5rem;
+        }
+
+        /* Print the URL only for external links, which a paper reader cannot
+     click. Site-relative hrefs are expanded to a bare path that resolves
+     nowhere from a PDF — and this family's only relative link is
+     /explore?strategy=sNNNN, so the unscoped form printed a run ID into
+     reader-facing body text, against the run-ID discipline that keeps run
+     IDs in the references note and the sidecar only. */
+        a[href^="http"]::after {
+          content: " (" attr(href) ")";
+          font-size: 0.8em;
+          color: #888;
+        }
+      }
+
+      /* ── Mobile ─────────────────────────────────────────────────────── */
+      @media (max-width: 640px) {
+        .brief {
+          padding: 2.5rem 1.2rem 4rem;
+        }
+        body {
+          font-size: 17px;
+        }
+        h1 {
+          font-size: 1.55rem;
+        }
+        .tldr {
+          font-size: 1.05rem;
+          padding-left: 1.1rem;
+        }
+        ul.related-list {
+          font-size: 0.92rem;
+        }
+        table.config {
+          font-size: 0.78rem;
+        }
+        table.refs {
+          font-size: 0.74rem;
+        }
+        h1 .subtitle {
+          font-size: 1rem;
+        }
+        .footer {
+          flex-direction: column;
+        }
+        /* The masthead is three items on one line at desktop width; at 640px the
+     Download PDF button no longer fits beside the kicker, so the row is
+     allowed to wrap rather than overflow. */
+        .masthead {
+          font-size: 0.65rem;
+          flex-wrap: wrap;
+          row-gap: 0.6rem;
+        }
+        .pdf-button {
+          margin-left: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="sitenav sitenav-top">
+      <a href="https://coeqwal.org">COEQWAL</a
+      ><a href="https://coeqwal.org/data">Return to COEQWAL Documentation</a>
+    </nav>
+
+    <article class="brief">
+      <!-- ─── MASTHEAD ─────────────────────────────────────────────── -->
+      <header class="masthead">
+        <span class="brand">COEQWAL</span>
+        <span class="meta">Strategy Brief · Background</span>
+        <a
+          class="pdf-button"
+          href="pdf/strategy_brief_functional-environmental-flows-with-reduced-crop-acreage.pdf"
+          >Download PDF</a
+        >
+      </header>
+      <!-- ─── §1 HEADLINE ──────────────────────────────────────────── -->
+      <div class="eyebrow">
+        Operational Strategy · Environment · Farms and groundwater
+      </div>
+      <h1>
+        Functional environmental flows with reduced crop acreage
+        <span class="subtitle"
+          >A management strategy in the COEQWAL scenario library</span
+        >
+      </h1>
+      <p class="tldr">
+        This strategy combines functional minimum flow requirements at 17
+        locations throughout the Central Valley — tributaries plus the Delta —
+        with reduced irrigated acreage across the Central Valley aimed at
+        groundwater sustainability. These two actions are paired with the goal
+        of moderating impacts to reservoir storage from the high water demands
+        of the flow requirements with a lower overall agricultural demand.
+      </p>
+      <p class="identity">
+        This brief describes
+        <em>“functional environmental flows with reduced crop acreage”</em>, one
+        of 28 management strategies in the COEQWAL scenario library. Each
+        strategy is simulated once under each of five hydroclimates; the
+        references note at the end of this brief lists the model runs.
+      </p>
+      <p class="reintro-partner">
+        A variant of this strategy,
+        <a
+          href="https://coeqwal.org/documents/Strategy_Documentation/strategy_brief_functional-environmental-flows-with-reduced-crop-acreage-and-reintroduction.html"
+          >Functional environmental flows with reduced crop acreage and
+          reintroduction</a
+        >, adds one action that is not a water management action: reintroduction
+        of winter-run Chinook salmon to cold-water habitat upstream of Shasta
+        Dam. The two strategies share the same CalSim 3 simulation; modeled
+        results differ only for the winter-run salmon key outcome.
+      </p>
+
+      <!-- ─── §2 WHAT THIS STRATEGY CHANGES ───────────────────────── -->
+      <section>
+        <h2><span class="num">§2</span> What this strategy changes</h2>
+        <p>
+          The strategy combines two changes. The first is the functional-flows
+          requirement set: minimum flow requirements at 17 locations throughout
+          the Central Valley, developed by the COEQWAL eflows team from
+          natural-flow estimates, with selected seasonal components added and
+          scaled according to expected water availability. In this combination
+          the requirement set includes the downstream main stems and Delta
+          outflow, not only the tributaries. The second change is the use of a
+          reduced irrigated agriculture footprint that reduces irrigation demand
+          across the Central Valley. Reductions in irrigated agriculture were
+          developed for the Reduced Crop Acreage scenarios to stabilize
+          groundwater levels and are used without additional modifications here.
+        </p>
+        <p>
+          The second is a reduction in irrigated acreage across the Central
+          Valley, set according to historical groundwater decline in each demand
+          unit, with reduced acreage replaced by an unirrigated “native
+          vegetation” land-cover type. Groundwater pumping is limited
+          indirectly, through the reduced demand.
+        </p>
+        <p>
+          The goal of pairing the flow and groundwater management actions is to
+          offset the high water demands of the functional-flows requirements
+          with a lower overall system demand, to mitigate extreme reservoir
+          drawdown.
+        </p>
+      </section>
+
+      <!-- ─── §3 CONFIGURATION ─────────────────────────────────────── -->
+      <section>
+        <h2><span class="num">§3</span> The configuration in detail</h2>
+        <p>
+          The table compares the eight operational fields that define this
+          strategy against current operations — the strategy that represents
+          existing operational rules, recent (2020) land use, and TUCPs. Rows
+          that match current operations are shown in light gray; rows that
+          differ are highlighted.
+        </p>
+        <table class="config">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Current operations</th>
+              <th>This strategy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="match">
+              <td>TUCP actions</td>
+              <td>Active</td>
+              <td>Active</td>
+            </tr>
+            <tr class="diff">
+              <td>SGMA actions</td>
+              <td>None</td>
+              <td>Reduce irrigated acreage for the entire Central Valley</td>
+            </tr>
+            <tr class="diff">
+              <td>Land use</td>
+              <td>2020 LandIQ</td>
+              <td>
+                2020 LandIQ with reduced agricultural acreage in selected areas
+                across the Central Valley
+              </td>
+            </tr>
+            <tr class="match">
+              <td>Delta regulations</td>
+              <td>Standard</td>
+              <td>Standard</td>
+            </tr>
+            <tr class="match">
+              <td>BiOps</td>
+              <td>2019 / 2020 ITP</td>
+              <td>2019 / 2020 ITP</td>
+            </tr>
+            <tr class="match">
+              <td>Infrastructure</td>
+              <td>Standard</td>
+              <td>Standard</td>
+            </tr>
+            <tr class="diff">
+              <td>Flows</td>
+              <td>Standard</td>
+              <td>
+                Functional flow requirements at 17 locations (tributaries plus
+                Delta)
+              </td>
+            </tr>
+            <tr class="match">
+              <td>Allocation / priorities</td>
+              <td>Standard</td>
+              <td>Standard</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ─── §4 LINEAGE AND SOURCE ────────────────────────────────── -->
+      <section>
+        <h2><span class="num">§4</span> Lineage and source</h2>
+        <p>
+          This configuration was created by the COEQWAL team by combining the
+          functional-flows study with the reduced-acreage land use of the
+          Central Valley groundwater strategy. It is built on the COEQWAL
+          Current Operations scenario using DWR's adjusted historical hydrology.
+          The CalSim model files for this strategy are referenced by the run IDs
+          in the references note at the end of this brief.
+        </p>
+      </section>
+
+      <!-- ─── §5 RELATED STRATEGIES ────────────────────────────────── -->
+      <section class="related">
+        <h2><span class="num">§5</span> Related strategies</h2>
+        <h3>Related strategies — Environment</h3>
+        <ul class="related-list">
+          <li>
+            <span class="sname">No flow requirements.</span> Current operations
+            without minimum flow requirements on Central Valley rivers.
+          </li>
+          <li>
+            <span class="sname">Winter-run refuge flows.</span> Sacramento River
+            flow requirements and Shasta cold-water storage protection to
+            support Sacramento River winter-run Chinook salmon life-cycle needs.
+          </li>
+          <li>
+            <span class="sname"
+              >Winter-run refuge flows with reduced crop acreage.</span
+            >
+            The winter-run refuge flows combined with reduced irrigated acreage
+            across the Central Valley, reflecting groundwater management under
+            SGMA.
+          </li>
+          <li>
+            <span class="sname"
+              >Increase Delta outflows (65% unimpaired flow target).</span
+            >
+            USBR Alternative 3 for the Long-Term Operation of the Central Valley
+            Project, with Delta outflow requirements set to roughly 65% of
+            unimpaired volume.
+          </li>
+          <li>
+            <span class="sname"
+              >Increase Delta outflows (55% unimpaired flow target).</span
+            >
+            USBR Alternative 3 for the Long-Term Operation of the Central Valley
+            Project, with Delta outflow requirements set to roughly 55% of
+            unimpaired volume.
+          </li>
+          <li>
+            <span class="sname">Functional environmental flows.</span>
+            Functional minimum flow requirements on tributaries to the
+            Sacramento and San Joaquin rivers, derived from natural-flow
+            estimates.
+          </li>
+        </ul>
+        <h3>Related strategies — Farms and groundwater</h3>
+        <ul class="related-list">
+          <li>
+            <span class="sname"
+              >Groundwater pumping limits in the San Joaquin Valley.</span
+            >
+            Monthly groundwater pumping limits for San Joaquin Valley demand
+            units, set at levels estimated to minimize long-term groundwater
+            storage decline.
+          </li>
+          <li>
+            <span class="sname"
+              >Groundwater pumping limits via reduced crop acreage in the San
+              Joaquin Valley.</span
+            >
+            Reduced irrigated crop acreage in the San Joaquin Valley, lowering
+            irrigation demands and indirectly limiting groundwater pumping.
+          </li>
+          <li>
+            <span class="sname"
+              >Groundwater pumping limits in the Central Valley.</span
+            >
+            Monthly groundwater pumping limits for demand units across the
+            Central Valley, set at levels estimated to minimize long-term
+            groundwater storage decline.
+          </li>
+          <li>
+            <span class="sname"
+              >Groundwater pumping limits via reduced crop acreage in the
+              Central Valley.</span
+            >
+            Reduced irrigated crop acreage across the Central Valley, lowering
+            irrigation demands and indirectly limiting groundwater pumping.
+          </li>
+          <li>
+            <span class="sname"
+              >Winter-run refuge flows with reduced crop acreage.</span
+            >
+            The winter-run refuge flows combined with reduced irrigated acreage
+            across the Central Valley, reflecting groundwater management under
+            SGMA.
+          </li>
+        </ul>
+      </section>
+
+      <!-- ─── §6 WHAT THIS DOESN'T SAY ─────────────────────────────── -->
+      <section>
+        <h2><span class="num">§6</span> What this doesn't say</h2>
+        <p class="disclaimer">
+          This brief describes a scenario representation in CalSim, not a
+          real-world policy proposal or implementation plan. The strategy as
+          modeled may not capture all details necessary to support direct
+          translation to actual operations. The brief does not predict,
+          evaluate, or recommend any outcome — it describes what the scenario
+          changes about CalSim's representation of the system. For what the
+          model produces under this strategy, see the result briefs referenced
+          in §7.
+        </p>
+      </section>
+
+      <!-- ─── §7 SEE RESULTS FOR THIS STRATEGY ─────────────────────── -->
+      <section>
+        <h2><span class="num">§7</span> See results for this strategy</h2>
+        <p>
+          To see modeled outcomes under this strategy across all nine sectors at
+          the reference hydroclimate, see the
+          <em>Rivers, salmon and the Delta ecosystem</em> theme brief.
+        </p>
+        <p>
+          To see outcomes at a specific place, see the relevant LOI briefs —
+          particularly those for locations on the Sacramento and San Joaquin
+          tributaries and for groundwater basins in the Central Valley.
+        </p>
+        <p>
+          <a class="explore-link" href="/explore?strategy=s0032">
+            Compare this strategy in the data explorer
+            <span class="arrow">→</span>
+          </a>
+        </p>
+      </section>
+
+      <!-- ─── REFERENCES NOTE (run IDs; footer-adjacent) ───────────── -->
+      <section class="refs-note">
+        <h2>References — model runs</h2>
+        <p class="refs-intro">
+          Each strategy is simulated once under each of five hydroclimates. The
+          table lists the model run behind this strategy and the
+          current-operations run it is compared against, for each hydroclimate,
+          so any reader can trace this page to specific CalSim runs.
+        </p>
+        <table class="refs">
+          <thead>
+            <tr>
+              <th>Hydroclimate</th>
+              <th>This strategy</th>
+              <th>Current operations</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Historical hydroclimate (adjusted)</td>
+              <td class="runid">s0032</td>
+              <td class="runid">s0020</td>
+            </tr>
+            <tr>
+              <td>Moderate climate stress (EC-Earth3-Veg)</td>
+              <td class="runid">s0145</td>
+              <td class="runid">s0134</td>
+            </tr>
+            <tr>
+              <td>Moderate-high climate stress (cc50)</td>
+              <td class="runid">s0073</td>
+              <td class="runid">s0047</td>
+            </tr>
+            <tr>
+              <td>High climate stress (cc95)</td>
+              <td class="runid">s0093</td>
+              <td class="runid">s0056</td>
+            </tr>
+            <tr>
+              <td>Extreme climate stress (TaiESM1)</td>
+              <td class="runid">s0119</td>
+              <td class="runid">s0108</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ─── FOOTER (metadata) ────────────────────────────────────── -->
+      <footer class="footer">
+        <div class="meta-row">
+          <span>COEQWAL · Collaboratory for Equity in Water Allocation</span>
+        </div>
+        <div class="meta-row">
+          <span>RunID <code>s0032_DCRadjHist_2020LU_eflows_aggw</code></span>
+          <span>Web platform ID 3.3</span>
+          <span>Brief v0.1 (generated draft)</span>
+          <span>Updated August 21, 2026</span>
+        </div>
+      </footer>
+    </article>
+
+    <!-- ─── PRINT HINT (screen-only) ──────────────────────────────── -->
+    <p class="print-hint">
+      Save this brief as a PDF — open your browser's print menu (<kbd>⌘P</kbd>
+      on Mac, <kbd>Ctrl</kbd>+<kbd>P</kbd> on Windows) and choose "Save as PDF"
+      as the destination.
+    </p>
+
+    <nav class="sitenav sitenav-bottom">
+      <a href="https://coeqwal.org">COEQWAL</a
+      ><a href="https://coeqwal.org/data">Return to COEQWAL Documentation</a>
+    </nav>
+  </body>
+</html>

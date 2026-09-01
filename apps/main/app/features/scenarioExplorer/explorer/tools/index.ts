@@ -25,7 +25,6 @@ export type {
   ResilienceView,
   CellEncoding,
   DeltaMode,
-  AggregateScope,
   ResilienceChartDataRow,
   ResilienceHeatmapChartData,
   ResilienceCaptureResult,

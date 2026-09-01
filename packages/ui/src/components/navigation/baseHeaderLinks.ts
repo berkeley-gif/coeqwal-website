@@ -1,13 +1,14 @@
 "use client"
 
 import type { NavDropdownOption } from "./NavDropdown"
+import { WATER_THEME_REGISTRY, type WaterThemeId } from "../../themes/theme"
 
 const DEFAULT_MAIN_APP_URL =
   process.env.NEXT_PUBLIC_MAIN_APP_URL ?? "https://dev.coeqwal.org"
 
 export type WaterStoryKey = "flow" | "climate" | "managed" | "equity"
 
-export type WaterThemeKey = "cws" | "ag_gw" | "eco" | "delta"
+export type WaterThemeKey = WaterThemeId
 
 type WaterStory = {
   key: WaterStoryKey
@@ -61,24 +62,10 @@ export const WATER_STORIES: WaterStory[] = [
   },
 ]
 
-export const WATER_THEMES: WaterTheme[] = [
-  {
-    key: "cws",
-    label: "Community water systems",
-  },
-  {
-    key: "ag_gw",
-    label: "Farms and groundwater",
-  },
-  {
-    key: "eco",
-    label: "Rivers and salmon",
-  },
-  {
-    key: "delta",
-    label: "The Delta as a living place",
-  },
-]
+export const WATER_THEMES: WaterTheme[] = WATER_THEME_REGISTRY.map((t) => ({
+  key: t.id,
+  label: t.shortLabel,
+}))
 
 function buildMainUrl(path = "", search = "") {
   return `${DEFAULT_MAIN_APP_URL}${path}${search}`

@@ -74,15 +74,6 @@ export const LIST_TOUR: TourStep[] = [
     body: "Selecting an operation icon selects every scenario in the library that shares it, so you can quickly build a shortlist around one water-management choice.",
     placement: "left-start",
   },
-  {
-    id: "list.step1.share",
-    anchorId: "list.row.share",
-    eyebrow: "arrange the list",
-    title: "Share",
-    titleIcon: "share",
-    body: "Use share to stage the chart you see in the Share drawer, then find it in the Share tab when you are ready to save the chart and its data.",
-    placement: "left-start",
-  },
 
   // Gather a shortlist (row-level selection).
   {

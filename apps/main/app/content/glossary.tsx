@@ -75,7 +75,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <Diversity3Icon />,
     term: "COEQWAL",
     definition:
-      "The Collaboratory for Equity in Water Allocation – is a publicly-funded project that works with communities to better understand how water decisions affect us now and for generations to come. Visit ABOUT US to learn more about the project.",
+      "The Collaboratory for Equity in Water Allocation – is a publicly-funded project that works with communities to better understand how water decisions affect us now and for generations to come. Visit ABOUT to learn more about the project.",
   },
   {
     icon: <LocalShippingIcon />,

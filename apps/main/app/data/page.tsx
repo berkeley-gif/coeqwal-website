@@ -39,6 +39,18 @@ import {
   OUTCOME_LEVEL_DOCUMENTS,
   getOutcomeLevelDocumentUrl,
 } from "../content/outcomeLevelMethodology"
+import {
+  BACKGROUND_BRIEF_DOCUMENTS,
+  getBackgroundBriefDocumentUrl,
+} from "../content/backgroundBriefs"
+import {
+  RESULT_SUMMARY_STRATEGY_DOCUMENTS,
+  getResultSummaryStrategyDocumentUrl,
+} from "../content/resultSummaryStrategy"
+import {
+  RESULT_SUMMARY_OUTCOME_DOCUMENTS,
+  getResultSummaryOutcomeDocumentUrl,
+} from "../content/resultSummaryOutcome"
 
 const { OpenInNew: OpenInNewIcon } = icons
 
@@ -334,6 +346,189 @@ function OutcomeLevelDocumentSelect({
   )
 }
 
+/**
+ * Flat (non-grouped) Select for the background brief documents.
+ * Options are just {id, label} pairs — no theme grouping needed since these
+ * PDFs aren't scenario-resolved.
+ */
+function BackgroundBriefDocumentSelect({
+  id,
+  value,
+  onChange,
+}: {
+  id: string
+  value: string
+  onChange: (event: SelectChangeEvent<string>) => void
+}) {
+  const theme = useTheme()
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        mt: 0.5,
+        backgroundColor: "common.white",
+        boxShadow: theme.shadow.sm,
+        border: `1px solid ${theme.palette.grey[200]}`,
+        borderRadius: theme.borderRadius.md,
+        "& .MuiMenuItem-root": {
+          py: 1,
+          whiteSpace: "normal" as const,
+          wordBreak: "break-word" as const,
+          "&:hover": { backgroundColor: theme.palette.grey[50] },
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.grey[100],
+            "&:hover": { backgroundColor: theme.palette.grey[100] },
+          },
+        },
+      },
+    },
+  }
+
+  return (
+    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
+      <Select
+        id={id}
+        value={value}
+        onChange={onChange}
+        displayEmpty
+        sx={SELECT_SX}
+        MenuProps={menuProps}
+        renderValue={(v) => {
+          const doc = BACKGROUND_BRIEF_DOCUMENTS.find((d) => d.id === v)
+          return doc ? doc.label : "Choose a background brief"
+        }}
+      >
+        {BACKGROUND_BRIEF_DOCUMENTS.map((doc) => (
+          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
+            {doc.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  )
+}
+
+/**
+ * Flat (non-grouped) Select for the result summary (by strategy) documents.
+ * Options are just {id, label} pairs — no theme grouping needed since these
+ * PDFs aren't scenario-resolved.
+ */
+function ResultSummaryStrategyDocumentSelect({
+  id,
+  value,
+  onChange,
+}: {
+  id: string
+  value: string
+  onChange: (event: SelectChangeEvent<string>) => void
+}) {
+  const theme = useTheme()
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        mt: 0.5,
+        backgroundColor: "common.white",
+        boxShadow: theme.shadow.sm,
+        border: `1px solid ${theme.palette.grey[200]}`,
+        borderRadius: theme.borderRadius.md,
+        "& .MuiMenuItem-root": {
+          py: 1,
+          whiteSpace: "normal" as const,
+          wordBreak: "break-word" as const,
+          "&:hover": { backgroundColor: theme.palette.grey[50] },
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.grey[100],
+            "&:hover": { backgroundColor: theme.palette.grey[100] },
+          },
+        },
+      },
+    },
+  }
+
+  return (
+    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
+      <Select
+        id={id}
+        value={value}
+        onChange={onChange}
+        displayEmpty
+        sx={SELECT_SX}
+        MenuProps={menuProps}
+        renderValue={(v) => {
+          const doc = RESULT_SUMMARY_STRATEGY_DOCUMENTS.find((d) => d.id === v)
+          return doc ? doc.label : "Choose a strategy"
+        }}
+      >
+        {RESULT_SUMMARY_STRATEGY_DOCUMENTS.map((doc) => (
+          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
+            {doc.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  )
+}
+
+/**
+ * Flat (non-grouped) Select for the result summary (by outcome) documents.
+ * Options are just {id, label} pairs — no theme grouping needed since these
+ * PDFs aren't scenario-resolved.
+ */
+function ResultSummaryOutcomeDocumentSelect({
+  id,
+  value,
+  onChange,
+}: {
+  id: string
+  value: string
+  onChange: (event: SelectChangeEvent<string>) => void
+}) {
+  const theme = useTheme()
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        mt: 0.5,
+        backgroundColor: "common.white",
+        boxShadow: theme.shadow.sm,
+        border: `1px solid ${theme.palette.grey[200]}`,
+        borderRadius: theme.borderRadius.md,
+        "& .MuiMenuItem-root": {
+          py: 1,
+          whiteSpace: "normal" as const,
+          wordBreak: "break-word" as const,
+          "&:hover": { backgroundColor: theme.palette.grey[50] },
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.grey[100],
+            "&:hover": { backgroundColor: theme.palette.grey[100] },
+          },
+        },
+      },
+    },
+  }
+
+  return (
+    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
+      <Select
+        id={id}
+        value={value}
+        onChange={onChange}
+        displayEmpty
+        sx={SELECT_SX}
+        MenuProps={menuProps}
+        renderValue={(v) => {
+          const doc = RESULT_SUMMARY_OUTCOME_DOCUMENTS.find((d) => d.id === v)
+          return doc ? doc.label : "Choose an outcome"
+        }}
+      >
+        {RESULT_SUMMARY_OUTCOME_DOCUMENTS.map((doc) => (
+          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
+            {doc.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  )
+}
+
 const SELECT_SX = {
   backgroundColor: "common.white",
   "& .MuiOutlinedInput-notchedOutline": {
@@ -353,6 +548,14 @@ export default function DataPage() {
   const [selectedCsvDataset, setSelectedCsvDataset] = useState("")
   const [selectedStrategyDoc, setSelectedStrategyDoc] = useState("")
   const [selectedOutcomeLevelDoc, setSelectedOutcomeLevelDoc] = useState("")
+  const [selectedBackgroundBriefDoc, setSelectedBackgroundBriefDoc] =
+    useState("")
+  const [
+    selectedResultSummaryStrategyDoc,
+    setSelectedResultSummaryStrategyDoc,
+  ] = useState("")
+  const [selectedResultSummaryOutcomeDoc, setSelectedResultSummaryOutcomeDoc] =
+    useState("")
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -408,6 +611,22 @@ export default function DataPage() {
     setSelectedOutcomeLevelDoc(event.target.value)
   }
 
+  const handleBackgroundBriefDocChange = (event: SelectChangeEvent<string>) => {
+    setSelectedBackgroundBriefDoc(event.target.value)
+  }
+
+  const handleResultSummaryStrategyDocChange = (
+    event: SelectChangeEvent<string>,
+  ) => {
+    setSelectedResultSummaryStrategyDoc(event.target.value)
+  }
+
+  const handleResultSummaryOutcomeDocChange = (
+    event: SelectChangeEvent<string>,
+  ) => {
+    setSelectedResultSummaryOutcomeDoc(event.target.value)
+  }
+
   // Filter scenarios that have zip files
   const zipScenarios = scenarios.filter((scenario) => scenario.files.zip)
 
@@ -455,6 +674,17 @@ export default function DataPage() {
   const selectedOutcomeLevelDocument = OUTCOME_LEVEL_DOCUMENTS.find(
     (d) => d.id === selectedOutcomeLevelDoc,
   )
+  const selectedBackgroundBriefDocument = BACKGROUND_BRIEF_DOCUMENTS.find(
+    (d) => d.id === selectedBackgroundBriefDoc,
+  )
+  const selectedResultSummaryStrategyDocument =
+    RESULT_SUMMARY_STRATEGY_DOCUMENTS.find(
+      (d) => d.id === selectedResultSummaryStrategyDoc,
+    )
+  const selectedResultSummaryOutcomeDocument =
+    RESULT_SUMMARY_OUTCOME_DOCUMENTS.find(
+      (d) => d.id === selectedResultSummaryOutcomeDoc,
+    )
 
   return (
     <>
@@ -515,7 +745,7 @@ export default function DataPage() {
                   top: 4,
                 }}
               />
-              <Typography variant="h4">Data & Documents</Typography>
+              <Typography variant="h4">Data & Documentation</Typography>
             </Box>
 
             {error && (
@@ -602,7 +832,7 @@ export default function DataPage() {
                 </Box>
 
                 {/* Scenario data section */}
-                <Box>
+                <Box sx={{ mb: (theme) => theme.space.section.lg }}>
                   <Typography
                     variant="h5"
                     sx={{ mb: (theme) => theme.space.component.lg }}
@@ -686,16 +916,87 @@ export default function DataPage() {
                     </>
                   )}
                 </Box>
+
+                {/* API access section */}
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
+                    API access
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: (theme) => theme.space.section.sm,
+                    }}
+                  >
+                    REST API endpoints for programmatic access to scenario data,
+                    model outputs, and COEQWAL resources.
+                  </Typography>
+
+                  <DownloadButton
+                    fileId="api-docs"
+                    filename="api-docs"
+                    downloadUrl="https://api.coeqwal.org/docs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    icon={<OpenInNewIcon />}
+                  >
+                    COEQWAL API
+                  </DownloadButton>
+                </Box>
               </Grid>
 
-              {/* Documents column */}
+              {/* Documentation column */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Typography
                   variant="h4"
                   sx={{ mb: (theme) => theme.space.section.md }}
                 >
-                  Documents
+                  Documentation
                 </Typography>
+
+                {/* Background briefs section */}
+                <Box sx={{ mb: (theme) => theme.space.section.lg }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
+                    Background briefs
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: (theme) => theme.space.section.sm,
+                    }}
+                  >
+                    Various project background documents.
+                  </Typography>
+
+                  <BackgroundBriefDocumentSelect
+                    id="background-brief-doc-select"
+                    value={selectedBackgroundBriefDoc}
+                    onChange={handleBackgroundBriefDocChange}
+                  />
+
+                  {selectedBackgroundBriefDocument && (
+                    <Box sx={{ mb: (theme) => theme.space.section.xs }}>
+                      <DownloadButton
+                        fileId={selectedBackgroundBriefDocument.id}
+                        filename={selectedBackgroundBriefDocument.file}
+                        downloadUrl={getBackgroundBriefDocumentUrl(
+                          selectedBackgroundBriefDocument.file,
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        icon={<OpenInNewIcon />}
+                      >
+                        View {selectedBackgroundBriefDocument.label}
+                      </DownloadButton>
+                    </Box>
+                  )}
+                </Box>
 
                 {/* Water management strategies section */}
                 <Box sx={{ mb: (theme) => theme.space.section.lg }}>
@@ -781,43 +1082,13 @@ export default function DataPage() {
                   )}
                 </Box>
 
-                {/* Hydroclimates section */}
-                <Box sx={{ mb: (theme) => theme.space.section.lg }}>
-                  <Typography
-                    variant="h5"
-                    sx={{ mb: (theme) => theme.space.component.lg }}
-                  >
-                    Hydroclimates
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.space.section.sm,
-                    }}
-                  >
-                    Documentation of COEQWAL&apos;s CalSim3 hydroclimates and
-                    methodology.
-                  </Typography>
-
-                  <DownloadButton
-                    fileId="hydroclimates"
-                    filename="hydroclimates.pdf"
-                    downloadUrl="/documents/hydroclimates.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    icon={<OpenInNewIcon />}
-                  >
-                    COEQWAL hydroclimates brief
-                  </DownloadButton>
-                </Box>
-
-                {/* API access section */}
+                {/* Summaries section */}
                 <Box>
                   <Typography
                     variant="h5"
                     sx={{ mb: (theme) => theme.space.component.lg }}
                   >
-                    API access
+                    Summaries
                   </Typography>
                   <Typography
                     variant="body1"
@@ -825,31 +1096,81 @@ export default function DataPage() {
                       mb: (theme) => theme.space.section.sm,
                     }}
                   >
-                    REST API endpoints for programmatic access to scenario data,
-                    model outputs, and COEQWAL resources.
+                    Briefs that summarize outcome level results by Location of
+                    interest, Strategy, and Outcome.
                   </Typography>
 
-                  <DownloadButton
-                    fileId="api-docs"
-                    filename="api-docs"
-                    downloadUrl="https://api.coeqwal.org/docs"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    icon={<OpenInNewIcon />}
+                  <ResultSummaryStrategyDocumentSelect
+                    id="result-summary-strategy-doc-select"
+                    value={selectedResultSummaryStrategyDoc}
+                    onChange={handleResultSummaryStrategyDocChange}
+                  />
+
+                  {/* Reserve the button's footprint so the outcome dropdown
+                      below doesn't shift when a strategy is selected. */}
+                  <Box
+                    sx={{
+                      mb: (theme) => theme.space.section.xs,
+                      minHeight: 56,
+                    }}
                   >
-                    API documentation
-                  </DownloadButton>
+                    {selectedResultSummaryStrategyDocument && (
+                      <DownloadButton
+                        fileId={selectedResultSummaryStrategyDocument.id}
+                        filename={selectedResultSummaryStrategyDocument.file}
+                        downloadUrl={getResultSummaryStrategyDocumentUrl(
+                          selectedResultSummaryStrategyDocument.file,
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        icon={<OpenInNewIcon />}
+                      >
+                        View {selectedResultSummaryStrategyDocument.label}
+                      </DownloadButton>
+                    )}
+                  </Box>
+
+                  <ResultSummaryOutcomeDocumentSelect
+                    id="result-summary-outcome-doc-select"
+                    value={selectedResultSummaryOutcomeDoc}
+                    onChange={handleResultSummaryOutcomeDocChange}
+                  />
+
+                  {/* Reserve the button's footprint so this section's total
+                      height stays stable regardless of selection state. */}
+                  <Box
+                    sx={{
+                      mb: (theme) => theme.space.section.xs,
+                      minHeight: 56,
+                    }}
+                  >
+                    {selectedResultSummaryOutcomeDocument && (
+                      <DownloadButton
+                        fileId={selectedResultSummaryOutcomeDocument.id}
+                        filename={selectedResultSummaryOutcomeDocument.file}
+                        downloadUrl={getResultSummaryOutcomeDocumentUrl(
+                          selectedResultSummaryOutcomeDocument.file,
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        icon={<OpenInNewIcon />}
+                      >
+                        View {selectedResultSummaryOutcomeDocument.label}
+                      </DownloadButton>
+                    )}
+                  </Box>
                 </Box>
               </Grid>
             </Grid>
           </Container>
         </Box>
         <CenteredTextSection
-          title="Get Involved"
-          id="getInvolved"
-          ariaLabel="get involved"
+          title="Contact Us!"
+          id="contactUs"
+          ariaLabel="Contact Us"
           text="Do you have questions or feedback about our project? 
-                            Would you like to be involved in future phases of this work? Please email: "
+              Would you like to be involved in future phases of this work? 
+              Please contact us: "
           email="coeqwal@berkeley.edu"
         />
       </Box>

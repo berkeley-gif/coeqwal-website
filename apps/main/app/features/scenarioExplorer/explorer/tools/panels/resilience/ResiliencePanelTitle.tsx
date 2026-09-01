@@ -1,7 +1,7 @@
 "use client"
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import type { AggregateOver, ResilienceView } from "../../../store"
+import type { ResilienceView } from "../../../store"
 
 /**
  * ResiliencePanelTitle - two-line header rendered at the top of the
@@ -22,58 +22,24 @@ import type { AggregateOver, ResilienceView } from "../../../store"
  */
 export function ResiliencePanelTitle({
   view,
-  aggregateOver,
   scenarioCount,
   outcomeCount,
   climateCount,
 }: {
   view: ResilienceView
-  aggregateOver: AggregateOver
   scenarioCount: number
   outcomeCount: number
   climateCount: number
 }) {
   const theme = useTheme()
 
-  // Local copy of the Z-role derivation so the title doesn't have
-  // to import from ResilienceControls. Must stay in sync with the
-  // adapter over there.
-  type ZDim = "scenario" | "outcome" | "hydroclimate"
-  type ZMode = "facet" | "aggregate"
-  const AGGREGATE_OVER_TO_ZDIM: Record<AggregateOver, ZDim> = {
-    scenarios: "scenario",
-    outcomes: "outcome",
-    hydroclimates: "hydroclimate",
-  }
-  const DIM_PLURAL_TITLECASE: Record<ZDim, string> = {
+  const DIM_PLURAL_TITLECASE: Record<ResilienceView, string> = {
     scenario: "Scenarios",
     outcome: "Outcomes",
     hydroclimate: "Hydroclimates",
   }
-  const DIM_PLURAL_LOWER: Record<ZDim, string> = {
-    scenario: "scenarios",
-    outcome: "outcomes",
-    hydroclimate: "hydroclimates",
-  }
 
-  const zDim: ZDim =
-    view === "aggregate"
-      ? AGGREGATE_OVER_TO_ZDIM[aggregateOver]
-      : (view as ZDim)
-  const zMode: ZMode = view === "aggregate" ? "aggregate" : "facet"
-
-  // Mirror the sentence header's empty-selection fallback so the
-  // title reads aggregate when the panel is actually showing the
-  // library aggregate.
-  const effectiveMode: ZMode =
-    zMode === "facet" && zDim === "scenario" && scenarioCount === 0
-      ? "aggregate"
-      : zMode
-
-  const title =
-    effectiveMode === "facet"
-      ? `${DIM_PLURAL_TITLECASE[zDim]} as small multiples`
-      : `Averaged across ${DIM_PLURAL_LOWER[zDim]}`
+  const title = `${DIM_PLURAL_TITLECASE[view]} as small multiples`
 
   const scopeBits: string[] = []
   if (scenarioCount > 0) {

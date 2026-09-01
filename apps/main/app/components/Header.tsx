@@ -8,6 +8,7 @@ import { useTabs } from "../context/Tabs"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import { WATER_THEMES } from "../content/themes"
 import { useTabNavigation } from "../hooks/useTabNavigation"
+import { normalizePathname } from "../lib/routePath"
 
 /**
  * Main application header
@@ -19,7 +20,9 @@ import { useTabNavigation } from "../hooks/useTabNavigation"
  */
 export function Header() {
   const router = useRouter()
-  const pathname = usePathname()
+  // Normalized: the export serves directory-style URLs, so the live pathname
+  // can be "/explore/" while the comparisons below use "/explore".
+  const pathname = normalizePathname(usePathname())
   const theme = useTheme()
   const { navigateToTab } = useTabNavigation()
 
