@@ -27,6 +27,7 @@ import { useWorkspaceSlice, type ExploreMode } from "../../../store"
 import { useTabs } from "../../../../../../context/Tabs"
 import { useTabNavigation } from "../../../../../../hooks/useTabNavigation"
 import { motion, useReducedMotion } from "@repo/motion"
+import { useTourAnchor } from "../../tour"
 
 /**
  * Flow map steps for the curation loop (List -> Radar -> Distribution ->
@@ -93,6 +94,9 @@ export default function ExploreSubNav() {
   const { exploreMode, setExploreMode, selectedScenarios } = useWorkspaceSlice()
   const prefersReducedMotion = useReducedMotion()
 
+  // List tour Step 1 highlights this specific tab, not the whole sub-nav.
+  const homeTabAnchorRef = useTourAnchor("list.homeTab")
+
   // Research-only tools hidden by default, toggled with "A" key
   const [showResearchTools, setShowResearchTools] = useState(false)
   useEffect(() => {
@@ -153,6 +157,7 @@ export default function ExploreSubNav() {
           return (
             <React.Fragment key={step.label}>
               <Box
+                ref={step.mode === "list" ? homeTabAnchorRef : undefined}
                 component="button"
                 type="button"
                 role="tab"
@@ -169,9 +174,9 @@ export default function ExploreSubNav() {
                   border: step.showTrailingArrow
                     ? "none"
                     : `1px solid ${alpha(
-                        theme.palette.common.white,
-                        active ? 0.7 : 0.3,
-                      )}`,
+                      theme.palette.common.white,
+                      active ? 0.7 : 0.3,
+                    )}`,
                   borderRadius: "12px",
                   cursor: "pointer",
                   background: active
@@ -242,15 +247,15 @@ export default function ExploreSubNav() {
                   <motion.div
                     animate={
                       selectedScenarios.length > 0 &&
-                      exploreMode === "list" &&
-                      !prefersReducedMotion
+                        exploreMode === "list" &&
+                        !prefersReducedMotion
                         ? { x: [0, 4, 0] }
                         : { x: 0 }
                     }
                     transition={
                       selectedScenarios.length > 0 &&
-                      exploreMode === "list" &&
-                      !prefersReducedMotion
+                        exploreMode === "list" &&
+                        !prefersReducedMotion
                         ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" }
                         : { duration: 0.2, ease: "easeOut" }
                     }
