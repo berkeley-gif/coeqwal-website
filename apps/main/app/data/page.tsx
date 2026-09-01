@@ -745,7 +745,7 @@ export default function DataPage() {
                   top: 4,
                 }}
               />
-              <Typography variant="h4">Data & Documentation</Typography>
+              <Typography variant="h4">Data and Documentation</Typography>
             </Box>
 
             {error && (
