@@ -1,14 +1,14 @@
-// Update this file whenever changes are made to themes.tsx in the main app
 "use client"
 
 import type { NavDropdownOption } from "./NavDropdown"
+import { WATER_THEME_REGISTRY, type WaterThemeId } from "../../themes/theme"
 
 const DEFAULT_MAIN_APP_URL =
   process.env.NEXT_PUBLIC_MAIN_APP_URL ?? "https://dev.coeqwal.org"
 
 export type WaterStoryKey = "flow" | "climate" | "managed" | "equity"
 
-export type WaterThemeKey = "baseline" | "cws" | "ag_gw" | "eco" | "delta"
+export type WaterThemeKey = WaterThemeId
 
 type WaterStory = {
   key: WaterStoryKey
@@ -61,29 +61,11 @@ export const WATER_STORIES: WaterStory[] = [
     hostnameMatchers: ["equity.coeqwal"],
   },
 ]
-export const WATER_THEMES: WaterTheme[] = [
-  {
-    key: "baseline",
-    label: "Understanding Today's Water System",
-  },
-  {
-    key: "cws",
-    label: "Securing Community Water Supplies",
-  },
-  {
-    key: "ag_gw",
-    label: "Sustaining Farms and Groundwater",
-  },
-  {
-    key: "eco",
-    label: "Protecting Rivers and Salmon",
-  },
-  {
-    key: "delta",
-    label: "Balancing Needs in the Delta",
-  },
-]
 
+export const WATER_THEMES: WaterTheme[] = WATER_THEME_REGISTRY.map((t) => ({
+  key: t.id,
+  label: t.shortLabel,
+}))
 
 function buildMainUrl(path = "", search = "") {
   return `${DEFAULT_MAIN_APP_URL}${path}${search}`

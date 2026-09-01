@@ -8,7 +8,16 @@
 import type { ScenarioTheme } from "./scenarios"
 import type { ReactNode } from "react"
 import { Typography } from "@repo/ui/mui"
+import { WATER_THEME_REGISTRY } from "@repo/ui/themes/theme"
 import { InlineNavLink } from "../components/InlineNavLink"
+
+// Looks up a theme's canonical display name from the shared registry in
+// @repo/ui (the actual source of truth — packages/ui can't import from
+// apps/main, so the name lives there and this file derives from it,
+// rather than the other way around).
+function registryLabel(id: string): string {
+  return WATER_THEME_REGISTRY.find((t) => t.id === id)?.shortLabel ?? id
+}
 
 // =============================================================================
 // Block types: content blocks for theme sections
@@ -123,14 +132,14 @@ export interface ThemeLabelConfig {
 
 export const THEME_LABEL_CONFIG: Record<ScenarioTheme, ThemeLabelConfig> = {
   baseline: {
-    label: "Understanding Today's Water System",
+    label: registryLabel("baseline"),
     tooltip:
       "Baselines represent current operations of the State Water Project and Central Valley Project. They serve as the reference point for comparing all other scenarios.",
   },
-  ag_gw: { label: "Sustaining Farms and Groundwater" },
-  eco: { label: "Protecting Rivers and Salmon" },
-  delta: { label: "Balancing Needs in the Delta" },
-  cws: { label: "Securing Community Water Supplies" },
+  ag_gw: { label: registryLabel("ag_gw") },
+  eco: { label: registryLabel("eco") },
+  delta: { label: registryLabel("delta") },
+  cws: { label: registryLabel("cws") },
   unthemed: { label: "Other scenarios" },
 }
 
@@ -153,8 +162,8 @@ export const ACTIVE_THEMES: ScenarioTheme[] = [
 export const WATER_THEMES: Theme[] = [
   {
     id: "baseline",
-    label: "Understanding Today's\nWater system",
-    shortLabel: "Understanding Today's Water system",
+    label: "Understanding Today's\nWater System",
+    shortLabel: registryLabel("baseline"),
     description:
       "Whether California's current water management — the Central Valley Project and State Water Project — performs reliably for communities, agriculture, and the environment, now and under future climate conditions",
     heroImage: "/images/themes/baseline_hero_cred_ken_james.jpg",
@@ -527,7 +536,7 @@ export const WATER_THEMES: Theme[] = [
   {
     id: "cws",
     label: "Securing Community\nWater Supplies",
-    shortLabel: "Securing Community Water Supplies",
+    shortLabel: registryLabel("cws"),
     description:
       "Whether California's community water systems can reliably deliver safe drinking water to the people who depend on them, in wet years, dry years, and a changing climate",
     heroImage: "/images/themes/cws_hero_cred_dan_bacher.jpg",
@@ -934,7 +943,7 @@ export const WATER_THEMES: Theme[] = [
   {
     id: "ag_gw",
     label: "Sustaining Farms\nand Groundwater",
-    shortLabel: "Sustaining Farms and Groundwater",
+    shortLabel: registryLabel("ag_gw"),
     description:
       "Whether California's agricultural water use can be sustained without depleting the groundwater that farms, communities, and ecosystems depend on",
     heroImage: "/images/themes/farms-groundwater_hero.jpg",
@@ -1365,8 +1374,8 @@ export const WATER_THEMES: Theme[] = [
   },
   {
     id: "eco",
-    label: "Protecting rivers\nand salmon",
-    shortLabel: "Protecting rivers and salmon",
+    label: "Protecting Rivers\nand Salmon",
+    shortLabel: registryLabel("eco"),
     description:
       "Whether California's rivers can support healthy ecosystems and salmon populations while continuing to provide water for people and farms",
     heroImage: "/images/themes/salmon_hero.jpg",
@@ -1883,7 +1892,7 @@ export const WATER_THEMES: Theme[] = [
   {
     id: "delta",
     label: "Balancing Needs\nin the Delta",
-    shortLabel: "Balancing Needs in the Delta",
+    shortLabel: registryLabel("delta"),
     description:
       "Whether the Delta can remain healthy for people, farms, fish, and wildlife as California balances water exports, salinity, and ecosystem needs",
     heroImage: "/images/themes/delta_hero.jpg",
