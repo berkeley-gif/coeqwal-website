@@ -14,10 +14,24 @@ export interface WaterIssueTheme {
   dimmed?: boolean
 }
 
+// Card copy is maintained here, independent of the longer theme-panel
+// `description` in content/themes.tsx — this card needs the short
+// "How X..." framing that the theme panel doesn't have.
+const WATER_ISSUE_DESCRIPTIONS: Record<string, string> = {
+  baseline:
+    "How current management of California's water affects communities, agriculture, and the environment",
+  cws: "How people and communities can reliably access safe drinking water for daily life, health, and essential services",
+  ag_gw:
+    "How agricultural water deliveries can sustain food production, while preventing over-draft of groundwater basins",
+  eco: "How rivers and winter-run Chinook salmon receive the flows they need to thrive",
+  delta:
+    "How the Delta can be managed as a place where communities, farms, and ecosystems coexist and thrive",
+}
+
 export const WATER_ISSUE_THEMES: ReadonlyArray<WaterIssueTheme> =
   WATER_THEMES.map((wt) => ({
     title: wt.shortLabel,
-    description: wt.description,
+    description: WATER_ISSUE_DESCRIPTIONS[wt.id] ?? "",
     themeKey: wt.id,
   }))
 

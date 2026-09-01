@@ -7,8 +7,6 @@ import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
 import { usePanelRoute } from "../../../../hooks/usePanelRoute"
 import { WATER_ISSUE_THEMES } from "../content"
-import { WATER_THEMES } from "../../../../content/themes"
-import { LinedList } from "@repo/ui"
 import { GlossaryTermLink } from "../../../glossary"
 
 // "How X..." explainer clauses for the intro bullet list, keyed by theme id.
@@ -58,26 +56,7 @@ export default function WaterIssuesPanel() {
         the <GlossaryTermLink>Delta</GlossaryTermLink>, from salmon in the{" "}
         <GlossaryTermLink>Sacramento River</GlossaryTermLink> to urban water
         users in Los Angeles. <GlossaryTermLink>COEQWAL</GlossaryTermLink>{" "}
-        considers how decisions affect the water issues that people care about,
-        such as:
-      </Typography>
-
-      <LinedList
-        items={WATER_THEMES.map((wt) => ({
-          label: (
-            <>
-              {wt.shortLabel}: {WATER_ISSUE_BLURBS[wt.id]}
-            </>
-          ),
-        }))}
-        color={theme.palette.common.white}
-        icon={dropletIcon}
-        labelVariant="body2"
-        sx={{ mt: sp.sm }}
-      />
-
-      <Typography variant="body2" color="text.secondary" sx={{ my: sp.lg }}>
-        Click on each water issue to learn more.
+        considers how decisions affect the water issues that people care about.
       </Typography>
 
       <InfoCardGrid columns={{ xs: 2, sm: 3, md: WATER_ISSUE_THEMES.length }}>
