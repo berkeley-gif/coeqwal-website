@@ -33,8 +33,15 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     // before AutoAdvanceFooter. `minHeight`, not `height`, so a section
     // taller than one screen just grows the page and scrolls - this only
     // ever adds space, never clips content.
+    //
+    // Uses collapsedHeaderHeight, not headerHeight - BaseHeader is
+    // position:fixed, so its own rendered height never affects document
+    // flow. What actually pushes #panel-learn down is SmoothTabs' own
+    // `marginTop: theme.layout.collapsedHeaderHeight` (a fixed 42px,
+    // regardless of BaseHeader's current animated height), plus its two
+    // stacked tab-height rows.
     const learnColumnMinHeight =
-      theme.layout.headerHeight + 2 * theme.layout.collapsedTabHeight
+      theme.layout.collapsedHeaderHeight + 2 * theme.layout.collapsedTabHeight
 
     return (
       <div
