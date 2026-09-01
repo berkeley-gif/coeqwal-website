@@ -166,7 +166,6 @@ export default function ToolToolbar({
                 >
                   View by hydroclimate
                 </Typography>
-
               </Box>
               <HydroclimateChooser
                 layout="horizontal"
