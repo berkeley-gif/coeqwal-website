@@ -499,8 +499,8 @@ export const WATER_THEMES: Theme[] = [
                     become more frequent, temperatures rise, and water
                     availability changes. The Resilience heatmap in the Explore
                     Tool examines how management strategies perform across a
-                    range of plausible hydroclimates, representing
-                    increasing levels of stress to the water system. See{" "}
+                    range of plausible hydroclimates, representing increasing
+                    levels of stress to the water system. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
@@ -896,8 +896,8 @@ export const WATER_THEMES: Theme[] = [
                     availability changes. The Resilience heatmap in the{" "}
                     <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
                     examines how management strategies perform across a range of
-                    plausible hydroclimates, representing increasing
-                    levels of stress to the water system. Visit{" "}
+                    plausible hydroclimates, representing increasing levels of
+                    stress to the water system. Visit{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
@@ -1316,8 +1316,8 @@ export const WATER_THEMES: Theme[] = [
                     become more frequent, temperatures rise, and water
                     availability changes. The Resilience heatmap in the Explore
                     Tool examines how management strategies perform across a
-                    range of plausible hydroclimates, representing
-                    increasing levels of stress to the water system. Visit{" "}
+                    range of plausible hydroclimates, representing increasing
+                    levels of stress to the water system. Visit{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
@@ -1805,8 +1805,8 @@ export const WATER_THEMES: Theme[] = [
                     become more frequent, temperatures rise, and water
                     availability changes. The Resilience heatmap in the Explore
                     Tool examines how management strategies perform across a
-                    range of plausible hydroclimates, representing
-                    increasing levels of stress to the water system. See{" "}
+                    range of plausible hydroclimates, representing increasing
+                    levels of stress to the water system. See{" "}
                     <InlineNavLink to="/data">
                       Data and documentation
                     </InlineNavLink>{" "}
@@ -1855,14 +1855,13 @@ export const WATER_THEMES: Theme[] = [
                     Sacramento River. As a result, the winter-run population
                     responds positively and moves out of &ldquo;Critical&rdquo;
                     levels and into &ldquo;At-Risk&rdquo; levels for all
-                    hydroclimates. The results suggest that the
-                    combination of functional environmental flows and
-                    reintroduction can improve conditions for both environmental
-                    flow metrics and winter-run salmon under historical and
-                    future climates. This also underscores the potential
-                    importance of complementary approaches, such as
-                    reintroduction, for mitigating climate impacts to winter-run
-                    salmon.
+                    hydroclimates. The results suggest that the combination of
+                    functional environmental flows and reintroduction can
+                    improve conditions for both environmental flow metrics and
+                    winter-run salmon under historical and future climates. This
+                    also underscores the potential importance of complementary
+                    approaches, such as reintroduction, for mitigating climate
+                    impacts to winter-run salmon.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Overall, the heatmap shows how the effectiveness of
@@ -2207,8 +2206,8 @@ export const WATER_THEMES: Theme[] = [
                     become more frequent, temperatures rise, and water
                     availability changes. The Resilience heatmap in the Explore
                     Tool examines how management strategies perform across a
-                    range of plausible hydroclimates, representing
-                    increasing levels of stress to the water system. See{" "}
+                    range of plausible hydroclimates, representing increasing
+                    levels of stress to the water system. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
