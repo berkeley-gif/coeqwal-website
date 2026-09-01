@@ -30,10 +30,16 @@ export type ImageBlock = {
   type: "image"
   src: string
   alt: string
+  /** Text shown above the image, in its own box — the "top slot" for
+   * figures where the doc places some of the box's text before the
+   * graphic rather than all of it after. Rare; most figures only use
+   * `caption`. */
+  captionBefore?: ReactNode
   /** Bold heading shown above the caption — a Figure Box's title line */
   title?: ReactNode
-  /** Plain string gets \n-separated paragraph breaks. Pass JSX when one
-   * of the caption's paragraphs needs a link. */
+  /** Text shown below the image ("bottom slot"). Plain string gets
+   * \n-separated paragraph breaks. Pass JSX when one of the caption's
+   * paragraphs needs a link. */
   caption?: ReactNode
 }
 
@@ -189,9 +195,27 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/baseline-fig-01.svg",
               alt: "California's interconnected water system",
-              title: "California's interconnected water system",
-              caption:
-                "California's major water projects connect reservoirs, rivers, groundwater basins, and the Delta to an extensive network of water users. Decisions about how water is stored and moved through this system affects communities, agriculture, and the environment. The map highlights key parts of the system represented in COEQWAL, including major reservoirs and rivers, groundwater aquifers, the Delta, water deliveries and exports, and ecological conditions.",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    California's interconnected water system
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    California's major water projects connect reservoirs,
+                    rivers, groundwater basins, and the Delta to an
+                    extensive network of water users. Decisions about how
+                    water is stored and moved through this system affects
+                    communities, agriculture, and the environment. The map
+                    highlights key parts of the system represented in
+                    COEQWAL, including major reservoirs and rivers,
+                    groundwater aquifers, the Delta, water deliveries and
+                    exports, and ecological conditions.
+                  </Typography>
+                </>
+              ),
             },
           ],
         },
@@ -218,11 +242,31 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/baseline-fig-02.svg",
               alt: "Operations of the Central Valley Project and State Water Project",
-              title: "Operations of the Central Valley Project and State Water Project",
-              caption:
-                "The CalSim3 water systems model used in COEQWAL focuses on operations of the Central Valley Project and State Water Project. While other features of California's integrated water system are represented, most of the information shared on the COEQWAL platform focuses on water supplied to the San Francisco Bay-Delta watershed (Contributing Watershed Area), water distributed to users within the Sacramento and San Joaquin Valley (Central Valley Model Area), and water exported to water users in the Tulare Basin, Southern California, and coast.",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Operations of the Central Valley Project and State Water
+                    Project
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The CalSim3 water systems model used in COEQWAL focuses
+                    on operations of the Central Valley Project and State
+                    Water Project. While other features of California's
+                    integrated water system are represented, most of the
+                    information shared on the COEQWAL platform focuses on
+                    water supplied to the San Francisco Bay-Delta watershed
+                    (Contributing Watershed Area), water distributed to
+                    users within the Sacramento and San Joaquin Valley
+                    (Central Valley Model Area), and water exported to
+                    water users in the Tulare Basin, Southern California,
+                    and coast.
+                  </Typography>
+                </>
+              ),
             },
-
           ],
         },
       },
@@ -295,17 +339,23 @@ export const WATER_THEMES: Theme[] = [
                   In the{" "}
                   <InlineNavLink to="explore">
                     Explore Tool
-                  </InlineNavLink>, different representations of current operations are grouped as \"baseline\" scenarios because they provide reference points for comparing alternative management strategies. The Explore Tool allows you to examine how outcomes differ across the baseline scenarios and under different hydroclimate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.
+                  </InlineNavLink>, different representations of current operations are grouped as "baseline" scenarios because they provide reference points for comparing alternative management strategies. The Explore Tool allows you to examine how outcomes differ across the baseline scenarios and under different hydroclimate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.
                 </>
               ),
+
             },
             {
               type: "image",
               src: "/images/themes/baseline-fig-03.svg",
               alt: "Trade-offs radar chart",
-              title: "Trade-offs",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Trade-offs
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How do different management strategies affect overall system
                     performance across multiple outcomes?
@@ -323,6 +373,10 @@ export const WATER_THEMES: Theme[] = [
                     <InlineNavLink to="/data">Data and Documentation</InlineNavLink>{" "}
                     for more information on how these categories are defined.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The radar plot highlights existing trade-offs among competing
                     water uses and objectives under current operations. Community
@@ -361,22 +415,55 @@ export const WATER_THEMES: Theme[] = [
                 </>
               ),
             },
-
             {
               type: "image",
               src: "/images/themes/baseline-fig-04.svg",
               alt: "Equity distribution view map",
-              title: "Equity",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Equity
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Where do benefits and impacts occur, and who is most affected?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    System-wide averages can hide important differences in current
+                    conditions across individual locations. Water availability,
+                    infrastructure, water rights, access to different water sources,
+                    and other characteristics vary considerably across California,
+                    meaning that the outcomes produced by current water management
+                    can differ substantially from place to place.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The Distribution view in the Explore Tool shows results for
+                    individual locations of interest. The figure below shows outcomes
+                    for Current operations under the historical hydroclimate, while
+                    the map highlights community surface water delivery locations in
+                    particular. The markers represent locations of interest, and the
+                    colors represent optimal (green), acceptable (blue), at-risk
+                    (orange), or critical (red) outcomes.
+                  </Typography>
+                </>
+              ),
               caption:
-                "Where do benefits and impacts occur, and who is most affected?\nSystem-wide averages can hide important differences in current conditions across individual locations. Water availability, infrastructure, water rights, access to different water sources, and other characteristics vary considerably across California, meaning that the outcomes produced by current water management can differ substantially from place to place.\nThe Distribution view in the Explore Tool shows results for individual locations of interest. The figure below shows outcomes for Current operations under the historical hydroclimate, while the map highlights community surface water delivery locations in particular. The markers represent locations of interest, and the colors represent optimal (green), acceptable (blue), at-risk (orange), or critical (red) outcomes.\nThe Distribution view shows considerable variation among community surface water delivery locations and agricultural districts. Many locations experience optimal or acceptable conditions, while others fall into at-risk or critical conditions. Poor community surface water delivery outcomes are not concentrated in a single region, showing that vulnerabilities under current operations occur in different parts of the state. It is also important to keep in mind that the community surface water outcome only evaluates the reliability of water delivered from the state's major water projects and does not consider the contribution of other water sources to the water supplies of community water systems.\nOverall, the Distribution view reveals patterns hidden by system-wide averages and helps identify where vulnerabilities already exist under current operations and how unevenly those conditions are distributed.",
+                "The Distribution view shows considerable variation among community surface water delivery locations and agricultural districts. Many locations experience optimal or acceptable conditions, while others fall into at-risk or critical conditions. Poor community surface water delivery outcomes are not concentrated in a single region, showing that vulnerabilities under current operations occur in different parts of the state. It is also important to keep in mind that the community surface water outcome only evaluates the reliability of water delivered from the state's major water projects and does not consider the contribution of other water sources to the water supplies of community water systems.\nOverall, the Distribution view reveals patterns hidden by system-wide averages and helps identify where vulnerabilities already exist under current operations and how unevenly those conditions are distributed.",
             },
             {
               type: "image",
               src: "/images/themes/baseline-fig-05.svg",
               alt: "Resilience heatmap across hydroclimate scenarios",
-              title: "Resilience",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Resilience
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How consistently do management strategies perform under different
                     climate futures?
@@ -402,6 +489,10 @@ export const WATER_THEMES: Theme[] = [
                     3.99), or critical (red, 4.00 - 4.99), with higher numerical
                     values indicating worse performance.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The results show that climate stress affects different parts of
                     the water system in different ways. Community surface water
@@ -469,9 +560,27 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/cws-fig-01.svg",
               alt: "Different water sources shape community resilience",
-              title: "Different water sources shape community resilience",
-              caption:
-                "Some communities rely primarily on surface water delivered through rivers, reservoirs, pipes, and canals, while others draw from both surface water and groundwater wells. Access to multiple water sources can provide greater flexibility when one source becomes less available, while reliance on a single source can leave communities more vulnerable to drought, infrastructure disruptions, and other changes in water supply.",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Different water sources shape community resilience
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Some communities rely primarily on surface water
+                    delivered through rivers, reservoirs, pipes, and
+                    canals, while others draw from both surface water and
+                    groundwater wells. Access to multiple water sources can
+                    provide greater flexibility when one source becomes
+                    less available, while reliance on a single source can
+                    leave communities more vulnerable to drought,
+                    infrastructure disruptions, and other changes in water
+                    supply.
+                  </Typography>
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -498,19 +607,52 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/cws-fig-02.svg",
               alt: "Surface water deliveries from large water projects to communities",
-              title:
-                "Surface water deliveries from large water projects to communities",
-              caption:
-                "Community water systems rely on surface water, groundwater, or a combination of sources to meet their needs. This water issue focuses on surface water delivered from California's major water projects to major metropolitan areas around the Bay Area, Sacramento, and Los Angeles, as well as smaller communities throughout the Central Valley and Southern California. These deliveries represent only a subset of California's community water systems and drinking water supplies.",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Surface water deliveries from large water projects to
+                    communities
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Community water systems rely on surface water,
+                    groundwater, or a combination of sources to meet their
+                    needs. This water issue focuses on surface water
+                    delivered from California's major water projects to
+                    major metropolitan areas around the Bay Area,
+                    Sacramento, and Los Angeles, as well as smaller
+                    communities throughout the Central Valley and Southern
+                    California. These deliveries represent only a subset
+                    of California's community water systems and drinking
+                    water supplies.
+                  </Typography>
+                </>
+              ),
             },
             {
               type: "image",
               src: "/images/themes/cws-fig-03.svg",
               alt: "Community drinking water deliveries as represented in CalSim3",
-              title:
-                "Community drinking water deliveries as represented in CalSim3",
-              caption:
-                "The CalSim3 water systems model that is used in COEQWAL simulates surface water deliveries from the major water projects to community water systems at 74 locations of interest throughout California, shown on the map below.",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Community drinking water deliveries as represented in
+                    CalSim3
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The CalSim3 water systems model that is used in
+                    COEQWAL simulates surface water deliveries from the
+                    major water projects to community water systems at 74
+                    locations of interest throughout California, shown on
+                    the map below.
+                  </Typography>
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -601,9 +743,14 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/cws-fig-04.svg",
               alt: "Trade-offs radar chart",
-              title: "Trade-offs",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Trade-offs
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How do different management strategies affect overall
                     system performance across multiple outcomes?
@@ -636,6 +783,10 @@ export const WATER_THEMES: Theme[] = [
                     for more information on how these categories are
                     defined.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The results show that community surface water deliveries
                     perform well on average under Current Operations and
@@ -664,17 +815,55 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/cws-fig-05.svg",
               alt: "Distribution view map of community water delivery outcomes",
-              title: "Equity",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Equity
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Where do benefits and impacts occur, and who is most
+                    affected?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    System-wide averages can hide important differences in
+                    scenario impacts. Water availability and access can
+                    vary substantially between regions and served systems,
+                    meaning that the same management strategy can produce
+                    different outcomes in different places.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The Distribution view in the Explore Tool shows results
+                    for individual locations of interest. This figure
+                    displays outcomes for community surface water
+                    deliveries for Prioritizing human health delivery
+                    levels to community water systems, relative to Current
+                    operations. Arrows indicate the direction of change
+                    relative to current operations, and color represents
+                    optimal (green), acceptable (blue), at-risk (orange),
+                    or critical (red) outcomes for the scenario. Circles
+                    represent locations that did not change condition
+                    relative to current operations.
+                  </Typography>
+                </>
+              ),
               caption:
-                "Where do benefits and impacts occur, and who is most affected?\nSystem-wide averages can hide important differences in scenario impacts. Water availability and access can vary substantially between regions and served systems, meaning that the same management strategy can produce different outcomes in different places.\nThe Distribution view in the Explore Tool shows results for individual locations of interest. This figure displays outcomes for community surface water deliveries for Prioritizing human health delivery levels to community water systems, relative to Current operations. Arrows indicate the direction of change relative to current operations, and color represents optimal (green), acceptable (blue), at-risk (orange), or critical (red) outcomes for the scenario. Circles represent locations that did not change condition relative to current operations.\nThe results show that surface water deliveries to most locations of interest are \"Optimal\" or \"Acceptable\" under the human health priority scenario, and deliveries improve for many systems. However, seven locations remain \"At-risk\" or \"Critical\" and do not improve relative to Current operations. This shows that prioritizing community water deliveries across the system does not benefit every community equally or eliminate existing vulnerabilities.\nBecause communities differ in their access to groundwater, local storage, alternative supplies, financial resources, and other sources of resilience, similar surface water delivery outcomes may have different implications in different places. Overall, the Distribution view reveals patterns hidden by the system-wide averages and helps identify which locations benefit from changes in management and which remain vulnerable.",
+                "The results show that surface water deliveries to most locations of interest are \"Optimal\" or \"Acceptable\" under the human health priority scenario, and deliveries improve for many systems. However, seven locations remain \"At-risk\" or \"Critical\" and do not improve relative to Current operations. This shows that prioritizing community water deliveries across the system does not benefit every community equally or eliminate existing vulnerabilities.\nBecause communities differ in their access to groundwater, local storage, alternative supplies, financial resources, and other sources of resilience, similar surface water delivery outcomes may have different implications in different places. Overall, the Distribution view reveals patterns hidden by the system-wide averages and helps identify which locations benefit from changes in management and which remain vulnerable.",
             },
             {
               type: "image",
               src: "/images/themes/cws-fig-06.svg",
               alt: "Resilience heatmap across hydroclimate scenarios",
-              title: "Resilience",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Resilience
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How consistently do management strategies perform under
                     different climate futures?
@@ -709,6 +898,10 @@ export const WATER_THEMES: Theme[] = [
                     with higher numerical values indicating worse
                     performance.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Community surface water deliveries decline as climate
                     stress increases under both management strategies. Under
@@ -782,10 +975,41 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/ag_gw-fig-01.svg",
               alt: "Relationships between agricultural water use, groundwater levels, agricultural revenues, and groundwater-dependent ecosystems over time",
-              title:
-                "Relationships between agricultural water use, groundwater levels, and agricultural revenues, and groundwater-dependent ecosystems over time under two hypothetical scenarios",
-              caption:
-                "When no restrictions on groundwater pumping are imposed (Scenario 1), groundwater use increases during drought, causing declines in groundwater levels. With reductions in groundwater use (Scenario 2), groundwater can still help mitigate agricultural losses during the worst drought years, while groundwater levels remain more stable over the long term. However, reduced access to groundwater during drought can lead to unmet agricultural water demand and lower agricultural revenues.\nOver the longer term, maintaining more sustainable groundwater levels can reduce problems associated with overdraft, including land subsidence, dry wells, and reductions in groundwater contributions to surface waters. Groundwater-dependent ecosystems can also benefit, as more stable groundwater levels can help sustain native vegetation and support recovery following drought.",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Relationships between agricultural water use, groundwater
+                    levels, and agricultural revenues, and
+                    groundwater-dependent ecosystems over time under two
+                    hypothetical scenarios
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    When no restrictions on groundwater pumping are imposed
+                    (Scenario 1), groundwater use increases during drought,
+                    causing declines in groundwater levels. With reductions
+                    in groundwater use (Scenario 2), groundwater can still
+                    help mitigate agricultural losses during the worst
+                    drought years, while groundwater levels remain more
+                    stable over the long term. However, reduced access to
+                    groundwater during drought can lead to unmet
+                    agricultural water demand and lower agricultural
+                    revenues.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Over the longer term, maintaining more sustainable
+                    groundwater levels can reduce problems associated with
+                    overdraft, including land subsidence, dry wells, and
+                    reductions in groundwater contributions to surface
+                    waters. Groundwater-dependent ecosystems can also
+                    benefit, as more stable groundwater levels can help
+                    sustain native vegetation and support recovery
+                    following drought.
+                  </Typography>
+                </>
+              ),
             },
           ],
         },
@@ -816,9 +1040,14 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/ag_gw-fig-02.svg",
               alt: "Groundwater storage and agricultural demand units",
-              title: "Groundwater storage and agricultural demand units",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Groundwater storage and agricultural demand units
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The CalSim3 water systems model used in COEQWAL
                     simulates groundwater storage conditions in 42 aquifer
@@ -828,6 +1057,10 @@ export const WATER_THEMES: Theme[] = [
                     right map), each representing agricultural land with
                     specific water demand characteristics.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The colors of the polygons indicate conditions under
                     current operations and represent whether outcomes are
@@ -924,9 +1157,14 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/ag_gw-fig-03.svg",
               alt: "Trade-offs radar chart",
-              title: "Trade-offs",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Trade-offs
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How do different management strategies affect system
                     performance across multiple outcomes?
@@ -958,6 +1196,10 @@ export const WATER_THEMES: Theme[] = [
                     for more information on how these categories are
                     defined.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The results show slight improvements in the average
                     groundwater storage performance levels for Groundwater
@@ -1006,9 +1248,45 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/ag_gw-fig-04.svg",
               alt: "Distribution view map of groundwater and agricultural revenue outcomes",
-              title: "Equity",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Equity
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Where do benefits and impacts occur, and who is most
+                    affected?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    System-wide averages can hide important differences in
+                    scenario impacts. Water availability, groundwater
+                    conditions, agricultural systems, and management
+                    constraints vary considerably among agricultural water
+                    users across the areas represented in the analysis,
+                    meaning that the same management strategy can produce
+                    different outcomes in different places.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The Distribution view in the Explore Tool shows results
+                    for individual locations of interest. This figure
+                    compares outcomes for aquifer zones and agricultural
+                    districts for Groundwater pumping limits via reduced
+                    crop acreage in the Central Valley relative to the
+                    Current operations scenario under the historical
+                    hydroclimate. Arrows indicate the direction of change
+                    relative to current operations and color represents
+                    optimal, acceptable, at-risk, or critical outcomes for
+                    the scenario. Circles on the map indicate locations
+                    where the outcome level did not change relative to
+                    current operations.
+                  </Typography>
+                </>
+              ),
               caption:
-                "Where do benefits and impacts occur, and who is most affected?\nSystem-wide averages can hide important differences in scenario impacts. Water availability, groundwater conditions, agricultural systems, and management constraints vary considerably among agricultural water users across the areas represented in the analysis, meaning that the same management strategy can produce different outcomes in different places.\nThe Distribution view in the Explore Tool shows results for individual locations of interest. This figure compares outcomes for aquifer zones and agricultural districts for Groundwater pumping limits via reduced crop acreage in the Central Valley relative to the Current operations scenario under the historical hydroclimate. Arrows indicate the direction of change relative to current operations and color represents optimal, acceptable, at-risk, or critical outcomes for the scenario. Circles on the map indicate locations where the outcome level did not change relative to current operations.\nAgricultural revenue declines at most locations in the scenario with reduced crop acreage, with many falling into at-risk or critical conditions. In contrast, groundwater storage improves across most zones, with numerous locations moving into optimal condition and none remaining critical. The map indicates improvements in groundwater storage across much of the Sacramento and San Joaquin Valleys. Agricultural impacts are more uneven, with some of the largest declines in agricultural revenues occurring in the central and southern Sacramento Valley.\nComparing the two maps makes an important distributional trade-off visible: groundwater storage improves across much of the represented Central Valley, while agricultural revenues decline at many locations. The geographic patterns do not align perfectly because groundwater storage and agricultural revenues are evaluated using different spatial units, and the magnitude of benefits and impacts varies across regions.\nOverall, the Distribution view reveals regional patterns hidden by the system-wide averages and helps identify where management strategies create benefits, where they create burdens, and how evenly those effects are distributed.",
+                "Agricultural revenue declines at most locations in the scenario with reduced crop acreage, with many falling into at-risk or critical conditions. In contrast, groundwater storage improves across most zones, with numerous locations moving into optimal condition and none remaining critical. The map indicates improvements in groundwater storage across much of the Sacramento and San Joaquin Valleys. Agricultural impacts are more uneven, with some of the largest declines in agricultural revenues occurring in the central and southern Sacramento Valley.\nComparing the two maps makes an important distributional trade-off visible: groundwater storage improves across much of the represented Central Valley, while agricultural revenues decline at many locations. The geographic patterns do not align perfectly because groundwater storage and agricultural revenues are evaluated using different spatial units, and the magnitude of benefits and impacts varies across regions.\nOverall, the Distribution view reveals regional patterns hidden by the system-wide averages and helps identify where management strategies create benefits, where they create burdens, and how evenly those effects are distributed.",
             },
             {
               type: "image",
@@ -1112,9 +1390,35 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/eco-fig-01.svg",
               alt: "Winter-run Chinook salmon life cycle",
-              title: "Winter-run Chinook salmon life cycle",
-              caption:
-                "Sacramento River winter-run Chinook have a unique life history. Spawning adults (age 2, 3, or 4 years old) enter the Sacramento River as early as November, and most migrate far up the Sacramento River, where they hold in the upper river for several months before spawning. After spawning, the eggs incubate in the gravel for approximately 3 months before emerging as fry.\nFry can rear in the freshwater environment for 5-10 months before transitioning to the smolt outmigration lifestage. From January through April, smolts migrate downstream and enter the Gulf of the Farallones. Once in the Pacific Ocean, they mature for 1-3 years before re-entering the Sacramento River to spawn again to start the next generation.",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Winter-run Chinook salmon life cycle
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Sacramento River winter-run Chinook have a unique life
+                    history. Spawning adults (age 2, 3, or 4 years old)
+                    enter the Sacramento River as early as November, and
+                    most migrate far up the Sacramento River, where they
+                    hold in the upper river for several months before
+                    spawning. After spawning, the eggs incubate in the
+                    gravel for approximately 3 months before emerging as
+                    fry.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Fry can rear in the freshwater environment for 5-10
+                    months before transitioning to the smolt outmigration
+                    lifestage. From January through April, smolts migrate
+                    downstream and enter the Gulf of the Farallones. Once
+                    in the Pacific Ocean, they mature for 1-3 years before
+                    re-entering the Sacramento River to spawn again to
+                    start the next generation.
+                  </Typography>
+                </>
+              ),
             },
           ],
         },
@@ -1149,19 +1453,51 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/eco-fig-02.svg",
               alt: "Winter-run Chinook salmon depend on connected habitats throughout their life cycle",
-              title:
-                "Winter-run Chinook salmon depend on connected habitats throughout their life cycle",
-              caption:
-                "Historically, most winter-run Chinook salmon spawned in cold headwater streams upstream of what is now Shasta Dam. Today, most spawn below the dam. Young salmon then move through the Sacramento River, floodplains, Delta, and Bay before reaching the ocean, while returning adults make the journey back upstream. Their survival depends on suitable flows, temperatures, and habitat at each stage of this life cycle.",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Winter-run Chinook salmon depend on connected habitats
+                    throughout their life cycle
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Historically, most winter-run Chinook salmon spawned in
+                    cold headwater streams upstream of what is now Shasta
+                    Dam. Today, most spawn below the dam. Young salmon then
+                    move through the Sacramento River, floodplains, Delta,
+                    and Bay before reaching the ocean, while returning
+                    adults make the journey back upstream. Their survival
+                    depends on suitable flows, temperatures, and habitat at
+                    each stage of this life cycle.
+                  </Typography>
+                </>
+              ),
             },
             {
               type: "image",
               src: "/images/themes/eco-fig-03.svg",
               alt: "Winter-run Chinook salmon need different river conditions throughout the year",
-              title:
-                "Winter-run Chinook salmon need different river conditions throughout the year",
-              caption:
-                "Winter-run chinook salmon depend on seasonal flows for migration and rearing and on cold summer water for successful spawning and egg survival. Because Shasta Dam blocks access to historical cold-water habitat, reservoir operations now play a critical role in maintaining suitable downstream temperatures.",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Winter-run Chinook salmon need different river
+                    conditions throughout the year
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Winter-run chinook salmon depend on seasonal flows for
+                    migration and rearing and on cold summer water for
+                    successful spawning and egg survival. Because Shasta
+                    Dam blocks access to historical cold-water habitat,
+                    reservoir operations now play a critical role in
+                    maintaining suitable downstream temperatures.
+                  </Typography>
+                </>
+              ),
             },
           ],
         },
@@ -1295,9 +1631,14 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/eco-fig-04.svg",
               alt: "Trade-offs radar chart",
-              title: "Trade-offs",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Trade-offs
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How do different management strategies affect overall
                     system performance across multiple outcomes?
@@ -1330,6 +1671,10 @@ export const WATER_THEMES: Theme[] = [
                     for more information on how these categories are
                     defined.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The results show that Functional environmental flows
                     substantially improve the environmental flow outcome,
@@ -1398,17 +1743,55 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/eco-fig-05.svg",
               alt: "Distribution view map of environmental flow and salmon outcomes",
-              title: "Equity",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Equity
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Where do benefits and impacts occur, and who is most
+                    affected?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    System-wide averages can hide important differences in
+                    scenario impacts. River conditions, water availability,
+                    ecosystem needs, and competing demands vary
+                    considerably across the Central Valley, meaning that
+                    the same river management strategy can create
+                    different benefits and burdens in different places.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The Distribution view in the Explore Tool shows results
+                    for individual locations of interest. The figure
+                    summarizes how outcomes shift at all locations under
+                    the Functional environmental flows scenario relative to
+                    current operations. Arrows indicate direction of change
+                    relative to current operations and color represents
+                    optimal (green), acceptable (blue), at-risk (orange),
+                    or critical (red) outcomes for the scenario. Boxes
+                    represent locations for which the outcome results
+                    remain the same.
+                  </Typography>
+                </>
+              ),
               caption:
-                "Where do benefits and impacts occur, and who is most affected?\nSystem-wide averages can hide important differences in scenario impacts. River conditions, water availability, ecosystem needs, and competing demands vary considerably across the Central Valley, meaning that the same river management strategy can create different benefits and burdens in different places.\nThe Distribution view in the Explore Tool shows results for individual locations of interest. The figure summarizes how outcomes shift at all locations under the Functional environmental flows scenario relative to current operations. Arrows indicate direction of change relative to current operations and color represents optimal (green), acceptable (blue), at-risk (orange), or critical (red) outcomes for the scenario. Boxes represent locations for which the outcome results remain the same.\nCompared with Current operations, Functional environmental flows have mixed effects on community surface water deliveries and agricultural revenues. Conditions improve at some locations, decline at others, and remain the same at most locations. Environmental flow outcomes substantially improve, while groundwater storage, freshwater for in-Delta uses, Delta estuary ecology, and winter-run salmon generally remain at the same outcome level. Reservoir storage experiences mixed effects. In the Sacramento Valley, more water is released for functional flows and other uses and results in lower storage; the San Joaquin Valley sees some increases in reservoir storage and some declines.\nOverall, the Distribution view reveals spatial patterns hidden by system-wide averages and helps identify where a management strategy creates benefits, where it creates burdens, and how evenly those effects are distributed.",
+                "Compared with Current operations, Functional environmental flows have mixed effects on community surface water deliveries and agricultural revenues. Conditions improve at some locations, decline at others, and remain the same at most locations. Environmental flow outcomes substantially improve, while groundwater storage, freshwater for in-Delta uses, Delta estuary ecology, and winter-run salmon generally remain at the same outcome level. Reservoir storage experiences mixed effects. In the Sacramento Valley, more water is released for functional flows and other uses and results in lower storage; the San Joaquin Valley sees some increases in reservoir storage and some declines.\nOverall, the Distribution view reveals spatial patterns hidden by system-wide averages and helps identify where a management strategy creates benefits, where it creates burdens, and how evenly those effects are distributed.",
             },
             {
               type: "image",
               src: "/images/themes/eco-fig-06.svg",
               alt: "Resilience heatmap across hydroclimate scenarios",
-              title: "Resilience",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Resilience
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How consistently do management strategies perform under
                     different climate futures?
@@ -1441,6 +1824,10 @@ export const WATER_THEMES: Theme[] = [
                     critical (red, 4.00 - 4.99), with higher numerical
                     values indicating worse performance.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Under Current operations, environmental flows are "at
                     risk" under historical climate and future climates
@@ -1541,9 +1928,32 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/delta-fig-01.svg",
               alt: "How river flows and water exports affect the Delta",
-              title: "How river flows and water exports affect the Delta",
-              caption:
-                "Freshwater flowing into the Delta and water exported through the Delta pumping facilities together influence how water moves through Delta channels and where fresh and saline water meet. When river flows are high and exports are low, freshwater generally moves seaward and limits salinity intrusion. When freshwater inflows decline or export pumping increases, flow patterns can shift and saline water can move farther inland.\nThese interactions create important trade-offs among freshwater available for export, water quality for in-Delta water uses, and ecosystem conditions.",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    How river flows and water exports affect the Delta
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Freshwater flowing into the Delta and water exported
+                    through the Delta pumping facilities together
+                    influence how water moves through Delta channels and
+                    where fresh and saline water meet. When river flows
+                    are high and exports are low, freshwater generally
+                    moves seaward and limits salinity intrusion. When
+                    freshwater inflows decline or export pumping
+                    increases, flow patterns can shift and saline water
+                    can move farther inland.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    These interactions create important trade-offs among
+                    freshwater available for export, water quality for
+                    in-Delta water uses, and ecosystem conditions.
+                  </Typography>
+                </>
+              ),
             },
           ],
         },
@@ -1626,7 +2036,7 @@ export const WATER_THEMES: Theme[] = [
                 <>
                   For more information about each of these scenarios, visit{" "}
                   <InlineNavLink to="/data">
-                    DATA AND DOCUMENTATION
+                    Data and Documentation
                   </InlineNavLink>
                   .
                 </>
@@ -1649,9 +2059,14 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/delta-fig-02.svg",
               alt: "Trade-offs radar chart",
-              title: "Trade-offs",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Trade-offs
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How do different management strategies affect overall
                     system performance across multiple outcomes?
@@ -1672,11 +2087,15 @@ export const WATER_THEMES: Theme[] = [
                     outcome, classified into four outcome levels: optimal,
                     acceptable, at-risk, and critical. See{" "}
                     <InlineNavLink to="/data">
-                      DATA AND DOCUMENTATION
+                      Data and Documentation
                     </InlineNavLink>{" "}
                     for more information on how these categories are
                     defined.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The results show how the two strategies shift the
                     balance of outcomes within and beyond the Delta.
@@ -1734,17 +2153,60 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/delta-fig-03.svg",
               alt: "Distribution view map of Delta outcomes",
-              title: "Equity",
+              captionBefore: (
+                <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Equity
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Where do benefits and impacts occur, and who is most
+                    affected?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    System-wide averages can hide important differences in
+                    scenario impacts. Communities, farms, ecosystems, and
+                    water users within and outside the Delta depend on
+                    water moving through the system in different ways. As
+                    a result, changes in reservoir operations, Delta
+                    flows, salinity, or exports can shift the benefits and
+                    impacts to different locations.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The Distribution view in the Explore Tool shows results
+                    for individual locations of interest. The figure
+                    summarizes how outcomes shift across locations under
+                    the Increase Shasta carry-over storage scenario
+                    relative to Current operations under the historical
+                    hydroclimate. This scenario targets approximately 20%
+                    more September storage in Shasta Reservoir than under
+                    Current operations by adjusting water allocations
+                    earlier in the year. Arrows indicate direction of
+                    change relative to current operations and color
+                    represents optimal (green), acceptable (blue), at-risk
+                    (orange), or critical (red) outcomes for the scenario.
+                    Squares represent locations that did not change
+                    condition relative to current operations.
+                  </Typography>
+                </>
+              ),
               caption:
-                "Where do benefits and impacts occur, and who is most affected?\nSystem-wide averages can hide important differences in scenario impacts. Communities, farms, ecosystems, and water users within and outside the Delta depend on water moving through the system in different ways. As a result, changes in reservoir operations, Delta flows, salinity, or exports can shift the benefits and impacts to different locations.\nThe Distribution view in the Explore Tool shows results for individual locations of interest. The figure summarizes how outcomes shift across locations under the Increase Shasta carry-over storage scenario relative to Current operations under the historical hydroclimate. This scenario targets approximately 20% more September storage in Shasta Reservoir than under Current operations by adjusting water allocations earlier in the year. Arrows indicate direction of change relative to current operations and color represents optimal (green), acceptable (blue), at-risk (orange), or critical (red) outcomes for the scenario. Squares represent locations that did not change condition relative to current operations.\nThe Distribution view shows that increasing Shasta carry-over storage has limited effects on most outcomes and locations. In many years, the additional amount of water needed to reach the September storage target may be relatively modest and can be accumulated through adjustments spread over several preceding months. Other demands and operating constraints can also limit how strongly this change propagates through the system. Community surface water deliveries and agricultural revenues decline at a small number of locations, while reservoir storage improves at two locations. Freshwater for Delta exports declines. Environmental flows, groundwater storage, Delta estuary ecology, and freshwater for in-Delta uses do not change.\nThese results show how a strategy intended to maintain more water in storage can create benefits and negative impacts in different parts of the system. The locations benefiting from increased reservoir storage are not necessarily the same locations experiencing declines in environmental flows, agricultural revenues, or community surface water deliveries.\nOverall, the Distribution view reveals patterns hidden by system-wide averages and helps identify where management strategies create benefits, where they create burdens, and how evenly those effects are distributed.",
+                "The Distribution view shows that increasing Shasta carry-over storage has limited effects on most outcomes and locations. In many years, the additional amount of water needed to reach the September storage target may be relatively modest and can be accumulated through adjustments spread over several preceding months. Other demands and operating constraints can also limit how strongly this change propagates through the system. Community surface water deliveries and agricultural revenues decline at a small number of locations, while reservoir storage improves at two locations. Freshwater for Delta exports declines. Environmental flows, groundwater storage, Delta estuary ecology, and freshwater for in-Delta uses do not change.\nThese results show how a strategy intended to maintain more water in storage can create benefits and negative impacts in different parts of the system. The locations benefiting from increased reservoir storage are not necessarily the same locations experiencing declines in environmental flows, agricultural revenues, or community surface water deliveries.\nOverall, the Distribution view reveals patterns hidden by system-wide averages and helps identify where management strategies create benefits, where they create burdens, and how evenly those effects are distributed.",
             },
             {
               type: "image",
               src: "/images/themes/delta-fig-04.svg",
               alt: "Resilience heatmap across hydroclimate scenarios",
-              title: "Resilience",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Resilience
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How consistently do management strategies perform under
                     different climate futures?
@@ -1760,7 +2222,7 @@ export const WATER_THEMES: Theme[] = [
                     representing increasing levels of stress to the water
                     system. See{" "}
                     <InlineNavLink to="/data">
-                      DATA AND DOCUMENTATION
+                      Data and Documentation
                     </InlineNavLink>{" "}
                     for more information about hydroclimate futures.
                   </Typography>
@@ -1779,6 +2241,10 @@ export const WATER_THEMES: Theme[] = [
                     4.99), with higher numerical values indicating worse
                     performance.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Relaxing the fall Delta salinity standard produces
                     relatively small changes in system outcomes under the
@@ -1824,5 +2290,4 @@ export const WATER_THEMES: Theme[] = [
       },
     ],
   },
-
 ]

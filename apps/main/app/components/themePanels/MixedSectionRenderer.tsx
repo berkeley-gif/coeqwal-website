@@ -86,7 +86,14 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
               />
             )
 
-          case "image":
+          case "image": {
+            const figcaptionSx = {
+              color: muiTheme.palette.text.primary,
+              gap: muiTheme.space.listGap.sm,
+              textAlign: isMobile ? "center" : ("left" as const),
+              display: "flex",
+              flexDirection: "column" as const,
+            }
             return (
               <Box
                 key={i}
@@ -104,6 +111,21 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                   maxWidth: isMobile ? "100%" : "900px",
                 }}
               >
+                {block.captionBefore && (
+                  <Box
+                    component="figcaption"
+                    sx={{
+                      ...figcaptionSx,
+                      pb: isMobile
+                        ? muiTheme.space.listGap.md
+                        : muiTheme.space.listGap.lg,
+                    }}
+                  >
+                    {typeof block.captionBefore === "string"
+                      ? parseCaptionBlocks(block.captionBefore)
+                      : block.captionBefore}
+                  </Box>
+                )}
                 <Box
                   component={motion.img}
                   initial="hidden"
@@ -122,14 +144,10 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                   <Box
                     component="figcaption"
                     sx={{
-                      color: muiTheme.palette.text.primary,
+                      ...figcaptionSx,
                       pt: isMobile
                         ? muiTheme.space.listGap.md
                         : muiTheme.space.listGap.lg,
-                      gap: muiTheme.space.listGap.sm,
-                      textAlign: isMobile ? "center" : "left",
-                      display: "flex",
-                      flexDirection: "column",
                     }}
                   >
                     {block.title && (
@@ -148,6 +166,8 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                 )}
               </Box>
             )
+          }
+
           default: {
             const _exhaustive: never = block
             return null
