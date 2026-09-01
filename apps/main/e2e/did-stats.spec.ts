@@ -100,9 +100,7 @@ test("Stats view sentence reports the mean and CV, not the median", async ({
   await expect(sentence).toContainText("(CV)")
   await expect(sentence).not.toContainText(/median/i)
 
-  await page
-    .getByRole("button", { name: "Climate futures", exact: true })
-    .click()
+  await page.getByRole("button", { name: "Hydroclimates", exact: true }).click()
   await expect(
     page.getByText(
       /^At Shasta Reservoir under .+, mean April reservoir storage ranges from [\d,.]+ TAF \(/,

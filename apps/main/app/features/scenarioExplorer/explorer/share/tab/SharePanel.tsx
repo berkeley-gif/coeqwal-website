@@ -154,8 +154,8 @@ function SharePanelContent() {
           }}
         >
           Review snapshots of{" "}
-          <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink> to
-          access data, gain insights, and share what you have learned.
+          <GlossaryTermLink term="Scenario">scenario</GlossaryTermLink> results
+          to access data, gain insights, and share what you have learned.
         </Typography>
         <Typography
           sx={{
@@ -167,9 +167,7 @@ function SharePanelContent() {
           }}
         >
           No results staged for sharing yet. Go to the Explore tab and find
-          scenario results that you want to share by clicking on the{" "}
-          <icons.IosShare sx={{ fontSize: "1rem", ml: 0.5 }} fontWeight={600} />
-          .
+          scenario results that you want to share by clicking on the share icon.
         </Typography>
         <Button
           variant="outlined"
@@ -234,8 +232,9 @@ function SharePanelContent() {
             }}
           >
             Review snapshots of{" "}
-            <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink> to
-            access data, gain insights, and share what you have learned.
+            <GlossaryTermLink term="Scenario">scenario</GlossaryTermLink>{" "}
+            results to access data, gain insights, and share what you have
+            learned.
           </Typography>
           {/* Clears the tray AND the story, and the store persists the empty
               state immediately. No confirm step, matching the drawer's
@@ -251,8 +250,10 @@ function SharePanelContent() {
               sx={{
                 textTransform: "none",
                 mt: 1,
-                color: theme.palette.text.secondary,
-                borderColor: theme.palette.text.secondary,
+                // White, not text.secondary: the share tab sits on the dark
+                // navy panel color, where grey text has too little contrast.
+                color: theme.palette.common.white,
+                borderColor: theme.palette.common.white,
               }}
             >
               Clear share tray

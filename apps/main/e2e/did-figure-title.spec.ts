@@ -42,11 +42,11 @@ test("buildFigureTitle omits absent parts without dangling separators", () => {
   expect(
     buildFigureTitle({
       variableName: "Delta outflow volume",
-      memberSummary: "2 climate futures",
+      memberSummary: "2 hydroclimates",
       waterYearTypeLabels: ["Wet", "Above normal", "Dry"],
     }),
   ).toBe(
-    "Delta Outflow Volume, 2 Climate Futures, Wet, Above Normal and Dry Water Years",
+    "Delta Outflow Volume, 2 Hydroclimates, Wet, Above Normal and Dry Water Years",
   )
 })
 
@@ -61,7 +61,7 @@ test("getLocationTitle appends the group's title suffix", () => {
   // Basin" would be wrong, and the NOD total is now the default groundwater
   // location, so this is the default figure title.
   expect(getLocationTitle("basins", "AGG_GW_NOD")).toBe("All North of Delta")
-  expect(getLocationTitle("reservoirs", "AGG_NOD")).toBe("All North-of-Delta")
+  expect(getLocationTitle("reservoirs", "AGG_NOD")).toBe("All North of Delta")
 })
 
 test("null water-year labels omit the clause entirely (WYT-excluded variables)", () => {

@@ -50,6 +50,9 @@ export default function ViewBar() {
   const variable = getVariable(selectedVariableId)
   if (!variable) return null
 
+  // A tab strip with a single pre-selected tab offers no choice, so the
+  // view tabs render only when the variable has at least two views; the
+  // distribution-style toggle stands alone for single-view variables.
   const views = variable.views.filter((v) => v !== "monthly")
   // The Level view is blocked while a groundwater total is the pinned (or a
   // compared) location; the user picks a basin, nothing is reselected.
@@ -78,31 +81,63 @@ export default function ViewBar() {
       }}
     >
       <InlineTourAnchor anchorId="data.views">
-        <ToggleButtonGroup
-          exclusive
-          size="small"
-          value={view}
-          onChange={(_, next: VariableView | null) => {
-            if (next) setView(next)
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 1.5,
           }}
-          aria-label="Data view"
         >
-          {views.map((v) => (
-            <ToggleButton
-              key={v}
-              value={v}
-              disabled={v === "level" && levelBlocked != null}
-              aria-describedby={
-                v === "level" && levelBlocked != null
-                  ? "level-view-blocked-reason"
-                  : undefined
-              }
-              sx={{ textTransform: "none", px: 1.5 }}
+          {views.length > 1 && (
+            <ToggleButtonGroup
+              exclusive
+              size="small"
+              value={view}
+              onChange={(_, next: VariableView | null) => {
+                if (next) setView(next)
+              }}
+              aria-label="Data view"
             >
-              {variable.viewLabels?.[v] ?? VIEW_LABELS[v]}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
+              {views.map((v) => (
+                <ToggleButton
+                  key={v}
+                  value={v}
+                  disabled={v === "level" && levelBlocked != null}
+                  aria-describedby={
+                    v === "level" && levelBlocked != null
+                      ? "level-view-blocked-reason"
+                      : undefined
+                  }
+                  sx={{ textTransform: "none", px: 1.5 }}
+                >
+                  {variable.viewLabels?.[v] ?? VIEW_LABELS[v]}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          )}
+          {showDistToggle && (
+            <ToggleButtonGroup
+              exclusive
+              size="small"
+              value={distKind}
+              onChange={(_, next: DataDistKind | null) => {
+                if (next) setDistKind(next)
+              }}
+              aria-label="Distribution chart style"
+            >
+              {DIST_OPTIONS.map((opt) => (
+                <ToggleButton
+                  key={opt.value}
+                  value={opt.value}
+                  sx={{ textTransform: "none", px: 1.5 }}
+                >
+                  {opt.label}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          )}
+        </Box>
       </InlineTourAnchor>
       {levelBlocked && view !== "level" && (
         <Typography
@@ -112,28 +147,6 @@ export default function ViewBar() {
         >
           {levelBlocked}
         </Typography>
-      )}
-
-      {showDistToggle && (
-        <ToggleButtonGroup
-          exclusive
-          size="small"
-          value={distKind}
-          onChange={(_, next: DataDistKind | null) => {
-            if (next) setDistKind(next)
-          }}
-          aria-label="Distribution chart style"
-        >
-          {DIST_OPTIONS.map((opt) => (
-            <ToggleButton
-              key={opt.value}
-              value={opt.value}
-              sx={{ textTransform: "none", px: 1.5 }}
-            >
-              {opt.label}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
       )}
     </Box>
   )

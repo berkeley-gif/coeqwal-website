@@ -1,13 +1,15 @@
 /**
- * Data in Depth tour. Same rhythm as the list and radar tours: a short hero,
- * a "get oriented" card per region followed by that region's controls, a
- * "read the chart" section anchored to the figure, and a closing card that
- * points at the next step of the journey.
+ * Data in Depth tour. Step copy mirrors the website-copy document's
+ * "Data In Depth Tour" script: two centered intro cards, the variables
+ * rail, the variable explainers, the compare-by control, and the three
+ * per-axis selector steps (the effects component switches the compare
+ * axis so each selector is on screen while its step is active). The
+ * remaining steps cover controls the script does not mention (shared
+ * toolbar, view tabs, water-year filter, the figure, Save snapshot, the
+ * closing journey card) and keep their drafted copy.
  *
- * Step copy is drafted from the tool's own behavior and is expected to be
- * replaced verbatim by the website-copy document's Data in Depth section.
- * Keep the ids and anchor ids stable when that swap happens: they are React
- * keys and sessionStorage payload bits.
+ * Keep the ids and anchor ids stable: they are React keys and
+ * sessionStorage payload bits.
  */
 
 import type { TourStep } from "../../../tour/types"
@@ -16,18 +18,67 @@ export const DATA_TOUR: TourStep[] = [
   {
     id: "data.hero",
     eyebrow: "start here",
-    title: "Data in Depth shows the numbers behind the outcomes",
-    body: "Pick a variable, choose what to compare, and read one chart at a time. Every figure can be saved to your story together with the data behind it.",
+    title:
+      "If this is your first time using the Explore Tool, we recommend visiting the Get Started section of the site before beginning your exploration.",
+  },
+  {
+    id: "data.intro",
+    eyebrow: "data in depth",
+    title:
+      "The Data in Depth tool can be used to explore additional scenario outcomes variables.",
   },
 
-  // Orientation and controls for the left rail.
   {
     id: "data.step0.rail",
     anchorId: "data.rail",
-    eyebrow: "get oriented",
-    title: "Variables live in the left rail, grouped by sector",
-    body: "Pick any variable to load its chart. Variables that feed a key outcome say so in a chip beside the chart title.",
+    eyebrow: "variables",
+    title: "Select a variable.",
+    body: "Select a single variable from the list to evaluate. Data for that variable will be plotted for up to six selected scenarios and for the selected hydroclimate.",
     placement: "right",
+  },
+  {
+    id: "data.step2.explainers",
+    anchorId: "data.explainers",
+    eyebrow: "what is this variable?",
+    title: "Open this tab for a description of the variable.",
+    body: "There is a general description and technical definition of each variable.",
+    placement: "top",
+  },
+
+  // Arranging the chart: the comparison axis and its per-axis selectors.
+  {
+    id: "data.step1.compareBy",
+    anchorId: "data.compareBy",
+    eyebrow: "compare by",
+    title:
+      "Compare variable values by scenario, by hydroclimate, or by location",
+    body: "Determine how the variables should be displayed on the plot.",
+    placement: "bottom-start",
+  },
+  {
+    id: "data.step1.selectLocation",
+    anchorId: "data.locationPin",
+    eyebrow: "select location",
+    title:
+      "Display how the variable differs across scenarios at a specific location",
+    body: 'When "Compare by scenarios" is selected, choose which locations to compare variable values.',
+    placement: "bottom-start",
+  },
+  {
+    id: "data.step1.selectScenarioLocation",
+    anchorId: "data.heldPins",
+    eyebrow: "select scenario and location",
+    title: "Display how the variable changes across hydroclimates",
+    body: 'When "Compare by hydroclimates" is selected, choose which scenario and location to compare variable values.',
+    placement: "bottom-start",
+  },
+  {
+    id: "data.step1.selectLocations",
+    anchorId: "data.locationMembers",
+    eyebrow: "select locations",
+    title: "Display how the variable changes across locations",
+    body: 'When "Compare by locations" is selected, choose which location to display.',
+    placement: "bottom-start",
   },
 
   // The shared toolbar above the tool.
@@ -36,18 +87,8 @@ export const DATA_TOUR: TourStep[] = [
     anchorId: "data.viewArea",
     eyebrow: "get oriented",
     title: "These controls set the data view",
-    body: "This is the same toolbar as the other Explore tools. View by hydroclimate switches the climate future every chart on this page is computed under.",
+    body: "This is the same toolbar as the other Explore tools. View by hydroclimate switches the hydroclimate every chart on this page is computed under.",
     placement: "bottom-end",
-  },
-
-  // Arranging the chart.
-  {
-    id: "data.step1.compareBy",
-    anchorId: "data.compareBy",
-    eyebrow: "arrange the chart",
-    title: "Choose one comparison axis",
-    body: "Compare your selected scenarios, compare climate futures for a single scenario, or compare locations. Whichever you pick, the other dimensions are held constant by the selectors beside this control.",
-    placement: "bottom-start",
   },
   {
     id: "data.step1.views",
@@ -83,14 +124,6 @@ export const DATA_TOUR: TourStep[] = [
     title: "Save snapshot",
     body: "Stage the chart you are looking at in the Share drawer, then open the Share tab to download the figure and the data behind it.",
     placement: "bottom-end",
-  },
-  {
-    id: "data.step2.explainers",
-    anchorId: "data.explainers",
-    eyebrow: "read the chart",
-    title: "What is this variable?",
-    body: "Open the panels under the chart for a plain-language and a technical definition of the variable, and for how to read the chart style you are in.",
-    placement: "top",
   },
 
   {

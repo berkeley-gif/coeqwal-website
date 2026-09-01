@@ -84,7 +84,7 @@ test("the box plot explainer names the dashed mean line", async ({ page }) => {
   await page.getByRole("button", { name: "Box plot" }).click()
   await page.getByRole("button", { name: "How do I read this chart?" }).click()
   await expect(
-    page.getByText("The short dashed line inside each box marks the mean."),
+    page.getByText("The dashed line is the mean value (average)."),
   ).toBeVisible()
 })
 

@@ -9,7 +9,7 @@
 
 import React, { useCallback } from "react"
 import { Box, Typography, useTheme, Switch } from "@repo/ui/mui"
-import { HydroclimateBadge } from "@repo/ui"
+import { HydroclimateBadge, InfoIconButton } from "@repo/ui"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import {
@@ -140,6 +140,23 @@ export default function ToolToolbar({
                 flexWrap: "wrap",
               }}
             >
+              <InfoIconButton
+                title="About the hydroclimates"
+                placement="bottom"
+                tooltipContent={
+                  <Typography variant="body2">
+                    The historical hydroclimate used in COEQWAL is adjusted for
+                    recent climate change and does not represent the observed
+                    historical record. The flow change reported for the four
+                    hydroclimate futures represent the average change in flow
+                    from California&apos;s major water supply basins over a
+                    30-year period, centered on 2043. An assumed level of sea
+                    level rise is also specified for each hydroclimate future.
+                    For more information, see technical documentation on the
+                    Data page.
+                  </Typography>
+                }
+              />
               <Typography
                 variant="dashboard"
                 sx={{
