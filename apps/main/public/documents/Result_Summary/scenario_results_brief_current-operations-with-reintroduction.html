@@ -1,0 +1,4687 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>
+      Current operations with reintroduction: modeled outcome levels — COEQWAL
+    </title>
+    <style>
+      :root {
+        --ink: #1c1a17;
+        --muted: #5c554c;
+        --line: #d9d2c6;
+        --paper: #fbf9f5;
+        --frame: #f4f1ea;
+        --accent: #7a5c1e;
+        --climate: #c28433;
+        --operations: #3d7db5;
+        --t1-fill: #dcefe1;
+        --t2-fill: #d8eef2;
+        --t3-fill: #fbe7d4;
+        --t4-fill: #fbdcd3;
+        --t1-txt: #16774a;
+        --t2-txt: #1f7c8c;
+        --t3-txt: #b5651d;
+        --t4-txt: #c2412a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        font-size: 17px;
+      }
+      body {
+        margin: 0;
+        background: var(--frame);
+        color: var(--ink);
+        font-family:
+          "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+          "Times New Roman", serif;
+        line-height: 1.6;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .wrap {
+        max-width: 60rem;
+        margin: 0 auto;
+        padding: 2.4rem 1.4rem 5rem;
+      }
+      header.doc {
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 1rem;
+        margin-bottom: 1.4rem;
+      }
+      .kicker {
+        font-size: 0.7rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 0.35rem;
+      }
+      /* ── Download PDF button (screen-only) ─────────────────────────────
+     A109 requirement 1: every published HTML brief carries this, linking by
+     RELATIVE path to pdf/<frozen base name>.pdf. The name is the manifest's,
+     not this file's, because the button is an affordance for the served site
+     (A151). Requirement 2 is the print rule below: the button must not appear
+     in the PDF, which would otherwise offer to download itself. The .sitenav
+     rows are NOT print-hidden and deliberately do print. */
+      header.doc {
+        position: relative;
+      }
+      .pdf-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 0.25rem 0.7rem;
+        border: 1px solid var(--accent);
+        border-radius: 3px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+        font-size: 0.66rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        color: var(--accent);
+        text-decoration: none;
+        transition:
+          color 0.2s,
+          background-color 0.2s;
+      }
+      .pdf-button:hover {
+        color: #fff;
+        background-color: var(--accent);
+      }
+      @media (max-width: 640px) {
+        .pdf-button {
+          position: static;
+          display: inline-block;
+          margin: 0 0 0.5rem;
+        }
+      }
+      h1 {
+        font-size: 1.6rem;
+        line-height: 1.22;
+        margin: 0 0 0.5rem;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      h2 {
+        font-size: 1.2rem;
+        margin: 2.1rem 0 0.5rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid var(--line);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+        scroll-margin-top: 1rem;
+      }
+      p {
+        margin: 0.6rem 0;
+      }
+      .prov {
+        font-style: italic;
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin: 0.2rem 0;
+      }
+      .tldr {
+        font-size: 1.05rem;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--accent);
+        border-radius: 4px;
+        padding: 0.8rem 1rem;
+        margin: 1rem 0;
+      }
+      a {
+        color: var(--accent);
+      }
+      code {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.84em;
+        background: #efe9dd;
+        padding: 0.05em 0.35em;
+        border-radius: 3px;
+      }
+      figure {
+        margin: 1rem 0 0.4rem;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 0.9rem 0.9rem 0.7rem;
+      }
+      figure svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      figcaption {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-top: 0.6rem;
+        line-height: 1.55;
+      }
+      /* §8.6 ruling 16. Panels of one figure, stacked: they share a width and a
+     level axis, so they are spaced closely enough to read as one exhibit and
+     each is labeled with nothing but its position. */
+      .panel {
+        margin: 0 0 0.5rem;
+      }
+      .panel:last-of-type {
+        margin-bottom: 0;
+      }
+      .panel-label {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin: 0 0 0.15rem;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+        letter-spacing: 0.02em;
+      }
+      .disclosure {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin: 0.7rem 0 0;
+        padding: 0.4rem 0.7rem;
+        border-left: 3px solid var(--line);
+        background: var(--frame);
+      }
+      table.grid {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0.7rem 0 0.3rem;
+        font-size: 0.8rem;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      /* One vertical alignment for every cell in the grid, and it is the BOTTOM.
+     A data cell stacks three lines — the hydroclimate effect, the operations
+     effect, then the badge and the value — and the badge-and-value line is the
+     one a reader scans across the row. Under `middle` the stack is centred in a
+     row whose height is set by the tallest cell, so a row whose strategy name
+     wraps to two lines, or carries the single-level-value tag, pushes that line
+     down relative to its neighbours: on 71_PA4 the Functional environmental
+     flows row sat visibly lower than the rows above it. Bottom-aligning every
+     cell puts the badge-and-value line the same distance above the row's own
+     bottom border in every row, and lines it up with the single-line baseline
+     column, whose `vertical-align:bottom` this now subsumes. */
+      table.grid th,
+      table.grid td {
+        border: 1px solid var(--line);
+        padding: 0.28rem 0.34rem;
+        text-align: left;
+        vertical-align: bottom;
+      }
+      table.grid thead th {
+        background: var(--frame);
+        font-weight: 600;
+        font-size: 0.72rem;
+      }
+      /* The permalink pilcrow on each hydroclimate column: present for anyone who
+     wants the anchor, out of the way of everyone reading the table. Hidden with
+     `opacity` rather than `display:none` so it keeps its box — the header text
+     does not shift when it appears — and so it stays in the accessibility tree
+     and reachable by keyboard. `:focus-visible` brings it back for a tabbing
+     reader, who cannot hover. */
+      table.grid thead th .pin {
+        text-decoration: none;
+        color: var(--accent);
+        margin-right: 0.15rem;
+        opacity: 0;
+        transition: opacity 0.12s ease-in-out;
+      }
+      table.grid thead th:hover .pin,
+      table.grid thead th .pin:focus,
+      table.grid thead th .pin:focus-visible {
+        opacity: 1;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        table.grid thead th .pin {
+          transition: none;
+        }
+      }
+      table.grid th[scope="row"] {
+        font-weight: 600;
+        width: 10rem;
+      }
+      td.n {
+        text-align: right;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.76rem;
+        white-space: nowrap;
+      }
+      table.grid td span {
+        display: block;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.74rem;
+        white-space: nowrap;
+      }
+      table.grid td:not(.flag) span:not(.bt) {
+        display: grid;
+        grid-template-columns: 1.9rem 1fr;
+        text-align: right;
+        column-gap: 0.3rem;
+      }
+      table.grid td:not(.flag) .bt {
+        justify-self: start;
+        margin-left: 0;
+      }
+      table.grid td:not(.flag) span.cl,
+      table.grid td:not(.flag) span.op {
+        display: block;
+      }
+      table.grid td.n .bt {
+        margin: 0;
+      }
+      table.grid tr:has(.svtag) td:not(.flag) span:not(.bt) {
+        grid-template-columns: calc(1.9rem + 2ch) 1fr;
+      }
+      /* §8.6 ruling 14. The numbers table is visible in every kind: it is the only
+     text alternative to the figure that carries the values, and the five
+     citable column anchors live on its header cells. It was behind a
+     disclosure element here and inside a screen-reader-only div on the place
+     pages; both are gone, and the styles for them with them. */
+      .numbers-body {
+        margin: 0.2rem 0 1.4rem;
+      }
+      .cl {
+        color: #8a5c14;
+        font-weight: 700;
+      }
+      .op {
+        color: #2c5f8d;
+        font-weight: 700;
+      }
+      .sc {
+        color: var(--ink);
+      }
+      /* Cells where the two effects run opposite ways. The fill alone was doing all
+     the work at #fbf4ee — about two percent off the paper, which disappeared in
+     a room with a projector and again in every greyscale print, so the sentence
+     above the table named a distinction a reader could not see. Lightened
+     further and given an outline: the border is what survives, because it does
+     not depend on the fill reproducing. `box-shadow: inset` rather than
+     `border`, so the outline sits INSIDE the cell box and no column shifts by a
+     pixel when a cell is flagged. Colour and outline both, so the cue is not
+     carried by hue alone. Printed with `print-color-adjust` asked to keep the
+     fill, and legible without it.
+
+     The outline is `--muted`, deliberately NOT `--climate`. Warm orange already
+     means "the hydroclimate effect" on this page — it is the colour of figure
+     1's warm arrow and of the `.cl` number in the cell the box would enclose —
+     and a reader who has learned that would read an orange box as encoding it.
+     What the box means is that the two effects oppose, which is neither of
+     them, so it is drawn in the one neutral the palette has.
+     (v2 edit round 2026-08-24, step 5.) */
+      td.opp {
+        background: #fdf8f3;
+        box-shadow: inset 0 0 0 1.5px var(--muted);
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      @media print {
+        td.opp {
+          box-shadow: inset 0 0 0 1.5px #000;
+        }
+      }
+      td.flag {
+        font-size: 0.72rem;
+        color: var(--muted);
+        line-height: 1.3;
+      }
+      td.flag .rng {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.7rem;
+      }
+      .svtag {
+        display: inline-block;
+        font-weight: 400;
+        font-size: 0.62rem;
+        color: var(--muted);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+      .bt {
+        display: inline-block !important;
+        min-width: 1.2rem;
+        text-align: center;
+        font-size: 0.64rem;
+        font-weight: 700;
+        border-radius: 3px;
+        padding: 0.02rem 0.18rem;
+        margin-left: 0.22rem;
+        border: 1px solid transparent;
+      }
+      .bt.t1 {
+        background: var(--t1-fill);
+        color: var(--t1-txt);
+        border-color: var(--t1-txt);
+      }
+      .bt.t2 {
+        background: var(--t2-fill);
+        color: var(--t2-txt);
+        border-color: var(--t2-txt);
+      }
+      .bt.t3 {
+        background: var(--t3-fill);
+        color: var(--t3-txt);
+        border-color: var(--t3-txt);
+      }
+      .bt.t4 {
+        background: var(--t4-fill);
+        color: var(--t4-txt);
+        border-color: var(--t4-txt);
+      }
+      /* §8.6 ruling 13. A group of more than four renders as a list in columns:
+     a reader finds a name in it by shape, which a 22-link sentence does not
+     allow. The entry for the brief you are on is present and unlinked. */
+      .rel-q {
+        margin: 1.1rem 0 0.2rem;
+      }
+      ul.related {
+        list-style: none;
+        margin: 0.2rem 0 0.4rem;
+        padding: 0;
+        columns: 2;
+        column-gap: 1.8rem;
+        font-size: 0.92rem;
+      }
+      ul.related li {
+        break-inside: avoid;
+        margin: 0 0 0.22rem;
+        line-height: 1.4;
+      }
+      ul.related .here {
+        color: var(--muted);
+      }
+      ul.related .here em {
+        font-style: italic;
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
+      @media (max-width: 34rem) {
+        ul.related {
+          columns: 1;
+        }
+      }
+      .key {
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin: 0.5rem 0 0;
+      }
+      .key b {
+        color: var(--ink);
+      }
+      /* The LOI facts table (§5.8). Four rows, no level value in any of them: the
+     row labels are the questions, so the label column is the narrow one. */
+      table.facts {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0.7rem 0 0.9rem;
+        font-size: 0.86rem;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      table.facts th,
+      table.facts td {
+        border: 1px solid var(--line);
+        padding: 0.4rem 0.55rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      table.facts th[scope="row"] {
+        background: var(--frame);
+        font-weight: 600;
+        width: 13rem;
+        color: var(--muted);
+      }
+      /* Reserved space that is not yet written, marked as such on the page rather
+     than left silent. A reader can tell a question that was deferred from one
+     that was never asked; a blank cannot say which it is. */
+      .placeholder {
+        border: 1px dashed var(--line);
+        background: var(--frame);
+        color: var(--muted);
+        font-size: 0.86rem;
+        padding: 0.55rem 0.8rem;
+        border-radius: 4px;
+      }
+      .doesnt {
+        border-left: 4px solid var(--muted);
+        background: #f0ede7;
+        padding: 0.7rem 1rem;
+        margin: 1rem 0;
+      }
+      .doesnt p:first-child {
+        margin-top: 0;
+      }
+      .doesnt p:last-child {
+        margin-bottom: 0;
+      }
+      .refs {
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .refs p {
+        margin: 0.5rem 0;
+      }
+      .read-note p {
+        margin: 0 0 0.5rem;
+      }
+      .explore-link {
+        font-weight: 600;
+      }
+      /* The site navigation row, top and bottom. Same measure as .wrap so the two
+     links sit over the text column rather than over the frame. */
+      .sitenav {
+        max-width: 60rem;
+        margin: 0 auto;
+        padding: 0.55rem 1.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1rem;
+        font-size: 0.78rem;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      .sitenav a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .sitenav a:hover {
+        text-decoration: underline;
+      }
+      .sitenav-top {
+        border-bottom: 1px solid var(--line);
+      }
+      .sitenav-bottom {
+        border-top: 1px solid var(--line);
+      }
+      @media print {
+        body {
+          background: #fff;
+          font-size: 11pt;
+        }
+        .wrap {
+          max-width: none;
+          padding: 0;
+        }
+        a {
+          color: inherit;
+          text-decoration: none;
+        }
+        figure,
+        table.grid,
+        .tldr {
+          break-inside: avoid;
+        }
+        h2 {
+          break-after: avoid;
+        }
+        .panel {
+          break-inside: avoid;
+        }
+        .pdf-button {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="sitenav sitenav-top">
+      <a href="https://coeqwal.org">COEQWAL</a
+      ><a href="https://coeqwal.org/data">Return to COEQWAL Documentation</a>
+    </nav>
+    <div class="wrap">
+      <header class="doc">
+        <p class="kicker">COEQWAL results brief &middot; strategy</p>
+        <a
+          class="pdf-button"
+          href="pdf/scenario_results_brief_current-operations-with-reintroduction.pdf"
+          >Download PDF</a
+        >
+        <h1>
+          Current operations with reintroduction: modeled outcome levels across
+          five hydroclimates, and how much of the difference from the baseline
+          is the hydroclimate
+        </h1>
+        <p class="prov">
+          A results brief for a general reader &mdash; prototype (v0_3), built
+          by the brief builder from the locked 2026-08-29 API snapshot &mdash;
+          reporting modeled outcome levels for one management strategy read
+          across the five hydroclimates, each difference from the baseline split
+          into the two effects that produce it. The build stamp, the run
+          identifiers and the verification status are in
+          <a href="#references">references</a>.
+        </p>
+      </header>
+
+      <p class="tldr">
+        <strong>TL;DR.</strong> Compared with the baseline &mdash; current
+        operations under the historical hydroclimate &mdash; this
+        strategy&rsquo;s modeled outcome levels differ from the baseline in all
+        nine sectors of the water system under at least one hydroclimate.
+        Reading each sector under each hydroclimate as one result, 45 in all,
+        the hydroclimate effect is the larger of the two in 32, the operations
+        effect in 5, and neither is larger in the remaining 8. The
+        strategy&rsquo;s value differs from current operations at 1 of the 279
+        locations reported here under the historical hydroclimate and at 1 under
+        extreme climate stress, and across the five hydroclimates that count is
+        1 under every one; where it does not differ, the difference from the
+        baseline is the hydroclimate alone. Winter-run salmon is the clearest
+        case of the two effects running opposite ways: under high climate stress
+        the hydroclimate contributes +0.6 and the strategy −1.0, leaving a
+        difference from the baseline of −0.4.
+      </p>
+
+      <h2 id="what-this-is">What this is</h2>
+      <p>
+        This is a <em>results brief</em>: it reports the modeled outcome levels,
+        and nothing else, for the current operations with reintroduction
+        strategy &mdash; one of 29 management strategies in the COEQWAL scenario
+        library &mdash; simulated once under each of five hydroclimates and read
+        as a set. The selection rule is that there is none: this brief reports
+        every sector of the water system these model runs carry an outcome level
+        for, across all five modeled hydroclimates, and no filter is applied to
+        either. All nine sectors of the water system are reported under every
+        hydroclimate. A scenario is a strategy paired with one hydroclimate; the
+        five hydroclimates are a sample of stress levels, not a forecast of
+        which will occur. For how the five were constructed, see the
+        <a
+          href="https://coeqwal.org/documents/Background/hydroclimates_brief.html#construction"
+          >hydroclimates reference brief</a
+        >.
+      </p>
+      <p>
+        This strategy <em>is</em> current operations: all eight of the
+        operational settings the scenario library records carry the reference
+        values every other strategy is measured against. For the full
+        configuration, see the
+        <a
+          href="https://coeqwal.org/documents/Strategy_Documentation/strategy_brief_current-operations-with-reintroduction.html"
+          >current operations with reintroduction strategy brief</a
+        >.
+      </p>
+      <p>
+        Current operations with reintroduction specifies the same water
+        management actions as Current operations. The two strategies share the
+        same CalSim 3 simulation of the water system — the same model run, not a
+        duplicate. They differ in one action that is not a water management
+        action: reintroduction of winter-run Chinook salmon to cold-water
+        habitat upstream of Shasta Dam. Reintroduction enters the modeling
+        through the winter-run life cycle model, not through CalSim 3, so
+        modeled results differ from Current operations only for the winter-run
+        salmon key outcome. Results for the other eight key outcomes are
+        identical by construction.
+      </p>
+
+      <h2 id="what-the-model-shows">What the model shows</h2>
+      <p>
+        Across the nine sectors these runs report, the modeled level values
+        under the baseline &mdash; current operations under the historical
+        hydroclimate &mdash; range from 1.7 to 4.2. Read across the five
+        hydroclimates, the values this brief reports range from 1.7 to 4.2. Of
+        the 45 results &mdash; one sector under one hydroclimate &mdash; 20 sit
+        in a different level band from that sector&rsquo;s baseline value and 25
+        sit in the same band; in seven of the nine sectors the five values do
+        not all sit in one band.
+      </p>
+      <p>
+        The figure below draws every one of those results beside the baseline,
+        with the two effects that produce the difference shown as separate
+        marks, so a reader can see how much of each difference the hydroclimate
+        carries and how much the strategy does. The section that follows says
+        what the two effects are before the figure draws them; what the level
+        values themselves mean is set out in
+        <a href="#how-to-read">how to read the values</a>.
+      </p>
+
+      <h2 id="decomposition">The baseline, and the two effects</h2>
+      <p>
+        <strong>The baseline</strong> is current operations under the historical
+        hydroclimate. It is the one reference this brief asks a reader to learn,
+        and it is the same value in every column, because it does not depend on
+        which hydroclimate a scenario pairs with.
+      </p>
+      <p>
+        Any difference between a scenario and the baseline comes from two
+        places, and they add exactly:
+      </p>
+      <p class="key">
+        <b>The hydroclimate effect</b> is current operations under that
+        hydroclimate minus the baseline &mdash; the same operations, a different
+        hydroclimate. <b>The operations effect</b> is this strategy minus
+        current operations <em>under that same hydroclimate</em> &mdash; the
+        only comparison that holds the hydroclimate fixed, and therefore the
+        only one that isolates what the strategy does. Together they equal the
+        difference from the baseline.
+      </p>
+      <p>
+        Outcome levels are reported as a value on a continuous axis from
+        Level&nbsp;1 to Level&nbsp;4.99, with the four level bands as shaded
+        zones; the whole number below any value is its band. A value that lands
+        exactly on a whole number takes that band: 4.0 is Level&nbsp;4, at the
+        start of its zone rather than the top of Level&nbsp;3. The level scale
+        is ordered by definition, Level&nbsp;1 through Level&nbsp;4; a band is a
+        category and a position on the axis is a modeled magnitude, neither is a
+        judgment. The scale, the two thresholds and the two fields a level value
+        comes in are set out in
+        <a href="#how-to-read">how to read the values</a>.
+      </p>
+      <p>
+        A sector&rsquo;s level value is the mean of the level values at its
+        locations. The nine sectors differ in how many locations that is. Delta
+        estuary ecology is reported at one location, Delta-Eastside Water.
+        Winter-run salmon is reported at one location, Sacramento River at
+        Keswick. Freshwater for Delta exports is reported at two locations,
+        Harvey O. Banks Pumping Plant and C.W. &quot;Bill&quot; Jones Pumping
+        Plant (formerly Tracy). Both carry the same level value in every
+        scenario in this ensemble. Freshwater for in-Delta uses is reported at
+        two locations, Emmaton and Jersey Point. Both carry the same level value
+        in every scenario in this ensemble. The remaining five sectors are
+        reported across 8 to 132 locations. On the figure, a square mark
+        identifies the sectors reported at one or two locations. This page
+        reports sectors, not individual locations; where a place brief has been
+        published for one of a sector&rsquo;s locations, that brief reports the
+        location&rsquo;s own values across the same scenarios.
+      </p>
+
+      <h2 id="figure">All nine sectors, all five hydroclimates</h2>
+      <figure>
+        <svg
+          viewBox="0 0 932 516"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
+          aria-label="Climate and operations effects as vertical arrows, nine sectors by five hydroclimates"
+        >
+          <title>
+            Current operations with reintroduction: the climate and operations
+            effects to the difference from the baseline, nine sectors of the
+            water system &#215; five hydroclimates
+          </title>
+          <desc>
+            Nine sectors of the water system are drawn across the figure, each
+            holding five narrow lanes, one per hydroclimate in the order
+            historical, moderate, moderate-high, high and extreme climate
+            stress. The vertical axis is the continuous level value from 1 to
+            4.99, Level 1 at the top, level bands as shaded zones. The dashed
+            line spanning a sector is the baseline: current operations under the
+            historical hydroclimate, the same value under every hydroclimate. In
+            each lane a warm arrow runs from the baseline to current operations
+            under that hydroclimate, so its length is the hydroclimate effect,
+            and a blue arrow continues to this strategy under the same
+            hydroclimate, so its length is the operations effect. The solid line
+            in each lane is the scenario. A short flat tick instead of an arrow
+            means a change smaller than 0.1 on the level scale. Every value is
+            in the table that follows.
+          </desc>
+          <text x="70.0" y="21.0" font-size="9.5" fill="#5c554c">
+            per lane:
+            <tspan font-weight="700" fill="#c28433">warm arrow</tspan>
+            = hydroclimate,
+            <tspan font-weight="700" fill="#3d7db5">blue arrow</tspan>
+            = strategy &nbsp;&middot;&nbsp; dashed line = the baseline, solid
+            line = this scenario
+          </text>
+          <rect
+            x="60.0"
+            y="34.00"
+            width="864.00"
+            height="76.69"
+            fill="#dcefe1"
+            opacity="0.5"
+            data-band="1"
+          />
+          <text
+            x="54.0"
+            y="75.35"
+            text-anchor="end"
+            font-size="10.5"
+            font-weight="600"
+            fill="#16774a"
+          >
+            Level 1
+          </text>
+          <text
+            x="54.0"
+            y="87.35"
+            text-anchor="end"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Optimal
+          </text>
+          <rect
+            x="60.0"
+            y="110.69"
+            width="864.00"
+            height="76.69"
+            fill="#d8eef2"
+            opacity="0.5"
+            data-band="2"
+          />
+          <text
+            x="54.0"
+            y="152.04"
+            text-anchor="end"
+            font-size="10.5"
+            font-weight="600"
+            fill="#1f7c8c"
+          >
+            Level 2
+          </text>
+          <text
+            x="54.0"
+            y="164.04"
+            text-anchor="end"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Acceptable
+          </text>
+          <rect
+            x="60.0"
+            y="187.38"
+            width="864.00"
+            height="76.69"
+            fill="#fbe7d4"
+            opacity="0.5"
+            data-band="3"
+          />
+          <text
+            x="54.0"
+            y="228.73"
+            text-anchor="end"
+            font-size="10.5"
+            font-weight="600"
+            fill="#b5651d"
+          >
+            Level 3
+          </text>
+          <text
+            x="54.0"
+            y="240.73"
+            text-anchor="end"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            At-risk
+          </text>
+          <rect
+            x="60.0"
+            y="264.08"
+            width="864.00"
+            height="75.92"
+            fill="#fbdcd3"
+            opacity="0.5"
+            data-band="4"
+          />
+          <text
+            x="54.0"
+            y="305.04"
+            text-anchor="end"
+            font-size="10.5"
+            font-weight="600"
+            fill="#c2412a"
+          >
+            Level 4
+          </text>
+          <text
+            x="54.0"
+            y="317.04"
+            text-anchor="end"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Critical
+          </text>
+          <line
+            x1="70.00"
+            y1="27.0"
+            x2="70.00"
+            y2="347.0"
+            stroke="#cfc7ba"
+            stroke-width="0.6"
+          />
+          <line
+            x1="72.00"
+            y1="94.14"
+            x2="162.00"
+            y2="94.14"
+            stroke="#9b9384"
+            stroke-width="1.8"
+            stroke-dasharray="3 3"
+            data-today-area="CWS_DEL"
+            data-today-val="1.784189"
+            data-today-pos="94.141"
+          />
+          <line
+            x1="71.60"
+            y1="94.14"
+            x2="87.20"
+            y2="94.14"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="CWS_DEL"
+            data-scen-hc="BL"
+            data-scen-val="1.784189"
+            data-scen-pos="94.141"
+          />
+          <line
+            x1="72.50"
+            y1="94.14"
+            x2="77.70"
+            y2="94.14"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="CWS_DEL"
+            data-hc="BL"
+            data-role="climate"
+            data-delta="+0.000000"
+            data-from="1.784189"
+            data-to="1.784189"
+            data-y0="94.141"
+            data-y1="94.141"
+          />
+          <line
+            x1="81.10"
+            y1="94.14"
+            x2="86.30"
+            y2="94.14"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="CWS_DEL"
+            data-hc="BL"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="1.784189"
+            data-to="1.784189"
+            data-y0="94.141"
+            data-y1="94.141"
+          />
+          <text
+            x="79.40"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            H
+          </text>
+          <line
+            x1="90.40"
+            y1="107.98"
+            x2="106.00"
+            y2="107.98"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="CWS_DEL"
+            data-scen-hc="HC4"
+            data-scen-val="1.964649"
+            data-scen-pos="107.981"
+          />
+          <line
+            x1="93.90"
+            y1="94.14"
+            x2="93.90"
+            y2="102.78"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 93.90 107.98 L 90.90 102.78 L 96.90 102.78 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="CWS_DEL"
+            data-hc="HC4"
+            data-role="climate"
+            data-delta="+0.180459"
+            data-from="1.784189"
+            data-to="1.964649"
+            data-y0="94.141"
+            data-y1="107.981"
+          />
+          <line
+            x1="99.90"
+            y1="107.98"
+            x2="105.10"
+            y2="107.98"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="CWS_DEL"
+            data-hc="HC4"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="1.964649"
+            data-to="1.964649"
+            data-y0="107.981"
+            data-y1="107.981"
+          />
+          <text
+            x="98.20"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            M
+          </text>
+          <line
+            x1="109.20"
+            y1="110.17"
+            x2="124.80"
+            y2="110.17"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="CWS_DEL"
+            data-scen-hc="HC1"
+            data-scen-val="1.993243"
+            data-scen-pos="110.174"
+          />
+          <line
+            x1="112.70"
+            y1="94.14"
+            x2="112.70"
+            y2="104.97"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 112.70 110.17 L 109.70 104.97 L 115.70 104.97 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="CWS_DEL"
+            data-hc="HC1"
+            data-role="climate"
+            data-delta="+0.209054"
+            data-from="1.784189"
+            data-to="1.993243"
+            data-y0="94.141"
+            data-y1="110.174"
+          />
+          <line
+            x1="118.70"
+            y1="110.17"
+            x2="123.90"
+            y2="110.17"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="CWS_DEL"
+            data-hc="HC1"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="1.993243"
+            data-to="1.993243"
+            data-y0="110.174"
+            data-y1="110.174"
+          />
+          <text
+            x="117.00"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            MH
+          </text>
+          <line
+            x1="128.00"
+            y1="131.05"
+            x2="143.60"
+            y2="131.05"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="CWS_DEL"
+            data-scen-hc="HC2"
+            data-scen-val="2.265473"
+            data-scen-pos="131.051"
+          />
+          <line
+            x1="131.50"
+            y1="94.14"
+            x2="131.50"
+            y2="125.85"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 131.50 131.05 L 128.50 125.85 L 134.50 125.85 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="CWS_DEL"
+            data-hc="HC2"
+            data-role="climate"
+            data-delta="+0.481284"
+            data-from="1.784189"
+            data-to="2.265473"
+            data-y0="94.141"
+            data-y1="131.051"
+          />
+          <line
+            x1="137.50"
+            y1="131.05"
+            x2="142.70"
+            y2="131.05"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="CWS_DEL"
+            data-hc="HC2"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.265473"
+            data-to="2.265473"
+            data-y0="131.051"
+            data-y1="131.051"
+          />
+          <text
+            x="135.80"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Hi
+          </text>
+          <line
+            x1="146.80"
+            y1="150.15"
+            x2="162.40"
+            y2="150.15"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="CWS_DEL"
+            data-scen-hc="HC3"
+            data-scen-val="2.514527"
+            data-scen-pos="150.152"
+          />
+          <line
+            x1="150.30"
+            y1="94.14"
+            x2="150.30"
+            y2="144.95"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 150.30 150.15 L 147.30 144.95 L 153.30 144.95 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="CWS_DEL"
+            data-hc="HC3"
+            data-role="climate"
+            data-delta="+0.730338"
+            data-from="1.784189"
+            data-to="2.514527"
+            data-y0="94.141"
+            data-y1="150.152"
+          />
+          <line
+            x1="156.30"
+            y1="150.15"
+            x2="161.50"
+            y2="150.15"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="CWS_DEL"
+            data-hc="HC3"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.514527"
+            data-to="2.514527"
+            data-y0="150.152"
+            data-y1="150.152"
+          />
+          <text
+            x="154.60"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            E
+          </text>
+          <text
+            transform="translate(120.00,362.00) rotate(-90)"
+            text-anchor="end"
+            font-size="10"
+            font-weight="600"
+            fill="#1c1a17"
+          >
+            Community surface water
+          </text>
+          <line
+            x1="164.00"
+            y1="27.0"
+            x2="164.00"
+            y2="347.0"
+            stroke="#cfc7ba"
+            stroke-width="0.6"
+          />
+          <line
+            x1="166.00"
+            y1="135.73"
+            x2="256.00"
+            y2="135.73"
+            stroke="#9b9384"
+            stroke-width="1.8"
+            stroke-dasharray="3 3"
+            data-today-area="AG_REV"
+            data-today-val="2.326439"
+            data-today-pos="135.727"
+          />
+          <line
+            x1="165.60"
+            y1="135.73"
+            x2="181.20"
+            y2="135.73"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="AG_REV"
+            data-scen-hc="BL"
+            data-scen-val="2.326439"
+            data-scen-pos="135.727"
+          />
+          <line
+            x1="166.50"
+            y1="135.73"
+            x2="171.70"
+            y2="135.73"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="AG_REV"
+            data-hc="BL"
+            data-role="climate"
+            data-delta="+0.000000"
+            data-from="2.326439"
+            data-to="2.326439"
+            data-y0="135.727"
+            data-y1="135.727"
+          />
+          <line
+            x1="175.10"
+            y1="135.73"
+            x2="180.30"
+            y2="135.73"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="AG_REV"
+            data-hc="BL"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.326439"
+            data-to="2.326439"
+            data-y0="135.727"
+            data-y1="135.727"
+          />
+          <text
+            x="173.40"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            H
+          </text>
+          <line
+            x1="184.40"
+            y1="172.05"
+            x2="200.00"
+            y2="172.05"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="AG_REV"
+            data-scen-hc="HC4"
+            data-scen-val="2.800076"
+            data-scen-pos="172.051"
+          />
+          <line
+            x1="187.90"
+            y1="135.73"
+            x2="187.90"
+            y2="166.85"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 187.90 172.05 L 184.90 166.85 L 190.90 166.85 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="AG_REV"
+            data-hc="HC4"
+            data-role="climate"
+            data-delta="+0.473636"
+            data-from="2.326439"
+            data-to="2.800076"
+            data-y0="135.727"
+            data-y1="172.051"
+          />
+          <line
+            x1="193.90"
+            y1="172.05"
+            x2="199.10"
+            y2="172.05"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="AG_REV"
+            data-hc="HC4"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.800076"
+            data-to="2.800076"
+            data-y0="172.051"
+            data-y1="172.051"
+          />
+          <text
+            x="192.20"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            M
+          </text>
+          <line
+            x1="203.20"
+            y1="170.10"
+            x2="218.80"
+            y2="170.10"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="AG_REV"
+            data-scen-hc="HC1"
+            data-scen-val="2.774697"
+            data-scen-pos="170.105"
+          />
+          <line
+            x1="206.70"
+            y1="135.73"
+            x2="206.70"
+            y2="164.90"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 206.70 170.10 L 203.70 164.90 L 209.70 164.90 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="AG_REV"
+            data-hc="HC1"
+            data-role="climate"
+            data-delta="+0.448258"
+            data-from="2.326439"
+            data-to="2.774697"
+            data-y0="135.727"
+            data-y1="170.105"
+          />
+          <line
+            x1="212.70"
+            y1="170.10"
+            x2="217.90"
+            y2="170.10"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="AG_REV"
+            data-hc="HC1"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.774697"
+            data-to="2.774697"
+            data-y0="170.105"
+            data-y1="170.105"
+          />
+          <text
+            x="211.00"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            MH
+          </text>
+          <line
+            x1="222.00"
+            y1="179.93"
+            x2="237.60"
+            y2="179.93"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="AG_REV"
+            data-scen-hc="HC2"
+            data-scen-val="2.902803"
+            data-scen-pos="179.929"
+          />
+          <line
+            x1="225.50"
+            y1="135.73"
+            x2="225.50"
+            y2="174.73"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 225.50 179.93 L 222.50 174.73 L 228.50 174.73 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="AG_REV"
+            data-hc="HC2"
+            data-role="climate"
+            data-delta="+0.576364"
+            data-from="2.326439"
+            data-to="2.902803"
+            data-y0="135.727"
+            data-y1="179.929"
+          />
+          <line
+            x1="231.50"
+            y1="179.93"
+            x2="236.70"
+            y2="179.93"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="AG_REV"
+            data-hc="HC2"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.902803"
+            data-to="2.902803"
+            data-y0="179.929"
+            data-y1="179.929"
+          />
+          <text
+            x="229.80"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Hi
+          </text>
+          <line
+            x1="240.80"
+            y1="185.52"
+            x2="256.40"
+            y2="185.52"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="AG_REV"
+            data-scen-hc="HC3"
+            data-scen-val="2.975682"
+            data-scen-pos="185.518"
+          />
+          <line
+            x1="244.30"
+            y1="135.73"
+            x2="244.30"
+            y2="180.32"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 244.30 185.52 L 241.30 180.32 L 247.30 180.32 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="AG_REV"
+            data-hc="HC3"
+            data-role="climate"
+            data-delta="+0.649242"
+            data-from="2.326439"
+            data-to="2.975682"
+            data-y0="135.727"
+            data-y1="185.518"
+          />
+          <line
+            x1="250.30"
+            y1="185.52"
+            x2="255.50"
+            y2="185.52"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="AG_REV"
+            data-hc="HC3"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.975682"
+            data-to="2.975682"
+            data-y0="185.518"
+            data-y1="185.518"
+          />
+          <text
+            x="248.60"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            E
+          </text>
+          <text
+            transform="translate(214.00,362.00) rotate(-90)"
+            text-anchor="end"
+            font-size="10"
+            font-weight="600"
+            fill="#1c1a17"
+          >
+            Agricultural revenue
+          </text>
+          <line
+            x1="258.00"
+            y1="27.0"
+            x2="258.00"
+            y2="347.0"
+            stroke="#cfc7ba"
+            stroke-width="0.6"
+          />
+          <line
+            x1="260.00"
+            y1="243.64"
+            x2="350.00"
+            y2="243.64"
+            stroke="#9b9384"
+            stroke-width="1.8"
+            stroke-dasharray="3 3"
+            data-today-area="ENV_FLOWS"
+            data-today-val="3.733529"
+            data-today-pos="243.639"
+          />
+          <line
+            x1="259.60"
+            y1="243.64"
+            x2="275.20"
+            y2="243.64"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="ENV_FLOWS"
+            data-scen-hc="BL"
+            data-scen-val="3.733529"
+            data-scen-pos="243.639"
+          />
+          <line
+            x1="260.50"
+            y1="243.64"
+            x2="265.70"
+            y2="243.64"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="ENV_FLOWS"
+            data-hc="BL"
+            data-role="climate"
+            data-delta="+0.000000"
+            data-from="3.733529"
+            data-to="3.733529"
+            data-y0="243.639"
+            data-y1="243.639"
+          />
+          <line
+            x1="269.10"
+            y1="243.64"
+            x2="274.30"
+            y2="243.64"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="ENV_FLOWS"
+            data-hc="BL"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.733529"
+            data-to="3.733529"
+            data-y0="243.639"
+            data-y1="243.639"
+          />
+          <text
+            x="267.40"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            H
+          </text>
+          <line
+            x1="278.40"
+            y1="247.74"
+            x2="294.00"
+            y2="247.74"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="ENV_FLOWS"
+            data-scen-hc="HC4"
+            data-scen-val="3.787059"
+            data-scen-pos="247.744"
+          />
+          <line
+            x1="279.30"
+            y1="243.64"
+            x2="284.50"
+            y2="243.64"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="ENV_FLOWS"
+            data-hc="HC4"
+            data-role="climate"
+            data-delta="+0.053529"
+            data-from="3.733529"
+            data-to="3.787059"
+            data-y0="243.639"
+            data-y1="247.744"
+          />
+          <line
+            x1="287.90"
+            y1="247.74"
+            x2="293.10"
+            y2="247.74"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="ENV_FLOWS"
+            data-hc="HC4"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.787059"
+            data-to="3.787059"
+            data-y0="247.744"
+            data-y1="247.744"
+          />
+          <text
+            x="286.20"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            M
+          </text>
+          <line
+            x1="297.20"
+            y1="248.42"
+            x2="312.80"
+            y2="248.42"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="ENV_FLOWS"
+            data-scen-hc="HC1"
+            data-scen-val="3.795882"
+            data-scen-pos="248.421"
+          />
+          <line
+            x1="298.10"
+            y1="243.64"
+            x2="303.30"
+            y2="243.64"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="ENV_FLOWS"
+            data-hc="HC1"
+            data-role="climate"
+            data-delta="+0.062353"
+            data-from="3.733529"
+            data-to="3.795882"
+            data-y0="243.639"
+            data-y1="248.421"
+          />
+          <line
+            x1="306.70"
+            y1="248.42"
+            x2="311.90"
+            y2="248.42"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="ENV_FLOWS"
+            data-hc="HC1"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.795882"
+            data-to="3.795882"
+            data-y0="248.421"
+            data-y1="248.421"
+          />
+          <text
+            x="305.00"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            MH
+          </text>
+          <line
+            x1="316.00"
+            y1="262.59"
+            x2="331.60"
+            y2="262.59"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="ENV_FLOWS"
+            data-scen-hc="HC2"
+            data-scen-val="3.980588"
+            data-scen-pos="262.586"
+          />
+          <line
+            x1="319.50"
+            y1="243.64"
+            x2="319.50"
+            y2="257.39"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 319.50 262.59 L 316.50 257.39 L 322.50 257.39 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="ENV_FLOWS"
+            data-hc="HC2"
+            data-role="climate"
+            data-delta="+0.247059"
+            data-from="3.733529"
+            data-to="3.980588"
+            data-y0="243.639"
+            data-y1="262.586"
+          />
+          <line
+            x1="325.50"
+            y1="262.59"
+            x2="330.70"
+            y2="262.59"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="ENV_FLOWS"
+            data-hc="HC2"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.980588"
+            data-to="3.980588"
+            data-y0="262.586"
+            data-y1="262.586"
+          />
+          <text
+            x="323.80"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Hi
+          </text>
+          <line
+            x1="334.80"
+            y1="277.16"
+            x2="350.40"
+            y2="277.16"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="ENV_FLOWS"
+            data-scen-hc="HC3"
+            data-scen-val="4.170588"
+            data-scen-pos="277.158"
+          />
+          <line
+            x1="338.30"
+            y1="243.64"
+            x2="338.30"
+            y2="271.96"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 338.30 277.16 L 335.30 271.96 L 341.30 271.96 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="ENV_FLOWS"
+            data-hc="HC3"
+            data-role="climate"
+            data-delta="+0.437059"
+            data-from="3.733529"
+            data-to="4.170588"
+            data-y0="243.639"
+            data-y1="277.158"
+          />
+          <line
+            x1="344.30"
+            y1="277.16"
+            x2="349.50"
+            y2="277.16"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="ENV_FLOWS"
+            data-hc="HC3"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="4.170588"
+            data-to="4.170588"
+            data-y0="277.158"
+            data-y1="277.158"
+          />
+          <text
+            x="342.60"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            E
+          </text>
+          <text
+            transform="translate(308.00,362.00) rotate(-90)"
+            text-anchor="end"
+            font-size="10"
+            font-weight="600"
+            fill="#1c1a17"
+          >
+            Environmental flows
+          </text>
+          <line
+            x1="352.00"
+            y1="27.0"
+            x2="352.00"
+            y2="347.0"
+            stroke="#cfc7ba"
+            stroke-width="0.6"
+          />
+          <line
+            x1="354.00"
+            y1="204.26"
+            x2="444.00"
+            y2="204.26"
+            stroke="#9b9384"
+            stroke-width="1.8"
+            stroke-dasharray="3 3"
+            data-today-area="DELTA_ECO"
+            data-today-val="3.220000"
+            data-today-pos="204.256"
+          />
+          <rect
+            x="358.40"
+            y="201.26"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="DELTA_ECO"
+            data-scen-hc="BL"
+            data-scen-val="3.220000"
+            data-scen-pos="204.256"
+            data-single="yes"
+          />
+          <line
+            x1="354.50"
+            y1="204.26"
+            x2="359.70"
+            y2="204.26"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="DELTA_ECO"
+            data-hc="BL"
+            data-role="climate"
+            data-delta="+0.000000"
+            data-from="3.220000"
+            data-to="3.220000"
+            data-y0="204.256"
+            data-y1="204.256"
+          />
+          <line
+            x1="363.10"
+            y1="204.26"
+            x2="368.30"
+            y2="204.26"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="DELTA_ECO"
+            data-hc="BL"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.220000"
+            data-to="3.220000"
+            data-y0="204.256"
+            data-y1="204.256"
+          />
+          <text
+            x="361.40"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            H
+          </text>
+          <rect
+            x="377.20"
+            y="179.94"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="DELTA_ECO"
+            data-scen-hc="HC4"
+            data-scen-val="2.942000"
+            data-scen-pos="182.935"
+            data-single="yes"
+          />
+          <line
+            x1="375.90"
+            y1="204.26"
+            x2="375.90"
+            y2="188.14"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 375.90 182.94 L 372.90 188.14 L 378.90 188.14 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="DELTA_ECO"
+            data-hc="HC4"
+            data-role="climate"
+            data-delta="-0.278000"
+            data-from="3.220000"
+            data-to="2.942000"
+            data-y0="204.256"
+            data-y1="182.935"
+          />
+          <line
+            x1="381.90"
+            y1="182.94"
+            x2="387.10"
+            y2="182.94"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="DELTA_ECO"
+            data-hc="HC4"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.942000"
+            data-to="2.942000"
+            data-y0="182.935"
+            data-y1="182.935"
+          />
+          <text
+            x="380.20"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            M
+          </text>
+          <rect
+            x="396.00"
+            y="199.65"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="DELTA_ECO"
+            data-scen-hc="HC1"
+            data-scen-val="3.199000"
+            data-scen-pos="202.645"
+            data-single="yes"
+          />
+          <line
+            x1="392.10"
+            y1="204.26"
+            x2="397.30"
+            y2="204.26"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="DELTA_ECO"
+            data-hc="HC1"
+            data-role="climate"
+            data-delta="-0.021000"
+            data-from="3.220000"
+            data-to="3.199000"
+            data-y0="204.256"
+            data-y1="202.645"
+          />
+          <line
+            x1="400.70"
+            y1="202.65"
+            x2="405.90"
+            y2="202.65"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="DELTA_ECO"
+            data-hc="HC1"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.199000"
+            data-to="3.199000"
+            data-y0="202.645"
+            data-y1="202.645"
+          />
+          <text
+            x="399.00"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            MH
+          </text>
+          <rect
+            x="414.80"
+            y="209.08"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="DELTA_ECO"
+            data-scen-hc="HC2"
+            data-scen-val="3.322000"
+            data-scen-pos="212.078"
+            data-single="yes"
+          />
+          <line
+            x1="413.50"
+            y1="204.26"
+            x2="413.50"
+            y2="206.88"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 413.50 212.08 L 410.50 206.88 L 416.50 206.88 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="DELTA_ECO"
+            data-hc="HC2"
+            data-role="climate"
+            data-delta="+0.102000"
+            data-from="3.220000"
+            data-to="3.322000"
+            data-y0="204.256"
+            data-y1="212.078"
+          />
+          <line
+            x1="419.50"
+            y1="212.08"
+            x2="424.70"
+            y2="212.08"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="DELTA_ECO"
+            data-hc="HC2"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.322000"
+            data-to="3.322000"
+            data-y0="212.078"
+            data-y1="212.078"
+          />
+          <text
+            x="417.80"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Hi
+          </text>
+          <rect
+            x="433.60"
+            y="230.63"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="DELTA_ECO"
+            data-scen-hc="HC3"
+            data-scen-val="3.603000"
+            data-scen-pos="233.629"
+            data-single="yes"
+          />
+          <line
+            x1="432.30"
+            y1="204.26"
+            x2="432.30"
+            y2="228.43"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 432.30 233.63 L 429.30 228.43 L 435.30 228.43 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="DELTA_ECO"
+            data-hc="HC3"
+            data-role="climate"
+            data-delta="+0.383000"
+            data-from="3.220000"
+            data-to="3.603000"
+            data-y0="204.256"
+            data-y1="233.629"
+          />
+          <line
+            x1="438.30"
+            y1="233.63"
+            x2="443.50"
+            y2="233.63"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="DELTA_ECO"
+            data-hc="HC3"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.603000"
+            data-to="3.603000"
+            data-y0="233.629"
+            data-y1="233.629"
+          />
+          <text
+            x="436.60"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            E
+          </text>
+          <text
+            transform="translate(402.00,362.00) rotate(-90)"
+            text-anchor="end"
+            font-size="10"
+            font-weight="600"
+            fill="#1c1a17"
+          >
+            Delta estuary ecology
+          </text>
+          <line
+            x1="446.00"
+            y1="27.0"
+            x2="446.00"
+            y2="347.0"
+            stroke="#cfc7ba"
+            stroke-width="0.6"
+          />
+          <line
+            x1="448.00"
+            y1="282.48"
+            x2="538.00"
+            y2="282.48"
+            stroke="#9b9384"
+            stroke-width="1.8"
+            stroke-dasharray="3 3"
+            data-today-area="WRC_SALMON_AB"
+            data-today-val="4.240000"
+            data-today-pos="282.481"
+          />
+          <rect
+            x="452.40"
+            y="243.44"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="WRC_SALMON_AB"
+            data-scen-hc="BL"
+            data-scen-val="3.770000"
+            data-scen-pos="246.436"
+            data-single="yes"
+          />
+          <line
+            x1="448.50"
+            y1="282.48"
+            x2="453.70"
+            y2="282.48"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="WRC_SALMON_AB"
+            data-hc="BL"
+            data-role="climate"
+            data-delta="+0.000000"
+            data-from="4.240000"
+            data-to="4.240000"
+            data-y0="282.481"
+            data-y1="282.481"
+          />
+          <line
+            x1="459.70"
+            y1="282.48"
+            x2="459.70"
+            y2="251.64"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 459.70 246.44 L 456.70 251.64 L 462.70 251.64 Z"
+            fill="#3d7db5"
+            data-flat="no"
+            data-area="WRC_SALMON_AB"
+            data-hc="BL"
+            data-role="operations"
+            data-delta="-0.470000"
+            data-from="4.240000"
+            data-to="3.770000"
+            data-y0="282.481"
+            data-y1="246.436"
+          />
+          <text
+            x="455.40"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            H
+          </text>
+          <rect
+            x="471.20"
+            y="216.59"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="WRC_SALMON_AB"
+            data-scen-hc="HC4"
+            data-scen-val="3.420000"
+            data-scen-pos="219.594"
+            data-single="yes"
+          />
+          <line
+            x1="469.90"
+            y1="261.77"
+            x2="478.50"
+            y2="261.77"
+            stroke="#b9b1a4"
+            stroke-width="0.9"
+            stroke-dasharray="1.5 1.5"
+            data-junction-area="WRC_SALMON_AB"
+            data-junction-hc="HC4"
+          />
+          <line
+            x1="469.90"
+            y1="282.48"
+            x2="469.90"
+            y2="266.97"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 469.90 261.77 L 466.90 266.97 L 472.90 266.97 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="WRC_SALMON_AB"
+            data-hc="HC4"
+            data-role="climate"
+            data-delta="-0.270000"
+            data-from="4.240000"
+            data-to="3.970000"
+            data-y0="282.481"
+            data-y1="261.774"
+          />
+          <line
+            x1="478.50"
+            y1="261.77"
+            x2="478.50"
+            y2="224.79"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 478.50 219.59 L 475.50 224.79 L 481.50 224.79 Z"
+            fill="#3d7db5"
+            data-flat="no"
+            data-area="WRC_SALMON_AB"
+            data-hc="HC4"
+            data-role="operations"
+            data-delta="-0.550000"
+            data-from="3.970000"
+            data-to="3.420000"
+            data-y0="261.774"
+            data-y1="219.594"
+          />
+          <text
+            x="474.20"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            M
+          </text>
+          <rect
+            x="490.00"
+            y="240.37"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="WRC_SALMON_AB"
+            data-scen-hc="HC1"
+            data-scen-val="3.730000"
+            data-scen-pos="243.368"
+            data-single="yes"
+          />
+          <line
+            x1="488.70"
+            y1="313.92"
+            x2="497.30"
+            y2="313.92"
+            stroke="#b9b1a4"
+            stroke-width="0.9"
+            stroke-dasharray="1.5 1.5"
+            data-junction-area="WRC_SALMON_AB"
+            data-junction-hc="HC1"
+          />
+          <line
+            x1="488.70"
+            y1="282.48"
+            x2="488.70"
+            y2="308.72"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 488.70 313.92 L 485.70 308.72 L 491.70 308.72 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="WRC_SALMON_AB"
+            data-hc="HC1"
+            data-role="climate"
+            data-delta="+0.410000"
+            data-from="4.240000"
+            data-to="4.650000"
+            data-y0="282.481"
+            data-y1="313.925"
+          />
+          <line
+            x1="497.30"
+            y1="313.92"
+            x2="497.30"
+            y2="248.57"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 497.30 243.37 L 494.30 248.57 L 500.30 248.57 Z"
+            fill="#3d7db5"
+            data-flat="no"
+            data-area="WRC_SALMON_AB"
+            data-hc="HC1"
+            data-role="operations"
+            data-delta="-0.920000"
+            data-from="4.650000"
+            data-to="3.730000"
+            data-y0="313.925"
+            data-y1="243.368"
+          />
+          <text
+            x="493.00"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            MH
+          </text>
+          <rect
+            x="508.80"
+            y="251.11"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="WRC_SALMON_AB"
+            data-scen-hc="HC2"
+            data-scen-val="3.870000"
+            data-scen-pos="254.105"
+            data-single="yes"
+          />
+          <line
+            x1="507.50"
+            y1="331.56"
+            x2="516.10"
+            y2="331.56"
+            stroke="#b9b1a4"
+            stroke-width="0.9"
+            stroke-dasharray="1.5 1.5"
+            data-junction-area="WRC_SALMON_AB"
+            data-junction-hc="HC2"
+          />
+          <line
+            x1="507.50"
+            y1="282.48"
+            x2="507.50"
+            y2="326.36"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 507.50 331.56 L 504.50 326.36 L 510.50 326.36 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="WRC_SALMON_AB"
+            data-hc="HC2"
+            data-role="climate"
+            data-delta="+0.640000"
+            data-from="4.240000"
+            data-to="4.880000"
+            data-y0="282.481"
+            data-y1="331.564"
+          />
+          <line
+            x1="516.10"
+            y1="331.56"
+            x2="516.10"
+            y2="259.31"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 516.10 254.11 L 513.10 259.31 L 519.10 259.31 Z"
+            fill="#3d7db5"
+            data-flat="no"
+            data-area="WRC_SALMON_AB"
+            data-hc="HC2"
+            data-role="operations"
+            data-delta="-1.010000"
+            data-from="4.880000"
+            data-to="3.870000"
+            data-y0="331.564"
+            data-y1="254.105"
+          />
+          <text
+            x="511.80"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Hi
+          </text>
+          <rect
+            x="527.60"
+            y="259.54"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="WRC_SALMON_AB"
+            data-scen-hc="HC3"
+            data-scen-val="3.980000"
+            data-scen-pos="262.541"
+            data-single="yes"
+          />
+          <line
+            x1="526.30"
+            y1="323.89"
+            x2="534.90"
+            y2="323.89"
+            stroke="#b9b1a4"
+            stroke-width="0.9"
+            stroke-dasharray="1.5 1.5"
+            data-junction-area="WRC_SALMON_AB"
+            data-junction-hc="HC3"
+          />
+          <line
+            x1="526.30"
+            y1="282.48"
+            x2="526.30"
+            y2="318.69"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 526.30 323.89 L 523.30 318.69 L 529.30 318.69 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="WRC_SALMON_AB"
+            data-hc="HC3"
+            data-role="climate"
+            data-delta="+0.540000"
+            data-from="4.240000"
+            data-to="4.780000"
+            data-y0="282.481"
+            data-y1="323.895"
+          />
+          <line
+            x1="534.90"
+            y1="323.89"
+            x2="534.90"
+            y2="267.74"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 534.90 262.54 L 531.90 267.74 L 537.90 267.74 Z"
+            fill="#3d7db5"
+            data-flat="no"
+            data-area="WRC_SALMON_AB"
+            data-hc="HC3"
+            data-role="operations"
+            data-delta="-0.800000"
+            data-from="4.780000"
+            data-to="3.980000"
+            data-y0="323.895"
+            data-y1="262.541"
+          />
+          <text
+            x="530.60"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            E
+          </text>
+          <text
+            transform="translate(496.00,362.00) rotate(-90)"
+            text-anchor="end"
+            font-size="10"
+            font-weight="600"
+            fill="#1c1a17"
+          >
+            Winter-run salmon
+          </text>
+          <line
+            x1="540.00"
+            y1="27.0"
+            x2="540.00"
+            y2="347.0"
+            stroke="#cfc7ba"
+            stroke-width="0.6"
+          />
+          <line
+            x1="542.00"
+            y1="165.91"
+            x2="632.00"
+            y2="165.91"
+            stroke="#9b9384"
+            stroke-width="1.8"
+            stroke-dasharray="3 3"
+            data-today-area="FW_EXP"
+            data-today-val="2.720000"
+            data-today-pos="165.910"
+          />
+          <rect
+            x="546.40"
+            y="162.91"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="FW_EXP"
+            data-scen-hc="BL"
+            data-scen-val="2.720000"
+            data-scen-pos="165.910"
+            data-single="yes"
+          />
+          <line
+            x1="542.50"
+            y1="165.91"
+            x2="547.70"
+            y2="165.91"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_EXP"
+            data-hc="BL"
+            data-role="climate"
+            data-delta="+0.000000"
+            data-from="2.720000"
+            data-to="2.720000"
+            data-y0="165.910"
+            data-y1="165.910"
+          />
+          <line
+            x1="551.10"
+            y1="165.91"
+            x2="556.30"
+            y2="165.91"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_EXP"
+            data-hc="BL"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.720000"
+            data-to="2.720000"
+            data-y0="165.910"
+            data-y1="165.910"
+          />
+          <text
+            x="549.40"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            H
+          </text>
+          <rect
+            x="565.20"
+            y="195.96"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="FW_EXP"
+            data-scen-hc="HC4"
+            data-scen-val="3.151000"
+            data-scen-pos="198.964"
+            data-single="yes"
+          />
+          <line
+            x1="563.90"
+            y1="165.91"
+            x2="563.90"
+            y2="193.76"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 563.90 198.96 L 560.90 193.76 L 566.90 193.76 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="FW_EXP"
+            data-hc="HC4"
+            data-role="climate"
+            data-delta="+0.431000"
+            data-from="2.720000"
+            data-to="3.151000"
+            data-y0="165.910"
+            data-y1="198.964"
+          />
+          <line
+            x1="569.90"
+            y1="198.96"
+            x2="575.10"
+            y2="198.96"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_EXP"
+            data-hc="HC4"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.151000"
+            data-to="3.151000"
+            data-y0="198.964"
+            data-y1="198.964"
+          />
+          <text
+            x="568.20"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            M
+          </text>
+          <rect
+            x="584.00"
+            y="209.31"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="FW_EXP"
+            data-scen-hc="HC1"
+            data-scen-val="3.325000"
+            data-scen-pos="212.308"
+            data-single="yes"
+          />
+          <line
+            x1="582.70"
+            y1="165.91"
+            x2="582.70"
+            y2="207.11"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 582.70 212.31 L 579.70 207.11 L 585.70 207.11 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="FW_EXP"
+            data-hc="HC1"
+            data-role="climate"
+            data-delta="+0.605000"
+            data-from="2.720000"
+            data-to="3.325000"
+            data-y0="165.910"
+            data-y1="212.308"
+          />
+          <line
+            x1="588.70"
+            y1="212.31"
+            x2="593.90"
+            y2="212.31"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_EXP"
+            data-hc="HC1"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.325000"
+            data-to="3.325000"
+            data-y0="212.308"
+            data-y1="212.308"
+          />
+          <text
+            x="587.00"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            MH
+          </text>
+          <rect
+            x="602.80"
+            y="248.19"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="FW_EXP"
+            data-scen-hc="HC2"
+            data-scen-val="3.832000"
+            data-scen-pos="251.191"
+            data-single="yes"
+          />
+          <line
+            x1="601.50"
+            y1="165.91"
+            x2="601.50"
+            y2="245.99"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 601.50 251.19 L 598.50 245.99 L 604.50 245.99 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="FW_EXP"
+            data-hc="HC2"
+            data-role="climate"
+            data-delta="+1.112000"
+            data-from="2.720000"
+            data-to="3.832000"
+            data-y0="165.910"
+            data-y1="251.191"
+          />
+          <line
+            x1="607.50"
+            y1="251.19"
+            x2="612.70"
+            y2="251.19"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_EXP"
+            data-hc="HC2"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.832000"
+            data-to="3.832000"
+            data-y0="251.191"
+            data-y1="251.191"
+          />
+          <text
+            x="605.80"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Hi
+          </text>
+          <rect
+            x="621.60"
+            y="269.66"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="FW_EXP"
+            data-scen-hc="HC3"
+            data-scen-val="4.112000"
+            data-scen-pos="272.665"
+            data-single="yes"
+          />
+          <line
+            x1="620.30"
+            y1="165.91"
+            x2="620.30"
+            y2="267.46"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 620.30 272.66 L 617.30 267.46 L 623.30 267.46 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="FW_EXP"
+            data-hc="HC3"
+            data-role="climate"
+            data-delta="+1.392000"
+            data-from="2.720000"
+            data-to="4.112000"
+            data-y0="165.910"
+            data-y1="272.665"
+          />
+          <line
+            x1="626.30"
+            y1="272.66"
+            x2="631.50"
+            y2="272.66"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_EXP"
+            data-hc="HC3"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="4.112000"
+            data-to="4.112000"
+            data-y0="272.665"
+            data-y1="272.665"
+          />
+          <text
+            x="624.60"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            E
+          </text>
+          <text
+            transform="translate(590.00,362.00) rotate(-90)"
+            text-anchor="end"
+            font-size="10"
+            font-weight="600"
+            fill="#1c1a17"
+          >
+            Freshwater for Delta exports
+          </text>
+          <line
+            x1="634.00"
+            y1="27.0"
+            x2="634.00"
+            y2="347.0"
+            stroke="#cfc7ba"
+            stroke-width="0.6"
+          />
+          <line
+            x1="636.00"
+            y1="176.65"
+            x2="726.00"
+            y2="176.65"
+            stroke="#9b9384"
+            stroke-width="1.8"
+            stroke-dasharray="3 3"
+            data-today-area="FW_DELTA_USES"
+            data-today-val="2.860000"
+            data-today-pos="176.647"
+          />
+          <rect
+            x="640.40"
+            y="173.65"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="FW_DELTA_USES"
+            data-scen-hc="BL"
+            data-scen-val="2.860000"
+            data-scen-pos="176.647"
+            data-single="yes"
+          />
+          <line
+            x1="636.50"
+            y1="176.65"
+            x2="641.70"
+            y2="176.65"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_DELTA_USES"
+            data-hc="BL"
+            data-role="climate"
+            data-delta="+0.000000"
+            data-from="2.860000"
+            data-to="2.860000"
+            data-y0="176.647"
+            data-y1="176.647"
+          />
+          <line
+            x1="645.10"
+            y1="176.65"
+            x2="650.30"
+            y2="176.65"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_DELTA_USES"
+            data-hc="BL"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.860000"
+            data-to="2.860000"
+            data-y0="176.647"
+            data-y1="176.647"
+          />
+          <text
+            x="643.40"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            H
+          </text>
+          <rect
+            x="659.20"
+            y="198.95"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="FW_DELTA_USES"
+            data-scen-hc="HC4"
+            data-scen-val="3.190000"
+            data-scen-pos="201.955"
+            data-single="yes"
+          />
+          <line
+            x1="657.90"
+            y1="176.65"
+            x2="657.90"
+            y2="196.75"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 657.90 201.95 L 654.90 196.75 L 660.90 196.75 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="FW_DELTA_USES"
+            data-hc="HC4"
+            data-role="climate"
+            data-delta="+0.330000"
+            data-from="2.860000"
+            data-to="3.190000"
+            data-y0="176.647"
+            data-y1="201.955"
+          />
+          <line
+            x1="663.90"
+            y1="201.95"
+            x2="669.10"
+            y2="201.95"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_DELTA_USES"
+            data-hc="HC4"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.190000"
+            data-to="3.190000"
+            data-y0="201.955"
+            data-y1="201.955"
+          />
+          <text
+            x="662.20"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            M
+          </text>
+          <rect
+            x="678.00"
+            y="198.03"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="FW_DELTA_USES"
+            data-scen-hc="HC1"
+            data-scen-val="3.178000"
+            data-scen-pos="201.035"
+            data-single="yes"
+          />
+          <line
+            x1="676.70"
+            y1="176.65"
+            x2="676.70"
+            y2="195.83"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 676.70 201.03 L 673.70 195.83 L 679.70 195.83 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="FW_DELTA_USES"
+            data-hc="HC1"
+            data-role="climate"
+            data-delta="+0.318000"
+            data-from="2.860000"
+            data-to="3.178000"
+            data-y0="176.647"
+            data-y1="201.035"
+          />
+          <line
+            x1="682.70"
+            y1="201.03"
+            x2="687.90"
+            y2="201.03"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_DELTA_USES"
+            data-hc="HC1"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.178000"
+            data-to="3.178000"
+            data-y0="201.035"
+            data-y1="201.035"
+          />
+          <text
+            x="681.00"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            MH
+          </text>
+          <rect
+            x="696.80"
+            y="228.86"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="FW_DELTA_USES"
+            data-scen-hc="HC2"
+            data-scen-val="3.580000"
+            data-scen-pos="231.865"
+            data-single="yes"
+          />
+          <line
+            x1="695.50"
+            y1="176.65"
+            x2="695.50"
+            y2="226.66"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 695.50 231.86 L 692.50 226.66 L 698.50 226.66 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="FW_DELTA_USES"
+            data-hc="HC2"
+            data-role="climate"
+            data-delta="+0.720000"
+            data-from="2.860000"
+            data-to="3.580000"
+            data-y0="176.647"
+            data-y1="231.865"
+          />
+          <line
+            x1="701.50"
+            y1="231.86"
+            x2="706.70"
+            y2="231.86"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_DELTA_USES"
+            data-hc="HC2"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.580000"
+            data-to="3.580000"
+            data-y0="231.865"
+            data-y1="231.865"
+          />
+          <text
+            x="699.80"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Hi
+          </text>
+          <rect
+            x="715.60"
+            y="278.64"
+            width="6"
+            height="6"
+            fill="#43403a"
+            data-scen-area="FW_DELTA_USES"
+            data-scen-hc="HC3"
+            data-scen-val="4.229000"
+            data-scen-pos="281.638"
+            data-single="yes"
+          />
+          <line
+            x1="714.30"
+            y1="176.65"
+            x2="714.30"
+            y2="276.44"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 714.30 281.64 L 711.30 276.44 L 717.30 276.44 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="FW_DELTA_USES"
+            data-hc="HC3"
+            data-role="climate"
+            data-delta="+1.369000"
+            data-from="2.860000"
+            data-to="4.229000"
+            data-y0="176.647"
+            data-y1="281.638"
+          />
+          <line
+            x1="720.30"
+            y1="281.64"
+            x2="725.50"
+            y2="281.64"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="FW_DELTA_USES"
+            data-hc="HC3"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="4.229000"
+            data-to="4.229000"
+            data-y0="281.638"
+            data-y1="281.638"
+          />
+          <text
+            x="718.60"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            E
+          </text>
+          <text
+            transform="translate(684.00,362.00) rotate(-90)"
+            text-anchor="end"
+            font-size="10"
+            font-weight="600"
+            fill="#1c1a17"
+          >
+            Freshwater for in-Delta uses
+          </text>
+          <line
+            x1="728.00"
+            y1="27.0"
+            x2="728.00"
+            y2="347.0"
+            stroke="#cfc7ba"
+            stroke-width="0.6"
+          />
+          <line
+            x1="730.00"
+            y1="145.28"
+            x2="820.00"
+            y2="145.28"
+            stroke="#9b9384"
+            stroke-width="1.8"
+            stroke-dasharray="3 3"
+            data-today-area="RES_STOR"
+            data-today-val="2.451000"
+            data-today-pos="145.280"
+          />
+          <line
+            x1="729.60"
+            y1="145.28"
+            x2="745.20"
+            y2="145.28"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="RES_STOR"
+            data-scen-hc="BL"
+            data-scen-val="2.451000"
+            data-scen-pos="145.280"
+          />
+          <line
+            x1="730.50"
+            y1="145.28"
+            x2="735.70"
+            y2="145.28"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="RES_STOR"
+            data-hc="BL"
+            data-role="climate"
+            data-delta="+0.000000"
+            data-from="2.451000"
+            data-to="2.451000"
+            data-y0="145.280"
+            data-y1="145.280"
+          />
+          <line
+            x1="739.10"
+            y1="145.28"
+            x2="744.30"
+            y2="145.28"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="RES_STOR"
+            data-hc="BL"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.451000"
+            data-to="2.451000"
+            data-y0="145.280"
+            data-y1="145.280"
+          />
+          <text
+            x="737.40"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            H
+          </text>
+          <line
+            x1="748.40"
+            y1="141.60"
+            x2="764.00"
+            y2="141.60"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="RES_STOR"
+            data-scen-hc="HC4"
+            data-scen-val="2.403000"
+            data-scen-pos="141.598"
+          />
+          <line
+            x1="749.30"
+            y1="145.28"
+            x2="754.50"
+            y2="145.28"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="RES_STOR"
+            data-hc="HC4"
+            data-role="climate"
+            data-delta="-0.048000"
+            data-from="2.451000"
+            data-to="2.403000"
+            data-y0="145.280"
+            data-y1="141.598"
+          />
+          <line
+            x1="757.90"
+            y1="141.60"
+            x2="763.10"
+            y2="141.60"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="RES_STOR"
+            data-hc="HC4"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.403000"
+            data-to="2.403000"
+            data-y0="141.598"
+            data-y1="141.598"
+          />
+          <text
+            x="756.20"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            M
+          </text>
+          <line
+            x1="767.20"
+            y1="135.39"
+            x2="782.80"
+            y2="135.39"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="RES_STOR"
+            data-scen-hc="HC1"
+            data-scen-val="2.322000"
+            data-scen-pos="135.386"
+          />
+          <line
+            x1="770.70"
+            y1="145.28"
+            x2="770.70"
+            y2="140.59"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 770.70 135.39 L 767.70 140.59 L 773.70 140.59 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="RES_STOR"
+            data-hc="HC1"
+            data-role="climate"
+            data-delta="-0.129000"
+            data-from="2.451000"
+            data-to="2.322000"
+            data-y0="145.280"
+            data-y1="135.386"
+          />
+          <line
+            x1="776.70"
+            y1="135.39"
+            x2="781.90"
+            y2="135.39"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="RES_STOR"
+            data-hc="HC1"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.322000"
+            data-to="2.322000"
+            data-y0="135.386"
+            data-y1="135.386"
+          />
+          <text
+            x="775.00"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            MH
+          </text>
+          <line
+            x1="786.00"
+            y1="159.16"
+            x2="801.60"
+            y2="159.16"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="RES_STOR"
+            data-scen-hc="HC2"
+            data-scen-val="2.632000"
+            data-scen-pos="159.161"
+          />
+          <line
+            x1="789.50"
+            y1="145.28"
+            x2="789.50"
+            y2="153.96"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 789.50 159.16 L 786.50 153.96 L 792.50 153.96 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="RES_STOR"
+            data-hc="HC2"
+            data-role="climate"
+            data-delta="+0.181000"
+            data-from="2.451000"
+            data-to="2.632000"
+            data-y0="145.280"
+            data-y1="159.161"
+          />
+          <line
+            x1="795.50"
+            y1="159.16"
+            x2="800.70"
+            y2="159.16"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="RES_STOR"
+            data-hc="HC2"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.632000"
+            data-to="2.632000"
+            data-y0="159.161"
+            data-y1="159.161"
+          />
+          <text
+            x="793.80"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Hi
+          </text>
+          <line
+            x1="804.80"
+            y1="226.53"
+            x2="820.40"
+            y2="226.53"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="RES_STOR"
+            data-scen-hc="HC3"
+            data-scen-val="3.510500"
+            data-scen-pos="226.535"
+          />
+          <line
+            x1="808.30"
+            y1="145.28"
+            x2="808.30"
+            y2="221.33"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 808.30 226.53 L 805.30 221.33 L 811.30 221.33 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="RES_STOR"
+            data-hc="HC3"
+            data-role="climate"
+            data-delta="+1.059500"
+            data-from="2.451000"
+            data-to="3.510500"
+            data-y0="145.280"
+            data-y1="226.535"
+          />
+          <line
+            x1="814.30"
+            y1="226.53"
+            x2="819.50"
+            y2="226.53"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="RES_STOR"
+            data-hc="HC3"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.510500"
+            data-to="3.510500"
+            data-y0="226.535"
+            data-y1="226.535"
+          />
+          <text
+            x="812.60"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            E
+          </text>
+          <text
+            transform="translate(778.00,362.00) rotate(-90)"
+            text-anchor="end"
+            font-size="10"
+            font-weight="600"
+            fill="#1c1a17"
+          >
+            Reservoir storage
+          </text>
+          <line
+            x1="822.00"
+            y1="27.0"
+            x2="822.00"
+            y2="347.0"
+            stroke="#cfc7ba"
+            stroke-width="0.6"
+          />
+          <line
+            x1="824.00"
+            y1="170.86"
+            x2="914.00"
+            y2="170.86"
+            stroke="#9b9384"
+            stroke-width="1.8"
+            stroke-dasharray="3 3"
+            data-today-area="GW_STOR"
+            data-today-val="2.784524"
+            data-today-pos="170.858"
+          />
+          <line
+            x1="823.60"
+            y1="170.86"
+            x2="839.20"
+            y2="170.86"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="GW_STOR"
+            data-scen-hc="BL"
+            data-scen-val="2.784524"
+            data-scen-pos="170.858"
+          />
+          <line
+            x1="824.50"
+            y1="170.86"
+            x2="829.70"
+            y2="170.86"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="GW_STOR"
+            data-hc="BL"
+            data-role="climate"
+            data-delta="+0.000000"
+            data-from="2.784524"
+            data-to="2.784524"
+            data-y0="170.858"
+            data-y1="170.858"
+          />
+          <line
+            x1="833.10"
+            y1="170.86"
+            x2="838.30"
+            y2="170.86"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="GW_STOR"
+            data-hc="BL"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.784524"
+            data-to="2.784524"
+            data-y0="170.858"
+            data-y1="170.858"
+          />
+          <text
+            x="831.40"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            H
+          </text>
+          <line
+            x1="842.40"
+            y1="159.79"
+            x2="858.00"
+            y2="159.79"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="GW_STOR"
+            data-scen-hc="HC4"
+            data-scen-val="2.640238"
+            data-scen-pos="159.793"
+          />
+          <line
+            x1="845.90"
+            y1="170.86"
+            x2="845.90"
+            y2="164.99"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 845.90 159.79 L 842.90 164.99 L 848.90 164.99 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="GW_STOR"
+            data-hc="HC4"
+            data-role="climate"
+            data-delta="-0.144286"
+            data-from="2.784524"
+            data-to="2.640238"
+            data-y0="170.858"
+            data-y1="159.793"
+          />
+          <line
+            x1="851.90"
+            y1="159.79"
+            x2="857.10"
+            y2="159.79"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="GW_STOR"
+            data-hc="HC4"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.640238"
+            data-to="2.640238"
+            data-y0="159.793"
+            data-y1="159.793"
+          />
+          <text
+            x="850.20"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            M
+          </text>
+          <line
+            x1="861.20"
+            y1="174.46"
+            x2="876.80"
+            y2="174.46"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="GW_STOR"
+            data-scen-hc="HC1"
+            data-scen-val="2.831524"
+            data-scen-pos="174.463"
+          />
+          <line
+            x1="862.10"
+            y1="170.86"
+            x2="867.30"
+            y2="170.86"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="GW_STOR"
+            data-hc="HC1"
+            data-role="climate"
+            data-delta="+0.047000"
+            data-from="2.784524"
+            data-to="2.831524"
+            data-y0="170.858"
+            data-y1="174.463"
+          />
+          <line
+            x1="870.70"
+            y1="174.46"
+            x2="875.90"
+            y2="174.46"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="GW_STOR"
+            data-hc="HC1"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="2.831524"
+            data-to="2.831524"
+            data-y0="174.463"
+            data-y1="174.463"
+          />
+          <text
+            x="869.00"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            MH
+          </text>
+          <line
+            x1="880.00"
+            y1="188.11"
+            x2="895.60"
+            y2="188.11"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="GW_STOR"
+            data-scen-hc="HC2"
+            data-scen-val="3.009500"
+            data-scen-pos="188.112"
+          />
+          <line
+            x1="883.50"
+            y1="170.86"
+            x2="883.50"
+            y2="182.91"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 883.50 188.11 L 880.50 182.91 L 886.50 182.91 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="GW_STOR"
+            data-hc="HC2"
+            data-role="climate"
+            data-delta="+0.224976"
+            data-from="2.784524"
+            data-to="3.009500"
+            data-y0="170.858"
+            data-y1="188.112"
+          />
+          <line
+            x1="889.50"
+            y1="188.11"
+            x2="894.70"
+            y2="188.11"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="GW_STOR"
+            data-hc="HC2"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.009500"
+            data-to="3.009500"
+            data-y0="188.112"
+            data-y1="188.112"
+          />
+          <text
+            x="887.80"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            Hi
+          </text>
+          <line
+            x1="898.80"
+            y1="208.55"
+            x2="914.40"
+            y2="208.55"
+            stroke="#43403a"
+            stroke-width="2"
+            data-scen-area="GW_STOR"
+            data-scen-hc="HC3"
+            data-scen-val="3.275952"
+            data-scen-pos="208.547"
+          />
+          <line
+            x1="902.30"
+            y1="170.86"
+            x2="902.30"
+            y2="203.35"
+            stroke="#c28433"
+            stroke-width="1.9"
+            stroke-linecap="butt"
+          />
+          <path
+            d="M 902.30 208.55 L 899.30 203.35 L 905.30 203.35 Z"
+            fill="#c28433"
+            data-flat="no"
+            data-area="GW_STOR"
+            data-hc="HC3"
+            data-role="climate"
+            data-delta="+0.491429"
+            data-from="2.784524"
+            data-to="3.275952"
+            data-y0="170.858"
+            data-y1="208.547"
+          />
+          <line
+            x1="908.30"
+            y1="208.55"
+            x2="913.50"
+            y2="208.55"
+            stroke="#3d7db5"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            data-flat="yes"
+            data-area="GW_STOR"
+            data-hc="HC3"
+            data-role="operations"
+            data-delta="+0.000000"
+            data-from="3.275952"
+            data-to="3.275952"
+            data-y0="208.547"
+            data-y1="208.547"
+          />
+          <text
+            x="906.60"
+            y="351.00"
+            text-anchor="middle"
+            font-size="8.5"
+            fill="#5c554c"
+          >
+            E
+          </text>
+          <text
+            transform="translate(872.00,362.00) rotate(-90)"
+            text-anchor="end"
+            font-size="10"
+            font-weight="600"
+            fill="#1c1a17"
+          >
+            Groundwater storage
+          </text>
+        </svg>
+        <figcaption>
+          Figure&nbsp;1. Modeled level values for current operations with
+          reintroduction and the two effects that produce their difference from
+          the baseline, nine sectors of the water system &times; five
+          hydroclimates. Lanes within each sector run left to right: Historical
+          (H), Moderate (M), Moderate-high (MH), High (Hi), Extreme (E) climate
+          stress. Vertical axis: continuous level value, Level&nbsp;1 at top,
+          level bands as shaded zones. Dashed level: the baseline. Solid level:
+          this scenario. A short flat tick in place of an arrow is a change
+          smaller than 0.1 on the level scale. Square marks are the sectors
+          reported at one or two locations. Every value is in the table that
+          follows, and the scale is set out in
+          <a href="#how-to-read">how to read the values</a>.
+        </figcaption>
+      </figure>
+
+      <h2 id="table">The same 45 results as numbers</h2>
+      <div class="numbers-body">
+        <p>
+          Each cell reads top to bottom: the hydroclimate effect, the operations
+          effect, and the resulting value with its band. The two effects add to
+          the difference between the scenario and the baseline. Outlined cells
+          are those where the two run opposite ways. Each hydroclimate column
+          carries its own address for citation, and its own slice of the
+          companion data file.
+        </p>
+        <table class="grid">
+          <thead>
+            <tr>
+              <th scope="col">Sector</th>
+              <th scope="col">The baseline</th>
+              <th scope="col" id="historical-hydroclimate">
+                <a
+                  class="pin"
+                  href="#historical-hydroclimate"
+                  aria-label="Permalink to Historical hydroclimate"
+                  >&para;</a
+                >Historical
+              </th>
+              <th scope="col" id="moderate-climate-stress">
+                <a
+                  class="pin"
+                  href="#moderate-climate-stress"
+                  aria-label="Permalink to Moderate climate stress"
+                  >&para;</a
+                >Moderate
+              </th>
+              <th scope="col" id="moderate-high-climate-stress">
+                <a
+                  class="pin"
+                  href="#moderate-high-climate-stress"
+                  aria-label="Permalink to Moderate-high climate stress"
+                  >&para;</a
+                >Moderate-high
+              </th>
+              <th scope="col" id="high-climate-stress">
+                <a
+                  class="pin"
+                  href="#high-climate-stress"
+                  aria-label="Permalink to High climate stress"
+                  >&para;</a
+                >High
+              </th>
+              <th scope="col" id="extreme-climate-stress">
+                <a
+                  class="pin"
+                  href="#extreme-climate-stress"
+                  aria-label="Permalink to Extreme climate stress"
+                  >&para;</a
+                >Extreme
+              </th>
+              <th scope="col">Operations effect across the five</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Community surface water</th>
+              <td class="n">
+                <span><span class="bt t1">L1</span>1.7</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t1">L1</span>1.7</span>
+              </td>
+              <td>
+                <span class="cl">+0.2</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t1">L1</span>1.9</span>
+              </td>
+              <td>
+                <span class="cl">+0.2</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t1">L1</span>1.9</span>
+              </td>
+              <td>
+                <span class="cl">+0.5</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.2</span>
+              </td>
+              <td>
+                <span class="cl">+0.8</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.5</span>
+              </td>
+              <td class="flag">
+                no change at the 0.1 threshold<br /><span class="rng">0.0</span>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Agricultural revenue</th>
+              <td class="n">
+                <span><span class="bt t2">L2</span>2.3</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.3</span>
+              </td>
+              <td>
+                <span class="cl">+0.5</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.8</span>
+              </td>
+              <td>
+                <span class="cl">+0.4</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.7</span>
+              </td>
+              <td>
+                <span class="cl">+0.6</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.9</span>
+              </td>
+              <td>
+                <span class="cl">+0.6</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.9</span>
+              </td>
+              <td class="flag">
+                no change at the 0.1 threshold<br /><span class="rng">0.0</span>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Environmental flows</th>
+              <td class="n">
+                <span><span class="bt t3">L3</span>3.7</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.7</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.7</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.7</span>
+              </td>
+              <td>
+                <span class="cl">+0.2</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.9</span>
+              </td>
+              <td>
+                <span class="cl">+0.4</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t4">L4</span>4.1</span>
+              </td>
+              <td class="flag">
+                no change at the 0.1 threshold<br /><span class="rng">0.0</span>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                Delta estuary ecology<br /><span class="svtag"
+                  >single level value</span
+                >
+              </th>
+              <td class="n">
+                <span><span class="bt t3">L3</span>3.2</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.2</span>
+              </td>
+              <td>
+                <span class="cl">−0.3</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.9</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.1</span>
+              </td>
+              <td>
+                <span class="cl">+0.1</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.3</span>
+              </td>
+              <td>
+                <span class="cl">+0.4</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.6</span>
+              </td>
+              <td class="flag">
+                no change at the 0.1 threshold<br /><span class="rng">0.0</span>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                Winter-run salmon<br /><span class="svtag"
+                  >single level value</span
+                >
+              </th>
+              <td class="n">
+                <span><span class="bt t4">L4</span>4.2</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">−0.5</span
+                ><span class="sc"><span class="bt t3">L3</span>3.7</span>
+              </td>
+              <td>
+                <span class="cl">−0.3</span><span class="op">−0.5</span
+                ><span class="sc"><span class="bt t3">L3</span>3.4</span>
+              </td>
+              <td class="opp">
+                <span class="cl">+0.4</span><span class="op">−0.9</span
+                ><span class="sc"><span class="bt t3">L3</span>3.7</span>
+              </td>
+              <td class="opp">
+                <span class="cl">+0.6</span><span class="op">−1.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.8</span>
+              </td>
+              <td class="opp">
+                <span class="cl">+0.5</span><span class="op">−0.8</span
+                ><span class="sc"><span class="bt t3">L3</span>3.9</span>
+              </td>
+              <td class="flag">
+                one direction<br /><span class="rng">−1.0 to −0.5</span>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                Freshwater for Delta exports<br /><span class="svtag"
+                  >single level value</span
+                >
+              </th>
+              <td class="n">
+                <span><span class="bt t2">L2</span>2.7</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.7</span>
+              </td>
+              <td>
+                <span class="cl">+0.4</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.1</span>
+              </td>
+              <td>
+                <span class="cl">+0.6</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.3</span>
+              </td>
+              <td>
+                <span class="cl">+1.1</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.8</span>
+              </td>
+              <td>
+                <span class="cl">+1.4</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t4">L4</span>4.1</span>
+              </td>
+              <td class="flag">
+                no change at the 0.1 threshold<br /><span class="rng">0.0</span>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                Freshwater for in-Delta uses<br /><span class="svtag"
+                  >single level value</span
+                >
+              </th>
+              <td class="n">
+                <span><span class="bt t2">L2</span>2.8</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.8</span>
+              </td>
+              <td>
+                <span class="cl">+0.3</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.1</span>
+              </td>
+              <td>
+                <span class="cl">+0.3</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.1</span>
+              </td>
+              <td>
+                <span class="cl">+0.7</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.5</span>
+              </td>
+              <td>
+                <span class="cl">+1.4</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t4">L4</span>4.2</span>
+              </td>
+              <td class="flag">
+                no change at the 0.1 threshold<br /><span class="rng">0.0</span>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Reservoir storage</th>
+              <td class="n">
+                <span><span class="bt t2">L2</span>2.4</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.4</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.4</span>
+              </td>
+              <td>
+                <span class="cl">−0.1</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.3</span>
+              </td>
+              <td>
+                <span class="cl">+0.2</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.6</span>
+              </td>
+              <td>
+                <span class="cl">+1.1</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.5</span>
+              </td>
+              <td class="flag">
+                no change at the 0.1 threshold<br /><span class="rng">0.0</span>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Groundwater storage</th>
+              <td class="n">
+                <span><span class="bt t2">L2</span>2.7</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.7</span>
+              </td>
+              <td>
+                <span class="cl">−0.1</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.6</span>
+              </td>
+              <td>
+                <span class="cl">0.0</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t2">L2</span>2.8</span>
+              </td>
+              <td>
+                <span class="cl">+0.3</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.0</span>
+              </td>
+              <td>
+                <span class="cl">+0.5</span><span class="op">0.0</span
+                ><span class="sc"><span class="bt t3">L3</span>3.2</span>
+              </td>
+              <td class="flag">
+                no change at the 0.1 threshold<br /><span class="rng">0.0</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="reach">How many places a strategy reaches</h2>
+      <p>
+        A strategy&rsquo;s rules apply in some places and not others, and a
+        sector&rsquo;s value is the unweighted mean of its locations. This
+        strategy&rsquo;s value differs from current operations by at least 0.1
+        on the level scale at 0 of the 74 Community surface water locations, 0
+        of the 132 Agricultural revenue locations, 0 of the 17 Environmental
+        flows locations, 0 of the one Delta estuary ecology location, the one
+        Winter-run salmon location, 0 of the 2 Freshwater for Delta exports
+        locations, 0 of the 2 Freshwater for in-Delta uses locations, 0 of the 8
+        Reservoir storage locations and 0 of the 42 Groundwater storage
+        locations, depending on the hydroclimate &mdash; 1 of the 279 locations
+        reported here. A sector where few locations differ therefore shows a
+        small sector-level difference even when the locations that do differ
+        move by a full level or more. Read across the five hydroclimates
+        together, 5 of the 1,395 location-and-hydroclimate results reported here
+        differ from current operations: 5 toward Level 1, 0 toward Level 4. The
+        median difference over the locations counted is 0.8 on the level scale.
+        In each of the 45 sector-and-hydroclimate combinations reported here,
+        the locations that differ all differ in the same direction. This page
+        reports sectors, not individual locations; where a place brief has been
+        published for one of a sector&rsquo;s locations, that brief reports the
+        location&rsquo;s own values across the same scenarios.
+      </p>
+
+      <h2 id="related-briefs">Related briefs</h2>
+      <p class="rel-q">
+        <strong>What does this strategy do?</strong> It is described, rather
+        than measured, by a reference brief that carries no modeled results:
+        <a
+          href="https://coeqwal.org/documents/Strategy_Documentation/strategy_brief_current-operations-with-reintroduction.html"
+          >Current operations with reintroduction strategy brief</a
+        >.
+      </p>
+      <p class="rel-q">
+        <strong>What happens under a different strategy?</strong> The same nine
+        sectors and the same five hydroclimates are reported once per strategy,
+        and once with the strategy held fixed:
+      </p>
+      <ul class="related">
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_current-operations.html"
+            >Current operations</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_current-operations-with-historical-land-use.html"
+            >Current operations with historical land use</a
+          >
+        </li>
+        <li>
+          <span class="here"
+            >Current operations with reintroduction &mdash;
+            <em>you are here</em></span
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_current-operations-without-tucps.html"
+            >Current operations without TUCPs</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_current-usbr-operations.html"
+            >Current USBR operations</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_current-usbr-operations-without-tucps.html"
+            >Current USBR operations without TUCPs</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_delta-conveyance-project.html"
+            >Delta Conveyance Project</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_functional-environmental-flows.html"
+            >Functional environmental flows</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_functional-environmental-flows-with-reduced-crop-acreage.html"
+            >Functional environmental flows with reduced crop acreage</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_functional-environmental-flows-with-reduced-crop-acreage-and-reintroduction.html"
+            >Functional environmental flows with reduced crop acreage and
+            reintroduction</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_functional-environmental-flows-with-reintroduction.html"
+            >Functional environmental flows with reintroduction</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_groundwater-pumping-limits-in-the-central-valley.html"
+            >Groundwater pumping limits in the Central Valley</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_groundwater-pumping-limits-in-the-san-joaquin-valley.html"
+            >Groundwater pumping limits in the San Joaquin Valley</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_groundwater-pumping-limits-via-reduced-crop-acreage-in-the-central-valley.html"
+            >Groundwater pumping limits via reduced crop acreage in the Central
+            Valley</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_groundwater-pumping-limits-via-reduced-crop-acreage-in-the-san-joaquin-valley.html"
+            >Groundwater pumping limits via reduced crop acreage in the San
+            Joaquin Valley</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_increase-delta-outflows-55-unimpaired-flow-target.html"
+            >Increase Delta outflows (55% unimpaired flow target)</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_increase-delta-outflows-65-unimpaired-flow-target.html"
+            >Increase Delta outflows (65% unimpaired flow target)</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_increase-shasta-carry-over-storage.html"
+            >Increase Shasta carry-over storage</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_maintain-delta-outflows-45-unimpaired-flow-target.html"
+            >Maintain Delta outflows (45% unimpaired flow target)</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_no-flow-requirements.html"
+            >No flow requirements</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_prioritizing-full-demands-of-community-water-systems.html"
+            >Prioritizing full demands of community water systems</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_prioritizing-human-health-water-deliveries-to-community-water-systems.html"
+            >Prioritizing human health water deliveries to community water
+            systems</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_reduce-delta-outflows-35-unimpaired-flow-target.html"
+            >Reduce Delta outflows (35% unimpaired flow target)</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_relax-delta-salinity-standards.html"
+            >Relax Delta salinity standards</a
+          >
+        </li>
+        <li>
+          <a href="baselines_dev.html"
+            >The water system under current operations</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_winter-run-refuge-flows.html"
+            >Winter-run refuge flows</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_winter-run-refuge-flows-with-reduced-crop-acreage.html"
+            >Winter-run refuge flows with reduced crop acreage</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_winter-run-refuge-flows-with-reduced-crop-acreage-and-reintroduction.html"
+            >Winter-run refuge flows with reduced crop acreage and
+            reintroduction</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/scenario_results_brief_winter-run-refuge-flows-with-reintroduction.html"
+            >Winter-run refuge flows with reintroduction</a
+          >
+        </li>
+      </ul>
+      <p class="rel-q">
+        <strong>What happens to one sector under every strategy?</strong> A
+        sector brief transposes this grid &mdash; one sector of the water
+        system, every strategy, the same five hydroclimates:
+      </p>
+      <ul class="related">
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/key_outcome_summary_agricultural-revenue.html"
+            >Agricultural revenue</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/key_outcome_summary_community-water-systems.html"
+            >Community surface water</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/key_outcome_summary_delta-estuary-ecology.html"
+            >Delta estuary ecology</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/key_outcome_summary_environmental-flows.html"
+            >Environmental flows</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/key_outcome_summary_freshwater-for-delta-exports.html"
+            >Freshwater for Delta exports</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/key_outcome_summary_freshwater-for-in-delta-uses.html"
+            >Freshwater for in-Delta uses</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/key_outcome_summary_groundwater-storage.html"
+            >Groundwater storage</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/key_outcome_summary_reservoir-storage.html"
+            >Reservoir storage</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://coeqwal.org/documents/Result_Summary/key_outcome_summary_winter-run-salmon.html"
+            >Winter-run salmon</a
+          >
+        </li>
+      </ul>
+      <p class="rel-q">
+        <strong>How were the five hydroclimates constructed?</strong> The
+        <a
+          href="https://coeqwal.org/documents/Background/hydroclimates_brief.html#construction"
+          >hydroclimates reference brief</a
+        >
+        defines them. It reports no results of its own; every brief above is
+        read against the same five.
+      </p>
+
+      <h2 id="what-this-doesnt-say">What this doesn&rsquo;t say</h2>
+      <div class="doesnt">
+        <p>
+          This brief reports modeled results from the COEQWAL ensemble. It does
+          not predict what will happen, evaluate whether those results are
+          acceptable, or recommend any course of action. The outcome-level
+          framework provides definitional categories; the meaning of those
+          categories for any individual reader, community, or decision is not
+          specified by COEQWAL.
+        </p>
+        <p>
+          In particular, for this brief: the five hydroclimates are a sample of
+          stress levels, carry no probabilities, and are not a timeline, so no
+          average over them is reported here. Splitting a difference into two
+          effects is arithmetic on modeled values, not a causal claim about the
+          water system, and the two are separable only because each is defined
+          against its own reference. A step or a spread on the level axis is a
+          modeled magnitude, not a benefit or a cost. A sector&rsquo;s value is
+          the unweighted mean of its locations, so locations count equally
+          regardless of the people, acres, or acre-feet each represents, and a
+          location already at either end of the scale cannot move further along
+          it. Locations are modeled nodes, not measured conditions at a place.
+        </p>
+        <p>
+          Extreme climate stress holds the single highest of a sector&rsquo;s
+          five values in all nine sectors reported here.
+        </p>
+      </div>
+
+      <h2 id="references">References, run identifiers and the build stamp</h2>
+      <div class="refs">
+        <p>
+          <strong>Model runs</strong> (this strategy&nbsp;/&nbsp;current
+          operations): Historical
+          <code>s0020-R</code>&nbsp;/&nbsp;<code>s0020</code>; Moderate
+          <code>s0134-R</code>&nbsp;/&nbsp;<code>s0134</code>; Moderate-high
+          <code>s0047-R</code>&nbsp;/&nbsp;<code>s0047</code>; High
+          <code>s0056-R</code>&nbsp;/&nbsp;<code>s0056</code>; Extreme
+          <code>s0108-R</code>&nbsp;/&nbsp;<code>s0108</code>. The baseline is
+          current operations under the historical hydroclimate,
+          <code>s0020</code>.
+        </p>
+        <p>
+          <strong>Build stamp.</strong> Snapshot <code>2026-08-29</code>;
+          builder version <code>0.1.0</code>; built 2026-08-29T19:45:09Z;
+          snapshot data read 2026-08-29; verification: pass. The verification
+          status is written by the independent check
+          (<code>briefbuilder.verifier</code>), which recomputes every value in
+          the companion data file from the per-location data and reads every
+          arrow on this page, after both files are written. It is not stamped by
+          whatever produced them.
+        </p>
+        <p>
+          Companion data file:
+          <code
+            ><a
+              href="results_current-operations-with-reintroduction_schema1.json"
+              >results_current-operations-with-reintroduction_schema1.json</a
+            ></code
+          >, holding every value in this brief plus the per-location counts, the
+          spread measures, the derivation of every number in the prose and the
+          figure&rsquo;s declared attribute contract. Per-hydroclimate slices:
+          Historical <code>#/rows/*/by_hydroclimate/BL</code>; Moderate
+          <code>#/rows/*/by_hydroclimate/HC4</code>; Moderate-high
+          <code>#/rows/*/by_hydroclimate/HC1</code>; High
+          <code>#/rows/*/by_hydroclimate/HC2</code>; Extreme
+          <code>#/rows/*/by_hydroclimate/HC3</code>. Built from the locked
+          2026-08-29 API snapshot (api.coeqwal.org v2.1.1 (locked dataset
+          snapshot)). Decomposition per
+          <code>Decomposition_Math_Quickref</code> (coeqwal-viz): the
+          hydroclimate effect is current operations under that hydroclimate
+          minus current operations under the historical hydroclimate; the
+          operations effect is this strategy minus current operations under that
+          same hydroclimate. Axis convention [1,&nbsp;4.99] per
+          <code>Ordinal_vs_continuous_tiers.md</code>; the visible band is
+          <code>floor(value)</code>. A difference of 0.1 on the level scale is
+          required before a difference is reported as movement, before a
+          location is counted as differing from its comparison, and before an
+          effect prints as anything other than 0.0. Color semantics (warm =
+          hydroclimate, blue = operations) follow the ops-vs-climate stepper.
+          Strategy identity is its descriptive name; run IDs appear only in this
+          note and the data file.
+        </p>
+      </div>
+
+      <h2 id="explore-further">Explore further</h2>
+      <p>
+        Every value on this page comes from the outcome-level data, and the data
+        explorer holds the same data without this brief&rsquo;s selection of it.
+        The link below opens current operations with reintroduction across all
+        five hydroclimates and all nine sectors, so a reader can take the
+        comparison apart, add a hydroclimate or a sector this brief reports as
+        one number, and read the locations behind a sector value directly.
+      </p>
+      <p>
+        <a
+          class="explore-link"
+          href="/explore?strategy=current-operations-with-reintroduction&amp;hydroclimates=all&amp;sectors=all"
+          >Open current operations with reintroduction in the data explorer</a
+        >.
+      </p>
+
+      <h2 id="how-to-read">How to read the values</h2>
+      <div class="refs read-note">
+        <p>
+          The level scale runs from 1 to 4.99. Level 1 is the favorable end of
+          the scale: the outcome-level framework names Level 1 Optimal and Level
+          4 Critical, so a smaller value sits nearer Optimal and a larger value
+          nearer Critical. The API serves this number in a field named
+          weighted_score; that name describes how the number is computed, and
+          does not mean that a larger number is a more favorable result.
+        </p>
+        <p>
+          Two numbers describe each result. The integer tier_level is the level
+          label. tier_continuous is the position within the band of that label,
+          and always falls inside it: tier_continuous is at least tier_level and
+          less than tier_level plus one. Labels, counts and prose use
+          tier_level; figure positions and statistics use tier_continuous.
+        </p>
+        <p>
+          Level 1 is Optimal, Level 2 is Acceptable, Level 3 is At-risk, and
+          Level 4 is Critical. These are definitional category names supplied by
+          the outcome-level framework; what a category means for any reader,
+          community, or decision is not specified by COEQWAL.
+        </p>
+        <p>
+          A sector value is the unweighted mean over the locations in that
+          sector. Every location counts equally, regardless of the people,
+          acres, or acre-feet it represents.
+        </p>
+        <p>
+          Any difference between two values under different hydroclimates
+          contains both a hydroclimate effect and an operations effect; the two
+          are separable only through the decomposition, because each is defined
+          against its own reference. A strategy is compared with current
+          operations under the same hydroclimate. Comparing one strategy with
+          itself across hydroclimates is a different quantity: the hydroclimate
+          effect plus the change in the operations effect.
+        </p>
+        <p>
+          One threshold governs every claim and every count here. A difference
+          smaller than 0.1 on the level scale is not reported as movement, and a
+          location is not counted as differing from its comparison. An outcome
+          level is a summary built so that results in nine sectors with no
+          shared unit can be compared, and 0.1 on the level scale is the finest
+          reading it carries; a smaller difference is left unstated rather than
+          described.
+        </p>
+        <p>
+          The five hydroclimates are a purposive sample of climate stress
+          levels. They are not a sequence, a trend, or a forecast, they carry no
+          probabilities, and no mean is taken over them.
+        </p>
+        <p>
+          A run ID identifies one modeling run of one strategy under one
+          hydroclimate. It is an internal identifier, used for citation and for
+          tracing a value back to the data platform, not a name for the
+          strategy; the public identity of a strategy is its descriptive name.
+        </p>
+        <p>
+          Level values are reported to one decimal place throughout this brief —
+          in the prose, in the figure and in the table. The level scale does not
+          carry meaning finer than that. Each effect shown is the difference
+          between the floored values, except that an effect smaller than 0.1 on
+          the level scale, which is the threshold this brief reports movement
+          at, is shown as 0.0, so a row containing one does not add up. Values
+          are floored rather than rounded, so a printed value stays inside the
+          band its own label names; full-precision values are in the
+          machine-readable sidecar this brief is built from.
+        </p>
+      </div>
+    </div>
+    <nav class="sitenav sitenav-bottom">
+      <a href="https://coeqwal.org">COEQWAL</a
+      ><a href="https://coeqwal.org/data">Return to COEQWAL Documentation</a>
+    </nav>
+  </body>
+</html>

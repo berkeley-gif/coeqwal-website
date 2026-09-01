@@ -43,6 +43,14 @@ import {
   BACKGROUND_BRIEF_DOCUMENTS,
   getBackgroundBriefDocumentUrl,
 } from "../content/backgroundBriefs"
+import {
+  RESULT_SUMMARY_STRATEGY_DOCUMENTS,
+  getResultSummaryStrategyDocumentUrl,
+} from "../content/resultSummaryStrategy"
+import {
+  RESULT_SUMMARY_OUTCOME_DOCUMENTS,
+  getResultSummaryOutcomeDocumentUrl,
+} from "../content/resultSummaryOutcome"
 
 const { OpenInNew: OpenInNewIcon } = icons
 
@@ -399,6 +407,128 @@ function BackgroundBriefDocumentSelect({
   )
 }
 
+/**
+ * Flat (non-grouped) Select for the result summary (by strategy) documents.
+ * Options are just {id, label} pairs — no theme grouping needed since these
+ * PDFs aren't scenario-resolved.
+ */
+function ResultSummaryStrategyDocumentSelect({
+  id,
+  value,
+  onChange,
+}: {
+  id: string
+  value: string
+  onChange: (event: SelectChangeEvent<string>) => void
+}) {
+  const theme = useTheme()
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        mt: 0.5,
+        backgroundColor: "common.white",
+        boxShadow: theme.shadow.sm,
+        border: `1px solid ${theme.palette.grey[200]}`,
+        borderRadius: theme.borderRadius.md,
+        "& .MuiMenuItem-root": {
+          py: 1,
+          whiteSpace: "normal" as const,
+          wordBreak: "break-word" as const,
+          "&:hover": { backgroundColor: theme.palette.grey[50] },
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.grey[100],
+            "&:hover": { backgroundColor: theme.palette.grey[100] },
+          },
+        },
+      },
+    },
+  }
+
+  return (
+    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
+      <Select
+        id={id}
+        value={value}
+        onChange={onChange}
+        displayEmpty
+        sx={SELECT_SX}
+        MenuProps={menuProps}
+        renderValue={(v) => {
+          const doc = RESULT_SUMMARY_STRATEGY_DOCUMENTS.find((d) => d.id === v)
+          return doc ? doc.label : "Choose a strategy"
+        }}
+      >
+        {RESULT_SUMMARY_STRATEGY_DOCUMENTS.map((doc) => (
+          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
+            {doc.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  )
+}
+
+/**
+ * Flat (non-grouped) Select for the result summary (by outcome) documents.
+ * Options are just {id, label} pairs — no theme grouping needed since these
+ * PDFs aren't scenario-resolved.
+ */
+function ResultSummaryOutcomeDocumentSelect({
+  id,
+  value,
+  onChange,
+}: {
+  id: string
+  value: string
+  onChange: (event: SelectChangeEvent<string>) => void
+}) {
+  const theme = useTheme()
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        mt: 0.5,
+        backgroundColor: "common.white",
+        boxShadow: theme.shadow.sm,
+        border: `1px solid ${theme.palette.grey[200]}`,
+        borderRadius: theme.borderRadius.md,
+        "& .MuiMenuItem-root": {
+          py: 1,
+          whiteSpace: "normal" as const,
+          wordBreak: "break-word" as const,
+          "&:hover": { backgroundColor: theme.palette.grey[50] },
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.grey[100],
+            "&:hover": { backgroundColor: theme.palette.grey[100] },
+          },
+        },
+      },
+    },
+  }
+
+  return (
+    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
+      <Select
+        id={id}
+        value={value}
+        onChange={onChange}
+        displayEmpty
+        sx={SELECT_SX}
+        MenuProps={menuProps}
+        renderValue={(v) => {
+          const doc = RESULT_SUMMARY_OUTCOME_DOCUMENTS.find((d) => d.id === v)
+          return doc ? doc.label : "Choose an outcome"
+        }}
+      >
+        {RESULT_SUMMARY_OUTCOME_DOCUMENTS.map((doc) => (
+          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
+            {doc.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  )
+}
+
 const SELECT_SX = {
   backgroundColor: "common.white",
   "& .MuiOutlinedInput-notchedOutline": {
@@ -419,6 +549,12 @@ export default function DataPage() {
   const [selectedStrategyDoc, setSelectedStrategyDoc] = useState("")
   const [selectedOutcomeLevelDoc, setSelectedOutcomeLevelDoc] = useState("")
   const [selectedBackgroundBriefDoc, setSelectedBackgroundBriefDoc] =
+    useState("")
+  const [
+    selectedResultSummaryStrategyDoc,
+    setSelectedResultSummaryStrategyDoc,
+  ] = useState("")
+  const [selectedResultSummaryOutcomeDoc, setSelectedResultSummaryOutcomeDoc] =
     useState("")
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(false)
@@ -479,6 +615,18 @@ export default function DataPage() {
     setSelectedBackgroundBriefDoc(event.target.value)
   }
 
+  const handleResultSummaryStrategyDocChange = (
+    event: SelectChangeEvent<string>,
+  ) => {
+    setSelectedResultSummaryStrategyDoc(event.target.value)
+  }
+
+  const handleResultSummaryOutcomeDocChange = (
+    event: SelectChangeEvent<string>,
+  ) => {
+    setSelectedResultSummaryOutcomeDoc(event.target.value)
+  }
+
   // Filter scenarios that have zip files
   const zipScenarios = scenarios.filter((scenario) => scenario.files.zip)
 
@@ -529,6 +677,14 @@ export default function DataPage() {
   const selectedBackgroundBriefDocument = BACKGROUND_BRIEF_DOCUMENTS.find(
     (d) => d.id === selectedBackgroundBriefDoc,
   )
+  const selectedResultSummaryStrategyDocument =
+    RESULT_SUMMARY_STRATEGY_DOCUMENTS.find(
+      (d) => d.id === selectedResultSummaryStrategyDoc,
+    )
+  const selectedResultSummaryOutcomeDocument =
+    RESULT_SUMMARY_OUTCOME_DOCUMENTS.find(
+      (d) => d.id === selectedResultSummaryOutcomeDoc,
+    )
 
   return (
     <>
@@ -924,6 +1080,85 @@ export default function DataPage() {
                       </DownloadButton>
                     </Box>
                   )}
+                </Box>
+
+                {/* Summaries section */}
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
+                    Summaries
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: (theme) => theme.space.section.sm,
+                    }}
+                  >
+                    Briefs that summarize outcome level results by Location of
+                    interest, Strategy, and Outcome.
+                  </Typography>
+
+                  <ResultSummaryStrategyDocumentSelect
+                    id="result-summary-strategy-doc-select"
+                    value={selectedResultSummaryStrategyDoc}
+                    onChange={handleResultSummaryStrategyDocChange}
+                  />
+
+                  {/* Reserve the button's footprint so the outcome dropdown
+                      below doesn't shift when a strategy is selected. */}
+                  <Box
+                    sx={{
+                      mb: (theme) => theme.space.section.xs,
+                      minHeight: 56,
+                    }}
+                  >
+                    {selectedResultSummaryStrategyDocument && (
+                      <DownloadButton
+                        fileId={selectedResultSummaryStrategyDocument.id}
+                        filename={selectedResultSummaryStrategyDocument.file}
+                        downloadUrl={getResultSummaryStrategyDocumentUrl(
+                          selectedResultSummaryStrategyDocument.file,
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        icon={<OpenInNewIcon />}
+                      >
+                        View {selectedResultSummaryStrategyDocument.label}
+                      </DownloadButton>
+                    )}
+                  </Box>
+
+                  <ResultSummaryOutcomeDocumentSelect
+                    id="result-summary-outcome-doc-select"
+                    value={selectedResultSummaryOutcomeDoc}
+                    onChange={handleResultSummaryOutcomeDocChange}
+                  />
+
+                  {/* Reserve the button's footprint so this section's total
+                      height stays stable regardless of selection state. */}
+                  <Box
+                    sx={{
+                      mb: (theme) => theme.space.section.xs,
+                      minHeight: 56,
+                    }}
+                  >
+                    {selectedResultSummaryOutcomeDocument && (
+                      <DownloadButton
+                        fileId={selectedResultSummaryOutcomeDocument.id}
+                        filename={selectedResultSummaryOutcomeDocument.file}
+                        downloadUrl={getResultSummaryOutcomeDocumentUrl(
+                          selectedResultSummaryOutcomeDocument.file,
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        icon={<OpenInNewIcon />}
+                      >
+                        View {selectedResultSummaryOutcomeDocument.label}
+                      </DownloadButton>
+                    )}
+                  </Box>
                 </Box>
               </Grid>
             </Grid>
