@@ -101,7 +101,7 @@ test("Stats view sentence reports the mean and CV, not the median", async ({
   await expect(sentence).not.toContainText(/median/i)
 
   await page
-    .getByRole("button", { name: "Climate futures", exact: true })
+    .getByRole("button", { name: "Hydroclimates", exact: true })
     .click()
   await expect(
     page.getByText(
