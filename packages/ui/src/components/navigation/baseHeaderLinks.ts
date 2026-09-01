@@ -3,7 +3,7 @@
 import type { NavDropdownOption } from "./NavDropdown"
 
 const DEFAULT_MAIN_APP_URL =
-  process.env.NEXT_PUBLIC_MAIN_APP_URL ?? "https://coeqwal.org"
+  process.env.NEXT_PUBLIC_MAIN_APP_URL ?? "https://dev.coeqwal.org"
 
 export type WaterStoryKey = "flow" | "climate" | "managed" | "equity"
 

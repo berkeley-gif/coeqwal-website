@@ -26,14 +26,14 @@ type Model = {
 
 const models: Model[] = [
   {
-    model: "Moderate-wet climate stress",
+    model: "Moderate climate stress",
     background: "#44ce1b",
     hover: "#35a915",
     text: "#fcfbfa",
     icon: WaterDropIcon,
   },
   {
-    model: "Moderate-dry climate stress",
+    model: "Moderate-high climate stress",
     background: "#f7e379",
     hover: "#dfc94f",
     text: "#fcfbfa",
@@ -56,8 +56,8 @@ const models: Model[] = [
 ]
 
 const modelQueryMap: Record<string, string> = {
-  "Moderate-wet climate stress": "Warmer & Wetter",
-  "Moderate-dry climate stress": "Warmer & Drier I",
+  "Moderate climate stress": "Warmer & Wetter",
+  "Moderate-high climate stress": "Warmer & Drier I",
   "High climate stress": "Warmer & Drier II",
   "Extreme climate stress": "Warmer & Drier III",
 }
@@ -66,7 +66,7 @@ export default function HydroClimateContainer() {
   const [flowData, setFlowData] = useState<FlowEntry[]>([])
   const [flowYExtents, setFlowYExtents] = useState<[number, number]>([0, 0])
   const [selectedModel, setSelectedModel] = useState<string>(
-    "Moderate-wet climate stress",
+    "Moderate climate stress",
   )
   const selectedDataModel = modelQueryMap[selectedModel] ?? selectedModel
 
