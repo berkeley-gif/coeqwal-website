@@ -4,6 +4,7 @@
 
 import React from "react"
 import { type OutcomeCode } from "../../../content/outcomes"
+import { WATER_THEMES } from "../../../content/themes"
 import { GlossaryTermLink } from "../../glossary"
 
 export interface WaterIssueTheme {
@@ -13,32 +14,12 @@ export interface WaterIssueTheme {
   dimmed?: boolean
 }
 
-export const WATER_ISSUE_THEMES: ReadonlyArray<WaterIssueTheme> = [
-  {
-    title: "Community water systems",
-    description:
-      "Whether people and communities can reliably access safe drinking water for daily life, health, and essential services",
-    themeKey: "cws",
-  },
-  {
-    title: "Farms and groundwater",
-    description:
-      "Whether agricultural water deliveries can sustain food production, while preventing over-draft of groundwater basins",
-    themeKey: "ag_gw",
-  },
-  {
-    title: "Rivers, salmon and the Delta ecosystem",
-    description:
-      "Whether rivers, salmon, and the Delta estuary receive the flows they need to thrive",
-    themeKey: "eco",
-  },
-  {
-    title: "The Delta as a living place",
-    description:
-      "Whether the Delta is a place where communities, farms, and ecosystems coexist and thrive",
-    themeKey: "delta",
-  },
-] as const
+export const WATER_ISSUE_THEMES: ReadonlyArray<WaterIssueTheme> =
+  WATER_THEMES.map((wt) => ({
+    title: wt.shortLabel,
+    description: wt.description,
+    themeKey: wt.id,
+  }))
 
 export interface HydroclimateFuture {
   title: string

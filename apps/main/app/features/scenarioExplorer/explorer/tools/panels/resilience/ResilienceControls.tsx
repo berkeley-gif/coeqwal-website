@@ -52,9 +52,7 @@ import {
   PIVOT_DIM_LABEL_PLURAL,
   PIVOT_DIM_LABEL_SINGULAR,
   type PivotDim,
-  type PivotMode,
 } from "./controls"
-import type { ResilienceControlsState } from "../../../store"
 import {
   type ResilienceHydroclimate,
   RESILIENCE_HYDROCLIMATES,
@@ -103,9 +101,7 @@ export default function ResilienceControls({
     selectedHydroclimates,
     primaryOutcomeCode,
     compareOutcomeCodes,
-    aggregateOver,
     transposed,
-    reorderBySimilarity,
     showCellNumbers,
     controlsSnapshot,
     writeChange,
@@ -155,10 +151,7 @@ export default function ResilienceControls({
   // --------------------------------------------------------------
 
   // PLAN: derive sentence axis roles from stored (view, aggregateOver, transposed).
-  const { pivotDim, pivotMode } = useMemo(
-    () => derivePivotFromStore(view, aggregateOver),
-    [view, aggregateOver],
-  )
+  const pivotDim = useMemo(() => derivePivotFromStore(view), [view])
   const { xDim, yDim } = useMemo(
     () => deriveSentenceAxes(pivotDim, transposed),
     [pivotDim, transposed],
@@ -166,22 +159,13 @@ export default function ResilienceControls({
 
   // Pivot handlers. planPivotPatch → writeChange (see controls/planPivotChange.ts).
   const handlePivotPick = useCallback(
-    (nextDim: PivotDim, nextMode?: PivotMode) => {
-      const mode = nextMode ?? pivotMode
-      if (nextDim === pivotDim && mode === pivotMode) return
-      const extra: Partial<ResilienceControlsState> =
-        nextDim === pivotDim ? {} : { transposed: false }
-      writeChange(planPivotPatch(nextDim, mode, controlsSnapshot, extra))
+    (nextDim: PivotDim) => {
+      if (nextDim === pivotDim) return
+      writeChange(
+        planPivotPatch(nextDim, controlsSnapshot, { transposed: false }),
+      )
     },
-    [controlsSnapshot, writeChange, pivotDim, pivotMode],
-  )
-
-  const handlePivotModeChange = useCallback(
-    (nextMode: PivotMode) => {
-      if (nextMode === pivotMode) return
-      writeChange(planPivotPatch(pivotDim, nextMode, controlsSnapshot))
-    },
-    [controlsSnapshot, writeChange, pivotDim, pivotMode],
+    [controlsSnapshot, writeChange, pivotDim],
   )
 
   // Clicking a dim in the X pill has three meaningful outcomes:
@@ -200,12 +184,12 @@ export default function ResilienceControls({
       const newPivotDim = xDim
       const needsTranspose = CANONICAL_X_FOR_PIVOT[newPivotDim] !== nextDim
       writeChange(
-        planPivotPatch(newPivotDim, pivotMode, controlsSnapshot, {
+        planPivotPatch(newPivotDim, controlsSnapshot, {
           transposed: needsTranspose,
         }),
       )
     },
-    [controlsSnapshot, writeChange, xDim, yDim, pivotMode, transposed],
+    [controlsSnapshot, writeChange, xDim, yDim, transposed],
   )
 
   // Mirror of handleXPick for the Y pill.
@@ -219,12 +203,12 @@ export default function ResilienceControls({
       const newPivotDim = yDim
       const needsTranspose = CANONICAL_X_FOR_PIVOT[newPivotDim] !== xDim
       writeChange(
-        planPivotPatch(newPivotDim, pivotMode, controlsSnapshot, {
+        planPivotPatch(newPivotDim, controlsSnapshot, {
           transposed: needsTranspose,
         }),
       )
     },
-    [controlsSnapshot, writeChange, xDim, yDim, pivotMode, transposed],
+    [controlsSnapshot, writeChange, xDim, yDim, transposed],
   )
 
   const toggleHydroclimate = useCallback(
@@ -322,18 +306,11 @@ export default function ResilienceControls({
   // mirror that effective behavior in the sentence label and pivot
   // popover so the user sees the chart they're actually getting
   // rather than the literal stored (pivotMode = facet) state.
-  const pivotEffectivelyAggregate =
-    pivotMode === "facet" && pivotDim === "scenario" && scenarioCount === 0
-  const pivotDisplayMode: PivotMode = pivotEffectivelyAggregate
-    ? "aggregate"
-    : pivotMode
 
   const xDimLabel = PIVOT_DIM_LABEL_PLURAL[xDim]
   const yDimLabel = PIVOT_DIM_LABEL_PLURAL[yDim]
-  const pivotPhraseLabel =
-    pivotDisplayMode === "facet"
-      ? `for each ${PIVOT_DIM_LABEL_SINGULAR[pivotDim]}`
-      : `averaged over ${PIVOT_DIM_LABEL_PLURAL[pivotDim]}`
+  const pivotPhraseLabel = `for each ${PIVOT_DIM_LABEL_SINGULAR[pivotDim]}`
+
   // The pivot phrase leads the sentence now, so render it with a
   // capitalized first letter. Keep `pivotPhraseLabel` itself lowercase
   // because aria-labels, tooltips, and tour copy use it mid-sentence.
@@ -390,7 +367,7 @@ export default function ResilienceControls({
             label={pivotPhraseLabelLeading}
             active={Boolean(pivotAnchor)}
             onClick={(e) => setPivotAnchor(e.currentTarget)}
-            ariaLabel={`Chart pivot: ${pivotPhraseLabel}. This is the biggest lever on the chart. Click to change the dimension the chart is built around and whether it shows small multiples or a single averaged chart.`}
+            ariaLabel={`Chart pivot: ${pivotPhraseLabel}. This is the biggest lever on the chart. Click to change which dimension the chart is arranged around.`}
           />
           <Box
             component="span"
@@ -480,18 +457,6 @@ export default function ResilienceControls({
         >
           Rows
         </Typography>
-        <InlineToggleChip
-          label="Group similar rows"
-          active={reorderBySimilarity}
-          onClick={() =>
-            writeChange({ reorderBySimilarity: !reorderBySimilarity })
-          }
-          ariaLabel={
-            reorderBySimilarity
-              ? "Row order: similar scenarios grouped. Click to use default order."
-              : "Row order: default. Click to group similar scenarios together."
-          }
-        />
         <InlineToggleChip
           label="Show cell values"
           active={showCellNumbers}
@@ -831,7 +796,7 @@ export default function ResilienceControls({
       >
         <PopoverShell
           title="What the chart is built around"
-          subtitle="Pick the dimension the chart is arranged around, and whether it shows one tile per item or a single averaged chart."
+          subtitle="Pick the dimension the chart is arranged around."
           width={340}
         >
           <Typography
@@ -855,45 +820,6 @@ export default function ResilienceControls({
               />
             ))}
           </Box>
-          <Divider sx={{ borderColor: theme.palette.divider }} />
-          <Typography
-            variant="caption"
-            sx={{
-              fontSize: "0.7rem",
-              color: theme.palette.grey[700],
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-            }}
-          >
-            Show as
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
-            <RadioRow
-              active={pivotDisplayMode === "facet"}
-              label={`small multiples, one chart per ${PIVOT_DIM_LABEL_SINGULAR[pivotDim]}`}
-              onClick={() => handlePivotModeChange("facet")}
-            />
-            <RadioRow
-              active={pivotDisplayMode === "aggregate"}
-              label={`a single chart, averaged across ${PIVOT_DIM_LABEL_PLURAL[pivotDim]}`}
-              onClick={() => handlePivotModeChange("aggregate")}
-            />
-          </Box>
-          {pivotEffectivelyAggregate && (
-            <Typography
-              variant="caption"
-              sx={{
-                fontSize: "0.72rem",
-                color: theme.palette.grey[600],
-                lineHeight: 1.35,
-                mt: 0.25,
-              }}
-            >
-              No scenarios are picked in the sidebar, so the chart is showing
-              the aggregate across the whole library. Pick a scenario to see one
-              chart per scenario.
-            </Typography>
-          )}
         </PopoverShell>
       </Popover>
     </Box>

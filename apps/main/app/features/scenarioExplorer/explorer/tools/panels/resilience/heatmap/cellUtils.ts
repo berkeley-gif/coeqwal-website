@@ -4,12 +4,7 @@ import type {
   ResilienceAxisItem,
   ResilienceCellRender,
 } from "@repo/viz"
-import type {
-  AggregateOver,
-  CellEncoding,
-  DeltaMode,
-  ResilienceView,
-} from "../../../../store"
+import type { CellEncoding, DeltaMode, ResilienceView } from "../../../../store"
 import { getOutcomeName } from "../../../../../../../content/outcomes"
 import type { HoveredInteraction } from "../../../../useExploreHoverCoordination"
 
@@ -57,35 +52,17 @@ export function transposeTile(
 
 export function resolveCellRender(
   view: ResilienceView,
-  encoding: CellEncoding,
   deltaMode: DeltaMode,
-  aggregateOver: AggregateOver = "scenarios",
 ): ResilienceCellRender {
-  if (view === "aggregate") {
-    if (encoding === "density_opp") {
-      return encoding
-    }
-    if (encoding === "glyph") return "glyph"
-    if (encoding === "distribution") return "distribution"
-    if (encoding === "leverage") {
-      return aggregateOver === "outcomes" ? "tier" : "leverage"
-    }
-    if (aggregateOver === "hydroclimates") return "tier"
-    return deltaMode !== "none" ? "delta" : "tier"
-  }
   return deltaMode !== "none" ? "delta" : "tier"
 }
 
 export function getMapLinkBlockedMessage(
-  effectiveView: ResilienceView,
   cellEncoding: CellEncoding,
   hasOutcome: boolean,
 ): string {
   if (!hasOutcome) {
     return "This cell isn't tied to a mappable outcome."
-  }
-  if (effectiveView === "aggregate") {
-    return "Overview cells aggregate many scenarios or outcomes, so they don't open a single slice on the map. Switch to Scenarios, Outcomes, or Hydroclimates to link cells to the map."
   }
   if (
     cellEncoding === "delta" ||
@@ -99,14 +76,8 @@ export function getMapLinkBlockedMessage(
 
 export function resolveScenarioIdFromCell(
   cell: ResilienceHeatmapCell,
-  effectiveView: ResilienceView,
-  aggregateOver: AggregateOver,
 ): string | null {
   if (cell.scenarioId) return cell.scenarioId
-  if (effectiveView === "aggregate") {
-    if (aggregateOver === "outcomes") return cell.rowKey
-    if (aggregateOver === "hydroclimates") return cell.colKey
-  }
   return null
 }
 

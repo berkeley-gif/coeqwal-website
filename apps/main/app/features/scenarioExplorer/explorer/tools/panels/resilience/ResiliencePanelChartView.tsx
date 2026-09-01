@@ -16,13 +16,11 @@
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import {
-  ResilienceHeatmap,
   ResilienceHeatmapSmallMultiples,
   getResilienceSmallMultiplesTileHeight,
   RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS,
   type ResilienceAxisItem,
   type ResilienceHeatmapCell,
-  type ResilienceHeatmapMarginals,
   type ResilienceHeatmapPalette,
   type ResilienceCellRender,
   type ResilienceGlyphEntry,
@@ -50,20 +48,6 @@ export type ResiliencePanelChartViewState =
       highlightedRowKeys?: Set<string> | null | undefined
       highlightedColKeys?: Set<string> | null | undefined
       highlightedTileIds?: Set<string> | null | undefined
-    }
-  | {
-      kind: "aggregate"
-      rows: ResilienceAxisItem[]
-      columns: ResilienceAxisItem[]
-      cells: ResilienceHeatmapCell[]
-      marginals?: ResilienceHeatmapMarginals | undefined
-      showMarginals?: boolean
-      highlightedRowKeys?: Set<string> | null | undefined
-      highlightedColKeys?: Set<string> | null | undefined
-      highlightedTileIds?: Set<string> | null | undefined
-      scenarioRowAxisHover?: boolean
-      scenarioColAxisHover?: boolean
-      columnLabelRotation?: number
     }
 
 export interface ResiliencePanelChartViewHandlers {
@@ -239,77 +223,45 @@ export default function ResiliencePanelChartView({
     )
   }
 
-  if (state.kind === "smallMultiples") {
-    const onSquareHover = handlers?.onSquareHover
-    const onSquareClick = handlers?.onSquareClick
-    return (
-      <ResilienceHeatmapSmallMultiples
-        rows={state.rows}
-        columns={state.columns}
-        tiles={state.tiles}
-        tierColors={tierColors}
-        tierLabels={tierLabels}
-        palette={palette}
-        cellRender={cellRender}
-        showCellNumbers={showCellNumbers}
-        tileAspect={state.tileAspect}
-        columnLabelRotation={state.columnLabelRotation}
-        captureMode={captureMode}
-        onCellHover={handlers?.onCellHover}
-        onTileHover={handlers?.onTileHover}
-        highlightedTileIds={state.highlightedTileIds ?? null}
-        highlightedRowKeys={state.highlightedRowKeys ?? null}
-        highlightedColKeys={state.highlightedColKeys ?? null}
-        onRowKeyHover={handlers?.onRowKeyHover}
-        onColKeyHover={handlers?.onColKeyHover}
-        onCellClick={handlers?.onCellClick}
-        formatRowTick={formatRowTick}
-        distributionMode={distributionMode}
-        onSquareHover={
-          onSquareHover
-            ? (info) =>
-                onSquareHover(
-                  info ? { cell: info.cell, entry: info.entry } : null,
-                )
-            : undefined
-        }
-        onSquareClick={
-          onSquareClick
-            ? (info) => onSquareClick({ cell: info.cell, entry: info.entry })
-            : undefined
-        }
-        renderTileActions={handlers?.renderTileActions}
-      />
-    )
-  }
-
+  const onSquareHover = handlers?.onSquareHover
+  const onSquareClick = handlers?.onSquareClick
   return (
-    <ResilienceHeatmap
+    <ResilienceHeatmapSmallMultiples
       rows={state.rows}
       columns={state.columns}
-      cells={state.cells}
+      tiles={state.tiles}
       tierColors={tierColors}
       tierLabels={tierLabels}
       palette={palette}
       cellRender={cellRender}
       showCellNumbers={showCellNumbers}
+      tileAspect={state.tileAspect}
+      columnLabelRotation={state.columnLabelRotation}
+      captureMode={captureMode}
       onCellHover={handlers?.onCellHover}
-      onCellClick={handlers?.onCellClick}
+      onTileHover={handlers?.onTileHover}
+      highlightedTileIds={state.highlightedTileIds ?? null}
       highlightedRowKeys={state.highlightedRowKeys ?? null}
       highlightedColKeys={state.highlightedColKeys ?? null}
-      onRowKeyHover={
-        state.scenarioRowAxisHover ? handlers?.onRowKeyHover : undefined
-      }
-      onColKeyHover={
-        state.scenarioColAxisHover ? handlers?.onColKeyHover : undefined
-      }
+      onRowKeyHover={handlers?.onRowKeyHover}
+      onColKeyHover={handlers?.onColKeyHover}
+      onCellClick={handlers?.onCellClick}
       formatRowTick={formatRowTick}
-      marginals={state.marginals}
-      showMarginals={state.showMarginals}
       distributionMode={distributionMode}
-      onSquareHover={handlers?.onSquareHover}
-      onSquareClick={handlers?.onSquareClick}
-      columnLabelRotation={state.columnLabelRotation}
+      onSquareHover={
+        onSquareHover
+          ? (info) =>
+              onSquareHover(
+                info ? { cell: info.cell, entry: info.entry } : null,
+              )
+          : undefined
+      }
+      onSquareClick={
+        onSquareClick
+          ? (info) => onSquareClick({ cell: info.cell, entry: info.entry })
+          : undefined
+      }
+      renderTileActions={handlers?.renderTileActions}
     />
   )
 }
