@@ -125,7 +125,7 @@ export const SECTION_LABELS: Record<SubSectionId, string> = {
   calsim: "CalSim Model",
   coeqwal: "What is COEQWAL?",
   "water-issues": "Water issues",
-  hydroclimates: "Hydroclimate futures",
+  hydroclimates: "Hydroclimates",
   "key-outcomes": "Key outcomes",
   "outcomes-viz": "Visualizing outcomes",
   "data-in-depth-intro": "Data in depth intro",
