@@ -96,8 +96,10 @@ export default function ExploreSubNav() {
 
   // List tour Step 1 highlights this specific tab, not the whole sub-nav.
   const homeTabAnchorRef = useTourAnchor("list.homeTab")
-  // Bar tour Step 1 highlights the Bar tab the same way.
+  // Bar tour Step 1 highlights the Bar tab 
   const barTabAnchorRef = useTourAnchor("bar.tab")
+  // Radar tour Step 1 highlights the Radar tab 
+  const radarTabAnchorRef = useTourAnchor("radar.tab")
 
   // Research-only tools hidden by default, toggled with "A" key
   const [showResearchTools, setShowResearchTools] = useState(false)
@@ -164,7 +166,9 @@ export default function ExploreSubNav() {
                     ? homeTabAnchorRef
                     : step.mode === "bar"
                       ? barTabAnchorRef
-                      : undefined
+                      : step.mode === "radar"
+                        ? radarTabAnchorRef
+                        : undefined
                 }
                 component="button"
                 type="button"
