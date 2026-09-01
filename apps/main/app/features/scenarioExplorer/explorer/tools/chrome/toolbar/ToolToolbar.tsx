@@ -7,7 +7,7 @@
  * with StrategyGrid columns. Otherwise uses a flex layout.
  */
 
-import React, { useCallback } from "react"
+import React from "react"
 import { Box, Typography, useTheme, Switch } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
@@ -51,6 +51,7 @@ export default function ToolToolbar({
   // tour. Resilience reuses this control too but its tour does not
   // step through it, so a single id is fine.
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
+  const showMapAnchorRef = useTourAnchor("bar.showMap")
   // High-level orientation anchor for the list tour: the whole strip
   // of view controls (hydroclimate, map, etc.) on the right side of
   // the toolbar. Registered only in list mode so it does not collide
@@ -96,7 +97,10 @@ export default function ToolToolbar({
 
         {mapPaired && (
           <>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Box
+              ref={showMapAnchorRef}
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
               <Typography
                 variant="dashboard"
                 sx={{
