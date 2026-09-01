@@ -924,7 +924,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist"],
     plain:
       "How much State Water Project water is delivered to agricultural contractors each year. Annual combined delivery volumes are provided for the entire system as well as subtotals for North of Delta and South of Delta regions. This variable includes deliveries to Feather River Settlement contractors.",
-    tech: "Total annual SWP deliveries to agricultural contractors are aggregated from monthly SWP delivery time series variables available in CalSim3 output files for each scenario. Total systemwide delivery amounts (DEL_SWP_PAG_TOTAL) are calculated as the sum of the DEL_SWP_PAG_NOD and DEL_SWP_PAG_S variables. These summary variables do not include carryover or interruptible supplies, only Table A amounts. The regional subtotals (North and South of Delta) sum to the systemwide total. Annual totals are aggregated on a water year (October-September) basis.",
+    tech: "Total annual SWP deliveries to agricultural contractors are aggregated from monthly SWP delivery time series variables available in CalSim3 output files for each scenario. Total systemwide delivery amounts (DEL_SWP_PAG_TOTAL) are calculated as the sum of DEL_SWP_PAG_NOD and DEL_SWP_PAG_S variables. These summary variables do not include carryover or interruptible supplies, only Table A amounts. The regional subtotals (North and South of Delta) sum to the systemwide total. Annual totals are aggregated on a water year (October-September) basis.",
     data: "live",
     mockKind: "exports",
     mockEffect: "exports",
@@ -1120,7 +1120,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist"],
     plain:
       "The total value of crops produced, given the water available. Water shortages translate into fallowed land and lost revenue.",
-    tech: "Annual gross revenue percentiles from the external agricultural economics model, driven by CalSim3 deliveries and pumping. Served for the North of Delta and South of Delta aggregates and for each individual demand unit; the site displays millions of dollars.",
+    tech: "Annual gross revenue percentiles from the external agricultural economics model, driven by CalSim3 deliveries and pumping.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
     data: "live",
@@ -1159,7 +1159,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     axisLabel: "Delivery shortage (% of demand)",
     views: ["dist"],
     plain:
-      "How much, if any, community water system deliveries are short of their estimated recent potable demands for those sources. Zero means demand was fully met.",
+      "How much, if any, community water system deliveries are short of their estimated recent potable demands for those sources.",
     tech: "For each location of interest, the shortfall between estimated recent potable demand (based on SAFER Clearinghouse data) and surface water deliveries (modeled via CalSim3), expressed as a percent of demand: the site derives it as 100 minus the served percent of demand met (demand-weighted at the NOD_CWS/SOD_CWS aggregates, capped at 100 upstream), so it is never negative. This is the annual surface water delivery shortage, distinct from the municipal supply shortage of the CWS economics analysis. The served series is aggregated by calendar year, so its first and last years are stubs; the site keeps 1922 to 2020. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
     tierOutcomeName: "Community surface water",
@@ -1183,7 +1183,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     viewUnits: { pct_demand: { unit: "%", unitLabel: "percent of demand" } },
     plain:
       "How much water communities needed but did not get, accounting for surface water deliveries and groundwater sources. Shortages are generally zero in wet years but can spike in droughts. Water shortage is expressed as a volume of unmet demand (annual TAF) and as a percent of unmet demand (%) for all locations of interest.",
-    tech: "Served live from the cws data-in-depth endpoint on the NOD_CWS/SOD_CWS aggregates and on the 63 community water systems in the CWS economics analysis: the volume view reads the shortage_total measure (annual TAF), the percent view reads the served shortage_pct measure directly (0-100). Note the shortage measures aggregate over the systems with modeled shortage series, a narrower set than the delivery measure covers, so the shortage percent is not simply 100 minus the percent of demand met. Water-year-type filtering does not apply because the annual data were calculated by calendar year, not water year.",
+    tech: "Served live from the cws data-in-depth endpoint on the NOD_CWS/SOD_CWS aggregates and on the 63 community water systems in the CWS economics analysis: the volume view reads the shortage_total measure (annual TAF), the percent view reads the served shortage_pct measure directly (0-100). Note the shortage measures aggregate over the systems with modeled shortage series, a narrower set than the delivery measure covers, so shortage_pct is not simply 100 minus pct_demand_met. Water-year-type filtering does not apply because the annual data were calculated by calendar year, not water year.",
     data: "live",
     wytApplicable: false,
     mockKind: "short",

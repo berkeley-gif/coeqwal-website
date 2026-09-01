@@ -77,7 +77,7 @@ export const DATA_TOUR: TourStep[] = [
     anchorId: "data.locationMembers",
     eyebrow: "select locations",
     title: "Display how the variable changes across locations",
-    body: 'When "Compare by locations" is selected, choose which location to display.',
+    body: 'When "Compare by Locations" is selected, choose which location to display.',
     placement: "bottom-start",
   },
 
