@@ -131,7 +131,7 @@ export interface VariableDef {
   /** Per-view unit overrides for views whose quantity differs from the
    *  variable's base unit (e.g. groundwater level in feet). */
   viewUnits?: Partial<Record<VariableView, { unit: string; unitLabel: string }>>
-  /** Plain-language explanation ("What is this metric?") */
+  /** Plain-language explanation ("What is this variable?") */
   plain: string
   /** Technical note (source variables, caveats) */
   tech: string
