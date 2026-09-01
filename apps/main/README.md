@@ -131,6 +131,17 @@ Three layers, from broadest to narrowest:
 
 Share-link rehydration uses `window.location.search` directly inside a mount `useEffect` (see `app/features/scenarioExplorer/explorer/share/useShareUrlRehydration.ts`) so it does not call `useSearchParams` and does not need a Suspense ancestor. Only `?tab=` and `?theme=` are read through `useSearchParams`, which is why those are the only Suspense-causing parameters.
 
+### Inline navigation links
+
+For a link inside body copy (tooltip text, panel copy, explainer strings) that should navigate elsewhere in the app, use `InlineNavLink` (`app/components/InlineNavLink.tsx`) instead of hand-rolling a styled `Typography component="button"` or reaching for `router.push` directly. It renders as an inline, underlined button and picks the right navigation method for the target: a tab (`"learn" | "explore" | "share"`) goes through `navigateToTab` so `TabsProvider`'s context state stays in sync with the URL, while anything else (e.g. `"/data"`) falls back to `router.push`. Calling `router.push` straight to a tab route works for the URL but leaves the Tabs context stale.
+
+```tsx
+<InlineNavLink to="/data">Data page</InlineNavLink>
+```
+
+Why: this slots into the existing "Important topics" pattern — each subsection here documents a convention a dev should reach for instead of reinventing (Suspense boundaries, error boundary layers, URL state ownership). `InlineNavLink` is the same kind of thing: a small shared helper whose value is that everyone uses it instead of five slightly-different one-off inline links. Placing it right after "URL state and deep links" groups it near the other navigation/routing content rather than burying it at the end of the file.
+
+
 ### State management
 
 Three storage tiers, picked by what the state needs to do.
