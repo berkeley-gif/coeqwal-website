@@ -7,7 +7,7 @@ import {
   useTheme,
   type Theme,
 } from "@repo/ui/mui"
-import { Paragraph, SectionTitle, Visualization } from "@repo/ui"
+import { Paragraph, SectionTitle, Visualization, getExploreUrl } from "@repo/ui"
 import { useRef } from "react"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import HydroClimateContainer from "./vis/HydroClimate"
@@ -98,7 +98,7 @@ const conclusionLink = [
     You can start{" "}
     <strong>
       <a
-        href="https://dev.coeqwal.org/?tab=explore"
+        href={getExploreUrl()}
         target="_blank"
         rel="noopener noreferrer"
         style={{ color: "inherit", textDecoration: "underline" }}

@@ -1,6 +1,7 @@
 "use client"
 
 import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
+import { getWaterStoryUrl } from "@repo/ui"
 import { useRef } from "react"
 import { useStoryline } from "../store"
 import { motion, useScroll, useTransform } from "@repo/motion"
@@ -246,7 +247,7 @@ export function Climate() {
           <Typography>
             <strong>
               <a
-                href="https://climate.coeqwal.org/"
+                href={getWaterStoryUrl("climate")}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: "inherit", textDecoration: "underline" }}

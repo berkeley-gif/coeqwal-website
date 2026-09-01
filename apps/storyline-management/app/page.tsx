@@ -7,6 +7,8 @@ import {
   goToMainAbout,
   goToMainData,
   goToMainHome,
+  goToMainLearn,
+  goToMainExplore,
 } from "@repo/ui"
 import { Box } from "@repo/ui/mui"
 
@@ -20,6 +22,8 @@ export default function ManagementContainer() {
         onLogoClick={goToMainHome}
         onAboutClick={goToMainAbout}
         onGetDataClick={goToMainData}
+        onGetStartedClick={goToMainLearn}
+        onToolsClick={goToMainExplore}
         waterThemesOptions={waterThemesOptions}
       />
       <Box

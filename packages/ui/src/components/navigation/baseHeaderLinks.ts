@@ -3,7 +3,7 @@
 import type { NavDropdownOption } from "./NavDropdown"
 
 const DEFAULT_MAIN_APP_URL =
-  process.env.NEXT_PUBLIC_MAIN_APP_URL ?? "https://dev.coeqwal.org"
+  process.env.NEXT_PUBLIC_MAIN_APP_URL ?? "https://coeqwal.org"
 
 export type WaterStoryKey = "flow" | "climate" | "managed" | "equity"
 
@@ -144,4 +144,20 @@ export function goToMainAbout() {
 
 export function goToMainData() {
   goToUrl(buildMainUrl("/data"))
+}
+
+export function getExploreUrl(): string {
+  return buildMainUrl("/explore")
+}
+
+export function getWaterStoryUrl(key: WaterStoryKey): string {
+  return WATER_STORIES.find((story) => story.key === key)?.href ?? ""
+}
+
+export function goToMainLearn() {
+  goToUrl(buildMainUrl("/learn"))
+}
+
+export function goToMainExplore() {
+  goToUrl(getExploreUrl())
 }
