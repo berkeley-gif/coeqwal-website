@@ -65,7 +65,6 @@ export default function ToolToolbar({
   // same non-list toolbar row.
   const dataViewAreaTourRef = useTourAnchor("data.viewArea")
 
-
   // The list view's "Outcome view" toggle (Average / Bar /
   // Distribution) is intentionally deactivated for the current demo
   // build. Flip the `false &&` guard below to bring it back.

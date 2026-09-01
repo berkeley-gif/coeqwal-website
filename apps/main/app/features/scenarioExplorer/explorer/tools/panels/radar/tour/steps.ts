@@ -25,7 +25,8 @@ export const RADAR_TOUR: TourStep[] = [
     id: "radar.step0.sidebar",
     anchorId: "radar.tab",
     eyebrow: "radar plot",
-    title: "The radar chart tool displays each key outcome for selected scenarios",
+    title:
+      "The radar chart tool displays each key outcome for selected scenarios",
     body: "Add or remove scenarios by changing your selection on the sidebar.",
     placement: "bottom",
   },

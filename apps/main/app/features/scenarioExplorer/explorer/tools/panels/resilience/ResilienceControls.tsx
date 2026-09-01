@@ -478,7 +478,6 @@ export default function ResilienceControls({
           />
         </InlineTourAnchor>
         <InlineTourAnchor anchorId="resilience.switchOrientation">
-
           <Button
             type="button"
             size="small"

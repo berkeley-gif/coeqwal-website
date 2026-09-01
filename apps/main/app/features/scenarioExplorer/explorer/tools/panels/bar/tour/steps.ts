@@ -11,7 +11,8 @@ export const BAR_TOUR: TourStep[] = [
     id: "bar.step1.tab",
     anchorId: "bar.tab",
     eyebrow: "bar chart",
-    title: "The bar tool displays outcomes for selected scenarios as bar charts",
+    title:
+      "The bar tool displays outcomes for selected scenarios as bar charts",
     body: "The row of bar charts shows scenario results for nine different key outcomes.",
     placement: "bottom",
   },
@@ -59,7 +60,8 @@ export const BAR_TOUR: TourStep[] = [
     id: "bar.step8.pin",
     anchorId: "bar.row.pin",
     eyebrow: "pin a scenario",
-    title: "Pin a set of bar charts from a scenario to enable comparison with other scenarios",
+    title:
+      "Pin a set of bar charts from a scenario to enable comparison with other scenarios",
     body: "Click on the pin to fix the bar charts from a selected scenario to the top of the screen.",
     placement: "top",
   },
@@ -67,7 +69,8 @@ export const BAR_TOUR: TourStep[] = [
     id: "bar.step9.share",
     anchorId: "bar.row.share",
     eyebrow: "save this chart",
-    title: "Click the share icon to export the bar charts to the SHARE folder. All shared items will be saved here to revisit later.",
+    title:
+      "Click the share icon to export the bar charts to the SHARE folder. All shared items will be saved here to revisit later.",
     placement: "top",
   },
   {

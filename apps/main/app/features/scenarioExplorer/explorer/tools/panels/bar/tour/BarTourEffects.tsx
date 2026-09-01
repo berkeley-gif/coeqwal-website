@@ -17,26 +17,26 @@ import type { TourEffectsProps } from "../../../tour/types"
 const MAP_STEP_ID = "bar.step7.showMap"
 
 export default function BarTourEffects({ step }: TourEffectsProps) {
-    const setShowMap = useWorkspaceSlice((s) => s.setShowMap)
-    const mapDemoRef = useRef<{ prevShowMap: boolean } | null>(null)
+  const setShowMap = useWorkspaceSlice((s) => s.setShowMap)
+  const mapDemoRef = useRef<{ prevShowMap: boolean } | null>(null)
 
-    useEffect(() => {
-        if (!step) return
-        if (step.id !== MAP_STEP_ID) return
-        const prevShowMap = useExplorerStore.getState().showMap
-        mapDemoRef.current = { prevShowMap }
-        if (!prevShowMap) {
-            setShowMap(true)
-        }
-        return () => {
-            const snap = mapDemoRef.current
-            mapDemoRef.current = null
-            if (!snap) return
-            if (!snap.prevShowMap) {
-                setShowMap(false)
-            }
-        }
-    }, [step, setShowMap])
+  useEffect(() => {
+    if (!step) return
+    if (step.id !== MAP_STEP_ID) return
+    const prevShowMap = useExplorerStore.getState().showMap
+    mapDemoRef.current = { prevShowMap }
+    if (!prevShowMap) {
+      setShowMap(true)
+    }
+    return () => {
+      const snap = mapDemoRef.current
+      mapDemoRef.current = null
+      if (!snap) return
+      if (!snap.prevShowMap) {
+        setShowMap(false)
+      }
+    }
+  }, [step, setShowMap])
 
-    return null
+  return null
 }

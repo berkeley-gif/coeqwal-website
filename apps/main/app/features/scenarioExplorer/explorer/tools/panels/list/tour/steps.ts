@@ -54,7 +54,8 @@ export const LIST_TOUR: TourStep[] = [
     id: "list.step5.definitions",
     anchorId: "list.select.showDefinitions",
     eyebrow: "definitions",
-    title: "The definitions button displays the detailed description of the scenario",
+    title:
+      "The definitions button displays the detailed description of the scenario",
     body: "Click to display or hide the text.",
     placement: "bottom",
   },
@@ -62,7 +63,8 @@ export const LIST_TOUR: TourStep[] = [
     id: "list.step6.baselines",
     anchorId: "list.select.showBaselines",
     eyebrow: "baselines",
-    title: "The baselines button displays alternative versions of the current operations scenario",
+    title:
+      "The baselines button displays alternative versions of the current operations scenario",
     body: "Click this button to see other scenarios that can serve as a baseline for comparison.",
     placement: "bottom-start",
   },
@@ -100,11 +102,11 @@ export const LIST_TOUR: TourStep[] = [
   },
   {
     id: "list.journey",
-    anchorId: "list.startVisualizing", 
+    anchorId: "list.startVisualizing",
     eyebrow: "visualize data",
-    title: "Click on panel or one of the explore tools to visualize scenario outcomes",
+    title:
+      "Click on panel or one of the explore tools to visualize scenario outcomes",
     body: "You can now visualize the data for the scenarios you selected.",
     placement: "top",
   },
 ]
-

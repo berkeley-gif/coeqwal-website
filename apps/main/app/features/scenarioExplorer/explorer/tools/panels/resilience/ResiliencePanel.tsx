@@ -1550,10 +1550,10 @@ export default function ResiliencePanel({
       const dynamicHeight =
         captureState.kind === "smallMultiples"
           ? computeResiliencePanelSmallMultiplesCaptureHeight({
-            tilesCount: captureState.tiles.length,
-            tileAspect: captureState.tileAspect,
-            rowsCount: captureState.rows.length,
-          })
+              tilesCount: captureState.tiles.length,
+              tileAspect: captureState.tileAspect,
+              rowsCount: captureState.rows.length,
+            })
           : undefined
       const { svg, dataUrl } = await captureResiliencePanelOffscreen({
         state: captureState,
@@ -1770,7 +1770,7 @@ export default function ResiliencePanel({
     // by-hydroclimate view untransposed, or by-outcome view transposed.
     const labelRotation =
       (!transposed && effectiveView === "hydroclimate") ||
-        (transposed && effectiveView === "outcome")
+      (transposed && effectiveView === "outcome")
         ? -90
         : 0
     if (hydroclimateColumns.length === 0) return { kind: "noColumns" }

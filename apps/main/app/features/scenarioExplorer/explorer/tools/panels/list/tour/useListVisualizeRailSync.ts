@@ -49,5 +49,10 @@ export function useListVisualizeRailSync(
       selectedByTourRef.current = false
       selectScenarios([])
     }
-  }, [listTourStepId, firstScenarioId, selectScenarios, selectedScenarios.length])
+  }, [
+    listTourStepId,
+    firstScenarioId,
+    selectScenarios,
+    selectedScenarios.length,
+  ])
 }

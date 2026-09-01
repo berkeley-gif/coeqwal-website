@@ -96,9 +96,9 @@ export default function ExploreSubNav() {
 
   // List tour Step 1 highlights this specific tab, not the whole sub-nav.
   const homeTabAnchorRef = useTourAnchor("list.homeTab")
-  // Bar tour Step 1 highlights the Bar tab 
+  // Bar tour Step 1 highlights the Bar tab
   const barTabAnchorRef = useTourAnchor("bar.tab")
-  // Radar tour Step 1 highlights the Radar tab 
+  // Radar tour Step 1 highlights the Radar tab
   const radarTabAnchorRef = useTourAnchor("radar.tab")
 
   // Research-only tools hidden by default, toggled with "A" key
@@ -186,9 +186,9 @@ export default function ExploreSubNav() {
                   border: step.showTrailingArrow
                     ? "none"
                     : `1px solid ${alpha(
-                      theme.palette.common.white,
-                      active ? 0.7 : 0.3,
-                    )}`,
+                        theme.palette.common.white,
+                        active ? 0.7 : 0.3,
+                      )}`,
                   borderRadius: "12px",
                   cursor: "pointer",
                   background: active
@@ -259,15 +259,15 @@ export default function ExploreSubNav() {
                   <motion.div
                     animate={
                       selectedScenarios.length > 0 &&
-                        exploreMode === "list" &&
-                        !prefersReducedMotion
+                      exploreMode === "list" &&
+                      !prefersReducedMotion
                         ? { x: [0, 4, 0] }
                         : { x: 0 }
                     }
                     transition={
                       selectedScenarios.length > 0 &&
-                        exploreMode === "list" &&
-                        !prefersReducedMotion
+                      exploreMode === "list" &&
+                      !prefersReducedMotion
                         ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" }
                         : { duration: 0.2, ease: "easeOut" }
                     }

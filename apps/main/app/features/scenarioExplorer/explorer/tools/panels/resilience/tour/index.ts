@@ -10,4 +10,3 @@ const resilienceTourModule: TourModule = {
 export default resilienceTourModule
 
 export { RESILIENCE_TOUR } from "./steps"
-

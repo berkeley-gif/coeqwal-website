@@ -14,7 +14,15 @@ import { useEffect, useRef } from "react"
 import { useExplorerStore, useWorkspaceSlice } from "../../../../store"
 import type { TourEffectsProps } from "../../../tour/types"
 
-const KEY_OPERATIONS_STEP_IDS = ["list.step9.keyOperations", "list.step10.filterByOperation"]
+const KEY_OPERATIONS_STEP_IDS = [
+  "list.step9.keyOperations",
+  "list.step10.filterByOperation",
+]
+
+const DEFINITIONS_STEP_TARGETS: Record<string, boolean> = {
+  "list.step5.definitions": false,
+  "list.step6.baselines": true,
+}
 
 export default function ListTourEffects({ step }: TourEffectsProps) {
   const setShowKeyOperations = useWorkspaceSlice((s) => s.setShowKeyOperations)
@@ -54,11 +62,6 @@ export default function ListTourEffects({ step }: TourEffectsProps) {
   // the same value across both of its steps).
   // ------------------------------------------------------------------
 
-  const DEFINITIONS_STEP_TARGETS: Record<string, boolean> = {
-    "list.step5.definitions": false,
-    "list.step6.baselines": true,
-  }
-
   const defsDemoRef = useRef<{ prevShowDefinitions: boolean } | null>(null)
 
   useEffect(() => {
@@ -82,4 +85,3 @@ export default function ListTourEffects({ step }: TourEffectsProps) {
 
   return null
 }
-

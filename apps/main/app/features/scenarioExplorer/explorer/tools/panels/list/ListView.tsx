@@ -180,7 +180,7 @@ export default function ListView({ highlightedIds }: ListViewProps) {
     hideColumnTitles: true,
     groupByTheme,
     scenariosInContiguousThemeOrder,
-    onMapViewChange: () => { },
+    onMapViewChange: () => {},
     onShowOnlyChosenChange: setShowOnlyChosen,
     onShowAlternativeBaselinesChange: setShowAlternativeBaselines,
     onThemeBadgeClick: handleThemeBadgeClick,
