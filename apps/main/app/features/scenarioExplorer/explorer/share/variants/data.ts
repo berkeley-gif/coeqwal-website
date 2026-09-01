@@ -32,7 +32,7 @@ type DataItem = ShareItemOfType<"data">
 /** How the compared members read in the facts block, singular and plural. */
 const COMPARE_NOUNS: Record<string, [string, string]> = {
   scenarios: ["scenario", "scenarios"],
-  climates: ["climate future", "climate futures"],
+  climates: ["hydroclimate", "hydroclimates"],
   locations: ["location", "locations"],
 }
 
