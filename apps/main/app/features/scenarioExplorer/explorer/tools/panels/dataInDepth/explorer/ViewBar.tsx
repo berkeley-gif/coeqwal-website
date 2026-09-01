@@ -18,6 +18,7 @@ import {
   useTheme,
 } from "@repo/ui/mui"
 import { useDataSlice } from "../../../../store"
+import { InlineTourAnchor } from "../../../tour"
 import type { DataDistKind } from "../../../../store"
 import {
   getVariable,
@@ -76,31 +77,33 @@ export default function ViewBar() {
         borderBottom: `1px solid ${theme.palette.divider}`,
       }}
     >
-      <ToggleButtonGroup
-        exclusive
-        size="small"
-        value={view}
-        onChange={(_, next: VariableView | null) => {
-          if (next) setView(next)
-        }}
-        aria-label="Data view"
-      >
-        {views.map((v) => (
-          <ToggleButton
-            key={v}
-            value={v}
-            disabled={v === "level" && levelBlocked != null}
-            aria-describedby={
-              v === "level" && levelBlocked != null
-                ? "level-view-blocked-reason"
-                : undefined
-            }
-            sx={{ textTransform: "none", px: 1.5 }}
-          >
-            {variable.viewLabels?.[v] ?? VIEW_LABELS[v]}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
+      <InlineTourAnchor anchorId="data.views">
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={view}
+          onChange={(_, next: VariableView | null) => {
+            if (next) setView(next)
+          }}
+          aria-label="Data view"
+        >
+          {views.map((v) => (
+            <ToggleButton
+              key={v}
+              value={v}
+              disabled={v === "level" && levelBlocked != null}
+              aria-describedby={
+                v === "level" && levelBlocked != null
+                  ? "level-view-blocked-reason"
+                  : undefined
+              }
+              sx={{ textTransform: "none", px: 1.5 }}
+            >
+              {variable.viewLabels?.[v] ?? VIEW_LABELS[v]}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </InlineTourAnchor>
       {levelBlocked && view !== "level" && (
         <Typography
           id="level-view-blocked-reason"

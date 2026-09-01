@@ -5,6 +5,7 @@ import {
 } from "../app/features/scenarioExplorer/explorer/share/figureFooter"
 import { thumbnailAspectRatioFor } from "../app/features/scenarioExplorer/explorer/share/thumbnailAspect"
 import {
+  buildStatsPanels,
   toBars,
   toBoxes,
   toSeries,
@@ -388,4 +389,44 @@ test("thumbnailAspectRatioFor follows each variant's capture size", () => {
     thumbnailAspectRatioFor({ type: "resilience", tileScope: "tile" } as never),
   ).toBeCloseTo(800 / 520, 6)
   expect(thumbnailAspectRatioFor({ type: "radar" } as never)).toBe(1)
+})
+
+// The Stats chart style is built from one pure spec list, shared by the live
+// card and the off-screen capture so an exported Stats figure cannot show a
+// different set of panels than the screen did.
+test("buildStatsPanels returns mean and CV, plus trend on the level view", () => {
+  const dist = buildStatsPanels("dist", "TAF", "thousand acre feet (TAF)")
+  expect(dist.map((p) => p.key)).toEqual(["mean", "cv"])
+  expect(dist[0]?.title).toBe("Mean (TAF)")
+  expect(dist[0]?.yLabel).toBe("thousand acre feet (TAF)")
+  expect(dist[1]?.title).toBe("CV")
+  expect(dist[1]?.format(0.1234)).toBe("0.12")
+
+  const level = buildStatsPanels("level", "ft", "feet (ft)")
+  expect(level.map((p) => p.key)).toEqual(["mean", "cv", "trend"])
+  expect(level[2]?.title).toBe("Trend (ft/yr)")
+  expect(level[2]?.yLabel).toBe("ft/yr")
+
+  // The panels read their values off a member, so the export and the card
+  // pull identical numbers from identical inputs.
+  const member: MarkMember = {
+    id: "m1",
+    label: "Current operations",
+    series: [10, 12, 14, 16],
+    stats: {
+      min: 10,
+      p10: 10,
+      p25: 11,
+      p50: 13,
+      p75: 15,
+      p90: 16,
+      max: 16,
+      mean: 13,
+      cv: 0.2,
+    },
+    value: 13,
+  }
+  expect(dist[0]?.valueOf(member)).toBe(13)
+  expect(dist[1]?.valueOf(member)).toBe(0.2)
+  expect(level[2]?.valueOf(member)).toBeCloseTo(2, 6)
 })

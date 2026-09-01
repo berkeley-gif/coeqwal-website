@@ -31,6 +31,7 @@ type DataItem = ShareItemOfType<"data">
 const DIST_LABELS: Record<string, string> = {
   exceedance: "Exceedance",
   box: "Box plot",
+  stats: "Stats",
 }
 
 function viewLabelFor(item: DataItem): string {
@@ -38,8 +39,13 @@ function viewLabelFor(item: DataItem): string {
     getVariable(item.variableId)?.viewLabels?.[item.view as VariableView] ??
     VIEW_LABELS[item.view as VariableView] ??
     item.view
+  // Every view that offers the distribution-style toggle names the style it
+  // captured (ViewBar shows the toggle for these four).
   const dist =
-    item.view === "dist" || item.view === "pct" || item.view === "level"
+    item.view === "dist" ||
+    item.view === "pct" ||
+    item.view === "pct_demand" ||
+    item.view === "level"
       ? DIST_LABELS[item.distKind]
       : undefined
   return dist ? `${view} (${dist})` : view

@@ -155,6 +155,13 @@ test("the share tab can clear the tray, and the empty state survives reload", as
 
   const clear = page.getByRole("button", { name: "Clear share tray" })
   await expect(clear).toBeVisible()
+  // Readable on the dark share canvas. The button used to take the outlined
+  // default, which renders dark blue text on the navy background; it now
+  // takes the design system's white (#fcfbfa, the value behind
+  // palette.common.white and text.secondary). Pinned so the contrast cannot
+  // regress to the default again.
+  const clearColor = await clear.evaluate((el) => getComputedStyle(el).color)
+  expect(clearColor).toBe("rgb(252, 251, 250)")
   await clear.click()
 
   await expect(

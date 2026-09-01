@@ -29,6 +29,8 @@ import {
   goToMainAbout,
   goToMainData,
   goToMainHome,
+  goToMainLearn,
+  goToMainExplore,
 } from "@repo/ui"
 //import { HeaderStory } from "@repo/motion/components"
 import {
@@ -96,6 +98,8 @@ export default function StoryContainer() {
         onLogoClick={goToMainHome}
         onAboutClick={goToMainAbout}
         onGetDataClick={goToMainData}
+        onGetStartedClick={goToMainLearn}
+        onToolsClick={goToMainExplore}
         waterThemesOptions={waterThemesOptions}
       />
       <SectionIndicator />

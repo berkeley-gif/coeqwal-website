@@ -61,6 +61,9 @@ export default function ToolToolbar({
   // rendered as a plain row (not the list grid), so we anchor the
   // radar orientation popper on that row directly.
   const radarViewAreaTourRef = useTourAnchor("radar.viewArea")
+  // Same strip again for the Data in Depth tour, which renders through the
+  // same non-list toolbar row.
+  const dataViewAreaTourRef = useTourAnchor("data.viewArea")
   // One DOM node serves both the Radar climate-chip tour and the new
   // List hydroclimate tour step. Merge callback refs so both registries
   // resolve to the same element without re-wrapping the chooser.
@@ -242,7 +245,11 @@ export default function ToolToolbar({
 
   // Non-list modes: search + chips live in the sidebar, toolbar only has view controls
   const nonListViewAreaRef =
-    exploreMode === "radar" ? radarViewAreaTourRef : undefined
+    exploreMode === "radar"
+      ? radarViewAreaTourRef
+      : exploreMode === "data"
+        ? dataViewAreaTourRef
+        : undefined
   return (
     <Box
       ref={nonListViewAreaRef}

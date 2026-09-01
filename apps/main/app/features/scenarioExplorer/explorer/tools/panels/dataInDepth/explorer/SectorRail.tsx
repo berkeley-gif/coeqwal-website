@@ -20,6 +20,7 @@ import {
   ChevronLeftIcon,
 } from "@repo/ui/mui"
 import { useDataSlice } from "../../../../store"
+import { useTourAnchor } from "../../../tour"
 import CollapsedRailStrip from "../../../chrome/layout/CollapsedRailStrip"
 import {
   getVariable,
@@ -36,6 +37,7 @@ function availableViews(views: VariableView[]): VariableView[] {
 
 export default function SectorRail() {
   const theme = useTheme()
+  const railAnchorRef = useTourAnchor("data.rail")
   const {
     selectedVariableId,
     view,
@@ -74,6 +76,7 @@ export default function SectorRail() {
 
   return (
     <Box
+      ref={railAnchorRef}
       component="nav"
       aria-label="Variables by sector"
       sx={{

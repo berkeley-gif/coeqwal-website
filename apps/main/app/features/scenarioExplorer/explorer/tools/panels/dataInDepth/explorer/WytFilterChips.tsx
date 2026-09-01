@@ -18,11 +18,13 @@
 import React from "react"
 import { Box, Chip, Typography, useTheme } from "@repo/ui/mui"
 import { useDataSlice } from "../../../../store"
+import { useTourAnchor } from "../../../tour"
 import { WYT_CLASSES, WYT_LABELS } from "../config/wytFilter"
 import { getVariable } from "../config/variableRegistry"
 
 export default function WytFilterChips() {
   const theme = useTheme()
+  const wytAnchorRef = useTourAnchor("data.wyt")
   const {
     view,
     selectedVariableId,
@@ -38,6 +40,7 @@ export default function WytFilterChips() {
 
   return (
     <Box
+      ref={wytAnchorRef}
       sx={{
         display: "flex",
         alignItems: "center",

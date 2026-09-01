@@ -28,15 +28,23 @@ import {
   type SummaryMember,
 } from "../hooks/interpretiveText"
 import { WYT_LABELS } from "../config/wytFilter"
-import { linearTrendPerYear, MOCK_YEARS } from "../config/mockDataEngine"
-import { axisLabelFor, toBars, toBoxes, toSeries } from "./chartMarks"
+import { MOCK_YEARS } from "../config/mockDataEngine"
+import {
+  axisLabelFor,
+  buildStatsPanels,
+  toBars,
+  toBoxes,
+  toSeries,
+} from "./chartMarks"
 import { SaveSnapshotButton } from "../../../chrome/actions/SaveSnapshotButton"
+import { InlineTourAnchor, useTourAnchor } from "../../../tour"
 import { useDataShareCapture } from "../hooks/useDataShareCapture"
 
 const CHART_HEIGHT = 340
 
 export default function ChartCard() {
   const theme = useTheme()
+  const chartAnchorRef = useTourAnchor("data.chart")
   const { compareBy, distKind, selectedWaterYearTypes } = useDataSlice()
   const data = useVariableData()
 
@@ -218,34 +226,11 @@ export default function ChartCard() {
     // Side-by-side summary statistics of the selected quantity view: mean
     // and CV everywhere, plus the linear level trend (ft/yr) on the
     // groundwater level view.
-    const statPanels = [
-      {
-        key: "mean",
-        title: `Mean (${data.unit})`,
-        yLabel: axisLabelFor(data.variable, data.view, data.unit),
-        format: fmt,
-        valueOf: (m: (typeof data.members)[number]) => m.stats.mean,
-      },
-      {
-        key: "cv",
-        title: "CV",
-        yLabel: "CV",
-        format: (v: number) => v.toFixed(2),
-        valueOf: (m: (typeof data.members)[number]) => m.stats.cv,
-      },
-      ...(data.view === "level"
-        ? [
-            {
-              key: "trend",
-              title: "Trend (ft/yr)",
-              yLabel: "ft/yr",
-              format: (v: number) => formatValue(v, "ft/yr"),
-              valueOf: (m: (typeof data.members)[number]) =>
-                linearTrendPerYear(m.series),
-            },
-          ]
-        : []),
-    ]
+    const statPanels = buildStatsPanels(
+      data.view,
+      data.unit,
+      axisLabelFor(data.variable, data.view, data.unit),
+    )
     chart = (
       <Box
         sx={{
@@ -344,10 +329,12 @@ export default function ChartCard() {
           </Tooltip>
         )}
         <Box sx={{ flex: 1 }} />
-        <SaveSnapshotButton
-          disabled={!share.canSnapshot}
-          onClick={share.onSaveSnapshot}
-        />
+        <InlineTourAnchor anchorId="data.saveSnapshot">
+          <SaveSnapshotButton
+            disabled={!share.canSnapshot}
+            onClick={share.onSaveSnapshot}
+          />
+        </InlineTourAnchor>
       </Box>
 
       {/* Interpretive summary sentence (never from series that cannot be shown) */}
@@ -396,6 +383,7 @@ export default function ChartCard() {
           the D3 internals carry no accessible semantics of their own,
           and the per-chart data alternative is the CSV export. */}
       <Box
+        ref={chartAnchorRef}
         {...(hasMembers ? { role: "img", "aria-label": figureTitle } : {})}
         sx={{ width: "100%", height: CHART_HEIGHT }}
       >

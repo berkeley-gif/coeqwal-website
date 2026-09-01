@@ -318,7 +318,7 @@ test("a missing route makes the SSJV total sample, labeled, while the route memb
   expect(errors).toEqual([])
 })
 
-test("a held climate other than the workspace climate renders sample for the whole chart", async ({
+test("switching the workspace climate re-resolves the locations axis", async ({
   page,
 }) => {
   const errors = collectConsoleErrors(page)
@@ -327,9 +327,17 @@ test("a held climate other than the workspace climate renders sample for the who
   await openDataInDepth(page)
   await page.getByRole("button", { name: "Locations", exact: true }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
-  await page.getByRole("combobox", { name: "Hydroclimate" }).click()
+
+  // The per-tool climate pin was removed: the shared "View by hydroclimate"
+  // control in the toolbar is the only hydroclimate input for this tool.
+  await expect(
+    page.getByRole("combobox", { name: "Hydroclimate" }),
+  ).toHaveCount(0)
+
+  // Driving that control moves the whole chart off the historical fixture,
+  // so the offline suite falls back to the sample engine for every member.
   await page
-    .getByRole("option", { name: /Moderate/ })
+    .getByRole("button", { name: /Moderate-dry climate stress/ })
     .first()
     .click()
   await expect(page.getByText(/^Sample data$/)).toBeVisible()
