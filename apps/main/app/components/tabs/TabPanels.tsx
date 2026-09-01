@@ -20,6 +20,7 @@ import ExplorePanel from "../tabPanels/Explore"
 import SharePanel from "../tabPanels/Share"
 // Share url -> state rehydration
 import { useShareUrlRehydration } from "../../features/scenarioExplorer/explorer/share"
+import { lastPathSegment } from "../../lib/routePath"
 
 const panelVariants = {
   enter: { opacity: 0, x: 30 },
@@ -40,7 +41,9 @@ export default function TabPanels() {
   // pathname is read only for this one-time sync; adding it would re-run on
   // every navigation and fight the context-driven tab state described above.
   useEffect(() => {
-    const segment = pathname.split("/").pop() ?? null
+    // Last non-empty segment: the export serves directory-style URLs, so a
+    // naive split on "/explore/" yields "" and the tab never syncs.
+    const segment = lastPathSegment(pathname)
     if (isTabKey(segment)) {
       dispatch(setActiveTab(segment))
     }
