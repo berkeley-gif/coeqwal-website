@@ -1,3 +1,4 @@
+// Update this file whenever changes are made to themes.tsx in the main app
 "use client"
 
 import type { NavDropdownOption } from "./NavDropdown"
@@ -7,7 +8,7 @@ const DEFAULT_MAIN_APP_URL =
 
 export type WaterStoryKey = "flow" | "climate" | "managed" | "equity"
 
-export type WaterThemeKey = "cws" | "ag_gw" | "eco" | "delta"
+export type WaterThemeKey = "baseline" | "cws" | "ag_gw" | "eco" | "delta"
 
 type WaterStory = {
   key: WaterStoryKey
@@ -60,25 +61,29 @@ export const WATER_STORIES: WaterStory[] = [
     hostnameMatchers: ["equity.coeqwal"],
   },
 ]
-
 export const WATER_THEMES: WaterTheme[] = [
   {
+    key: "baseline",
+    label: "Understanding Today's Water System",
+  },
+  {
     key: "cws",
-    label: "Community water systems",
+    label: "Securing Community Water Supplies",
   },
   {
     key: "ag_gw",
-    label: "Farms and groundwater",
+    label: "Sustaining Farms and Groundwater",
   },
   {
     key: "eco",
-    label: "Rivers and salmon",
+    label: "Protecting Rivers and Salmon",
   },
   {
     key: "delta",
-    label: "The Delta as a living place",
+    label: "Balancing Needs in the Delta",
   },
 ]
+
 
 function buildMainUrl(path = "", search = "") {
   return `${DEFAULT_MAIN_APP_URL}${path}${search}`
