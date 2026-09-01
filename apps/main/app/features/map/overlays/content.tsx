@@ -35,43 +35,6 @@ export const WATER_ISSUE_THEMES: ReadonlyArray<WaterIssueTheme> =
     description: WATER_ISSUE_DESCRIPTIONS[wt.id] ?? "",
     themeKey: wt.id,
   }))
-
-export interface HydroclimateFuture {
-  title: string
-  description: string
-  dimmed?: boolean
-}
-
-export const HYDROCLIMATES: ReadonlyArray<HydroclimateFuture> = [
-  {
-    title: "Historical hydroclimate (baseline)",
-    description:
-      "Temperature, precipitation, and flow patterns reflect historical conditions, adjusted for recent climate change",
-  },
-  {
-    title: "Moderate-dry climate stress",
-    description:
-      "Slightly warmer and moderately wetter conditions (+3.5% flow change) and assuming 15 cm of sea level rise",
-  },
-  {
-    title: "Moderate-wet climate stress",
-    description:
-      "Moderately warmer with little change in precipitation (-1% flow change) and assuming 15 cm of sea level rise",
-    dimmed: true,
-  },
-  {
-    title: "High climate stress",
-    description:
-      "Much warmer and moderately drier conditions (-6.5% flow change) and assuming 30 cm of sea level rise",
-  },
-  {
-    title: "Extreme climate stress",
-    description:
-      "Much warmer and much drier conditions (-19.2% flow change) and assuming 30 cm of sea level rise",
-    dimmed: true,
-  },
-] as const
-
 export interface KeyOutcome {
   outcomeCode: OutcomeCode
   description: string

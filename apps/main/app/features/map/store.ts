@@ -284,8 +284,8 @@ export const mapActions = {
   setOnLocationHover: (
     fn:
       | ((
-          info: { code: string; sourceId: string; tier: number } | null,
-        ) => void)
+        info: { code: string; sourceId: string; tier: number } | null,
+      ) => void)
       | null,
   ) => {
     _onLocationHover = fn

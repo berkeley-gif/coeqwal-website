@@ -83,6 +83,15 @@ export interface HydroclimateDef {
   shortLabel: string
   /** Long-form description for tooltips and info panels */
   description: string
+  /**
+   * Shorter description for the "How are climate change impacts
+   * evaluated?" learn panel list. Omits the sea-level-rise /
+   * historical-adjustment clause that `description` carries, since that
+   * panel states it once for all hydroclimates in a shared NOTE
+   * paragraph below the list — repeating it per bullet would be
+   * redundant there.
+   */
+  learnPanelDescription: string
 }
 
 /**
@@ -103,6 +112,8 @@ export const HYDROCLIMATE_DEFS = [
     shortLabel: "Historical",
     description:
       "Temperature, precipitation, and flow patterns reflect historical conditions, adjusted for recent climate change",
+    learnPanelDescription:
+      "Temperature, precipitation, and flow patterns reflect historical conditions",
   },
   {
     value: "ecv",
@@ -111,6 +122,8 @@ export const HYDROCLIMATE_DEFS = [
     shortLabel: "Moderate stress",
     description:
       "Slightly warmer and moderately wetter conditions (+3.5% flow change) and assuming 15 cm of sea level rise",
+    learnPanelDescription:
+      "Slightly warmer and moderately wetter conditions (+3.5% flow change)",
   },
   {
     value: "cc50",
@@ -119,6 +132,8 @@ export const HYDROCLIMATE_DEFS = [
     shortLabel: "Moderate-high stress",
     description:
       "Moderately warmer with little change in precipitation (-1% flow change) and assuming 15 cm of sea level rise",
+    learnPanelDescription:
+      "Moderately warmer with little change in precipitation (-1% flow change)",
   },
   {
     value: "cc95",
@@ -127,6 +142,8 @@ export const HYDROCLIMATE_DEFS = [
     shortLabel: "High stress",
     description:
       "Much warmer and moderately drier conditions (-6.5% flow change) and assuming 30 cm of sea level rise",
+    learnPanelDescription:
+      "Much warmer and moderately drier conditions (-6.5% flow change)",
   },
   {
     value: "tai",
@@ -135,8 +152,11 @@ export const HYDROCLIMATE_DEFS = [
     shortLabel: "Extreme stress",
     description:
       "Much warmer and much drier conditions (-19.2% flow change) and assuming 30 cm of sea level rise",
+    learnPanelDescription:
+      "Much warmer and much drier conditions (-19.2% flow change)",
   },
 ] as const satisfies readonly HydroclimateDef[]
+
 
 /** A supported hydroclimate value, for example "historical". */
 export type Hydroclimate = (typeof HYDROCLIMATE_DEFS)[number]["value"]

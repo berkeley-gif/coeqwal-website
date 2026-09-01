@@ -25,7 +25,7 @@ const STORY_DESCRIPTIONS: Record<string, string> = {
   flow: "Learn how the paths that water takes through California has been transformed by our water system",
   climate:
     "Learn how California’s water system can adapt to a changing climate",
-  managed: "Learn how California’s water is managed for communities, agriculture, and the environment (coming soon)",
+  managed: "Learn how California’s water is managed for communities, agriculture, and the environment",
   equity: "Learn how COEQWAL helps to guide us toward a more equitable water future ",
 }
 

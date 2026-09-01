@@ -49,6 +49,7 @@ export default function AutoAdvanceFooter() {
     navigateToTab(nxt)
   }
 
+
   const tab = TABS.find((t) => t.key === activeTab)
   return (
     <div
@@ -57,7 +58,7 @@ export default function AutoAdvanceFooter() {
         backgroundColor: tab?.panelColor ?? theme.palette.blue.darkest,
         color: theme.palette.common.white,
         pointerEvents: "auto",
-        minHeight: "100px",
+        flexShrink: 0,
         padding: `${theme.spacing(theme.space.section.lg)} 0`,
       }}
     >

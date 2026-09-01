@@ -20,6 +20,11 @@
 import { useEffect, useRef, useCallback } from "react"
 import { Box, useTheme, Typography } from "@repo/ui/mui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
+
+import VerticalNav, {
+  NAV_WIDTH_COLLAPSED,
+  NAV_WIDTH_EXPANDED,
+} from "../verticalNav/VerticalNav"
 import {
   useMapReady,
   useMapError,
@@ -33,12 +38,6 @@ import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { WATER_ISSUE_THEMES } from "../../features/map/overlays/content"
 import { WATER_STORIES } from "../../content/stories"
 import type { LearnNavSection } from "../../features/map/config/sectionLayers"
-
-import VerticalNav, {
-  NAV_WIDTH_COLLAPSED,
-  NAV_WIDTH_EXPANDED,
-} from "../verticalNav/VerticalNav"
-
 const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
 
 export default function LearnPanel() {
@@ -121,6 +120,7 @@ export default function LearnPanel() {
           style={{
             position: "relative",
             pointerEvents: "none", // Allow map panning through - child elements re-enable as needed
+            flex: "1 0 auto",
           }}
         >
           {/* 
@@ -205,8 +205,13 @@ export default function LearnPanel() {
             backgroundSize: "cover",
             backgroundPosition: "center bottom -160px",
             backgroundRepeat: "no-repeat",
-            minHeight: "100vh",
+            flex: "1 0 auto",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            pointerEvents: "auto",
             paddingTop: (theme) => theme.space.panel.padding,
+            paddingBottom: (theme) => theme.space.panel.padding,
             paddingLeft: (theme) =>
               `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
             paddingRight: (theme) => theme.space.panel.padding,
@@ -250,8 +255,14 @@ export default function LearnPanel() {
           sx={{
             p: 4,
             color: theme.palette.common.white,
+            flex: "1 0 auto",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
             backgroundColor: theme.palette.nature.forest,
-            paddingTop: (theme) => theme.space.panel.paddingXl,
+            pointerEvents: "auto",
+            paddingTop: (theme) => theme.space.panel.padding,
+            paddingBottom: (theme) => theme.space.panel.padding,
             paddingLeft: (theme) =>
               `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
             paddingRight: (theme) => theme.space.panel.padding,
