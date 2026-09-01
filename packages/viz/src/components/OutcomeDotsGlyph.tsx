@@ -19,16 +19,16 @@ const OutcomeDotsGlyph: React.FC<OutcomeDotsGlyphProps> = React.memo(
   ({ values, size = 60, tierColors }) => {
     const tiers = values
       ? values.map((value, idx) => ({
-        label: `Tier ${idx + 1}`,
-        color: tierColors[idx]!,
-        value: value,
-      }))
+          label: `Tier ${idx + 1}`,
+          color: tierColors[idx]!,
+          value: value,
+        }))
       : [
-        { label: "Tier 1", color: tierColors[0]!, value: 0 },
-        { label: "Tier 2", color: tierColors[1]!, value: 0 },
-        { label: "Tier 3", color: tierColors[2]!, value: 0 },
-        { label: "Tier 4", color: tierColors[3]!, value: 0 },
-      ]
+          { label: "Tier 1", color: tierColors[0]!, value: 0 },
+          { label: "Tier 2", color: tierColors[1]!, value: 0 },
+          { label: "Tier 3", color: tierColors[2]!, value: 0 },
+          { label: "Tier 4", color: tierColors[3]!, value: 0 },
+        ]
 
     const numTiers = tiers.length
     const barHeight = (size * 0.8) / numTiers

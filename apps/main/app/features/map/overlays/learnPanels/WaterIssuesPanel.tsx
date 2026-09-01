@@ -43,7 +43,6 @@ const WATER_ISSUE_BLURBS: Record<string, ReactNode> = {
     "How the Delta can be managed as a place where communities, farms, and ecosystems coexist and thrive",
 }
 
-
 export default function WaterIssuesPanel() {
   const theme = useTheme()
   const sp = theme.space.component
@@ -62,7 +61,6 @@ export default function WaterIssuesPanel() {
         considers how decisions affect the water issues that people care about,
         such as:
       </Typography>
-
 
       <LinedList
         items={WATER_THEMES.map((wt) => ({

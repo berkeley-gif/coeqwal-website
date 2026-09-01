@@ -28,7 +28,6 @@ interface NonCompactRowContentProps {
   isDistributionView?: boolean
 }
 
-
 export function NonCompactRowContent({
   scenario,
   layoutMode,

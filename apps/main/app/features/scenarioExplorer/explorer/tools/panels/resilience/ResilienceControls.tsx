@@ -53,7 +53,6 @@ import {
   PIVOT_DIM_LABEL_SINGULAR,
   type PivotDim,
 } from "./controls"
-import type { ResilienceControlsState } from "../../../store"
 import {
   type ResilienceHydroclimate,
   RESILIENCE_HYDROCLIMATES,
@@ -165,13 +164,6 @@ export default function ResilienceControls({
       writeChange(
         planPivotPatch(nextDim, controlsSnapshot, { transposed: false }),
       )
-    },
-    [controlsSnapshot, writeChange, pivotDim],
-  )
-
-  const handlePivotModeChange = useCallback(
-    () => {
-      writeChange(planPivotPatch(pivotDim, controlsSnapshot))
     },
     [controlsSnapshot, writeChange, pivotDim],
   )

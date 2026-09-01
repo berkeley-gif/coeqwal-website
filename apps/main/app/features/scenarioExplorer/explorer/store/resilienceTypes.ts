@@ -1,9 +1,6 @@
 import type { ResilienceHydroclimate } from "../tools/panels/resilience/resilienceHydroclimates"
 
-export type ResilienceView =
-  | "scenario"
-  | "outcome"
-  | "hydroclimate"
+export type ResilienceView = "scenario" | "outcome" | "hydroclimate"
 
 export type AggregateOver = "scenarios" | "outcomes" | "hydroclimates"
 

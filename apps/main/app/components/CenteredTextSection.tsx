@@ -11,7 +11,6 @@ import type { ReactNode } from "react"
 import { motion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { fadeIn } from "../lib/constants/motionAnimations"
-import { themeValues } from "@repo/ui/themes/theme"
 
 export interface CenteredTextSectionProps {
   /** Panel ID for navigation */
@@ -107,7 +106,6 @@ export function CenteredTextSection({
           {text}
         </Box>
       )}
-
     </Box>
   )
 }

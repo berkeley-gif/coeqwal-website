@@ -25,10 +25,8 @@ const STORY_DESCRIPTIONS: Record<string, string> = {
   flow: "How water moves through California a longer description goes here",
   climate:
     "How climate change affects California water a longer description goes here",
-  managed:
-    "How water is managed in California a longer description goes here",
-  equity:
-    "How equity shapes California water a longer description goes here",
+  managed: "How water is managed in California a longer description goes here",
+  equity: "How equity shapes California water a longer description goes here",
 }
 
 export const WATER_STORIES: Story[] = STORYLINE_LINKS.map((story) => ({

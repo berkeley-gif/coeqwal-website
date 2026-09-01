@@ -2,9 +2,7 @@
  * StrategyGrid type definitions
  */
 
-import type {
-  ScenarioForDisplay,
-} from "../../../../../../scenarios/components/shared"
+import type { ScenarioForDisplay } from "../../../../../../scenarios/components/shared"
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
 
 export interface StrategyGridProps {

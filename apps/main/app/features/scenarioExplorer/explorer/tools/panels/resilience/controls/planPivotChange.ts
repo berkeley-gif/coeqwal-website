@@ -9,10 +9,7 @@
  *   readControlsSnapshot(current) → planPivotPatch(...) → writeControlsChange(patch)
  */
 
-import type {
-  ResilienceControlsState,
-  ResilienceView,
-} from "../../../../store"
+import type { ResilienceControlsState, ResilienceView } from "../../../../store"
 
 export type PivotDim = "scenario" | "outcome" | "hydroclimate"
 export type PivotMode = "facet" | "aggregate"
@@ -93,6 +90,6 @@ export function planPivotPatch(
   if (pivotDim === "hydroclimate" && current.deltaMode !== "none") {
     patch.deltaMode = "none"
   }
-  
+
   return patch
 }

@@ -202,10 +202,8 @@ const translations: TranslationsMap = {
       about: "About",
     },
     dropdownIntros: {
-      guides:
-        "Learn about California water topics in a scrolling story format",
-      waterThemes:
-        "Learn about the water issues explored by COEQWAL",
+      guides: "Learn about California water topics in a scrolling story format",
+      waterThemes: "Learn about the water issues explored by COEQWAL",
     },
     waterStories: {
       flow: "How water moves through California",

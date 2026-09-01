@@ -9,11 +9,9 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React, { useCallback } from "react"
+import React from "react"
 import { Box, useTheme, Checkbox } from "@repo/ui/mui"
-import type {
-  ScenarioForDisplay,
-} from "../../../../../../scenarios/components/shared"
+import type { ScenarioForDisplay } from "../../../../../../scenarios/components/shared"
 import { useWorkspaceSlice } from "../../../../store"
 import { useTourAnchor } from "../../../tour"
 import type { LayoutMode } from "./StrategyGridHeader"

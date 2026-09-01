@@ -4,11 +4,7 @@ import type {
   ResilienceAxisItem,
   ResilienceCellRender,
 } from "@repo/viz"
-import type {
-  CellEncoding,
-  DeltaMode,
-  ResilienceView,
-} from "../../../../store"
+import type { CellEncoding, DeltaMode, ResilienceView } from "../../../../store"
 import { getOutcomeName } from "../../../../../../../content/outcomes"
 import type { HoveredInteraction } from "../../../../useExploreHoverCoordination"
 

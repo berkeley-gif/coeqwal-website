@@ -210,18 +210,17 @@ export const WATER_THEMES: Theme[] = [
                     variant="subtitle1"
                     sx={{ fontWeight: 700, color: "inherit" }}
                   >
-                    California's interconnected water system
+                    California&apos;s interconnected water system
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    California's major water projects connect reservoirs,
-                    rivers, groundwater basins, and the Delta to an
-                    extensive network of water users. Decisions about how
-                    water is stored and moved through this system affects
-                    communities, agriculture, and the environment. The map
-                    highlights key parts of the system represented in
-                    COEQWAL, including major reservoirs and rivers,
-                    groundwater aquifers, the Delta, water deliveries and
-                    exports, and ecological conditions.
+                    California&apos;s major water projects connect reservoirs,
+                    rivers, groundwater basins, and the Delta to an extensive
+                    network of water users. Decisions about how water is stored
+                    and moved through this system affects communities,
+                    agriculture, and the environment. The map highlights key
+                    parts of the system represented in COEQWAL, including major
+                    reservoirs and rivers, groundwater aquifers, the Delta,
+                    water deliveries and exports, and ecological conditions.
                   </Typography>
                 </>
               ),
@@ -241,7 +240,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "**Alternative representations of current operations** – Policies governing Central Valley water management are continually evolving, making the precise definition of \"current operations\" challenging. State and federal agencies may represent current operations differently based on the regulations, land-use conditions, operational assumptions, and other information incorporated into their models. Comparing these representations helps reveal how those choices influence modeled system performance.",
+              text: '**Alternative representations of current operations** – Policies governing Central Valley water management are continually evolving, making the precise definition of "current operations" challenging. State and federal agencies may represent current operations differently based on the regulations, land-use conditions, operational assumptions, and other information incorporated into their models. Comparing these representations helps reveal how those choices influence modeled system performance.',
             },
             {
               type: "paragraph",
@@ -261,17 +260,16 @@ export const WATER_THEMES: Theme[] = [
                     Project
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The CalSim3 water systems model used in COEQWAL focuses
-                    on operations of the Central Valley Project and State
-                    Water Project. While other features of California's
+                    The CalSim3 water systems model used in COEQWAL focuses on
+                    operations of the Central Valley Project and State Water
+                    Project. While other features of California&apos;s
                     integrated water system are represented, most of the
-                    information shared on the COEQWAL platform focuses on
-                    water supplied to the San Francisco Bay-Delta watershed
-                    (Contributing Watershed Area), water distributed to
-                    users within the Sacramento and San Joaquin Valley
-                    (Central Valley Model Area), and water exported to
-                    water users in the Tulare Basin, Southern California,
-                    and coast.
+                    information shared on the COEQWAL platform focuses on water
+                    supplied to the San Francisco Bay-Delta watershed
+                    (Contributing Watershed Area), water distributed to users
+                    within the Sacramento and San Joaquin Valley (Central Valley
+                    Model Area), and water exported to water users in the Tulare
+                    Basin, Southern California, and coast.
                   </Typography>
                 </>
               ),
@@ -290,7 +288,7 @@ export const WATER_THEMES: Theme[] = [
                 "Current operations provide a representation of today's water management system. They are not a neutral starting point, but reflect decades of infrastructure investments, policies, regulations, water rights, contracts, and negotiated trade-offs.",
                 "COEQWAL uses CalSim3, the water allocation model used by state and federal agencies to plan and manage the Central Valley Project and State Water Project. Using the same model makes this decision-making space more accessible to a broader range of people and perspectives.",
                 "Models are a simplification of reality. The CalSim3 water allocation model used by COEQWAL focuses on operations of the Central Valley Project and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.",
-                "There is no single model representation of \"current operations\". State and federal agencies use different assumptions about land use, system operations, regulations, and other conditions, and these representations change as policies and operations evolve.",
+                'There is no single model representation of "current operations". State and federal agencies use different assumptions about land use, system operations, regulations, and other conditions, and these representations change as policies and operations evolve.',
                 "Differences between hydroclimates under the same management strategy help reveal climate-driven changes, while differences between management strategies under the same hydroclimate help reveal management-driven changes.",
                 "Current operations already contain benefits, trade-offs, and inequities. Comparing other scenarios to current operations therefore shows how management changes redistribute benefits relative to current conditions, not to a neutral starting point.",
                 "Future hydroclimates are not predictions. They represent plausible alternative futures that help test how the system responds to different climate conditions. Results describe patterns across many modeled years rather than predicting conditions in any single year.",
@@ -326,9 +324,12 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: (
                 <>
-                  For more information about each of these, and other, scenarios,
-                  visit{" "}
-                  <InlineNavLink to="/data">Data and Documentation</InlineNavLink>.
+                  For more information about each of these, and other,
+                  scenarios, visit{" "}
+                  <InlineNavLink to="/data">
+                    Data and Documentation
+                  </InlineNavLink>
+                  .
                 </>
               ),
             },
@@ -346,12 +347,18 @@ export const WATER_THEMES: Theme[] = [
               text: (
                 <>
                   In the{" "}
-                  <InlineNavLink to="explore">
-                    Explore Tool
-                  </InlineNavLink>, different representations of current operations are grouped as "baseline" scenarios because they provide reference points for comparing alternative management strategies. The Explore Tool allows you to examine how outcomes differ across the baseline scenarios and under different hydroclimate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.
+                  <InlineNavLink to="explore">Explore Tool</InlineNavLink>,
+                  different representations of current operations are grouped as
+                  &ldquo;baseline&rdquo; scenarios because they provide
+                  reference points for comparing alternative management
+                  strategies. The Explore Tool allows you to examine how
+                  outcomes differ across the baseline scenarios and under
+                  different hydroclimate conditions. There are complementary
+                  ways to visualize tradeoffs, equity, and resilience of water
+                  management strategies. The examples below illustrate results
+                  from select scenarios for this water issue.
                 </>
               ),
-
             },
             {
               type: "image",
@@ -370,16 +377,18 @@ export const WATER_THEMES: Theme[] = [
                     performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart in the Explore Tool summarizes performance across
-                    nine key outcomes, revealing broad system-level trade-offs within
-                    and between scenarios. The chart displays average performance
-                    across all locations of interest for each outcome. This example
-                    compares Current operations with Current operations with
-                    historical land use and Current operations without TUCPs under
-                    the historical hydroclimate. Outcomes are categorized into
-                    different performance classes: optimal, acceptable, at-risk, and
-                    critical. See{" "}
-                    <InlineNavLink to="/data">Data and Documentation</InlineNavLink>{" "}
+                    The radar chart in the Explore Tool summarizes performance
+                    across nine key outcomes, revealing broad system-level
+                    trade-offs within and between scenarios. The chart displays
+                    average performance across all locations of interest for
+                    each outcome. This example compares Current operations with
+                    Current operations with historical land use and Current
+                    operations without TUCPs under the historical hydroclimate.
+                    Outcomes are categorized into different performance classes:
+                    optimal, acceptable, at-risk, and critical. See{" "}
+                    <InlineNavLink to="/data">
+                      Data and Documentation
+                    </InlineNavLink>{" "}
                     for more information on how these categories are defined.
                   </Typography>
                 </>
@@ -387,39 +396,42 @@ export const WATER_THEMES: Theme[] = [
               caption: (
                 <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar plot highlights existing trade-offs among competing
-                    water uses and objectives under current operations. Community
-                    surface water deliveries are in optimal conditions, on average,
-                    while agricultural revenues, reservoir storage, groundwater
-                    storage, and freshwater for Delta exports and in-delta uses are,
-                    on average, in acceptable conditions. Environmental flows, Delta
-                    estuary ecology, and winter-run salmon generally are considered
-                    at-risk or in critical condition under the baseline scenarios.
+                    The radar plot highlights existing trade-offs among
+                    competing water uses and objectives under current
+                    operations. Community surface water deliveries are in
+                    optimal conditions, on average, while agricultural revenues,
+                    reservoir storage, groundwater storage, and freshwater for
+                    Delta exports and in-delta uses are, on average, in
+                    acceptable conditions. Environmental flows, Delta estuary
+                    ecology, and winter-run salmon generally are considered
+                    at-risk or in critical condition under the baseline
+                    scenarios.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The radar plot also indicates that representing current
-                    operations with historical land use produces similar outcomes to
-                    those with more recent land use for most outcomes, but
-                    agricultural revenues decline from acceptable to at-risk
-                    conditions, on average. This likely reflects the larger footprint
-                    of higher-value perennial crops under more recent conditions.
-                    There are also slight improvements in groundwater storage in the
-                    scenario with historical land use, suggesting that current
-                    agricultural water demands rely more on groundwater than they did
-                    historically. The radar plot shows that TUCPs have limited
-                    effects on overall system performance, but relative to the
-                    scenario without TUCPs, the Current operations scenario (with
-                    TUCPs) has slightly worse average conditions for In-Delta uses
-                    and slightly improved reservoir storage conditions.
+                    operations with historical land use produces similar
+                    outcomes to those with more recent land use for most
+                    outcomes, but agricultural revenues decline from acceptable
+                    to at-risk conditions, on average. This likely reflects the
+                    larger footprint of higher-value perennial crops under more
+                    recent conditions. There are also slight improvements in
+                    groundwater storage in the scenario with historical land
+                    use, suggesting that current agricultural water demands rely
+                    more on groundwater than they did historically. The radar
+                    plot shows that TUCPs have limited effects on overall system
+                    performance, but relative to the scenario without TUCPs, the
+                    Current operations scenario (with TUCPs) has slightly worse
+                    average conditions for In-Delta uses and slightly improved
+                    reservoir storage conditions.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Overall, the radar chart shows that the broad pattern of system
-                    performance is relatively consistent across these representations
-                    of current operations, but some outcomes are sensitive to
-                    differences in land-use assumptions and operating rules. The
-                    system-wide averages do not show how these conditions are
-                    distributed among individual locations, which is explored in the
-                    Distribution view below.
+                    Overall, the radar chart shows that the broad pattern of
+                    system performance is relatively consistent across these
+                    representations of current operations, but some outcomes are
+                    sensitive to differences in land-use assumptions and
+                    operating rules. The system-wide averages do not show how
+                    these conditions are distributed among individual locations,
+                    which is explored in the Distribution view below.
                   </Typography>
                 </>
               ),
@@ -437,24 +449,27 @@ export const WATER_THEMES: Theme[] = [
                     Equity
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Where do benefits and impacts occur, and who is most affected?
+                    Where do benefits and impacts occur, and who is most
+                    affected?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    System-wide averages can hide important differences in current
-                    conditions across individual locations. Water availability,
-                    infrastructure, water rights, access to different water sources,
-                    and other characteristics vary considerably across California,
-                    meaning that the outcomes produced by current water management
-                    can differ substantially from place to place.
+                    System-wide averages can hide important differences in
+                    current conditions across individual locations. Water
+                    availability, infrastructure, water rights, access to
+                    different water sources, and other characteristics vary
+                    considerably across California, meaning that the outcomes
+                    produced by current water management can differ
+                    substantially from place to place.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The Distribution view in the Explore Tool shows results for
-                    individual locations of interest. The figure below shows outcomes
-                    for Current operations under the historical hydroclimate, while
-                    the map highlights community surface water delivery locations in
-                    particular. The markers represent locations of interest, and the
-                    colors represent optimal (green), acceptable (blue), at-risk
-                    (orange), or critical (red) outcomes.
+                    individual locations of interest. The figure below shows
+                    outcomes for Current operations under the historical
+                    hydroclimate, while the map highlights community surface
+                    water delivery locations in particular. The markers
+                    represent locations of interest, and the colors represent
+                    optimal (green), acceptable (blue), at-risk (orange), or
+                    critical (red) outcomes.
                   </Typography>
                 </>
               ),
@@ -474,61 +489,65 @@ export const WATER_THEMES: Theme[] = [
                     Resilience
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    How consistently do management strategies perform under different
-                    climate futures?
+                    How consistently do management strategies perform under
+                    different climate futures?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Climate change is expected to place increasing stress on
-                    California's water system. A management strategy that performs
-                    well today may respond differently as droughts become more
-                    frequent, temperatures rise, and water availability changes. The
-                    Resilience heatmap in the Explore Tool examines how management
-                    strategies perform across a range of plausible hydroclimate
-                    futures, representing increasing levels of stress to the water
-                    system. See{" "}
-                    <InlineNavLink to="/data">Data and Documentation</InlineNavLink>{" "}
+                    California&apos;s water system. A management strategy that
+                    performs well today may respond differently as droughts
+                    become more frequent, temperatures rise, and water
+                    availability changes. The Resilience heatmap in the Explore
+                    Tool examines how management strategies perform across a
+                    range of plausible hydroclimate futures, representing
+                    increasing levels of stress to the water system. See{" "}
+                    <InlineNavLink to="/data">
+                      Data and Documentation
+                    </InlineNavLink>{" "}
                     for more information about hydroclimate futures.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Resilience heatmap summarizes performance across all nine
-                    outcomes under Historical conditions and under Moderate,
-                    Moderate-High, High and Extreme climate stress for Current
-                    Operations. Outcomes are categorized as optimal (green, 1.00 -
-                    1.99), acceptable (blue, 2.00 - 2.99), at-risk (orange, 3.00 -
-                    3.99), or critical (red, 4.00 - 4.99), with higher numerical
-                    values indicating worse performance.
+                    The Resilience heatmap summarizes performance across all
+                    nine outcomes under Historical conditions and under
+                    Moderate, Moderate-High, High and Extreme climate stress for
+                    Current Operations. Outcomes are categorized as optimal
+                    (green, 1.00 - 1.99), acceptable (blue, 2.00 - 2.99),
+                    at-risk (orange, 3.00 - 3.99), or critical (red, 4.00 -
+                    4.99), with higher numerical values indicating worse
+                    performance.
                   </Typography>
                 </>
               ),
               caption: (
                 <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The results show that climate stress affects different parts of
-                    the water system in different ways. Community surface water
-                    deliveries, agricultural revenues, and reservoir storage remain in
-                    optimal or acceptable conditions across most hydroclimates,
-                    although performance generally declines under the more stressful
-                    futures. Other outcomes are more sensitive to climate stress.
-                    Freshwater available for Delta exports and in-Delta uses
-                    deteriorates steadily as climate stress increases, reaching
-                    "Critical" conditions under Extreme stress. Environmental flows,
-                    Delta estuary ecology, and winter run salmon remain at risk or
-                    fall to critical conditions with greater climate stress.
+                    The results show that climate stress affects different parts
+                    of the water system in different ways. Community surface
+                    water deliveries, agricultural revenues, and reservoir
+                    storage remain in optimal or acceptable conditions across
+                    most hydroclimates, although performance generally declines
+                    under the more stressful futures. Other outcomes are more
+                    sensitive to climate stress. Freshwater available for Delta
+                    exports and in-Delta uses deteriorates steadily as climate
+                    stress increases, reaching &ldquo;Critical&rdquo; conditions
+                    under Extreme stress. Environmental flows, Delta estuary
+                    ecology, and winter run salmon remain at risk or fall to
+                    critical conditions with greater climate stress.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Overall, the Resilience heatmap shows that some parts of today's
-                    water system remain relatively robust to climate stress across
-                    the hydroclimates examined, while others are already vulnerable
-                    under historical conditions or become increasingly vulnerable as
-                    climate conditions change. These patterns help identify where
-                    current operations may be less able to accommodate future climate
-                    stress and where adaptation may be needed.
+                    Overall, the Resilience heatmap shows that some parts of
+                    today&apos;s water system remain relatively robust to
+                    climate stress across the hydroclimates examined, while
+                    others are already vulnerable under historical conditions or
+                    become increasingly vulnerable as climate conditions change.
+                    These patterns help identify where current operations may be
+                    less able to accommodate future climate stress and where
+                    adaptation may be needed.
                   </Typography>
                 </>
               ),
             },
           ],
-
         },
       },
     ],
@@ -578,15 +597,14 @@ export const WATER_THEMES: Theme[] = [
                     Different water sources shape community resilience
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Some communities rely primarily on surface water
-                    delivered through rivers, reservoirs, pipes, and
-                    canals, while others draw from both surface water and
-                    groundwater wells. Access to multiple water sources can
-                    provide greater flexibility when one source becomes
-                    less available, while reliance on a single source can
-                    leave communities more vulnerable to drought,
-                    infrastructure disruptions, and other changes in water
-                    supply.
+                    Some communities rely primarily on surface water delivered
+                    through rivers, reservoirs, pipes, and canals, while others
+                    draw from both surface water and groundwater wells. Access
+                    to multiple water sources can provide greater flexibility
+                    when one source becomes less available, while reliance on a
+                    single source can leave communities more vulnerable to
+                    drought, infrastructure disruptions, and other changes in
+                    water supply.
                   </Typography>
                 </>
               ),
@@ -626,16 +644,15 @@ export const WATER_THEMES: Theme[] = [
                     communities
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Community water systems rely on surface water,
-                    groundwater, or a combination of sources to meet their
-                    needs. This water issue focuses on surface water
-                    delivered from California's major water projects to
-                    major metropolitan areas around the Bay Area,
-                    Sacramento, and Los Angeles, as well as smaller
-                    communities throughout the Central Valley and Southern
-                    California. These deliveries represent only a subset
-                    of California's community water systems and drinking
-                    water supplies.
+                    Community water systems rely on surface water, groundwater,
+                    or a combination of sources to meet their needs. This water
+                    issue focuses on surface water delivered from
+                    California&apos;s major water projects to major metropolitan
+                    areas around the Bay Area, Sacramento, and Los Angeles, as
+                    well as smaller communities throughout the Central Valley
+                    and Southern California. These deliveries represent only a
+                    subset of California&apos;s community water systems and
+                    drinking water supplies.
                   </Typography>
                 </>
               ),
@@ -654,11 +671,10 @@ export const WATER_THEMES: Theme[] = [
                     CalSim3
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The CalSim3 water systems model that is used in
-                    COEQWAL simulates surface water deliveries from the
-                    major water projects to community water systems at 74
-                    locations of interest throughout California, shown on
-                    the map below.
+                    The CalSim3 water systems model that is used in COEQWAL
+                    simulates surface water deliveries from the major water
+                    projects to community water systems at 74 locations of
+                    interest throughout California, shown on the map below.
                   </Typography>
                 </>
               ),
@@ -740,11 +756,13 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: (
                 <>
-                  The{" "}
-                  <InlineNavLink to="explore">
-                    Explore Tool
-                  </InlineNavLink>{" "}
-                  allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.
+                  The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                  allows you to explore how scenario outcomes compare under
+                  alternative management strategies and climate conditions.
+                  There are complementary ways to visualize tradeoffs, equity,
+                  and resilience of water management strategies. The examples
+                  below illustrate results from select scenarios for this water
+                  issue.
                 </>
               ),
             },
@@ -761,36 +779,31 @@ export const WATER_THEMES: Theme[] = [
                     Trade-offs
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    How do different management strategies affect overall
-                    system performance across multiple outcomes?
+                    How do different management strategies affect overall system
+                    performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The radar chart in the{" "}
-                    <InlineNavLink to="explore">
-                      Explore Tool
-                    </InlineNavLink>
-                    {" "}summarizes performance across nine key outcomes, revealing broad
-                    system-level trade-offs within and between scenarios. The
-                    chart displays the average performance across all
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    summarizes performance across nine key outcomes, revealing
+                    broad system-level trade-offs within and between scenarios.
+                    The chart displays the average performance across all
                     locations of interest for each scenario, providing a
                     system-wide view of how these management strategies
-                    influence multiple outcomes simultaneously. The chart
-                    view below specifically compares Current operations
-                    (black), Prioritizing human health delivery levels to
-                    community water systems (blue), and Prioritizing full
-                    demands of community water systems (red) under the
-                    historical hydroclimate.
+                    influence multiple outcomes simultaneously. The chart view
+                    below specifically compares Current operations (black),
+                    Prioritizing human health delivery levels to community water
+                    systems (blue), and Prioritizing full demands of community
+                    water systems (red) under the historical hydroclimate.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The points show the average condition across all
-                    locations of interest for each outcome, classified into
-                    four outcome levels: optimal, acceptable, at-risk, and
-                    critical. See{" "}
+                    The points show the average condition across all locations
+                    of interest for each outcome, classified into four outcome
+                    levels: optimal, acceptable, at-risk, and critical. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
-                    for more information on how these categories are
-                    defined.
+                    for more information on how these categories are defined.
                   </Typography>
                 </>
               ),
@@ -798,24 +811,23 @@ export const WATER_THEMES: Theme[] = [
                 <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The results show that community surface water deliveries
-                    perform well on average under Current Operations and
-                    improve further under both scenarios that prioritize
-                    community water needs. The results also reveal that
-                    these improvements in community surface water outcomes
-                    are not associated with notable impacts to other parts
-                    of the system. The performance of winter-run salmon does
-                    decline in the scenario that prioritizes human health
-                    delivery levels, suggesting that additional community
-                    water deliveries limit water needed by this salmon
-                    population. However, the average values for all other
-                    outcomes are similar between the baseline and the two
-                    scenarios that prioritize water deliveries to community
-                    water systems.
+                    perform well on average under Current Operations and improve
+                    further under both scenarios that prioritize community water
+                    needs. The results also reveal that these improvements in
+                    community surface water outcomes are not associated with
+                    notable impacts to other parts of the system. The
+                    performance of winter-run salmon does decline in the
+                    scenario that prioritizes human health delivery levels,
+                    suggesting that additional community water deliveries limit
+                    water needed by this salmon population. However, the average
+                    values for all other outcomes are similar between the
+                    baseline and the two scenarios that prioritize water
+                    deliveries to community water systems.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart shows system-wide performance of
-                    outcomes, while the Distribution view reveals the
-                    specific locations where benefits or impacts occur.
+                    The radar chart shows system-wide performance of outcomes,
+                    while the Distribution view reveals the specific locations
+                    where benefits or impacts occur.
                   </Typography>
                 </>
               ),
@@ -838,28 +850,27 @@ export const WATER_THEMES: Theme[] = [
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     System-wide averages can hide important differences in
-                    scenario impacts. Water availability and access can
-                    vary substantially between regions and served systems,
-                    meaning that the same management strategy can produce
-                    different outcomes in different places.
+                    scenario impacts. Water availability and access can vary
+                    substantially between regions and served systems, meaning
+                    that the same management strategy can produce different
+                    outcomes in different places.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Distribution view in the Explore Tool shows results
-                    for individual locations of interest. This figure
-                    displays outcomes for community surface water
-                    deliveries for Prioritizing human health delivery
-                    levels to community water systems, relative to Current
-                    operations. Arrows indicate the direction of change
-                    relative to current operations, and color represents
-                    optimal (green), acceptable (blue), at-risk (orange),
-                    or critical (red) outcomes for the scenario. Circles
-                    represent locations that did not change condition
+                    The Distribution view in the Explore Tool shows results for
+                    individual locations of interest. This figure displays
+                    outcomes for community surface water deliveries for
+                    Prioritizing human health delivery levels to community water
+                    systems, relative to Current operations. Arrows indicate the
+                    direction of change relative to current operations, and
+                    color represents optimal (green), acceptable (blue), at-risk
+                    (orange), or critical (red) outcomes for the scenario.
+                    Circles represent locations that did not change condition
                     relative to current operations.
                   </Typography>
                 </>
               ),
               caption:
-                "The results show that surface water deliveries to most locations of interest are \"Optimal\" or \"Acceptable\" under the human health priority scenario, and deliveries improve for many systems. However, seven locations remain \"At-risk\" or \"Critical\" and do not improve relative to Current operations. This shows that prioritizing community water deliveries across the system does not benefit every community equally or eliminate existing vulnerabilities.\nBecause communities differ in their access to groundwater, local storage, alternative supplies, financial resources, and other sources of resilience, similar surface water delivery outcomes may have different implications in different places. Overall, the Distribution view reveals patterns hidden by the system-wide averages and helps identify which locations benefit from changes in management and which remain vulnerable.",
+                'The results show that surface water deliveries to most locations of interest are "Optimal" or "Acceptable" under the human health priority scenario, and deliveries improve for many systems. However, seven locations remain "At-risk" or "Critical" and do not improve relative to Current operations. This shows that prioritizing community water deliveries across the system does not benefit every community equally or eliminate existing vulnerabilities.\nBecause communities differ in their access to groundwater, local storage, alternative supplies, financial resources, and other sources of resilience, similar surface water delivery outcomes may have different implications in different places. Overall, the Distribution view reveals patterns hidden by the system-wide averages and helps identify which locations benefit from changes in management and which remain vulnerable.',
             },
             {
               type: "image",
@@ -879,32 +890,28 @@ export const WATER_THEMES: Theme[] = [
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Climate change is expected to place increasing stress on
-                    California's water system. A management strategy that
+                    California&apos;s water system. A management strategy that
                     performs well today may respond differently as droughts
                     become more frequent, temperatures rise, and water
                     availability changes. The Resilience heatmap in the{" "}
-                    <InlineNavLink to="explore">
-                      Explore Tool
-                    </InlineNavLink>{" "}
-                    examines how management strategies perform
-                    across a range of plausible hydroclimate futures,
-                    representing increasing levels of stress to the water
-                    system. Visit{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    examines how management strategies perform across a range of
+                    plausible hydroclimate futures, representing increasing
+                    levels of stress to the water system. Visit{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
                     for more information about hydroclimate futures.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    This Resilience heatmap summarizes community surface
-                    water deliveries under the historical hydroclimate and
-                    future hydroclimates representing Moderate,
-                    Moderate-High, High and Extreme levels of climate stress
-                    for Current Operations and Prioritizing human health
-                    delivery levels to community water systems. Outcomes are
-                    categorized as optimal (1.00 - 1.99), acceptable (2.00 -
-                    2.99), at-risk (3.00 - 3.99), or critical (4.00 - 4.99),
-                    with higher numerical values indicating worse
+                    This Resilience heatmap summarizes community surface water
+                    deliveries under the historical hydroclimate and future
+                    hydroclimates representing Moderate, Moderate-High, High and
+                    Extreme levels of climate stress for Current Operations and
+                    Prioritizing human health delivery levels to community water
+                    systems. Outcomes are categorized as optimal (1.00 - 1.99),
+                    acceptable (2.00 - 2.99), at-risk (3.00 - 3.99), or critical
+                    (4.00 - 4.99), with higher numerical values indicating worse
                     performance.
                   </Typography>
                 </>
@@ -912,25 +919,25 @@ export const WATER_THEMES: Theme[] = [
               caption: (
                 <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Community surface water deliveries decline as climate
-                    stress increases under both management strategies. Under
-                    Current operations, average performance remains
-                    "Optimal" from the historical through Moderate-High
-                    hydroclimates, before declining to "Acceptable" under
-                    High and Extreme climate stress. Prioritizing human
-                    health delivery levels improves average community
-                    surface water delivery performance under every
-                    hydroclimate examined. However, performance still
+                    Community surface water deliveries decline as climate stress
+                    increases under both management strategies. Under Current
+                    operations, average performance remains
+                    &ldquo;Optimal&rdquo; from the historical through
+                    Moderate-High hydroclimates, before declining to
+                    &ldquo;Acceptable&rdquo; under High and Extreme climate
+                    stress. Prioritizing human health delivery levels improves
+                    average community surface water delivery performance under
+                    every hydroclimate examined. However, performance still
                     declines as climate stress increases, shifting from
-                    "Optimal" through Moderate-High stress to "Acceptable"
-                    under High and Extreme stress.
+                    &ldquo;Optimal&rdquo; through Moderate-High stress to
+                    &ldquo;Acceptable&rdquo; under High and Extreme stress.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    These results suggest that prioritizing essential
-                    community water needs improves the resilience of
-                    modeled surface water deliveries across a range of
-                    climate futures, but cannot fully offset the effects of
-                    increasingly severe water scarcity.
+                    These results suggest that prioritizing essential community
+                    water needs improves the resilience of modeled surface water
+                    deliveries across a range of climate futures, but cannot
+                    fully offset the effects of increasingly severe water
+                    scarcity.
                   </Typography>
                 </>
               ),
@@ -991,31 +998,28 @@ export const WATER_THEMES: Theme[] = [
                     sx={{ fontWeight: 700, color: "inherit" }}
                   >
                     Relationships between agricultural water use, groundwater
-                    levels, and agricultural revenues, and
-                    groundwater-dependent ecosystems over time under two
-                    hypothetical scenarios
+                    levels, and agricultural revenues, and groundwater-dependent
+                    ecosystems over time under two hypothetical scenarios
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     When no restrictions on groundwater pumping are imposed
                     (Scenario 1), groundwater use increases during drought,
-                    causing declines in groundwater levels. With reductions
-                    in groundwater use (Scenario 2), groundwater can still
-                    help mitigate agricultural losses during the worst
-                    drought years, while groundwater levels remain more
-                    stable over the long term. However, reduced access to
-                    groundwater during drought can lead to unmet
-                    agricultural water demand and lower agricultural
-                    revenues.
+                    causing declines in groundwater levels. With reductions in
+                    groundwater use (Scenario 2), groundwater can still help
+                    mitigate agricultural losses during the worst drought years,
+                    while groundwater levels remain more stable over the long
+                    term. However, reduced access to groundwater during drought
+                    can lead to unmet agricultural water demand and lower
+                    agricultural revenues.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Over the longer term, maintaining more sustainable
                     groundwater levels can reduce problems associated with
                     overdraft, including land subsidence, dry wells, and
-                    reductions in groundwater contributions to surface
-                    waters. Groundwater-dependent ecosystems can also
-                    benefit, as more stable groundwater levels can help
-                    sustain native vegetation and support recovery
-                    following drought.
+                    reductions in groundwater contributions to surface waters.
+                    Groundwater-dependent ecosystems can also benefit, as more
+                    stable groundwater levels can help sustain native vegetation
+                    and support recovery following drought.
                   </Typography>
                 </>
               ),
@@ -1058,22 +1062,22 @@ export const WATER_THEMES: Theme[] = [
                     Groundwater storage and agricultural demand units
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The CalSim3 water systems model used in COEQWAL
-                    simulates groundwater storage conditions in 42 aquifer
-                    regions across the Central Valley (see left map below).
-                    Agricultural revenues are evaluated separately for 134
-                    agricultural demand units within the modeled area (see
-                    right map), each representing agricultural land with
-                    specific water demand characteristics.
+                    The CalSim3 water systems model used in COEQWAL simulates
+                    groundwater storage conditions in 42 aquifer regions across
+                    the Central Valley (see left map below). Agricultural
+                    revenues are evaluated separately for 134 agricultural
+                    demand units within the modeled area (see right map), each
+                    representing agricultural land with specific water demand
+                    characteristics.
                   </Typography>
                 </>
               ),
               caption: (
                 <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The colors of the polygons indicate conditions under
-                    current operations and represent whether outcomes are
-                    optimal, acceptable, at-risk, or critical (red). See{" "}
+                    The colors of the polygons indicate conditions under current
+                    operations and represent whether outcomes are optimal,
+                    acceptable, at-risk, or critical (red). See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
@@ -1154,11 +1158,13 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: (
                 <>
-                  The{" "}
-                  <InlineNavLink to="explore">
-                    Explore Tool
-                  </InlineNavLink>{" "}
-                  allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.
+                  The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                  allows you to explore how scenario outcomes compare under
+                  alternative management strategies and climate conditions.
+                  There are complementary ways to visualize tradeoffs, equity,
+                  and resilience of water management strategies. The examples
+                  below illustrate results from select scenarios for this water
+                  issue.
                 </>
               ),
             },
@@ -1179,31 +1185,29 @@ export const WATER_THEMES: Theme[] = [
                     performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart in the Explore Tool summarizes
-                    performance across nine key outcomes, revealing broad
-                    system-level trade-offs within and between scenarios.
-                    The chart displays the average performance across all
-                    locations of interest for each scenario, providing a
-                    system-wide view of how these management strategies
-                    influence multiple outcomes simultaneously.
+                    The radar chart in the Explore Tool summarizes performance
+                    across nine key outcomes, revealing broad system-level
+                    trade-offs within and between scenarios. The chart displays
+                    the average performance across all locations of interest for
+                    each scenario, providing a system-wide view of how these
+                    management strategies influence multiple outcomes
+                    simultaneously.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    This chart specifically compares Current operations
-                    (black), Groundwater pumping limits in the Central
-                    Valley (blue), and Groundwater pumping limits via
-                    reduced crop acreage in the Central Valley (red) under
-                    the historical hydroclimate. Agricultural revenues are
-                    distinguished for water districts north-of-Delta
-                    (Sacramento Valley) and south-of-Delta (San Joaquin
-                    Valley). The points show the average condition across
-                    all locations of interest for each outcome, classified
-                    into four outcome levels: optimal, acceptable, at-risk,
-                    and critical. See{" "}
+                    This chart specifically compares Current operations (black),
+                    Groundwater pumping limits in the Central Valley (blue), and
+                    Groundwater pumping limits via reduced crop acreage in the
+                    Central Valley (red) under the historical hydroclimate.
+                    Agricultural revenues are distinguished for water districts
+                    north-of-Delta (Sacramento Valley) and south-of-Delta (San
+                    Joaquin Valley). The points show the average condition
+                    across all locations of interest for each outcome,
+                    classified into four outcome levels: optimal, acceptable,
+                    at-risk, and critical. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
-                    for more information on how these categories are
-                    defined.
+                    for more information on how these categories are defined.
                   </Typography>
                 </>
               ),
@@ -1212,43 +1216,41 @@ export const WATER_THEMES: Theme[] = [
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The results show slight improvements in the average
                     groundwater storage performance levels for Groundwater
-                    pumping limits in the Central Valley, which corresponds
-                    to a decrease in agricultural revenue. A larger
-                    improvement in groundwater storage occurs when
-                    groundwater use is limited through reductions in crop
-                    acreage. These groundwater benefits, however, come with
-                    larger reductions in agricultural revenues, particularly
-                    in the Sacramento Valley (North of Delta), where
-                    conditions fall from "acceptable" to "at risk".
+                    pumping limits in the Central Valley, which corresponds to a
+                    decrease in agricultural revenue. A larger improvement in
+                    groundwater storage occurs when groundwater use is limited
+                    through reductions in crop acreage. These groundwater
+                    benefits, however, come with larger reductions in
+                    agricultural revenues, particularly in the Sacramento Valley
+                    (North of Delta), where conditions fall from
+                    &ldquo;acceptable&rdquo; to &ldquo;at risk&rdquo;.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Reservoir storage improves under both groundwater
-                    management strategies, showing that changes in
-                    groundwater use can have effects elsewhere in the
-                    interconnected water system. Winter-run salmon also show
-                    modest improvements relative to current operations.
-                    Community water deliveries and Delta estuary conditions
-                    change relatively little on average. Water exports from
-                    the Delta substantially increase under the reduced crop
-                    acreage scenario. This may reflect lower agricultural
-                    water demands in the Sacramento Valley and changes in
-                    Sacramento River inflows associated with groundwater
-                    contributions. The increase in exports may also help
-                    buffer impacts to agricultural revenues in the San
+                    Reservoir storage improves under both groundwater management
+                    strategies, showing that changes in groundwater use can have
+                    effects elsewhere in the interconnected water system.
+                    Winter-run salmon also show modest improvements relative to
+                    current operations. Community water deliveries and Delta
+                    estuary conditions change relatively little on average.
+                    Water exports from the Delta substantially increase under
+                    the reduced crop acreage scenario. This may reflect lower
+                    agricultural water demands in the Sacramento Valley and
+                    changes in Sacramento River inflows associated with
+                    groundwater contributions. The increase in exports may also
+                    help buffer impacts to agricultural revenues in the San
                     Joaquin Valley (South of Delta).
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    These results illustrate a central trade-off in
-                    groundwater management. Direct pumping limits produce
-                    relatively modest improvements in the average
-                    groundwater storage performance level across locations,
-                    but also smaller impacts on agricultural revenues.
-                    Reducing crop acreage produces larger groundwater
-                    benefits, but also larger economic impacts, particularly
-                    in the Sacramento Valley. This illustrates how
-                    groundwater outcomes depend not only on pumping
-                    constraints, but also on how agricultural systems adapt
-                    to reduced water availability.
+                    These results illustrate a central trade-off in groundwater
+                    management. Direct pumping limits produce relatively modest
+                    improvements in the average groundwater storage performance
+                    level across locations, but also smaller impacts on
+                    agricultural revenues. Reducing crop acreage produces larger
+                    groundwater benefits, but also larger economic impacts,
+                    particularly in the Sacramento Valley. This illustrates how
+                    groundwater outcomes depend not only on pumping constraints,
+                    but also on how agricultural systems adapt to reduced water
+                    availability.
                   </Typography>
                 </>
               ),
@@ -1272,24 +1274,23 @@ export const WATER_THEMES: Theme[] = [
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     System-wide averages can hide important differences in
                     scenario impacts. Water availability, groundwater
-                    conditions, agricultural systems, and management
-                    constraints vary considerably among agricultural water
-                    users across the areas represented in the analysis,
-                    meaning that the same management strategy can produce
-                    different outcomes in different places.
+                    conditions, agricultural systems, and management constraints
+                    vary considerably among agricultural water users across the
+                    areas represented in the analysis, meaning that the same
+                    management strategy can produce different outcomes in
+                    different places.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Distribution view in the Explore Tool shows results
-                    for individual locations of interest. This figure
-                    compares outcomes for aquifer zones and agricultural
-                    districts for Groundwater pumping limits via reduced
-                    crop acreage in the Central Valley relative to the
-                    Current operations scenario under the historical
-                    hydroclimate. Arrows indicate the direction of change
-                    relative to current operations and color represents
-                    optimal, acceptable, at-risk, or critical outcomes for
-                    the scenario. Circles on the map indicate locations
-                    where the outcome level did not change relative to
+                    The Distribution view in the Explore Tool shows results for
+                    individual locations of interest. This figure compares
+                    outcomes for aquifer zones and agricultural districts for
+                    Groundwater pumping limits via reduced crop acreage in the
+                    Central Valley relative to the Current operations scenario
+                    under the historical hydroclimate. Arrows indicate the
+                    direction of change relative to current operations and color
+                    represents optimal, acceptable, at-risk, or critical
+                    outcomes for the scenario. Circles on the map indicate
+                    locations where the outcome level did not change relative to
                     current operations.
                   </Typography>
                 </>
@@ -1310,59 +1311,57 @@ export const WATER_THEMES: Theme[] = [
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Climate change is expected to place increasing stress on
-                    California's water system. A management strategy that
+                    California&apos;s water system. A management strategy that
                     performs well today may respond differently as droughts
                     become more frequent, temperatures rise, and water
-                    availability changes. The Resilience heatmap in the
-                    Explore Tool examines how management strategies perform
-                    across a range of plausible hydroclimate futures,
-                    representing increasing levels of stress to the water
-                    system. Visit{" "}
+                    availability changes. The Resilience heatmap in the Explore
+                    Tool examines how management strategies perform across a
+                    range of plausible hydroclimate futures, representing
+                    increasing levels of stress to the water system. Visit{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
                     for more information about hydroclimate futures.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    This Resilience heatmap summarizes changes in
-                    groundwater storage and agricultural revenues under
-                    Historical conditions and under Moderate, Moderate-High,
-                    High and Extreme climate stress for Current Operations
-                    and for Groundwater pumping limits via reduced crop
-                    acreage in the Central Valley. Outcomes are categorized
-                    as optimal (1.00 - 1.99), acceptable (2.00 - 2.99),
-                    at-risk (3.00 - 3.99), or critical (4.00 - 4.99), with
-                    higher numerical values indicating worse performance.
+                    This Resilience heatmap summarizes changes in groundwater
+                    storage and agricultural revenues under Historical
+                    conditions and under Moderate, Moderate-High, High and
+                    Extreme climate stress for Current Operations and for
+                    Groundwater pumping limits via reduced crop acreage in the
+                    Central Valley. Outcomes are categorized as optimal (1.00 -
+                    1.99), acceptable (2.00 - 2.99), at-risk (3.00 - 3.99), or
+                    critical (4.00 - 4.99), with higher numerical values
+                    indicating worse performance.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Groundwater pumping limits via reduced crop acreage in
-                    the Central Valley lowers agricultural revenues relative
-                    to Current operations under the historical climate and
-                    under future climates. However, agricultural revenues
-                    for Current operations respond more strongly to climate
-                    stress than for the scenario in which groundwater limits
-                    are imposed. This suggests a unique tradeoff between the
-                    two scenarios, in which the impacts of lower overall
-                    agricultural revenues are paired with a benefit of
-                    greater resilience to climate stress.
+                    Groundwater pumping limits via reduced crop acreage in the
+                    Central Valley lowers agricultural revenues relative to
+                    Current operations under the historical climate and under
+                    future climates. However, agricultural revenues for Current
+                    operations respond more strongly to climate stress than for
+                    the scenario in which groundwater limits are imposed. This
+                    suggests a unique tradeoff between the two scenarios, in
+                    which the impacts of lower overall agricultural revenues are
+                    paired with a benefit of greater resilience to climate
+                    stress.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Groundwater storage shows a different pattern. Reducing
-                    crop acreage improves groundwater conditions under the
-                    historical hydroclimate, and much of this benefit
-                    persists under Moderate through High climate stress.
-                    Under Extreme stress, however, groundwater conditions
-                    deteriorate and much of the advantage over current
-                    operations is lost.
+                    Groundwater storage shows a different pattern. Reducing crop
+                    acreage improves groundwater conditions under the historical
+                    hydroclimate, and much of this benefit persists under
+                    Moderate through High climate stress. Under Extreme stress,
+                    however, groundwater conditions deteriorate and much of the
+                    advantage over current operations is lost.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     These results suggest that reducing agricultural water
                     demand can improve groundwater resilience across a wide
-                    range of climate conditions, but increasingly severe
-                    climate stress can erode those benefits. They also show
-                    that protecting groundwater does not eliminate the
-                    broader challenge of maintaining agricultural production
-                    as water becomes more limited.
+                    range of climate conditions, but increasingly severe climate
+                    stress can erode those benefits. They also show that
+                    protecting groundwater does not eliminate the broader
+                    challenge of maintaining agricultural production as water
+                    becomes more limited.
                   </Typography>
                 </>
               ),
@@ -1409,22 +1408,20 @@ export const WATER_THEMES: Theme[] = [
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Sacramento River winter-run Chinook have a unique life
-                    history. Spawning adults (age 2, 3, or 4 years old)
-                    enter the Sacramento River as early as November, and
-                    most migrate far up the Sacramento River, where they
-                    hold in the upper river for several months before
-                    spawning. After spawning, the eggs incubate in the
-                    gravel for approximately 3 months before emerging as
-                    fry.
+                    history. Spawning adults (age 2, 3, or 4 years old) enter
+                    the Sacramento River as early as November, and most migrate
+                    far up the Sacramento River, where they hold in the upper
+                    river for several months before spawning. After spawning,
+                    the eggs incubate in the gravel for approximately 3 months
+                    before emerging as fry.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Fry can rear in the freshwater environment for 5-10
-                    months before transitioning to the smolt outmigration
-                    lifestage. From January through April, smolts migrate
-                    downstream and enter the Gulf of the Farallones. Once
-                    in the Pacific Ocean, they mature for 1-3 years before
-                    re-entering the Sacramento River to spawn again to
-                    start the next generation.
+                    Fry can rear in the freshwater environment for 5-10 months
+                    before transitioning to the smolt outmigration lifestage.
+                    From January through April, smolts migrate downstream and
+                    enter the Gulf of the Farallones. Once in the Pacific Ocean,
+                    they mature for 1-3 years before re-entering the Sacramento
+                    River to spawn again to start the next generation.
                   </Typography>
                 </>
               ),
@@ -1472,14 +1469,13 @@ export const WATER_THEMES: Theme[] = [
                     throughout their life cycle
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Historically, most winter-run Chinook salmon spawned in
-                    cold headwater streams upstream of what is now Shasta
-                    Dam. Today, most spawn below the dam. Young salmon then
-                    move through the Sacramento River, floodplains, Delta,
-                    and Bay before reaching the ocean, while returning
-                    adults make the journey back upstream. Their survival
-                    depends on suitable flows, temperatures, and habitat at
-                    each stage of this life cycle.
+                    Historically, most winter-run Chinook salmon spawned in cold
+                    headwater streams upstream of what is now Shasta Dam. Today,
+                    most spawn below the dam. Young salmon then move through the
+                    Sacramento River, floodplains, Delta, and Bay before
+                    reaching the ocean, while returning adults make the journey
+                    back upstream. Their survival depends on suitable flows,
+                    temperatures, and habitat at each stage of this life cycle.
                   </Typography>
                 </>
               ),
@@ -1494,16 +1490,16 @@ export const WATER_THEMES: Theme[] = [
                     variant="subtitle1"
                     sx={{ fontWeight: 700, color: "inherit" }}
                   >
-                    Winter-run Chinook salmon need different river
-                    conditions throughout the year
+                    Winter-run Chinook salmon need different river conditions
+                    throughout the year
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Winter-run chinook salmon depend on seasonal flows for
                     migration and rearing and on cold summer water for
-                    successful spawning and egg survival. Because Shasta
-                    Dam blocks access to historical cold-water habitat,
-                    reservoir operations now play a critical role in
-                    maintaining suitable downstream temperatures.
+                    successful spawning and egg survival. Because Shasta Dam
+                    blocks access to historical cold-water habitat, reservoir
+                    operations now play a critical role in maintaining suitable
+                    downstream temperatures.
                   </Typography>
                 </>
               ),
@@ -1630,9 +1626,13 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: (
                 <>
-                  The{" "}
-                  <InlineNavLink to="explore">Explore Tool</InlineNavLink>
-                  {" "}allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.
+                  The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                  allows you to explore how scenario outcomes compare under
+                  alternative management strategies and climate conditions.
+                  There are complementary ways to visualize tradeoffs, equity,
+                  and resilience of water management strategies. The examples
+                  below illustrate results from select scenarios for this water
+                  issue.
                 </>
               ),
             },
@@ -1649,36 +1649,33 @@ export const WATER_THEMES: Theme[] = [
                     Trade-offs
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    How do different management strategies affect overall
-                    system performance across multiple outcomes?
+                    How do different management strategies affect overall system
+                    performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart in the Explore Tool summarizes
-                    performance across nine key outcomes, revealing broad
-                    system-level trade-offs within and between scenarios.
-                    This example compares Current operations with two
-                    approaches to protecting rivers and salmon: Functional
-                    environmental flows, which seek to restore key elements
-                    of natural flow patterns, and Winter-run refuge flows,
-                    which prioritize cold-water releases from Shasta along
-                    with functional flows shaped to benefit winter-run
-                    Chinook salmon. The Functional environmental flows with
-                    reintroduction strategy is also included to show how
-                    reintroduction of winter-run Chinook salmon above Shasta
-                    Dam changes outcomes. The chart specifically compares
-                    Current operations (black), Functional environmental
-                    flows (red), Functional environmental flows with
-                    reintroduction (yellow), and Winter-run refuge flows
-                    (blue) under the historical hydroclimate. The points
-                    show the average conditions of all locations of
-                    interest for each outcome and are classified into four
-                    outcome levels: optimal, acceptable, at-risk, and
-                    critical. See{" "}
+                    The radar chart in the Explore Tool summarizes performance
+                    across nine key outcomes, revealing broad system-level
+                    trade-offs within and between scenarios. This example
+                    compares Current operations with two approaches to
+                    protecting rivers and salmon: Functional environmental
+                    flows, which seek to restore key elements of natural flow
+                    patterns, and Winter-run refuge flows, which prioritize
+                    cold-water releases from Shasta along with functional flows
+                    shaped to benefit winter-run Chinook salmon. The Functional
+                    environmental flows with reintroduction strategy is also
+                    included to show how reintroduction of winter-run Chinook
+                    salmon above Shasta Dam changes outcomes. The chart
+                    specifically compares Current operations (black), Functional
+                    environmental flows (red), Functional environmental flows
+                    with reintroduction (yellow), and Winter-run refuge flows
+                    (blue) under the historical hydroclimate. The points show
+                    the average conditions of all locations of interest for each
+                    outcome and are classified into four outcome levels:
+                    optimal, acceptable, at-risk, and critical. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
-                    for more information on how these categories are
-                    defined.
+                    for more information on how these categories are defined.
                   </Typography>
                 </>
               ),
@@ -1687,62 +1684,59 @@ export const WATER_THEMES: Theme[] = [
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The results show that Functional environmental flows
                     substantially improve the environmental flow outcome,
-                    shifting average conditions from "At-Risk" under current
-                    operations to "Optimal". This improvement is accompanied
-                    by lower reservoir storage and poorer conditions for
-                    winter-run salmon, unless functional environmental
-                    flows are paired with the reintroduction of winter-run
-                    Chinook salmon above Shasta. The result reflects an
-                    important challenge for winter-run: releasing water to
-                    restore more natural flow patterns can reduce the
-                    cold-water reserves in Shasta Reservoir needed to
-                    protect eggs during summer. However, if winter-run can
-                    spawn above Shasta where cool spring-fed tributaries
-                    support egg survival, then these actions are
-                    complementary with functional flows that can support
-                    instream rearing and outmigration habitat. As a result,
-                    all winter-run lifestages are supported with the
-                    Functional environmental flows with reintroduction
-                    scenario, and move winter-run from a "Critical" to
-                    "At-Risk" population.
+                    shifting average conditions from &ldquo;At-Risk&rdquo; under
+                    current operations to &ldquo;Optimal&rdquo;. This
+                    improvement is accompanied by lower reservoir storage and
+                    poorer conditions for winter-run salmon, unless functional
+                    environmental flows are paired with the reintroduction of
+                    winter-run Chinook salmon above Shasta. The result reflects
+                    an important challenge for winter-run: releasing water to
+                    restore more natural flow patterns can reduce the cold-water
+                    reserves in Shasta Reservoir needed to protect eggs during
+                    summer. However, if winter-run can spawn above Shasta where
+                    cool spring-fed tributaries support egg survival, then these
+                    actions are complementary with functional flows that can
+                    support instream rearing and outmigration habitat. As a
+                    result, all winter-run lifestages are supported with the
+                    Functional environmental flows with reintroduction scenario,
+                    and move winter-run from a &ldquo;Critical&rdquo; to
+                    &ldquo;At-Risk&rdquo; population.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The Winter-run refuge flows scenario also moves the
-                    winter-run population from "Critical" to "At-Risk", but
-                    does so by managing reservoir operations to protect
-                    Shasta's cold-water pool. It then allocates the
-                    remaining water to functional flows, adding pulse flows
-                    to support rearing habitat and salmon outmigration
-                    survival. While this scenario provides flows for later
-                    in-river lifestages in the mainstem Sacramento River, it
-                    has flow requirements at fewer locations than the
-                    Functional environmental flows scenario. As a result,
-                    the Winter-run refuge flows scenario improves reservoir
-                    storage and winter-run salmon outcomes relative to
-                    Functional environmental flows, but performs less well
-                    against the broader environmental-flow objective.
+                    winter-run population from &ldquo;Critical&rdquo; to
+                    &ldquo;At-Risk&rdquo;, but does so by managing reservoir
+                    operations to protect Shasta&apos;s cold-water pool. It then
+                    allocates the remaining water to functional flows, adding
+                    pulse flows to support rearing habitat and salmon
+                    outmigration survival. While this scenario provides flows
+                    for later in-river lifestages in the mainstem Sacramento
+                    River, it has flow requirements at fewer locations than the
+                    Functional environmental flows scenario. As a result, the
+                    Winter-run refuge flows scenario improves reservoir storage
+                    and winter-run salmon outcomes relative to Functional
+                    environmental flows, but performs less well against the
+                    broader environmental-flow objective.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The scenarios also affect water availability elsewhere
-                    in the system. All scenarios increase freshwater
-                    available for in-Delta uses, relative to Current
-                    operations, while the Winter-run refuge flows produce a
-                    particularly large improvement in freshwater available
-                    for Delta exports. Agricultural revenue and community
-                    surface water deliveries change relatively little at
-                    the system-wide scale, as do groundwater storage and
-                    Delta estuary ecology.
+                    The scenarios also affect water availability elsewhere in
+                    the system. All scenarios increase freshwater available for
+                    in-Delta uses, relative to Current operations, while the
+                    Winter-run refuge flows produce a particularly large
+                    improvement in freshwater available for Delta exports.
+                    Agricultural revenue and community surface water deliveries
+                    change relatively little at the system-wide scale, as do
+                    groundwater storage and Delta estuary ecology.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Overall, these results show that strategies intended to
-                    protect rivers and winter-run salmon can produce
-                    different trade-offs depending on how water is managed.
-                    A strategy that improves broader river-flow conditions
-                    may not necessarily improve survival of winter-run
-                    salmon if it does not preserve cold-water storage
-                    needed for their early life stage. Reintroduction
-                    changes this relationship by reducing winter-run
-                    dependence on downstream cold-water releases from
+                    protect rivers and winter-run salmon can produce different
+                    trade-offs depending on how water is managed. A strategy
+                    that improves broader river-flow conditions may not
+                    necessarily improve survival of winter-run salmon if it does
+                    not preserve cold-water storage needed for their early life
+                    stage. Reintroduction changes this relationship by reducing
+                    winter-run dependence on downstream cold-water releases from
                     Shasta Reservoir.
                   </Typography>
                 </>
@@ -1767,22 +1761,21 @@ export const WATER_THEMES: Theme[] = [
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     System-wide averages can hide important differences in
                     scenario impacts. River conditions, water availability,
-                    ecosystem needs, and competing demands vary
-                    considerably across the Central Valley, meaning that
-                    the same river management strategy can create
-                    different benefits and burdens in different places.
+                    ecosystem needs, and competing demands vary considerably
+                    across the Central Valley, meaning that the same river
+                    management strategy can create different benefits and
+                    burdens in different places.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Distribution view in the Explore Tool shows results
-                    for individual locations of interest. The figure
-                    summarizes how outcomes shift at all locations under
-                    the Functional environmental flows scenario relative to
-                    current operations. Arrows indicate direction of change
-                    relative to current operations and color represents
-                    optimal (green), acceptable (blue), at-risk (orange),
-                    or critical (red) outcomes for the scenario. Boxes
-                    represent locations for which the outcome results
-                    remain the same.
+                    The Distribution view in the Explore Tool shows results for
+                    individual locations of interest. The figure summarizes how
+                    outcomes shift at all locations under the Functional
+                    environmental flows scenario relative to current operations.
+                    Arrows indicate direction of change relative to current
+                    operations and color represents optimal (green), acceptable
+                    (blue), at-risk (orange), or critical (red) outcomes for the
+                    scenario. Boxes represent locations for which the outcome
+                    results remain the same.
                   </Typography>
                 </>
               ),
@@ -1807,14 +1800,13 @@ export const WATER_THEMES: Theme[] = [
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Climate change is expected to place increasing stress on
-                    California's water system. A management strategy that
+                    California&apos;s water system. A management strategy that
                     performs well today may respond differently as droughts
                     become more frequent, temperatures rise, and water
-                    availability changes. The Resilience heatmap in the
-                    Explore Tool examines how management strategies perform
-                    across a range of plausible hydroclimate futures,
-                    representing increasing levels of stress to the water
-                    system. See{" "}
+                    availability changes. The Resilience heatmap in the Explore
+                    Tool examines how management strategies perform across a
+                    range of plausible hydroclimate futures, representing
+                    increasing levels of stress to the water system. See{" "}
                     <InlineNavLink to="/data">
                       Data and documentation
                     </InlineNavLink>{" "}
@@ -1823,14 +1815,13 @@ export const WATER_THEMES: Theme[] = [
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The Resilience heatmap summarizes environmental flow and
                     winter-run salmon outcomes for the Current operations,
-                    Functional environmental flows, and Functional
-                    environmental flows with reintroduction scenarios,
-                    under the historical hydroclimate and under future
-                    hydroclimates representing Moderate, Moderate-High,
-                    High and Extreme levels of stress. Outcomes are
-                    categorized as optimal (green, 1.00 - 1.99), acceptable
-                    (blue, 2.00 - 2.99), at-risk (orange, 3.00 - 3.99), or
-                    critical (red, 4.00 - 4.99), with higher numerical
+                    Functional environmental flows, and Functional environmental
+                    flows with reintroduction scenarios, under the historical
+                    hydroclimate and under future hydroclimates representing
+                    Moderate, Moderate-High, High and Extreme levels of stress.
+                    Outcomes are categorized as optimal (green, 1.00 - 1.99),
+                    acceptable (blue, 2.00 - 2.99), at-risk (orange, 3.00 -
+                    3.99), or critical (red, 4.00 - 4.99), with higher numerical
                     values indicating worse performance.
                   </Typography>
                 </>
@@ -1838,48 +1829,47 @@ export const WATER_THEMES: Theme[] = [
               caption: (
                 <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Under Current operations, environmental flows are "at
-                    risk" under historical climate and future climates
-                    representing Moderate, Moderate-high, and High stress
-                    to the water system. On average, environmental flows
-                    fall to critical levels under Extreme climate stress.
-                    Implementing functional environmental flows in Central
-                    Valley rivers substantially improves environmental
-                    flow outcomes across all climate futures. For the
-                    Functional environmental flows and Functional
-                    environmental flows with reintroduction scenarios,
-                    environmental flow outcomes remain "Acceptable", even
-                    under Extreme climate stress.
+                    Under Current operations, environmental flows are &ldquo;at
+                    risk&rdquo; under historical climate and future climates
+                    representing Moderate, Moderate-high, and High stress to the
+                    water system. On average, environmental flows fall to
+                    critical levels under Extreme climate stress. Implementing
+                    functional environmental flows in Central Valley rivers
+                    substantially improves environmental flow outcomes across
+                    all climate futures. For the Functional environmental flows
+                    and Functional environmental flows with reintroduction
+                    scenarios, environmental flow outcomes remain
+                    &ldquo;Acceptable&rdquo;, even under Extreme climate stress.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Under Current operations, winter-run salmon remain at
-                    critical levels across the majority of hydroclimates.
-                    This is also true for the Functional environmental
-                    flows scenario, where winter-run remains at critical
-                    levels across hydroclimate futures because functional
-                    flows deplete Shasta cold-water reserves and provide
-                    less protection for the egg lifestage. However, if
-                    functional flows are paired with reintroduction of
-                    winter-run above Shasta, access to cold-water habitat
-                    supports the egg lifestage and functional flows support
-                    rearing and migration lifestages in the Sacramento
-                    River. As a result, the winter-run population responds
-                    positively and moves out of "Critical" levels and into
-                    "At-Risk" levels for all hydroclimate futures. The
-                    results suggest that the combination of functional
-                    environmental flows and reintroduction can improve
-                    conditions for both environmental flow metrics and
-                    winter-run salmon under historical and future climates.
-                    This also underscores the potential importance of
-                    complementary approaches, such as reintroduction, for
-                    mitigating climate impacts to winter-run salmon.
+                    critical levels across the majority of hydroclimates. This
+                    is also true for the Functional environmental flows
+                    scenario, where winter-run remains at critical levels across
+                    hydroclimate futures because functional flows deplete Shasta
+                    cold-water reserves and provide less protection for the egg
+                    lifestage. However, if functional flows are paired with
+                    reintroduction of winter-run above Shasta, access to
+                    cold-water habitat supports the egg lifestage and functional
+                    flows support rearing and migration lifestages in the
+                    Sacramento River. As a result, the winter-run population
+                    responds positively and moves out of &ldquo;Critical&rdquo;
+                    levels and into &ldquo;At-Risk&rdquo; levels for all
+                    hydroclimate futures. The results suggest that the
+                    combination of functional environmental flows and
+                    reintroduction can improve conditions for both environmental
+                    flow metrics and winter-run salmon under historical and
+                    future climates. This also underscores the potential
+                    importance of complementary approaches, such as
+                    reintroduction, for mitigating climate impacts to winter-run
+                    salmon.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Overall, the heatmap shows how the effectiveness of
-                    management strategies can change under different
-                    climate futures and helps identify where benefits
-                    remain robust and where they begin to break down as
-                    California's climate changes.
+                    management strategies can change under different climate
+                    futures and helps identify where benefits remain robust and
+                    where they begin to break down as California&apos;s climate
+                    changes.
                   </Typography>
                 </>
               ),
@@ -1946,20 +1936,19 @@ export const WATER_THEMES: Theme[] = [
                     How river flows and water exports affect the Delta
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Freshwater flowing into the Delta and water exported
-                    through the Delta pumping facilities together
-                    influence how water moves through Delta channels and
-                    where fresh and saline water meet. When river flows
-                    are high and exports are low, freshwater generally
-                    moves seaward and limits salinity intrusion. When
-                    freshwater inflows decline or export pumping
-                    increases, flow patterns can shift and saline water
-                    can move farther inland.
+                    Freshwater flowing into the Delta and water exported through
+                    the Delta pumping facilities together influence how water
+                    moves through Delta channels and where fresh and saline
+                    water meet. When river flows are high and exports are low,
+                    freshwater generally moves seaward and limits salinity
+                    intrusion. When freshwater inflows decline or export pumping
+                    increases, flow patterns can shift and saline water can move
+                    farther inland.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     These interactions create important trade-offs among
-                    freshwater available for export, water quality for
-                    in-Delta water uses, and ecosystem conditions.
+                    freshwater available for export, water quality for in-Delta
+                    water uses, and ecosystem conditions.
                   </Typography>
                 </>
               ),
@@ -2077,83 +2066,76 @@ export const WATER_THEMES: Theme[] = [
                     Trade-offs
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    How do different management strategies affect overall
-                    system performance across multiple outcomes?
+                    How do different management strategies affect overall system
+                    performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart in the Explore Tool summarizes
-                    performance across nine key outcomes, revealing broad
-                    system-level trade-offs within and between scenarios.
-                    The chart displays the average performance across all
-                    locations of interest for each scenario, providing a
-                    system-wide view of how these management strategies
-                    influence multiple outcomes simultaneously. The chart
-                    specifically compares Current operations (black),
-                    Increase Delta outflow targets (65% of unimpaired flow)
-                    (blue), and Delta Conveyance Project (red) under the
-                    historical hydroclimate. The points show the average
-                    condition across all locations of interest for each
+                    The radar chart in the Explore Tool summarizes performance
+                    across nine key outcomes, revealing broad system-level
+                    trade-offs within and between scenarios. The chart displays
+                    the average performance across all locations of interest for
+                    each scenario, providing a system-wide view of how these
+                    management strategies influence multiple outcomes
+                    simultaneously. The chart specifically compares Current
+                    operations (black), Increase Delta outflow targets (65% of
+                    unimpaired flow) (blue), and Delta Conveyance Project (red)
+                    under the historical hydroclimate. The points show the
+                    average condition across all locations of interest for each
                     outcome, classified into four outcome levels: optimal,
                     acceptable, at-risk, and critical. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
-                    for more information on how these categories are
-                    defined.
+                    for more information on how these categories are defined.
                   </Typography>
                 </>
               ),
               caption: (
                 <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The results show how the two strategies shift the
-                    balance of outcomes within and beyond the Delta.
-                    Increasing Delta outflow targets to 65% of unimpaired
-                    flow increases freshwater moving through and out of the
-                    Delta through a combination of increased upstream flows
-                    and reduced export pumping. This substantially reduces
-                    freshwater available for export while improving
-                    freshwater conditions for in-Delta uses. By contrast,
-                    the Delta Conveyance Project diverts some Sacramento
-                    River water through new intakes in the northern Delta,
-                    increasing freshwater available for export while
-                    producing relatively little change in modeled
-                    freshwater conditions for in-Delta uses.
+                    The results show how the two strategies shift the balance of
+                    outcomes within and beyond the Delta. Increasing Delta
+                    outflow targets to 65% of unimpaired flow increases
+                    freshwater moving through and out of the Delta through a
+                    combination of increased upstream flows and reduced export
+                    pumping. This substantially reduces freshwater available for
+                    export while improving freshwater conditions for in-Delta
+                    uses. By contrast, the Delta Conveyance Project diverts some
+                    Sacramento River water through new intakes in the northern
+                    Delta, increasing freshwater available for export while
+                    producing relatively little change in modeled freshwater
+                    conditions for in-Delta uses.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Both scenarios also affect outcomes elsewhere in the
-                    system. Increasing Delta outflows reduces reservoir and
-                    groundwater storage, while the Delta Conveyance Project
-                    improves both. Community surface-water deliveries
-                    decline slightly under both scenarios relative to
-                    Current operations, but remain at or near the Optimal
-                    threshold. Environmental flows also decline slightly,
-                    while the modeled outcome for winter-run salmon
-                    improves slightly under both scenarios. Agricultural
+                    Both scenarios also affect outcomes elsewhere in the system.
+                    Increasing Delta outflows reduces reservoir and groundwater
+                    storage, while the Delta Conveyance Project improves both.
+                    Community surface-water deliveries decline slightly under
+                    both scenarios relative to Current operations, but remain at
+                    or near the Optimal threshold. Environmental flows also
+                    decline slightly, while the modeled outcome for winter-run
+                    salmon improves slightly under both scenarios. Agricultural
                     revenue increases slightly under the increased-outflow
-                    scenario but declines under the Delta Conveyance
-                    Project.
+                    scenario but declines under the Delta Conveyance Project.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The modeled Delta estuary ecology outcome improves
-                    modestly under the increased-outflow scenario. This
-                    does not mean that freshwater flow is unimportant to
-                    Delta ecosystems. Rather, the result reflects that
-                    ecological conditions are also constrained by habitat,
-                    invasive species, food-web conditions, and other
-                    factors that are not changed by this scenario.
-                    Improving flows alongside habitat restoration and other
-                    complementary actions could potentially produce broader
-                    ecological benefits than changing flows alone.
+                    The modeled Delta estuary ecology outcome improves modestly
+                    under the increased-outflow scenario. This does not mean
+                    that freshwater flow is unimportant to Delta ecosystems.
+                    Rather, the result reflects that ecological conditions are
+                    also constrained by habitat, invasive species, food-web
+                    conditions, and other factors that are not changed by this
+                    scenario. Improving flows alongside habitat restoration and
+                    other complementary actions could potentially produce
+                    broader ecological benefits than changing flows alone.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    These modeled outcomes capture only some dimensions of
-                    the proposed Delta Conveyance Project. They do not
-                    capture many other important considerations, including
-                    effects on Delta communities, Tribal priorities,
-                    agriculture, and ecosystems; construction impacts and
-                    costs; or how benefits and burdens would be distributed
-                    among regions.
+                    These modeled outcomes capture only some dimensions of the
+                    proposed Delta Conveyance Project. They do not capture many
+                    other important considerations, including effects on Delta
+                    communities, Tribal priorities, agriculture, and ecosystems;
+                    construction impacts and costs; or how benefits and burdens
+                    would be distributed among regions.
                   </Typography>
                 </>
               ),
@@ -2176,28 +2158,26 @@ export const WATER_THEMES: Theme[] = [
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     System-wide averages can hide important differences in
-                    scenario impacts. Communities, farms, ecosystems, and
-                    water users within and outside the Delta depend on
-                    water moving through the system in different ways. As
-                    a result, changes in reservoir operations, Delta
-                    flows, salinity, or exports can shift the benefits and
-                    impacts to different locations.
+                    scenario impacts. Communities, farms, ecosystems, and water
+                    users within and outside the Delta depend on water moving
+                    through the system in different ways. As a result, changes
+                    in reservoir operations, Delta flows, salinity, or exports
+                    can shift the benefits and impacts to different locations.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Distribution view in the Explore Tool shows results
-                    for individual locations of interest. The figure
-                    summarizes how outcomes shift across locations under
-                    the Increase Shasta carry-over storage scenario
-                    relative to Current operations under the historical
-                    hydroclimate. This scenario targets approximately 20%
-                    more September storage in Shasta Reservoir than under
-                    Current operations by adjusting water allocations
-                    earlier in the year. Arrows indicate direction of
-                    change relative to current operations and color
-                    represents optimal (green), acceptable (blue), at-risk
-                    (orange), or critical (red) outcomes for the scenario.
-                    Squares represent locations that did not change
-                    condition relative to current operations.
+                    The Distribution view in the Explore Tool shows results for
+                    individual locations of interest. The figure summarizes how
+                    outcomes shift across locations under the Increase Shasta
+                    carry-over storage scenario relative to Current operations
+                    under the historical hydroclimate. This scenario targets
+                    approximately 20% more September storage in Shasta Reservoir
+                    than under Current operations by adjusting water allocations
+                    earlier in the year. Arrows indicate direction of change
+                    relative to current operations and color represents optimal
+                    (green), acceptable (blue), at-risk (orange), or critical
+                    (red) outcomes for the scenario. Squares represent locations
+                    that did not change condition relative to current
+                    operations.
                   </Typography>
                 </>
               ),
@@ -2222,14 +2202,13 @@ export const WATER_THEMES: Theme[] = [
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Climate change is expected to place increasing stress on
-                    California's water system. A management strategy that
+                    California&apos;s water system. A management strategy that
                     performs well today may respond differently as droughts
                     become more frequent, temperatures rise, and water
-                    availability changes. The Resilience heatmap in the
-                    Explore Tool examines how management strategies perform
-                    across a range of plausible hydroclimate futures,
-                    representing increasing levels of stress to the water
-                    system. See{" "}
+                    availability changes. The Resilience heatmap in the Explore
+                    Tool examines how management strategies perform across a
+                    range of plausible hydroclimate futures, representing
+                    increasing levels of stress to the water system. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
@@ -2237,18 +2216,17 @@ export const WATER_THEMES: Theme[] = [
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     The Resilience heatmap compares outcomes for Current
-                    operations and Relaxing Delta salinity standards under
-                    the historical hydroclimate and future hydroclimates
+                    operations and Relaxing Delta salinity standards under the
+                    historical hydroclimate and future hydroclimates
                     representing Moderate, Moderate-High, High and Extreme
-                    levels of stress. This relaxed salinity scenario
-                    removes the fall X2 salinity standard, which regulates
-                    how far saline water can move into the Delta during
-                    fall by setting a required location for the
-                    low-salinity zone. Outcomes are categorized as optimal
-                    (green, 1.00 - 1.99), acceptable (blue, 2.00 - 2.99),
-                    at-risk (orange, 3.00 - 3.99), or critical (red, 4.00 -
-                    4.99), with higher numerical values indicating worse
-                    performance.
+                    levels of stress. This relaxed salinity scenario removes the
+                    fall X2 salinity standard, which regulates how far saline
+                    water can move into the Delta during fall by setting a
+                    required location for the low-salinity zone. Outcomes are
+                    categorized as optimal (green, 1.00 - 1.99), acceptable
+                    (blue, 2.00 - 2.99), at-risk (orange, 3.00 - 3.99), or
+                    critical (red, 4.00 - 4.99), with higher numerical values
+                    indicating worse performance.
                   </Typography>
                 </>
               ),
@@ -2257,39 +2235,38 @@ export const WATER_THEMES: Theme[] = [
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Relaxing the fall Delta salinity standard produces
                     relatively small changes in system outcomes under the
-                    historical hydroclimate. All outcomes remain within the
-                    same performance category. Delta freshwater exports
-                    improve slightly, while freshwater for in-Delta uses
-                    falls from an "acceptable" to "at risk" level under the
-                    historical climate.
+                    historical hydroclimate. All outcomes remain within the same
+                    performance category. Delta freshwater exports improve
+                    slightly, while freshwater for in-Delta uses falls from an
+                    &ldquo;acceptable&rdquo; to &ldquo;at risk&rdquo; level
+                    under the historical climate.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Across the hydroclimate futures, many outcomes become
-                    less favorable as the climate becomes more stressful,
-                    but the responses are not always linear. Some outcomes
-                    improve under particular hydroclimates even as overall
-                    climate stress increases. For example, Delta estuary
-                    ecology performs better under the Moderate future than
-                    under historical conditions, for both scenarios. Some
-                    outcomes, including environmental flows, Delta estuary
-                    ecology, Delta exports, freshwater for in-Delta uses,
-                    and winter-run salmon, fall to at-risk or critical
-                    levels with increasing climate stress, while others,
-                    such as community surface water deliveries and
-                    agricultural revenues, remain at acceptable levels.
-                    These patterns show that individual outcomes can
-                    respond differently to the particular combination of
-                    conditions represented by each hydroclimate.
+                    Across the hydroclimate futures, many outcomes become less
+                    favorable as the climate becomes more stressful, but the
+                    responses are not always linear. Some outcomes improve under
+                    particular hydroclimates even as overall climate stress
+                    increases. For example, Delta estuary ecology performs
+                    better under the Moderate future than under historical
+                    conditions, for both scenarios. Some outcomes, including
+                    environmental flows, Delta estuary ecology, Delta exports,
+                    freshwater for in-Delta uses, and winter-run salmon, fall to
+                    at-risk or critical levels with increasing climate stress,
+                    while others, such as community surface water deliveries and
+                    agricultural revenues, remain at acceptable levels. These
+                    patterns show that individual outcomes can respond
+                    differently to the particular combination of conditions
+                    represented by each hydroclimate.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Differences between Current operations and Relaxing
-                    Delta salinity standards generally remain modest across
-                    the hydroclimates examined. In this comparison, changes
-                    associated with the hydroclimate are generally larger
-                    than the differences between the two management
-                    strategies, suggesting that climate has a stronger
-                    influence on overall system performance than relaxing
-                    the fall salinity standard alone.
+                    Differences between Current operations and Relaxing Delta
+                    salinity standards generally remain modest across the
+                    hydroclimates examined. In this comparison, changes
+                    associated with the hydroclimate are generally larger than
+                    the differences between the two management strategies,
+                    suggesting that climate has a stronger influence on overall
+                    system performance than relaxing the fall salinity standard
+                    alone.
                   </Typography>
                 </>
               ),

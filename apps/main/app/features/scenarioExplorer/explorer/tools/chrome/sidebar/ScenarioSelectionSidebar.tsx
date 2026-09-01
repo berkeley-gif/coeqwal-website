@@ -58,7 +58,6 @@ interface ScenarioSelectionSidebarProps {
   onCollapse?: () => void
 }
 
-
 export default function ScenarioSelectionSidebar({
   scenarioColors,
   hoveredInteraction,
@@ -314,37 +313,37 @@ export default function ScenarioSelectionSidebar({
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
                 ...(isSearchActive
                   ? {
-                    "--row-bg": isActive
-                      ? `${accentColor}1A`
-                      : isSearchMatch
-                        ? theme.palette.common.white
-                        : "#faf8f5",
-                    backgroundColor: "var(--row-bg)",
-                    outline: isSearchMatch
-                      ? `1px solid ${theme.palette.blue.bright}`
-                      : "none",
-                  }
+                      "--row-bg": isActive
+                        ? `${accentColor}1A`
+                        : isSearchMatch
+                          ? theme.palette.common.white
+                          : "#faf8f5",
+                      backgroundColor: "var(--row-bg)",
+                      outline: isSearchMatch
+                        ? `1px solid ${theme.palette.blue.bright}`
+                        : "none",
+                    }
                   : {
-                    "--row-bg": isActive
-                      ? theme.palette.background.paper
-                      : hasActiveScenario
-                        ? "#f0eeeb"
-                        : "#faf8f5",
-                    backgroundColor: "var(--row-bg)",
-                  }),
+                      "--row-bg": isActive
+                        ? theme.palette.background.paper
+                        : hasActiveScenario
+                          ? "#f0eeeb"
+                          : "#faf8f5",
+                      backgroundColor: "var(--row-bg)",
+                    }),
                 transition:
                   "background-color 0.2s ease, border-color 0.2s ease, border-left-color 0.2s ease",
                 "&:hover": isSearchActive
                   ? {
-                    "--row-bg": isActive
-                      ? `${accentColor}26`
-                      : theme.palette.background.paper,
-                    backgroundColor: "var(--row-bg)",
-                  }
+                      "--row-bg": isActive
+                        ? `${accentColor}26`
+                        : theme.palette.background.paper,
+                      backgroundColor: "var(--row-bg)",
+                    }
                   : {
-                    "--row-bg": theme.palette.background.paper,
-                    backgroundColor: "var(--row-bg)",
-                  },
+                      "--row-bg": theme.palette.background.paper,
+                      backgroundColor: "var(--row-bg)",
+                    },
               }}
             >
               {singleSelect ? (
@@ -460,9 +459,9 @@ export default function ScenarioSelectionSidebar({
                                 flexShrink: 0,
                                 bgcolor:
                                   tierColors[
-                                  Math.round(
-                                    hoveredInteraction.tierValue!,
-                                  ) as keyof typeof tierColors
+                                    Math.round(
+                                      hoveredInteraction.tierValue!,
+                                    ) as keyof typeof tierColors
                                   ] ?? theme.palette.grey[400],
                               }}
                             />

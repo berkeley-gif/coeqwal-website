@@ -150,15 +150,14 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   const allSectionIds = useMemo(
     () =>
       theme
-        ? [...theme.sections.map((s) => s.id as string), HOW_TO_EXPLORE_FURTHER_ID]
+        ? [
+            ...theme.sections.map((s) => s.id as string),
+            HOW_TO_EXPLORE_FURTHER_ID,
+          ]
         : [],
     [theme],
   )
-  const activeSection = useWhichScrollSection(
-    allSectionIds,
-    scrollContainerRef,
-  )
-
+  const activeSection = useWhichScrollSection(allSectionIds, scrollContainerRef)
 
   // Ref for the tab bar scroll container
   const tabBarRef = useRef<HTMLDivElement>(null)
@@ -366,9 +365,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                           exit={{ opacity: 0 }}
                           transition={{ duration: duration.fast }}
                         >
-                          <Typography
-                            variant="h5"
-                          >
+                          <Typography variant="h5">
                             {theme.label.replace(/\n/g, " ")}
                           </Typography>
                         </motion.div>
@@ -380,9 +377,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                           exit={{ opacity: 0 }}
                           transition={{ duration: duration.fast }}
                         >
-                          <Typography
-                            variant="h3"
-                          >
+                          <Typography variant="h3">
                             {theme.label.replace(/\n/g, " ")}
                           </Typography>
                         </motion.div>
@@ -557,10 +552,9 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                     <Typography variant="body1">
                       Together, the trade-offs, equity, and resilience views
                       show how different water management strategies affect
-                      outcomes across California's water system, how
-                      benefits and impacts are distributed across
-                      locations, and how outcomes may change under
-                      increasing climate stress.
+                      outcomes across California&apos;s water system, how
+                      benefits and impacts are distributed across locations, and
+                      how outcomes may change under increasing climate stress.
                     </Typography>
                     <Typography variant="body1">
                       Visit the{" "}

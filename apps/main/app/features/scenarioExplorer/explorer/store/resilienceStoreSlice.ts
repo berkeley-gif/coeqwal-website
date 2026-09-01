@@ -15,11 +15,7 @@ import {
 import type { ResilienceControlsState } from "./resilienceTypes"
 
 export type { ResilienceControlsState } from "./resilienceTypes"
-export type {
-  ResilienceView,
-  CellEncoding,
-  DeltaMode,
-} from "./resilienceTypes"
+export type { ResilienceView, CellEncoding, DeltaMode } from "./resilienceTypes"
 
 /** Default resilience chart controls (flat store fields use these values on mount) */
 export const DEFAULT_RESILIENCE_CONTROLS: ResilienceControlsState = {

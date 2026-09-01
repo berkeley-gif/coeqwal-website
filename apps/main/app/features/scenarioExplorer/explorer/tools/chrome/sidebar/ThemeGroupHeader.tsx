@@ -26,10 +26,7 @@ export default function ThemeGroupHeader({
   singleSelect = false,
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
-  const {
-    selectedScenarios,
-    selectScenarios,
-  } = useWorkspaceSlice()
+  const { selectedScenarios, selectScenarios } = useWorkspaceSlice()
 
   const themeConfig = THEME_LABEL_CONFIG[themeKey]
   const themeColors = theme.palette.waterThemes[themeKey]
@@ -63,17 +60,17 @@ export default function ThemeGroupHeader({
       sx={{
         ...(isFlex
           ? {
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            px: 1.5,
-            py: 0.5,
-          }
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              px: 1.5,
+              py: 0.5,
+            }
           : {
-            gridColumn: "1 / -1",
-            display: "grid",
-            gridTemplateColumns: "subgrid",
-          }),
+              gridColumn: "1 / -1",
+              display: "grid",
+              gridTemplateColumns: "subgrid",
+            }),
         alignItems: "center",
         minHeight: "24px",
         borderRadius: isFlex ? 0 : "4px",

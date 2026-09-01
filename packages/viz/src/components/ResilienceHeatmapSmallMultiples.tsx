@@ -277,8 +277,9 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
         if (captureMode) {
           return `repeat(${RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS}, 1fr)`
         }
-        const evenSplit = `calc((100% - ${(maxColumns - 1) * TILE_GRID_COLUMN_GAP_PX
-          }px) / ${maxColumns})`
+        const evenSplit = `calc((100% - ${
+          (maxColumns - 1) * TILE_GRID_COLUMN_GAP_PX
+        }px) / ${maxColumns})`
         return `repeat(auto-fit, minmax(max(${minTileWidth}px, ${evenSplit}), 1fr))`
       }, [minTileWidth, maxColumns, captureMode])
 
@@ -325,7 +326,6 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
               alignContent: "start",
             }}
           >
-
             {tiles.map((tile, tileIdx) => {
               const extraActions = renderTileActions?.(tile)
               const hasActions = extraActions != null
@@ -471,15 +471,15 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                       onSquareHover={
                         onSquareHover
                           ? (info) =>
-                            onSquareHover(
-                              info ? { tileId: tile.id, ...info } : null,
-                            )
+                              onSquareHover(
+                                info ? { tileId: tile.id, ...info } : null,
+                              )
                           : undefined
                       }
                       onSquareClick={
                         onSquareClick
                           ? (info) =>
-                            onSquareClick({ tileId: tile.id, ...info })
+                              onSquareClick({ tileId: tile.id, ...info })
                           : undefined
                       }
                     />

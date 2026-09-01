@@ -58,7 +58,7 @@ export type {
   DeltaMode,
   ResilienceControlsState,
 } from "../../../store"
-import type { ResilienceView, DeltaMode } from "../../../store"
+import type { ResilienceView } from "../../../store"
 import {
   useResilienceMatrix,
   type ResilienceHydroclimate,
@@ -97,7 +97,6 @@ import ResiliencePanelChartView, {
 import type { HoveredInteraction } from "../../../useExploreHoverCoordination"
 import { useResilienceHeatmapTheme } from "./useResilienceHeatmapTheme"
 import {
-  transposeCell,
   transposeTile,
   resolveCellRender,
   getMapLinkBlockedMessage,
@@ -241,7 +240,6 @@ export default function ResiliencePanel({
   const resolveScenarioAxisItem = useCallback(
     (sid: string): ResilienceAxisItem => {
       const s = scenarios.find((x) => x.scenarioId === sid)
-      const full = getDisplayName(sid)
       return {
         key: sid,
         label: getDisplayName(sid),
@@ -254,12 +252,8 @@ export default function ResiliencePanel({
     [scenarios, getDisplayName],
   )
 
-  const {
-    showOutcomeOnMap,
-    isOutcomeActive,
-    isMapVisible,
-    activeOutcome,
-  } = useOutcomeMapAction()
+  const { showOutcomeOnMap, isOutcomeActive, isMapVisible, activeOutcome } =
+    useOutcomeMapAction()
 
   // Tier colors, labels, and heatmap chrome palette shared with the
   // Share-tab live thumbnails so the viz stays theme-agnostic without
@@ -371,7 +365,6 @@ export default function ResiliencePanel({
   // cell builders and rebuild the SVG on every parent re-render -
   // observed as a hover-induced infinite render loop on outcomes whose
   // hover sets hoveredSquareHighlight to a non-null value).
-  const loiByCell = loiDistribution.byCell
   const loiBuildEntriesForScope = loiDistribution.buildEntriesForScope
 
   // Scenario-row order (for outcome view): primary baseline first, then
@@ -1556,10 +1549,10 @@ export default function ResiliencePanel({
       const dynamicHeight =
         captureState.kind === "smallMultiples"
           ? computeResiliencePanelSmallMultiplesCaptureHeight({
-            tilesCount: captureState.tiles.length,
-            tileAspect: captureState.tileAspect,
-            rowsCount: captureState.rows.length,
-          })
+              tilesCount: captureState.tiles.length,
+              tileAspect: captureState.tileAspect,
+              rowsCount: captureState.rows.length,
+            })
           : undefined
       const { svg, dataUrl } = await captureResiliencePanelOffscreen({
         state: captureState,
@@ -1637,7 +1630,10 @@ export default function ResiliencePanel({
       // requested scenario is not on screen (the small-multiples grid
       // hides scenarios outside the current selection).
       if (!tile) {
-        if (effectiveView === "scenario" && scenarioRowIdsAll.includes(tileId)) {
+        if (
+          effectiveView === "scenario" &&
+          scenarioRowIdsAll.includes(tileId)
+        ) {
           return await renderSoloScenarioForShare(tileId)
         }
         return null
@@ -1772,9 +1768,10 @@ export default function ResiliencePanel({
     // rotate-to-fit treatment - whenever transpose puts them there:
     // by-hydroclimate view untransposed, or by-outcome view transposed.
     const labelRotation =
-      !transposed && effectiveView === "hydroclimate" ||
-        (transposed && effectiveView === "outcome")
-        ? -90 : 0
+      (!transposed && effectiveView === "hydroclimate") ||
+      (transposed && effectiveView === "outcome")
+        ? -90
+        : 0
     if (hydroclimateColumns.length === 0) return { kind: "noColumns" }
     if (outcomeRowCodes.length === 0 && !outcomeEmpty) {
       return { kind: "noOutcomesSelected" }
