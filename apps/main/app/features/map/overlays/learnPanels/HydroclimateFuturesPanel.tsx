@@ -7,6 +7,7 @@ import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
 import { LinedList } from "@repo/ui"
 import { GlossaryTermLink } from "../../../glossary"
+import { HYDROCLIMATE_DEFS } from "../../../../content/scenarios"
 
 export default function HydroclimateFuturesPanel() {
   const theme = useTheme()
@@ -49,29 +50,11 @@ export default function HydroclimateFuturesPanel() {
         icon={dropletIcon}
         labelVariant="body2"
         sx={{ mt: sp.sm }}
-        items={[
-          {
-            label:
-              "Historical: Temperature, precipitation, and flow patterns reflect historical conditions",
-          },
-          {
-            label:
-              "Moderate climate stress: Slightly warmer and moderately wetter conditions (+3.5% flow change)",
-          },
-          {
-            label:
-              "Moderate-high climate stress: Moderately warmer with little change in precipitation (-1% flow change)",
-          },
-          {
-            label:
-              "High climate stress: Much warmer and moderately drier conditions (-6.5% flow change)",
-          },
-          {
-            label:
-              "Extreme climate stress: Much warmer and much drier conditions (-19.2% flow change)",
-          },
-        ]}
+        items={HYDROCLIMATE_DEFS.map((d) => ({
+          label: `${d.label}: ${d.learnPanelDescription}`,
+        }))}
       />
+
       <Typography variant="body2" color="text.secondary">
         NOTE:
       </Typography>

@@ -789,7 +789,7 @@ const tiersA = allScenariosData?.["s0020"]
 const tiersB = allScenariosData?.["s0021"]
 
 const cwsA = tiersA?.tiers["CWS_DEL"]
-// cwsA.average_score: 2.5      - average tier level (used for sorting scenarios)
+// cwsA.average_score: 2.5      - outcome level (used for sorting scenarios)
 // cwsA.normalized_score: 0.5    - 0-1 normalized (radar plot Y-axis)
 // cwsA.total: 76                - total locations
 // cwsA.data: [                  - tier distribution counts (used in bar chart glyphs)

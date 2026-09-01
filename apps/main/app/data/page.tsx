@@ -1165,11 +1165,12 @@ export default function DataPage() {
           </Container>
         </Box>
         <CenteredTextSection
-          title="Get Involved"
-          id="getInvolved"
-          ariaLabel="get involved"
+          title="Contact Us!"
+          id="contactUs"
+          ariaLabel="Contact Us"
           text="Do you have questions or feedback about our project? 
-                            Would you like to be involved in future phases of this work? Please email: "
+              Would you like to be involved in future phases of this work? 
+              Please contact us: "
           email="coeqwal@berkeley.edu"
         />
       </Box>

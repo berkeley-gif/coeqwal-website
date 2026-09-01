@@ -6,6 +6,7 @@ import React from "react"
 import { type OutcomeCode } from "../../../content/outcomes"
 import { WATER_THEMES } from "../../../content/themes"
 import { GlossaryTermLink } from "../../glossary"
+import { InlineNavLink } from "../../../components/InlineNavLink"
 
 export interface WaterIssueTheme {
   title: string
@@ -14,49 +15,26 @@ export interface WaterIssueTheme {
   dimmed?: boolean
 }
 
+// Card copy is maintained here, independent of the longer theme-panel
+// `description` in content/themes.tsx — this card needs the short
+// "How X..." framing that the theme panel doesn't have.
+const WATER_ISSUE_DESCRIPTIONS: Record<string, string> = {
+  baseline:
+    "How current management of California's water affects communities, agriculture, and the environment",
+  cws: "How people and communities can reliably access safe drinking water for daily life, health, and essential services",
+  ag_gw:
+    "How agricultural water deliveries can sustain food production, while preventing over-draft of groundwater basins",
+  eco: "How rivers and winter-run Chinook salmon receive the flows they need to thrive",
+  delta:
+    "How the Delta can be managed as a place where communities, farms, and ecosystems coexist and thrive",
+}
+
 export const WATER_ISSUE_THEMES: ReadonlyArray<WaterIssueTheme> =
   WATER_THEMES.map((wt) => ({
     title: wt.shortLabel,
-    description: wt.description,
+    description: WATER_ISSUE_DESCRIPTIONS[wt.id] ?? "",
     themeKey: wt.id,
   }))
-
-export interface HydroclimateFuture {
-  title: string
-  description: string
-  dimmed?: boolean
-}
-
-export const HYDROCLIMATES: ReadonlyArray<HydroclimateFuture> = [
-  {
-    title: "Historical hydroclimate (baseline)",
-    description:
-      "Temperature, precipitation, and flow patterns reflect historical conditions, adjusted for recent climate change",
-  },
-  {
-    title: "Moderate-dry climate stress",
-    description:
-      "Slightly warmer and moderately wetter conditions (+3.5% flow change) and assuming 15 cm of sea level rise",
-  },
-  {
-    title: "Moderate-wet climate stress",
-    description:
-      "Moderately warmer with little change in precipitation (-1% flow change) and assuming 15 cm of sea level rise",
-    dimmed: true,
-  },
-  {
-    title: "High climate stress",
-    description:
-      "Much warmer and moderately drier conditions (-6.5% flow change) and assuming 30 cm of sea level rise",
-  },
-  {
-    title: "Extreme climate stress",
-    description:
-      "Much warmer and much drier conditions (-19.2% flow change) and assuming 30 cm of sea level rise",
-    dimmed: true,
-  },
-] as const
-
 export interface KeyOutcome {
   outcomeCode: OutcomeCode
   description: string
@@ -212,5 +190,10 @@ export const CAVEATS: ReadonlyArray<React.ReactNode> = [
   "All hydroclimates use a historical 1922–2021 weather sequence, adjusted to account for recent climate change (for the historical hydroclimate) and adjusted to account for possible climate conditions the state may experience by 2043 (for all future hydroclimates). They do not specifically represent historical observations or predicted future conditions according to climate models.",
   "Estimates of water deliveries to locations of interest with small water demands may be less reliable than deliveries to water users that receive large volumes.",
   "The outcomes of CalSim3 are best interpreted in a comparative manner – evaluating how outcomes change relative to current operations (as a baseline) is more appropriate than assessing the specific outcomes of any particular scenario.",
-  "COEQWAL scenarios are exploratory model runs and are not intended for direct use in legal or regulatory proceedings. Visit ABOUT US to learn how COEQWAL scenarios were developed.",
+  <>
+    COEQWAL scenarios are exploratory model runs and are not intended for direct
+    use in legal or regulatory proceedings. Visit{" "}
+    <InlineNavLink to="/about">About</InlineNavLink> to learn how COEQWAL
+    scenarios were developed.
+  </>,
 ] as const
