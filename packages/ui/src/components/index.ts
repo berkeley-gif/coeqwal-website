@@ -9,6 +9,17 @@ export type {
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { ScrollToButton } from "./navigation/ScrollToButton"
 export { SkipLink } from "./navigation/SkipLink"
+export {
+  WATER_STORIES,
+  WATER_THEMES,
+  getActiveWaterStory,
+  getWaterStoryOptions,
+  getWaterThemeOptions,
+  goToMainAbout,
+  goToMainData,
+  goToMainHome,
+} from "./navigation/baseHeaderLinks"
+export type { WaterStoryKey, WaterThemeKey } from "./navigation/baseHeaderLinks"
 
 // Common components
 export { default as AutoHeight } from "./common/AutoHeight"
@@ -89,10 +100,6 @@ export {
   StorylineOpener,
   Text,
   Visualization,
-  getStorylineWaterThemesOptions,
-  goToMainAbout,
-  goToMainData,
-  goToMainHome,
 } from "./storylines"
 export type {
   ImageCaptionPlacement,

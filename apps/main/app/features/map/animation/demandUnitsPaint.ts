@@ -33,25 +33,14 @@ export const ZOOM_AWARE_BASE_OPACITY: unknown = [
 
 /* Shared outcome-polygon look.
  *
- * Three expressions for the settled outcome polygon: fill recedes on zoom-in,
- * stroke widens and tucks inside the boundary. Applied by
+ * Settled outcome polygons use an opaque fill with a tier-colored inset boundary
+ * so adjacent tier colors retain their full contrast over every basemap. Applied by
  * `OutcomePolygonLayer` (WBA, reservoir, demand-units) and matched by
  * `InteractivePaintArbiter` so the interactive view matches the declarative
  * one. Typed `unknown` so callers cast to their Mapbox expression type. */
 
-/** Fill opacity interpolated across zoom (5 to 10): dense low-zoom fills
- *  stay legible, high-zoom fills recede. */
-export const OUTCOME_FILL_OPACITY: unknown = [
-  "interpolate",
-  ["linear"],
-  ["zoom"],
-  5,
-  0.75,
-  8,
-  0.55,
-  10,
-  0.35,
-]
+/** Fully opaque fill keeps tier differences legible over satellite imagery. */
+export const OUTCOME_FILL_OPACITY: unknown = 1
 
 /** Outline width interpolated across zoom (5 to 11). */
 export const OUTCOME_OUTLINE_WIDTH: unknown = [

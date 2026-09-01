@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { BaseHeader } from "@repo/ui"
+import { BaseHeader, getWaterThemeOptions } from "@repo/ui"
 import { useRouter, usePathname } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
@@ -97,17 +97,17 @@ export function Header() {
     requestAnimationFrame(animateScroll)
   }
 
-  const waterThemesOptions = useMemo(
-    () =>
-      WATER_THEMES.map((wt) => ({
-        key: wt.id,
-        label: wt.label.replace(/\n/g, " "),
-        onClick: () => openThemePanel(wt.id),
-        active: activeThemeKey === wt.id,
-        disabled: wt.sections.length === 0,
-      })),
-    [activeThemeKey, openThemePanel],
-  )
+  const waterThemesOptions = useMemo(() => {
+    const disabledKeys = WATER_THEMES.filter(
+      (theme) => theme.sections.length === 0,
+    ).map((theme) => theme.id)
+
+    return getWaterThemeOptions({
+      activeKey: activeThemeKey,
+      disabledKeys,
+      onThemeClick: openThemePanel,
+    })
+  }, [activeThemeKey, openThemePanel])
 
   return (
     <BaseHeader

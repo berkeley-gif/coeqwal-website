@@ -9,32 +9,17 @@ import type {
   MapCircleAnnotation,
 } from "./components/map/config/locationPresets"
 import {
-  CALIFORNIA_VIEW,
+  CALIFORNIA_TRIBES_VIEW,
   DELTA_INFRASTRUCTURE_VIEW,
   SHASTA_MCCLOUD_VIEW,
 } from "./components/map/config/cameraPresets"
 
 export type { SectionId } from "./components/map/config/sectionConfig"
 
-export type CentralValleyIcon =
-  | "/map-icons/ag/water-user-ag-01.svg"
-  | "/map-icons/ag/water-user-ag-02.svg"
-  | "/map-icons/ag/water-user-ag-03.svg"
-  | "/map-icons/ag/water-user-ag-06.svg"
-  | "/map-icons/ag/water-user-ag-08.svg"
-export type UrbanIcon =
-  | "/map-icons/urban/water_user_urban-01.svg"
-  | "/map-icons/urban/water_user_urban-02.svg"
-  | "/map-icons/urban/water_user_urban-03.svg"
-export type WetlandIcon =
-  | "/map-icons/wetland/water_user_wetland-01.svg"
-  | "/map-icons/wetland/water_user_wetland-02.svg"
-  | "/map-icons/wetland/water_user_wetland-03.svg"
-export type SalmonIcon =
-  | "/map-icons/salmon/salmon_adult.svg"
-  | "/map-icons/salmon/salmon_jump.svg"
-  | "/map-icons/salmon/salmon_juvenile.svg"
-  | "/map-icons/salmon/salmon_simple.svg"
+export type CentralValleyIcon = "/map-icons/agriculture.svg"
+export type UrbanIcon = "/map-icons/urban.svg"
+export type WetlandIcon = "/map-icons/wetland.svg"
+export type SalmonIcon = "/map-icons/salmon.svg"
 
 interface AppState {
   activeSection: SectionId
@@ -45,7 +30,9 @@ interface AppState {
   yubaRiverProgress: number
   backgroundProgress: number
   infrastructureProgress: number
+  climateResilienceProgress: number
   transparencyProgress: number
+  conclusionProgress: number
   centralValleyIcon: CentralValleyIcon
   urbanIcon: UrbanIcon
   wetlandIcon: WetlandIcon
@@ -62,19 +49,25 @@ const initialState: AppState = {
   yubaRiverProgress: 0,
   backgroundProgress: 0,
   infrastructureProgress: 0,
+  climateResilienceProgress: 0,
   transparencyProgress: 0,
-  centralValleyIcon: "/map-icons/ag/water-user-ag-06.svg",
-  urbanIcon: "/map-icons/urban/water_user_urban-01.svg",
-  wetlandIcon: "/map-icons/wetland/water_user_wetland-01.svg",
-  salmonIcon: "/map-icons/salmon/salmon_adult.svg",
-  showMapIconStrokes: false,
+  conclusionProgress: 0,
+  centralValleyIcon: "/map-icons/agriculture.svg",
+  urbanIcon: "/map-icons/urban.svg",
+  wetlandIcon: "/map-icons/wetland.svg",
+  salmonIcon: "/map-icons/salmon.svg",
+  showMapIconStrokes: true,
 }
 
 const EMPTY_LOCATION_LABELS: LocationLabel[] = []
 const EMPTY_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = []
-const GOLD_RUSH_CAMERA_PROGRESS = 0.12
+export const HISTORICAL_CONTEXT_RIVERS_PROGRESS = 0.3
+export const HISTORICAL_CONTEXT_MCCLOUD_PROGRESS = 0.44
+export const HISTORICAL_CONTEXT_CLOSING_PROGRESS = 0.72
+export const HISTORICAL_CONTEXT_CURRENT_TERRITORIES_PROGRESS =
+  HISTORICAL_CONTEXT_CLOSING_PROGRESS +
+  (1 - HISTORICAL_CONTEXT_CLOSING_PROGRESS) * 0.4
 export const INFRASTRUCTURE_DELTA_PROGRESS = 0.66
-export const INFRASTRUCTURE_DELTA_PIPES_PROGRESS = 0.78
 
 const SECTION_ORDER: Record<SectionId, number> = {
   Opener: 0,
@@ -129,8 +122,14 @@ export const appActions = {
   setInfrastructureProgress: (progress: number) =>
     useStoryStore.setState({ infrastructureProgress: progress }),
 
+  setClimateResilienceProgress: (progress: number) =>
+    useStoryStore.setState({ climateResilienceProgress: progress }),
+
   setTransparencyProgress: (progress: number) =>
     useStoryStore.setState({ transparencyProgress: progress }),
+
+  setConclusionProgress: (progress: number) =>
+    useStoryStore.setState({ conclusionProgress: progress }),
 
   setCentralValleyIcon: (icon: CentralValleyIcon) =>
     useStoryStore.setState({ centralValleyIcon: icon }),
@@ -170,8 +169,12 @@ export const useBackgroundProgress = () =>
   useStoryStore((state) => state.backgroundProgress)
 export const useInfrastructureProgress = () =>
   useStoryStore((state) => state.infrastructureProgress)
+export const useClimateResilienceProgress = () =>
+  useStoryStore((state) => state.climateResilienceProgress)
 export const useTransparencyProgress = () =>
   useStoryStore((state) => state.transparencyProgress)
+export const useConclusionProgress = () =>
+  useStoryStore((state) => state.conclusionProgress)
 export const useCentralValleyIcon = () =>
   useStoryStore((state) => state.centralValleyIcon)
 export const useUrbanIcon = () => useStoryStore((state) => state.urbanIcon)
@@ -207,17 +210,24 @@ export const useCircleAnnotations = () =>
 export const useCameraView = () =>
   useStoryStore((state) => {
     if (
-      state.activeSection === "Background" &&
-      state.backgroundProgress >= 0.84
+      state.activeSection === "HistoricalContext" &&
+      state.historicalContextProgress >= HISTORICAL_CONTEXT_CLOSING_PROGRESS
     ) {
-      return SHASTA_MCCLOUD_VIEW
+      return CALIFORNIA_TRIBES_VIEW
     }
 
     if (
-      state.activeSection === "GoldRush" &&
-      state.goldRushProgress < GOLD_RUSH_CAMERA_PROGRESS
+      state.activeSection === "HistoricalContext" &&
+      state.historicalContextProgress < HISTORICAL_CONTEXT_MCCLOUD_PROGRESS
     ) {
-      return CALIFORNIA_VIEW
+      return CALIFORNIA_TRIBES_VIEW
+    }
+
+    if (
+      state.activeSection === "HistoricalContext" &&
+      state.historicalContextProgress >= HISTORICAL_CONTEXT_MCCLOUD_PROGRESS
+    ) {
+      return SHASTA_MCCLOUD_VIEW
     }
 
     if (

@@ -5,8 +5,15 @@ import { Marker } from "@repo/map"
 import { motion } from "@repo/motion"
 import { dams } from "@repo/data"
 import { Box, Typography } from "@repo/ui/mui"
-import { useActiveSectionStore } from "../../../store"
-import { InfrastructureColor } from "../../helpers/colorPalette"
+import {
+  INFRASTRUCTURE_DELTA_PROGRESS,
+  useActiveSectionStore,
+} from "../../../store"
+import {
+  InfrastructureColor,
+  InfrastructureOutlineColor,
+  InfrastructureOutlineOpacity,
+} from "../../helpers/colorPalette"
 
 type DamFeature = {
   type: "Feature"
@@ -69,7 +76,9 @@ function readDamMarkers(): DamMarker[] {
 
 export default function DamChronologyLayer({ progress }: { progress: number }) {
   const activeSection = useActiveSectionStore()
-  const visible = activeSection === "Infrastructure"
+  const visible =
+    activeSection === "Infrastructure" &&
+    progress < INFRASTRUCTURE_DELTA_PROGRESS
   const markers = useMemo(() => readDamMarkers(), [])
   const yearRange = useMemo(() => {
     const years = markers.map((marker) => marker.year)
@@ -87,11 +96,13 @@ export default function DamChronologyLayer({ progress }: { progress: number }) {
   )
   const currentYear =
     yearRange.min + revealProgress * (yearRange.max - yearRange.min)
+  const currentDecade = Math.floor(currentYear / 10) * 10
 
   return (
     <>
       {markers.map((marker) => {
-        if (marker.year > currentYear) return null
+        const builtDecade = Math.floor(marker.year / 10) * 10
+        if (builtDecade > currentDecade) return null
 
         const size = Math.max(
           12,
@@ -123,13 +134,13 @@ export default function DamChronologyLayer({ progress }: { progress: number }) {
                 transition={{ duration: 0.35, ease: "easeOut" }}
                 style={{
                   display: "block",
-                  filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35))",
                 }}
               >
                 <polygon
                   points={`${size / 2},0 ${size},${height} 0,${height}`}
                   fill={InfrastructureColor}
-                  stroke="#fcfbfa"
+                  stroke={InfrastructureOutlineColor}
+                  strokeOpacity={InfrastructureOutlineOpacity}
                   strokeWidth="1"
                 />
               </motion.svg>
@@ -155,7 +166,7 @@ export default function DamChronologyLayer({ progress }: { progress: number }) {
           pointerEvents: "none",
         }}
       >
-        Dam construction through {Math.floor(currentYear)}
+        Dam construction through the {currentDecade}s
       </Typography>
     </>
   )

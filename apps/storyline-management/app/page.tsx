@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 import {
   BaseHeader,
-  getStorylineWaterThemesOptions,
+  getWaterThemeOptions,
   goToMainAbout,
   goToMainData,
   goToMainHome,
@@ -11,7 +11,7 @@ import {
 import { Box } from "@repo/ui/mui"
 
 export default function ManagementContainer() {
-  const waterThemesOptions = useMemo(() => getStorylineWaterThemesOptions(), [])
+  const waterThemesOptions = useMemo(() => getWaterThemeOptions(), [])
 
   return (
     <>

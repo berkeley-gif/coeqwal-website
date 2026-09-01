@@ -204,6 +204,9 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@repo/viz':
+        specifier: workspace:*
+        version: link:../../packages/viz
       d3:
         specifier: ^7.8.5
         version: 7.9.0

@@ -17,7 +17,7 @@ export const BACKGROUND_RIVER_LABELS: LocationLabel[] = [
   {
     id: "sacramento-river",
     name: "Sacramento River",
-    latitude: 39.0,
+    latitude: 39.6,
     longitude: -121.78,
   },
   {
@@ -37,36 +37,43 @@ export const SHASTA_MCCLOUD_RIVER_LABELS: LocationLabel[] = [
   },
 ]
 
+export const YUBA_RIVER_LABEL: LocationLabel = {
+  id: "yuba-river",
+  name: "Yuba River",
+  latitude: 39.08,
+  longitude: -121.5,
+}
+
 export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   {
     id: "central-valley-agriculture",
-    name: "Central Valley",
-    latitude: 37.52,
-    longitude: -120.18,
+    name: "",
+    latitude: 36.72,
+    longitude: -119.58,
     color: "#f2f0ef",
-    revealAt: 0.25,
-    iconSrc: "/map-icons/ag/water-user-ag-06.svg",
+    revealAt: 0.2,
+    iconSrc: "/map-icons/agriculture.svg",
     labelPosition: "above",
   },
   {
     id: "bay-area-city",
     name: "Bay Area",
     latitude: 37.78,
-    longitude: -122.42,
+    longitude: -123.2,
     color: "#f2f0ef",
-    revealAt: 0.4,
-    iconSrc: "/map-icons/urban/water_user_urban-01.svg",
+    revealAt: 0.32,
+    iconSrc: "/map-icons/urban.svg",
     offset: [-24, 10],
     labelPosition: "above",
   },
   {
     id: "los-angeles-city",
     name: "Los Angeles",
-    latitude: 34.55,
-    longitude: -119.14,
+    latitude: 33.3,
+    longitude: -119.2,
     color: "#f2f0ef",
-    revealAt: 0.4,
-    iconSrc: "/map-icons/urban/water_user_urban-01.svg",
+    revealAt: 0.32,
+    iconSrc: "/map-icons/urban.svg",
     labelPosition: "above",
   },
   {
@@ -75,8 +82,8 @@ export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
     latitude: 38.04,
     longitude: -121.62,
     color: "#f2f0ef",
-    revealAt: 0.54,
-    iconSrc: "/map-icons/wetland/water_user_wetland-01.svg",
+    revealAt: 0.46,
+    iconSrc: "/map-icons/wetland.svg",
     offset: [18, -8],
   },
   {
@@ -85,7 +92,7 @@ export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
     latitude: 40.72,
     longitude: -122.42,
     color: "#f2f0ef",
-    revealAt: 0.54,
-    iconSrc: "/map-icons/salmon/salmon_adult.svg",
+    revealAt: 0.46,
+    iconSrc: "/map-icons/salmon.svg",
   },
 ]
