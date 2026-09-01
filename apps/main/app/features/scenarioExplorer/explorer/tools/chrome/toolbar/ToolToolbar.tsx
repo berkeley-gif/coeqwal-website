@@ -139,16 +139,6 @@ export default function ToolToolbar({
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Typography
-                  variant="dashboard"
-                  sx={{
-                    fontWeight: 500,
-                    color: theme.palette.text.primary,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  View by hydroclimate
-                </Typography>
                 <InfoIconButton
                   tooltipContent={
                     <>
@@ -166,6 +156,17 @@ export default function ToolToolbar({
                   }
                   placement="right"
                 />
+                <Typography
+                  variant="dashboard"
+                  sx={{
+                    fontWeight: 500,
+                    color: theme.palette.text.primary,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  View by hydroclimate
+                </Typography>
+
               </Box>
               <HydroclimateChooser
                 layout="horizontal"
