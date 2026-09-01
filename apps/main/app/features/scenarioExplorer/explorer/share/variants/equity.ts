@@ -107,7 +107,7 @@ const equityHandler: VariantHandler<EquityItem> = {
       toolLabel: "Distribution",
       title: info?.description ?? info?.name ?? item.scenarioId,
       standardTitle: toolFigureTitle({
-        toolName: "Outcome distribution",
+        toolName: "Distribution view",
         memberSummary: info?.description ?? info?.name ?? item.scenarioId,
         hydroclimateLabel:
           HYDROCLIMATE_SHORT_LABELS[item.hydroclimate] ?? item.hydroclimate,

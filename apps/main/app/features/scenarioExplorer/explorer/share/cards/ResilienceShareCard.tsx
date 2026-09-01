@@ -99,10 +99,10 @@ export default function ResilienceShareCard({
       figureFooter={shareFigureFooter(item)}
       thumbnailAspectRatio={thumbnailAspectRatioFor(item)}
       id={item.id}
-      toolLabel="Resilience"
+      toolLabel="Heatmap"
       title={model.headline}
       standardTitle={toolFigureTitle({
-        toolName: "Resilience heatmap",
+        toolName: "Heatmap",
         memberSummary: model.headline,
       })}
       scenarioDefinition={model.scenarioDefinition}

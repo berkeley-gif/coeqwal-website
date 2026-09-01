@@ -455,8 +455,8 @@ test("toolFigureTitle builds the standardized line for the non-data tools", () =
   // inventing one.
   expect(
     toolFigureTitle({
-      toolName: "Resilience heatmap",
+      toolName: "Heatmap",
       memberSummary: "4 scenarios",
     }),
-  ).toBe("Resilience Heatmap, 4 Scenarios")
+  ).toBe("Heatmap, 4 Scenarios")
 })
