@@ -89,10 +89,10 @@ test("salmon sentence enumerates every compared climate member", () => {
 test("salmon sentence does not double the word climate for climate-named holds", () => {
   const s = summarySentence([member("Current Operations", [0.4, 0.5], true)], {
     ...salmonCtx,
-    climateName: "Moderate-wet climate",
+    climateName: "Moderate climate",
   })
   expect(s).toBe(
-    "Winter-run Chinook salmon for Current Operations under the Moderate-wet climate occupy 45% of suitable spawning habitat, at the median.",
+    "Winter-run Chinook salmon for Current Operations under the Moderate climate occupy 45% of suitable spawning habitat, at the median.",
   )
 })
 

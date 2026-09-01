@@ -266,7 +266,7 @@ test("switching the workspace hydroclimate keeps the scenarios axis live", async
   // whole card to sample data on a climate change and drew an invented curve
   // for the unmodeled scenario under a "Sample data" badge.
   await page
-    .getByRole("button", { name: /Moderate-wet climate stress/ })
+    .getByRole("button", { name: /Moderate climate stress/ })
     .first()
     .click()
 
