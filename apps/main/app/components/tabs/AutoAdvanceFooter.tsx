@@ -49,7 +49,6 @@ export default function AutoAdvanceFooter() {
     navigateToTab(nxt)
   }
 
-
   const tab = TABS.find((t) => t.key === activeTab)
   return (
     <div
@@ -80,9 +79,7 @@ export default function AutoAdvanceFooter() {
             </ButtonCta>
           ))}
         {activeTab === "learn" && (
-          <ButtonCta onClick={onAdvance}>
-            Explore COEQWAL scenarios
-          </ButtonCta>
+          <ButtonCta onClick={onAdvance}>Explore COEQWAL scenarios</ButtonCta>
         )}
         {activeTab === "explore" && (
           <ButtonCta onClick={onAdvance}>Share your findings</ButtonCta>

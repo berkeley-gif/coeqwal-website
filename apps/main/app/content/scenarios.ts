@@ -157,7 +157,6 @@ export const HYDROCLIMATE_DEFS = [
   },
 ] as const satisfies readonly HydroclimateDef[]
 
-
 /** A supported hydroclimate value, for example "historical". */
 export type Hydroclimate = (typeof HYDROCLIMATE_DEFS)[number]["value"]
 

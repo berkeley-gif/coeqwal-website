@@ -191,11 +191,9 @@ export const CAVEATS: ReadonlyArray<React.ReactNode> = [
   "Estimates of water deliveries to locations of interest with small water demands may be less reliable than deliveries to water users that receive large volumes.",
   "The outcomes of CalSim3 are best interpreted in a comparative manner – evaluating how outcomes change relative to current operations (as a baseline) is more appropriate than assessing the specific outcomes of any particular scenario.",
   <>
-    COEQWAL scenarios are exploratory model runs and are not intended for direct use in legal or regulatory proceedings. Visit
-    {" "}<InlineNavLink to="/about">
-      About
-    </InlineNavLink>{" "}
-    to learn how COEQWAL scenarios were developed.
-  </>
-
+    COEQWAL scenarios are exploratory model runs and are not intended for direct
+    use in legal or regulatory proceedings. Visit{" "}
+    <InlineNavLink to="/about">About</InlineNavLink> to learn how COEQWAL
+    scenarios were developed.
+  </>,
 ] as const
