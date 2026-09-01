@@ -46,7 +46,7 @@ export const DATA_TOUR: TourStep[] = [
     anchorId: "data.compareBy",
     eyebrow: "arrange the chart",
     title: "Choose one comparison axis",
-    body: "Compare your selected scenarios, compare hydroclimates for a single scenario, or compare locations. Whichever you pick, the other dimensions are held constant by the selectors beside this control.",
+    body: "Compare your selected scenarios, compare climate futures for a single scenario, or compare locations. Whichever you pick, the other dimensions are held constant by the selectors beside this control.",
     placement: "bottom-start",
   },
   {

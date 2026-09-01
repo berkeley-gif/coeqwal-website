@@ -7,7 +7,7 @@
  * are held constant by the pinned selectors:
  *  - scenarios: the workspace scenario selection (Current Operations locked
  *    first as the reference), at a pinned location.
- *  - climates: a multi-select of hydroclimates, for one pinned scenario and
+ *  - climates: a multi-select of climate futures, for one pinned scenario and
  *    location.
  *  - locations: a multi-select of locations, for one pinned scenario.
  * Scenario membership is owned by the workspace (the selection sidebar); this
@@ -67,7 +67,7 @@ const climateLabel = (id: string) => HYDROCLIMATE_SHORT_LABELS[id] ?? id
 
 const COMPARE_OPTIONS: { value: DataCompareBy; label: string }[] = [
   { value: "scenarios", label: "Scenarios" },
-  { value: "climates", label: "Hydroclimates" },
+  { value: "climates", label: "Climate futures" },
   { value: "locations", label: "Locations" },
 ]
 
@@ -351,7 +351,7 @@ export default function CompareControls() {
                 color: theme.palette.grey[600],
               }}
             >
-              Hydroclimates
+              Climate futures
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
               {HYDROCLIMATES.map((c) => {

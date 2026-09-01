@@ -42,11 +42,11 @@ test("buildFigureTitle omits absent parts without dangling separators", () => {
   expect(
     buildFigureTitle({
       variableName: "Delta outflow volume",
-      memberSummary: "2 hydroclimates",
+      memberSummary: "2 climate futures",
       waterYearTypeLabels: ["Wet", "Above normal", "Dry"],
     }),
   ).toBe(
-    "Delta Outflow Volume, 2 Hydroclimates, Wet, Above Normal and Dry Water Years",
+    "Delta Outflow Volume, 2 Climate Futures, Wet, Above Normal and Dry Water Years",
   )
 })
 

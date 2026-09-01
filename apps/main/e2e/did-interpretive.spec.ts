@@ -62,7 +62,7 @@ test("salmon sentence lists compared scenarios by their own occupancy", () => {
   )
 })
 
-test("salmon sentence ranges across compared hydroclimates", () => {
+test("salmon sentence ranges across compared climate futures", () => {
   const s = summarySentence(
     [member("Historical", [0.4, 0.5]), member("2070 hotter-drier", [0.3, 0.4])],
     { ...salmonCtx, compareBy: "climates" },

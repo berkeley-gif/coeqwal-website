@@ -607,7 +607,7 @@ export interface DataFigureTitleInput {
 /**
  * Compose the standardized figure title for the data-in-depth card: the
  * compared axis is summarized (single member label, or "<n> scenarios" /
- * "<n> hydroclimates" / "<n> locations") and the held axes fill the
+ * "<n> climate futures" / "<n> locations") and the held axes fill the
  * scenario, hydroclimate, and location slots.
  */
 export function dataFigureTitle(input: DataFigureTitleInput): string {
@@ -623,7 +623,7 @@ export function dataFigureTitle(input: DataFigureTitleInput): string {
     : `${input.climateName} hydroclimate`
   const hydroclimateName =
     input.compareBy === "climates"
-      ? (single ?? `${input.memberCount} hydroclimates`)
+      ? (single ?? `${input.memberCount} climate futures`)
       : heldClimateTitle
   const locationName =
     input.compareBy === "locations"

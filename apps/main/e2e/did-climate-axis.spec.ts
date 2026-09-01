@@ -64,7 +64,7 @@ function reservoirPayload(id: string) {
   }
 }
 
-test("hydroclimates axis fetches each hydroclimate variant and goes live", async ({
+test("climate futures axis fetches each hydroclimate variant and goes live", async ({
   page,
 }) => {
   const errors = collectConsoleErrors(page)
@@ -109,7 +109,7 @@ test("hydroclimates axis fetches each hydroclimate variant and goes live", async
   // The behavior under test: switching to the climate-futures axis keeps the
   // card live, renders one member per hydroclimate, and fetches every
   // variant id exactly as resolved from the sibling group.
-  await page.getByRole("button", { name: "Hydroclimates" }).click()
+  await page.getByRole("button", { name: "Climate futures" }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect(page.getByText(/^Sample data$/)).not.toBeVisible()
   for (const label of [
