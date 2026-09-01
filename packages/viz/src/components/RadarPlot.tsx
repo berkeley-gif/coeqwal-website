@@ -190,28 +190,6 @@ const AXIS_DETAIL_DISMISS_MS = 500
 const FONT_FAMILY =
   '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif'
 
-const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
-  "Community surface water": ["Community surface", "water"],
-  "Agricultural revenue": ["Agricultural", "revenue"],
-  "Environmental flows": ["Environmental", "flows"],
-  "Reservoir storage": ["Reservoir", "storage"],
-  "Groundwater storage": ["Groundwater", "storage"],
-  "Delta estuary ecology": ["Delta estuary", "ecology"],
-  "Freshwater for Delta exports": ["Freshwater for", "Delta exports"],
-  "Freshwater for in-Delta uses": ["Freshwater for", "in-Delta uses"],
-  "Winter-run salmon": ["Winter-run", "salmon"],
-  "NOD: Community deliveries": ["NOD:", "Community deliveries"],
-  "SOD: Community deliveries": ["SOD:", "Community deliveries"],
-  "NOD: Agricultural revenue": ["NOD:", "Agricultural revenue"],
-  "SOD: Agricultural revenue": ["SOD:", "Agricultural revenue"],
-  "NOD: Environmental flows": ["NOD:", "Environmental flows"],
-  "SOD: Environmental flows": ["SOD:", "Environmental flows"],
-  "NOD: Reservoir storage": ["NOD:", "Reservoir storage"],
-  "SOD: Reservoir storage": ["SOD:", "Reservoir storage"],
-  "NOD: Groundwater storage": ["NOD:", "Groundwater storage"],
-  "SOD: Groundwater storage": ["SOD:", "Groundwater storage"],
-}
-
 /** Simple deterministic hash: scenario ID -> stable integer */
 function stableHash(s: string): number {
   let h = 0
@@ -1939,6 +1917,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         palette,
         interactive,
         animate,
+        labelBreaks,
       ],
     )
 
