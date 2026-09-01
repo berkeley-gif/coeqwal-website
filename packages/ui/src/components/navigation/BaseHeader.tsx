@@ -86,12 +86,6 @@ import {
  * ======================================== */
 const MotionAppBar = motion.create(AppBar)
 
-// Mobile breakpoint - below this width, show hamburger menu
-const MOBILE_BREAKPOINT = 900
-// Below this width, MobileNotSupported blocks /learn, /explore, /share.
-// Keep the Get Started / Tools drawer links in sync with that gate so
-// they never link to a page the user can't actually load.
-const TABS_BREAKPOINT = 600
 // WCAG: Minimum touch target size (44x44px)
 const MIN_TOUCH_TARGET = 44
 // ID for drawer (used by aria-controls)
@@ -283,11 +277,13 @@ export function BaseHeader({
   /* ========================================
    * RESPONSIVE & MOTION PREFERENCES
    * ======================================== */
-  const isMobile = useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-  const isWideDesktop = useMediaQuery("(min-width: 1200px)")
-  const tabsUnavailable = useMediaQuery(
-    `(max-width: ${TABS_BREAKPOINT - 1}px)`,
-  )
+  // Hamburger menu below "md" (theme.breakpoints.values.md, 900px)
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
+  const isWideDesktop = useMediaQuery(theme.breakpoints.up("lg"))
+  // Below "sm" (600px), MobileNotSupported blocks /learn, /explore, /share.
+  // Keep the Get Started / Tools drawer links in sync with that gate so
+  // they never link to a page the user can't actually load.
+  const tabsUnavailable = useMediaQuery(theme.breakpoints.down("sm"))
   // WCAG 2.3.3: Respect user's motion preferences
   const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -928,8 +924,6 @@ export function BaseHeader({
                     />
                   </ListItemButton>
                 </ListItem>
-
-                <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
               </>
             )}
 
