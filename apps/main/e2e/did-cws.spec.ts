@@ -193,11 +193,9 @@ test("cws variables fetch their per-variable measures and go live", async ({
 
   // "Surface water deliveries" also exists in the Agricultural water sector,
   // so scope to the list that carries the unique "Municipal supply shortages".
-  const cwsList = page
-    .getByRole("list")
-    .filter({
-      has: page.getByRole("button", { name: "Municipal supply shortages" }),
-    })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
 
   // Deliveries: the default pinned location is the group's first entry
   // (All North of Delta) -> subject NOD_CWS, measure delivery.
@@ -292,11 +290,9 @@ test("cws variables disable the water-year-type row and never send wyt", async (
 
   // "Surface water deliveries" also exists in the Agricultural water sector,
   // so scope to the list that carries the unique "Municipal supply shortages".
-  const cwsList = page
-    .getByRole("list")
-    .filter({
-      has: page.getByRole("button", { name: "Municipal supply shortages" }),
-    })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
 
   const expectChipsNotApplicable = async () => {
     await expect(
@@ -367,11 +363,9 @@ test("cws systems are pickable per measure family and pins carry over only when 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  const cwsList = page
-    .getByRole("list")
-    .filter({
-      has: page.getByRole("button", { name: "Municipal supply shortages" }),
-    })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
@@ -475,11 +469,9 @@ test("cws deliveries drop the partial calendar years and export calendar-year ro
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  const cwsList = page
-    .getByRole("list")
-    .filter({
-      has: page.getByRole("button", { name: "Municipal supply shortages" }),
-    })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
@@ -528,11 +520,9 @@ test("a subject absent from a served block is reported as no data, not sample", 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  const cwsList = page
-    .getByRole("list")
-    .filter({
-      has: page.getByRole("button", { name: "Municipal supply shortages" }),
-    })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
@@ -559,11 +549,9 @@ test("welfare loss reads the welfare_loss measure and displays millions of dolla
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  const cwsList = page
-    .getByRole("list")
-    .filter({
-      has: page.getByRole("button", { name: "Municipal supply shortages" }),
-    })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
   await cwsList.getByRole("button", { name: "Welfare loss" }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
@@ -620,11 +608,9 @@ test("surface water delivery shortage derives 100 minus percent met from the ser
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  const cwsList = page
-    .getByRole("list")
-    .filter({
-      has: page.getByRole("button", { name: "Municipal supply shortages" }),
-    })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
 
   await cwsList
     .getByRole("button", { name: "Surface water delivery shortage" })
