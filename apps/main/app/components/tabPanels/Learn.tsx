@@ -271,14 +271,14 @@ export default function LearnPanel() {
           }}
         >
           <Typography variant="h3" sx={{ maxWidth: "66%" }}>
-            Do you know that California has one of the most complex water
-            systems in the world?
+            Want to learn more about California water? 
           </Typography>
           <Box sx={{ mt: theme.space.listGap.sm }}>
             <Typography
               variant="body1"
               sx={{ maxWidth: "75%", mt: theme.space.listGap.sm }}
             >
+              Do you know that California has one of the most complex water systems in the world?
               Learn about how water flows through California’s Central Valley,
               how the state’s history influenced who has access to water today,
               and the ways in which climate change is affecting our water
