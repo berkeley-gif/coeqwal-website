@@ -128,7 +128,7 @@ export const SECTION_LABELS: Record<SubSectionId, string> = {
   hydroclimates: "Hydroclimates",
   "key-outcomes": "Key outcomes",
   "outcomes-viz": "Visualizing outcomes",
-  "data-in-depth-intro": "Data in depth intro",
+  "data-in-depth-intro": "Data-in-depth",
   "interpreting-outcomes": "Interpreting outcomes",
   "choosing-scenarios": "Choosing scenarios",
   "before-exploring": "Before exploring",
