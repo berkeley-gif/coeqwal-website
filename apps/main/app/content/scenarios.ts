@@ -118,7 +118,7 @@ export const HYDROCLIMATE_DEFS = [
   {
     value: "ecv",
     apiId: 7,
-    label: "Moderate-wet climate stress",
+    label: "Moderate climate stress",
     shortLabel: "Moderate stress",
     description:
       "Slightly warmer and moderately wetter conditions (+3.5% flow change) and assuming 15 cm of sea level rise",
@@ -128,7 +128,7 @@ export const HYDROCLIMATE_DEFS = [
   {
     value: "cc50",
     apiId: 3,
-    label: "Moderate-dry climate stress",
+    label: "Moderate-high climate stress",
     shortLabel: "Moderate-high stress",
     description:
       "Moderately warmer with little change in precipitation (-1% flow change) and assuming 15 cm of sea level rise",
