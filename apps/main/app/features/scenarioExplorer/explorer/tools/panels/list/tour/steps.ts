@@ -13,7 +13,7 @@ import type { TourStep } from "../../../tour/types"
 
 export const LIST_TOUR: TourStep[] = [
   {
-    id: "list.hero",
+    id: "list.hero", // edit this 
     eyebrow: "START HERE",
     title: "Start here",
     body: "If this is your first time using the Explore Tool, we recommend visiting the Get Started section of the site before beginning your exploration.",
@@ -21,85 +21,91 @@ export const LIST_TOUR: TourStep[] = [
 
   // Orientation + details for the scenario-list controls band.
   {
-    id: "list.step0.scenarioArea",
-    anchorId: "list.scenarioArea",
-    eyebrow: "HOME VIEW",
+    id: "list.step0.scenarioArea", // edit this
+    anchorId: "list.scenarioArea", // edit this
+    eyebrow: "home view",
     title: "These controls tune the scenario list below",
     body: "The Home view displays the list of all scenarios that can be explored.",
-    placement: "bottom-start",
+    placement: "bottom-start", // edit this
   },
   {
-    id: "list.step1.search",
-    anchorId: "list.toolbar.search",
-    eyebrow: "arrange the list",
-    title: "Search",
-    body: "Type here to optionally filter scenarios. Use the x to clear the field and bring the full set back.",
-    placement: "bottom-start",
+    id: "list.step1.search", // edit this
+    anchorId: "list.toolbar.search", // edit this
+    eyebrow: "select",
+    title: "Select a scenario of interest",
+    body: "Select scenarios of interest by checking the box on the left.",
+    placement: "bottom-start", // edit this
   },
   {
-    id: "list.step1.chips",
-    anchorId: "list.toolbar.chips",
-    eyebrow: "arrange the list",
-    title: "Chips",
-    body: "Use these toggles to show definitions, baselines, key operations, selected rows only, and group by theme. Each one changes what appears in the list.",
-    placement: "bottom-start",
+    id: "list.step1.chips", // edit this
+    anchorId: "list.toolbar.chips", // edit this
+    eyebrow: "search",
+    title: "Type in key words to search for a scenario of interest",
+    body: "The search words will filter scenarios. Use the x to clear the field and bring the full list back.",
+    placement: "bottom-start", // edit this
   },
   {
-    id: "list.step1.themeFilterChip",
-    eyebrow: "arrange the list",
-    title: "Filtering shows a removable chip",
-    body: "Click a scenario's theme badge to filter the list to that theme, or select any scenarios to reveal a Clear all chip. Both appear next to the chips above and let you back out of a filter in one click.",
+    id: "list.step1.themeFilterChip", // edit this
+    anchorId: "list.toolbar.themeFilterChip", // edit this
+    eyebrow: "refine the list",
+    title: "These controls refine the scenario list below",
+    body: "Click the buttons to filter or rearrange the scenario list.",
+    placement: "bottom-start", // edit this
   },
   {
-    id: "list.step3.showOnlyChosen",
-    anchorId: "list.select.showOnlyChosen",
-    eyebrow: "arrange the list",
-    title: "Selected only turns a long list into a working table",
-    body: "Once selected scenario listings are checked, you can hide the rest so the shortlist becomes easier to compare.",
-    placement: "bottom",
+    id: "list.step3.showOnlyChosen", // edit this
+    anchorId: "list.select.showOnlyChosen", // edit this
+    eyebrow: "definitions",
+    title: "The definitions button displays the detailed description of the scenario",
+    body: "Click to display or hide the text.",
+    placement: "bottom", // edit this
   },
   {
-    id: "list.step1.operations",
-    anchorId: "list.toolbar.keyOperationsChip",
-    eyebrow: "arrange the list",
-    title: "Key operations",
-    body: "Toggle key operations to add a column of icons that summarize the key operations of each scenario.",
-    placement: "bottom-start",
+    id: "list.step1.operations", // edit this
+    anchorId: "list.toolbar.keyOperationsChip", // edit this
+    eyebrow: "baselines",
+    title: "The baselines button displays alternative versions of the current operations scenario",
+    body: "Click this button to see other scenarios that can serve as a baseline for comparison.",
+    placement: "bottom-start", // edit this
   },
   {
-    id: "list.step1.operationsIcons",
-    anchorId: "list.row.operations",
-    eyebrow: "arrange the list",
+    id: "list.step1.operationsIcons", // edit this
+    anchorId: "list.row.operations", // edit this
+    eyebrow: "water issues",
+    title: "Scenarios are grouped by water issues",
+    body: "Click on this button to group selected scenarios by water issue.",
+    placement: "left-start", // edit this
+  },
+  {
+    id: "list.step1.share", // edit this
+    anchorId: "list.row.share", // edit: anchor ID for the share button
+    eyebrow: "view selected",
+    title: "Selected scenarios can be filtered",
+    body: "Click on this button to view only selected scenarios. The others are hidden so the shortlist becomes easier to compare.",
+    placement: "left-start", // edit this
+  },
+  {
+    id: "list.step3.row", // edit this
+    anchorId: "list.select.checkbox", // edit this
+    eyebrow: "key operations",
+    title: "Icons summarize key features of each scenario",
+    body: "Click on this button to display the icons.",
+    placement: "right", // edit this
+  },
+  {
+    id: "list.journey", // edit this
+    anchorId: "", // edit this
+    eyebrow: "filter by key operation",
     title: "Click an icon to filter by that operation",
-    body: "Selecting an operation icon selects every scenario in the library that shares it, so you can quickly build a shortlist around one water-management choice.",
-    placement: "left-start",
+    body: "Selecting an icon selects every scenario in the library that shares it, so you can build a shortlist around one water-management decision.",
+    placement: "", // edit this
   },
   {
-    id: "list.step1.share",
-    anchorId: "list.row.share",
-    eyebrow: "arrange the list",
-    title: "Share",
-    titleIcon: "share",
-    body: "Use share to stage the chart you see in the Share drawer, then find it in the Share tab when you are ready to save the chart and its data.",
-    placement: "left-start",
-  },
-
-  // Gather a shortlist (row-level selection).
-  {
-    id: "list.step3.row",
-    anchorId: "list.select.checkbox",
-    eyebrow: "gather a shortlist",
-    title: "Select the scenarios that you want to focus on",
-    illustration: "listCheckbox",
-    body: "Use the checkboxes to gather a working set without losing the rest of the library.",
-    placement: "right",
-  },
-
-  // Move forward with your shortlist
-  {
-    id: "list.journey",
-    eyebrow: "take your shortlist forward",
-    title: "What to do after this chart",
-    body: "Your shortlist stays with you in the other views. Use the links in the top toolbar to go to the next tool when you are ready, or click the Start Visualizing rail on the right to get started",
+    id: "list.journey", // edit this
+    anchorId: "", // edit this
+    eyebrow: "visualize data",
+    title: "Click on panel or one of the explore tools to visualize scenario outcomes",
+    body: "You can now visualize the data for the scenarios you selected.",
+    placement: "", // edit this
   },
 ]
