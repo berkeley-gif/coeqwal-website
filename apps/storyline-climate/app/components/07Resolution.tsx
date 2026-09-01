@@ -7,7 +7,7 @@ import {
   useTheme,
   type Theme,
 } from "@repo/ui/mui"
-import { Paragraph, SectionTitle, Visualization } from "@repo/ui"
+import { Paragraph, SectionTitle, Visualization, getExploreUrl } from "@repo/ui"
 import { useRef } from "react"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import HydroClimateContainer from "./vis/HydroClimate"
@@ -39,9 +39,12 @@ const hydroclimateDescription = [
   {
     segments: [
       { text: "These hydroclimates represent " },
-      { text: "different levels of risk to our water system", mark: "yellow" },
       {
-        text: ' that we should be prepared for. For example, a "moderate stress" hydroclimate future represents a change in conditions that are likely to occur, while the "extreme stress" hydroclimate future is less likely, but possible.',
+        text: "different levels of stress to our water system",
+        mark: "yellow",
+      },
+      {
+        text: ' that we should be prepared for. For example, an "extreme stress" hydroclimate represents a plausible climate future that will be much more challenging to deal with than a "moderate stress" hydroclimate.',
       },
     ],
   },
@@ -98,7 +101,7 @@ const conclusionLink = [
     You can start{" "}
     <strong>
       <a
-        href="https://dev.coeqwal.org/?tab=explore"
+        href={getExploreUrl()}
         target="_blank"
         rel="noopener noreferrer"
         style={{ color: "inherit", textDecoration: "underline" }}

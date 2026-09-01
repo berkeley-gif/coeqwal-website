@@ -18,6 +18,10 @@ export {
   goToMainAbout,
   goToMainData,
   goToMainHome,
+  goToMainLearn,
+  goToMainExplore,
+  getExploreUrl,
+  getWaterStoryUrl,
 } from "./navigation/baseHeaderLinks"
 export type { WaterStoryKey, WaterThemeKey } from "./navigation/baseHeaderLinks"
 

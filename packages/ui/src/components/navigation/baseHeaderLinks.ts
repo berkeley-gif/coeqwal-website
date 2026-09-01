@@ -132,3 +132,19 @@ export function goToMainAbout() {
 export function goToMainData() {
   goToUrl(buildMainUrl("/data"))
 }
+
+export function getExploreUrl(): string {
+  return buildMainUrl("/explore")
+}
+
+export function getWaterStoryUrl(key: WaterStoryKey): string {
+  return WATER_STORIES.find((story) => story.key === key)?.href ?? ""
+}
+
+export function goToMainLearn() {
+  goToUrl(buildMainUrl("/learn"))
+}
+
+export function goToMainExplore() {
+  goToUrl(getExploreUrl())
+}
