@@ -931,8 +931,8 @@ export default function DataPage() {
                       mb: (theme) => theme.space.section.sm,
                     }}
                   >
-                    REST API endpoints for programmatic access to scenario data,
-                    model outputs, and COEQWAL resources.
+                    REST API endpoints for accessing scenario data, model
+                    outputs, and other COEQWAL resources programmatically.
                   </Typography>
 
                   <DownloadButton
@@ -1170,7 +1170,7 @@ export default function DataPage() {
           ariaLabel="Contact Us"
           text="Do you have questions or feedback about our project? 
               Would you like to be involved in future phases of this work? 
-              Please contact us: "
+              Please contact us at: "
           email="coeqwal@berkeley.edu"
         />
       </Box>
