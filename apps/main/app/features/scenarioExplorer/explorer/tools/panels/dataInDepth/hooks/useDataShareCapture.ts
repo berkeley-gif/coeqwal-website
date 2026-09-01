@@ -40,20 +40,14 @@ export function useDataShareCapture(
   const { selectedVariableId, compareBy, distKind, selectedWaterYearTypes } =
     useDataSlice()
 
-  // The Stats style renders a composite of bar plots the offscreen capture
-  // pipeline cannot draw yet (it captures a single chart SVG), so the save
-  // button disables instead of exporting a chart that does not match the
-  // screen. Stats snapshot support needs a composed multi-chart capture.
-  const statsStyle =
-    distKind === "stats" &&
-    (data.view === "dist" ||
-      data.view === "pct" ||
-      data.view === "pct_demand" ||
-      data.view === "level")
+  // Every chart style can be captured: the Stats style stitches its bar
+  // panels into one composed SVG (see OffscreenDataCapture). The capture
+  // needs at least one DRAWN member: when every compared scenario is
+  // unmodeled for the variable the card shows a no-data message instead of a
+  // chart, and capturing then would export panels the card never drew.
   const canSnapshot =
-    data.members.length > 0 &&
+    data.members.some((m) => !m.liveDataMissing) &&
     !data.isLoading &&
-    !statsStyle &&
     !data.unavailableReason
 
   const saveSnapshot = useCallback(async () => {
