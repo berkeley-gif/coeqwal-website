@@ -337,7 +337,7 @@ test("switching the workspace climate re-resolves the locations axis", async ({
   // Driving that control moves the whole chart off the historical fixture,
   // so the offline suite falls back to the sample engine for every member.
   await page
-    .getByRole("button", { name: /Moderate-dry climate stress/ })
+    .getByRole("button", { name: /Moderate-high climate stress/ })
     .first()
     .click()
   await expect(page.getByText(/^Sample data$/)).toBeVisible()
