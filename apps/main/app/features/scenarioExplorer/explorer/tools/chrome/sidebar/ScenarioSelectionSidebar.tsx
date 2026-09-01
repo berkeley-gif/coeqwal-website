@@ -148,12 +148,6 @@ export default function ScenarioSelectionSidebar({
     [radarSidebarAnchorRef, exploreMode],
   )
 
-  // Separate anchor for the "search + visibility chips" strip inside
-  // the sidebar. The radar tour uses it for a single brief review of
-  // the scenario-list controls (the list view tour covers each chip
-  // individually).
-  const sidebarControlsAnchorRef = useTourAnchor("radar.sidebarControls")
-
   return (
     <Box
       ref={sidebarAnchorRef}
@@ -203,7 +197,6 @@ export default function ScenarioSelectionSidebar({
 
       {/* Search + visibility chips */}
       <Box
-        ref={sidebarControlsAnchorRef}
         sx={{
           flexShrink: 0,
           display: "flex",

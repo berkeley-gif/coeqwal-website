@@ -21,6 +21,7 @@ import { getScenariosWithIcon } from "../../../../../scenarios/components/shared
 import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
 import VisualizeRail from "./VisualizeRail"
+import { useListVisualizeRailSync } from "./tour/useListVisualizeRailSync"
 
 interface ListViewProps {
   highlightedIds?: Set<string> | null
@@ -73,6 +74,12 @@ export default function ListView({ highlightedIds }: ListViewProps) {
     setSelectedIconId,
     groupByTheme,
   } = useListSlice()
+
+  useListVisualizeRailSync(
+    orderedScenarios[0]?.scenarioId,
+    selectedScenarios,
+    selectScenarios,
+  )
 
   const handleToggleScenario = (scenarioId: string) => {
     toggleScenario(scenarioId)

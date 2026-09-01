@@ -124,6 +124,7 @@ import type {
   ResilienceScenarioSoloCaptureFn,
 } from "../../../share/capture/types"
 
+import { useTourAnchor } from "../../tour/anchors/TourAnchorContext"
 interface ResiliencePanelProps {
   highlightedIds?: Set<string> | null
   onChartHover?: (info: HoveredInteraction | null) => void
@@ -194,7 +195,7 @@ export default function ResiliencePanel({
     resilienceDistributionMode: distributionMode,
   } = useResilienceSlice()
   const { selectedScenarios, setHydroclimate } = useWorkspaceSlice()
-
+  const heatmapGridAnchorRef = useTourAnchor("resilience.heatmapGrid")
   // ============================================================
   // Store-derived scope, columns, and rows
   // ============================================================
@@ -1979,6 +1980,7 @@ export default function ResiliencePanel({
           />
 
           <Box
+            ref={heatmapGridAnchorRef}
             sx={{
               flex: 1,
               minHeight: 0,
