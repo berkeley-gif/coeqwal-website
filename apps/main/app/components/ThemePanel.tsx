@@ -32,6 +32,12 @@ interface ThemePanelProps {
   theme: Theme | null
 }
 
+// The shared closing section rendered below every theme's own sections
+// (see CenteredTextSection near the bottom of this component) — not part
+// of any individual theme's `sections` array, but still tracked in the
+// tab bar and scroll position like a real section.
+const HOW_TO_EXPLORE_FURTHER_ID = "how-to-explore-further"
+
 // Order matches THEME_SECTION_IDS exactly.
 const SECTION_LABELS: Record<string, { long: string; short: string }> = {
   intro: {
@@ -139,15 +145,20 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   // Ref for the scrollable content container
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  // Look for the sections that are active
-  const activeSectionIds = useMemo(
-    () => theme?.sections.map((s) => s.id as string) ?? [],
-    [theme?.sections],
+  // All section ids to track for scroll position and the tab bar,
+  // including the shared closing section that lives outside theme.sections
+  const allSectionIds = useMemo(
+    () =>
+      theme
+        ? [...theme.sections.map((s) => s.id as string), HOW_TO_EXPLORE_FURTHER_ID]
+        : [],
+    [theme],
   )
   const activeSection = useWhichScrollSection(
-    activeSectionIds,
+    allSectionIds,
     scrollContainerRef,
   )
+
 
   // Ref for the tab bar scroll container
   const tabBarRef = useRef<HTMLDivElement>(null)
@@ -357,7 +368,6 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         >
                           <Typography
                             variant="h5"
-                            sx={{ textTransform: "capitalize" }}
                           >
                             {theme.label.replace(/\n/g, " ")}
                           </Typography>
@@ -372,7 +382,6 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         >
                           <Typography
                             variant="h3"
-                            sx={{ textTransform: "capitalize" }}
                           >
                             {theme.label.replace(/\n/g, " ")}
                           </Typography>
@@ -434,18 +443,18 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   flexShrink: 0,
                 }}
               >
-                {theme.sections
-                  .filter((s) => SECTION_LABELS[s.id]?.short !== "")
-                  .map((section) => {
-                    const isActive = activeSection === section.id
+                {allSectionIds
+                  .filter((id) => SECTION_LABELS[id]?.short !== "")
+                  .map((sectionId) => {
+                    const isActive = activeSection === sectionId
                     return (
                       <Box
-                        key={section.id}
+                        key={sectionId}
                         component="button"
-                        data-section-id={section.id}
-                        onClick={() => scrollToSection(section.id)}
+                        data-section-id={sectionId}
+                        onClick={() => scrollToSection(sectionId)}
                         aria-pressed={isActive}
-                        aria-label={SECTION_LABELS[section.id]?.long}
+                        aria-label={SECTION_LABELS[sectionId]?.long}
                         sx={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -480,7 +489,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                             transition: "opacity 0.15s ease",
                           }}
                         >
-                          {SECTION_LABELS[section.id]?.short}
+                          {SECTION_LABELS[sectionId]?.short}
                         </Typography>
                       </Box>
                     )
@@ -534,25 +543,42 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                 ))}
               </Box>
               <CenteredTextSection
-                id="conclusion"
-                ariaLabel="Conclusion"
+                id={HOW_TO_EXPLORE_FURTHER_ID}
+                ariaLabel="How to explore further"
+                title="How To Explore Further"
                 text={
-                  <>
-                    Together, these views make trade-offs, equity, and
-                    resilience visible, providing a shared, data-grounded
-                    basis for comparison, discussion, and learning. Visit
-                    the <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
-                    to examine these patterns in greater detail. If this is
-                    your first time using the Explore Tool, we recommend
-                    visiting the{" "}
-                    <InlineNavLink to="learn">Get Started section</InlineNavLink>{" "}
-                    before beginning your exploration.
-                  </>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: muiTheme.space.listGap.md,
+                    }}
+                  >
+                    <Typography variant="body1">
+                      Together, the trade-offs, equity, and resilience views
+                      show how different water management strategies affect
+                      outcomes across California's water system, how
+                      benefits and impacts are distributed across
+                      locations, and how outcomes may change under
+                      increasing climate stress.
+                    </Typography>
+                    <Typography variant="body1">
+                      Visit the{" "}
+                      <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                      to compare strategies, outcomes, locations and
+                      hydroclimates in greater detail.
+                    </Typography>
+                    <Typography variant="body1">
+                      If this is your first time using the Explore Tool, we
+                      recommend visiting{" "}
+                      <InlineNavLink to="learn">Get Started</InlineNavLink>{" "}
+                      before beginning your exploration.
+                    </Typography>
+                  </Box>
                 }
                 bgColor={muiTheme.palette.brand.water}
                 textColor={muiTheme.palette.text.secondary}
               />
-
             </Box>
           </motion.div>
         </>

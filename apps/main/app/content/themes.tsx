@@ -117,14 +117,14 @@ export interface ThemeLabelConfig {
 
 export const THEME_LABEL_CONFIG: Record<ScenarioTheme, ThemeLabelConfig> = {
   baseline: {
-    label: "Baselines",
+    label: "Understanding Today's Water System",
     tooltip:
       "Baselines represent current operations of the State Water Project and Central Valley Project. They serve as the reference point for comparing all other scenarios.",
   },
-  ag_gw: { label: "Farms and groundwater" },
-  eco: { label: "Rivers and salmon" },
-  delta: { label: "The Delta" },
-  cws: { label: "Community water systems" },
+  ag_gw: { label: "Sustaining Farms and Groundwater" },
+  eco: { label: "Protecting Rivers and Salmon" },
+  delta: { label: "Balancing Needs in the Delta" },
+  cws: { label: "Securing Community Water Supplies" },
   unthemed: { label: "Other scenarios" },
 }
 
@@ -147,11 +147,11 @@ export const ACTIVE_THEMES: ScenarioTheme[] = [
 export const WATER_THEMES: Theme[] = [
   {
     id: "baseline",
-    label: "Understanding today's\nwater system",
-    shortLabel: "Understanding today's water system",
+    label: "Understanding Today's\nWater system",
+    shortLabel: "Understanding Today's Water system",
     description:
       "Whether California's current water management — the Central Valley Project and State Water Project — performs reliably for communities, agriculture, and the environment, now and under future climate conditions",
-    heroImage: "/images/themes/baseline_hero.jpg",
+    heroImage: "/images/themes/baseline_hero_cred_ken_james.jpg",
     inquiry:
       "How do California's major water projects in the Central Valley perform under current and future climate conditions?",
     sections: [
@@ -275,7 +275,7 @@ export const WATER_THEMES: Theme[] = [
                 <>
                   For more information about each of these, and other, scenarios,
                   visit{" "}
-                  <InlineNavLink to="/data">DATA AND DOCUMENTATION</InlineNavLink>.
+                  <InlineNavLink to="/data">Data and Documentation</InlineNavLink>.
                 </>
               ),
             },
@@ -290,7 +290,14 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "In the Explore Tool, different representations of current operations are grouped as \"baseline\" scenarios because they provide reference points for comparing alternative management strategies. The Explore Tool allows you to examine how outcomes differ across the baseline scenarios and under different hydroclimate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
+              text: (
+                <>
+                  In the{" "}
+                  <InlineNavLink to="explore">
+                    Explore Tool
+                  </InlineNavLink>, different representations of current operations are grouped as \"baseline\" scenarios because they provide reference points for comparing alternative management strategies. The Explore Tool allows you to examine how outcomes differ across the baseline scenarios and under different hydroclimate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.
+                </>
+              ),
             },
             {
               type: "image",
@@ -313,7 +320,7 @@ export const WATER_THEMES: Theme[] = [
                     the historical hydroclimate. Outcomes are categorized into
                     different performance classes: optimal, acceptable, at-risk, and
                     critical. See{" "}
-                    <InlineNavLink to="/data">DATA AND DOCUMENTATION</InlineNavLink>{" "}
+                    <InlineNavLink to="/data">Data and Documentation</InlineNavLink>{" "}
                     for more information on how these categories are defined.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
@@ -383,7 +390,7 @@ export const WATER_THEMES: Theme[] = [
                     strategies perform across a range of plausible hydroclimate
                     futures, representing increasing levels of stress to the water
                     system. See{" "}
-                    <InlineNavLink to="/data">DATA AND DOCUMENTATION</InlineNavLink>{" "}
+                    <InlineNavLink to="/data">Data and Documentation</InlineNavLink>{" "}
                     for more information about hydroclimate futures.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
@@ -428,8 +435,8 @@ export const WATER_THEMES: Theme[] = [
   },
   {
     id: "cws",
-    label: "Securing community\nwater supplies",
-    shortLabel: "Securing community water supplies",
+    label: "Securing Community\nWater Supplies",
+    shortLabel: "Securing Community Water Supplies",
     description:
       "Whether California's community water systems can reliably deliver safe drinking water to the people who depend on them, in wet years, dry years, and a changing climate",
     heroImage: "/images/themes/cws_hero_cred_dan_bacher.jpg",
@@ -563,7 +570,7 @@ export const WATER_THEMES: Theme[] = [
                 <>
                   For more information about each of these scenarios, visit{" "}
                   <InlineNavLink to="/data">
-                    DATA AND DOCUMENTATION
+                    Data and Documentation
                   </InlineNavLink>
                   .
                 </>
@@ -580,7 +587,15 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "The Explore Tool allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
+              text: (
+                <>
+                  The{" "}
+                  <InlineNavLink to="explore">
+                    Explore Tool
+                  </InlineNavLink>{" "}
+                  allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.
+                </>
+              ),
             },
             {
               type: "image",
@@ -594,8 +609,11 @@ export const WATER_THEMES: Theme[] = [
                     system performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart in the Explore Tool summarizes
-                    performance across nine key outcomes, revealing broad
+                    The radar chart in the{" "}
+                    <InlineNavLink to="explore">
+                      Explore Tool
+                    </InlineNavLink>
+                    {" "}summarizes performance across nine key outcomes, revealing broad
                     system-level trade-offs within and between scenarios. The
                     chart displays the average performance across all
                     locations of interest for each scenario, providing a
@@ -613,7 +631,7 @@ export const WATER_THEMES: Theme[] = [
                     four outcome levels: optimal, acceptable, at-risk, and
                     critical. See{" "}
                     <InlineNavLink to="/data">
-                      DATA AND DOCUMENTATION
+                      Data and Documentation
                     </InlineNavLink>{" "}
                     for more information on how these categories are
                     defined.
@@ -666,13 +684,16 @@ export const WATER_THEMES: Theme[] = [
                     California's water system. A management strategy that
                     performs well today may respond differently as droughts
                     become more frequent, temperatures rise, and water
-                    availability changes. The Resilience heatmap in the
-                    Explore Tool examines how management strategies perform
+                    availability changes. The Resilience heatmap in the{" "}
+                    <InlineNavLink to="explore">
+                      Explore Tool
+                    </InlineNavLink>{" "}
+                    examines how management strategies perform
                     across a range of plausible hydroclimate futures,
                     representing increasing levels of stress to the water
                     system. Visit{" "}
                     <InlineNavLink to="/data">
-                      DATA AND DOCUMENTATION
+                      Data and Documentation
                     </InlineNavLink>{" "}
                     for more information about hydroclimate futures.
                   </Typography>
@@ -719,8 +740,8 @@ export const WATER_THEMES: Theme[] = [
   },
   {
     id: "ag_gw",
-    label: "Sustaining farms\nand groundwater",
-    shortLabel: "Sustaining farms and groundwater",
+    label: "Sustaining Farms\nand Groundwater",
+    shortLabel: "Sustaining Farms and Groundwater",
     description:
       "Whether California's agricultural water use can be sustained without depleting the groundwater that farms, communities, and ecosystems depend on",
     heroImage: "/images/themes/farms-groundwater_hero.jpg",
@@ -812,7 +833,7 @@ export const WATER_THEMES: Theme[] = [
                     current operations and represent whether outcomes are
                     optimal, acceptable, at-risk, or critical (red). See{" "}
                     <InlineNavLink to="/data">
-                      DATA AND DOCUMENTATION
+                      Data and Documentation
                     </InlineNavLink>{" "}
                     for more information on how these performance levels are
                     defined.
@@ -872,7 +893,7 @@ export const WATER_THEMES: Theme[] = [
                 <>
                   For more information about each of these scenarios, visit{" "}
                   <InlineNavLink to="/data">
-                    DATA AND DOCUMENTATION
+                    Data and Documentation
                   </InlineNavLink>
                   .
                 </>
@@ -889,7 +910,15 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "The Explore Tool allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
+              text: (
+                <>
+                  The{" "}
+                  <InlineNavLink to="explore">
+                    Explore Tool
+                  </InlineNavLink>{" "}
+                  allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.
+                </>
+              ),
             },
             {
               type: "image",
@@ -924,7 +953,7 @@ export const WATER_THEMES: Theme[] = [
                     into four outcome levels: optimal, acceptable, at-risk,
                     and critical. See{" "}
                     <InlineNavLink to="/data">
-                      DATA AND DOCUMENTATION
+                      Data and Documentation
                     </InlineNavLink>{" "}
                     for more information on how these categories are
                     defined.
@@ -1003,7 +1032,7 @@ export const WATER_THEMES: Theme[] = [
                     representing increasing levels of stress to the water
                     system. Visit{" "}
                     <InlineNavLink to="/data">
-                      DATA AND DOCUMENTATION
+                      Data and Documentation
                     </InlineNavLink>{" "}
                     for more information about hydroclimate futures.
                   </Typography>
@@ -1233,7 +1262,7 @@ export const WATER_THEMES: Theme[] = [
                   For more information about those scenarios, and additional
                   scenarios modeled with reintroduction alternatives, visit{" "}
                   <InlineNavLink to="/data">
-                    DATA AND DOCUMENTATION
+                    Data and Documentation
                   </InlineNavLink>
                   .
                 </>
@@ -1254,7 +1283,13 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "The Explore Tool allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
+              text: (
+                <>
+                  The{" "}
+                  <InlineNavLink to="explore">Explore Tool</InlineNavLink>
+                  {" "}allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.
+                </>
+              ),
             },
             {
               type: "image",
@@ -1290,7 +1325,7 @@ export const WATER_THEMES: Theme[] = [
                     outcome levels: optimal, acceptable, at-risk, and
                     critical. See{" "}
                     <InlineNavLink to="/data">
-                      DATA AND DOCUMENTATION
+                      Data and Documentation
                     </InlineNavLink>{" "}
                     for more information on how these categories are
                     defined.
@@ -1389,7 +1424,7 @@ export const WATER_THEMES: Theme[] = [
                     representing increasing levels of stress to the water
                     system. See{" "}
                     <InlineNavLink to="/data">
-                      DATA AND DOCUMENTATION
+                      Data and documentation
                     </InlineNavLink>{" "}
                     for more information about hydroclimate futures.
                   </Typography>
@@ -1458,16 +1493,15 @@ export const WATER_THEMES: Theme[] = [
       },
     ],
   },
-
   {
     id: "delta",
-    label: "The Delta as\na living place",
-    shortLabel: "The Delta as a living place",
+    label: "Balancing Needs\nin the Delta",
+    shortLabel: "Balancing Needs in the Delta",
     description:
-      "Whether the Delta is a place where communities, farms, and ecosystems coexist and thrive.",
+      "Whether the Delta can remain healthy for people, farms, fish, and wildlife as California balances water exports, salinity, and ecosystem needs",
     heroImage: "/images/themes/delta_hero.jpg",
     inquiry:
-      "Can the Delta stay healthy for people, farms, fish, and wildlife – now and in the future?",
+      "Can the Delta stay healthy for people, farms, fish, and wildlife, now and in the future?",
     sections: [
       {
         id: "intro",
@@ -1476,7 +1510,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Millions of Californians rely on water pumped from the Sacramento-San Joaquin Delta. At the same time, the Delta is a living place – home to communities, farms that grow food, and fish and birds that depend on healthy rivers and wetlands.",
+              text: "Millions of Californians rely on freshwater from the Sacramento-San Joaquin Delta. Pumping facilities in the Delta divert water into canals for export to communities and farms elsewhere in California. At the same time, the Delta is a living place, home to communities, farms that grow food, and fish and birds that depend on rivers, wetlands, and a healthy estuary.",
             },
           ],
         },
@@ -1489,33 +1523,27 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "The Sacramento–San Joaquin Delta sits at the heart of California's water system. It sends water to cities and farms across the state. It is also an ecosystem of wetlands, rivers, and important fish species. Families, farmers, fishing communities, and Tribal nations have deep ties to this landscape.",
+              text: "The Sacramento–San Joaquin Delta sits at the heart of California's water system. Pumping facilities in and around the Delta convey water to cities and farms throughout the San Francisco Bay Area, San Joaquin Valley, Southern California, and other parts of the state. The Delta is also a highly altered ecosystem of wetlands, waterways, and important fish species. Families, farmers, fishing communities, and Tribal nations have deep ties to this landscape.",
             },
             {
               type: "paragraph",
-              text: "Over time, dams, levees, reservoirs, and pumping plants have changed how water moves through the Delta. Controlled releases from dams maintain freshwater flows into the Delta throughout the year. Wetlands have been converted to farmland. Some islands have sunk below sea level. Invasive species have changed habitats. These physical changes affect the quality of water in the Delta and estuary.",
+              text: "Over time, dams, levees, reservoirs, and pumping plants have changed how water moves through the Delta and into the San Francisco Bay estuary. The Delta historically experienced large seasonal shifts in freshwater and salinity conditions. Today, upstream reservoir releases, water quality requirements, and export operations strongly influence these patterns. Wetlands have been converted to farmland, creating islands protected by levees, many of which now lie below sea level. Habitat alterations and invasive species have also contributed to major changes in fish populations and water quality conditions.",
             },
             {
               type: "paragraph",
-              text: "The Delta now faces new pressures. Droughts are lasting longer. Heat waves are more intense. Sea levels are rising, changing how freshwater from rivers mixes with saltwater from the Bay. These shifts increase stress on both ecosystems and water supplies.",
+              text: "A transformed Delta now faces additional pressures. Droughts are lasting longer. Heat waves are more intense. Water quality problems, including harmful algal blooms, are increasing. Sea levels are rising, changing how freshwater from rivers mixes with saltwater from the Bay and increasing risk of levee failures. These shifts stress ecosystems and uses of water inside and outside of the Delta.",
             },
             {
               type: "paragraph",
-              text: "Understanding how the Delta functions – as both infrastructure and living ecosystem – helps inform decisions about its future.",
+              text: "Understanding how the Delta functions as a place, water-conveyance hub, and living ecosystem helps inform decisions about its future.",
             },
             {
               type: "image",
-              src: "/images/themes/Delta_Salinity_Flows-01.svg",
-              alt: "Delta flow diagram",
+              src: "/images/themes/delta-fig-01.svg",
+              alt: "How river flows and water exports affect the Delta",
+              title: "How river flows and water exports affect the Delta",
               caption:
-                "Water flow in the Delta changes with seasons, tides, and infrastructure operations. Winter storms and spring snowmelt bring in freshwater flows, while daily high tides push saltwater inland. Pumps in the southwest corner of the Delta export water to meet demand. \n When pumping is high relative to inflows, flow directions can reverse, pulling water and fish toward pumps and drawing saltwater deeper into the Delta.",
-            },
-            {
-              type: "image",
-              src: "/images/themes/Delta_Salinity_Flows-02.svg",
-              alt: "Delta flow diagram",
-              caption:
-                "Pumping water from the Delta into water supply canals changes the flow direction and salinity in rivers and wetlands.\nWith low pumping (left), high freshwater inflows keep water moving seaward and salinity low. In summer, low freshwater flows allow tides to push saltwater farther inland.\n With high pumping (right), water is pulled toward export canals. Even with strong inflows, flows shift toward pumps. In dry periods, rivers can reverse and salty water moves deeper into the Delta.\n Demand for water peaks in late summer when freshwater inflows are at their lowest. At this time, high pumping rates are most needed, but create tradeoffs for ecosystems and salinity control.",
+                "Freshwater flowing into the Delta and water exported through the Delta pumping facilities together influence how water moves through Delta channels and where fresh and saline water meet. When river flows are high and exports are low, freshwater generally moves seaward and limits salinity intrusion. When freshwater inflows decline or export pumping increases, flow patterns can shift and saline water can move farther inland.\nThese interactions create important trade-offs among freshwater available for export, water quality for in-Delta water uses, and ecosystem conditions.",
             },
           ],
         },
@@ -1523,26 +1551,28 @@ export const WATER_THEMES: Theme[] = [
       {
         id: "what-this-theme-focuses-on",
         content: {
-          type: "boxes",
-          items: [
+          type: "mixed",
+          gap: "40px",
+          blocks: [
             {
-              title: "Seasonal flow & salinity patterns",
-              paragraphs: [
-                "The Delta changes with the seasons. In spring, snowmelt fills rivers with fresh water, pushing salt toward the Bay. In summer and fall, river flows decline, temperatures rise, and salt moves farther inland. Reservoir releases help manage salinity during dry months. Farms, wetlands, fish, and communities depend on these seasonal patterns, and on whether conditions remain within healthy ranges.",
-              ],
+              type: "paragraph",
+              text: "**Seasonal flow, salinity, and water use** – The Delta changes with the seasons. In spring, snowmelt and reservoir releases fill rivers with fresh water, making the Delta less salty. In summer and fall, river flows decline, temperatures rise, and the Bay's saline waters can move farther inland. Salinity is shaped by freshwater inflows, sea level, tides, and the movement of water through the Delta's network of channels and wetlands. Reservoir releases help limit salinity intrusion during dry months, maintaining freshwater for in-Delta uses and for water exported from the Delta to farms and cities.",
             },
             {
-              title: "Water management & ecosystem health",
-              paragraphs: [
-                "Water management decisions shape what happens inside the Delta. Freshwater flows influence salinity levels and where they occur. Pumping shifts how water moves through the system. Reservoir storage affects both supply and temperature. These forces interact to influence habitat conditions and ecosystem resilience.",
-                "Salinity depends not only on how much water is present, but also on how water moves and mixes across levees, channels, and wetlands. Small changes in flow or pumping can shift ecological conditions in different parts of the Delta — sometimes improving habitat, sometimes increasing stress.",
-              ],
+              type: "paragraph",
+              text: "**Health of the Delta estuary ecosystem** – The Delta is a highly altered, novel ecosystem that has been transformed by over a century of intensive land use and water operations. Much of the natural habitats in the Delta have been lost or degraded and the system now supports a multitude of native and non-native species.",
             },
             {
-              title: "System connections & ripple effects",
-              paragraphs: [
-                "The Delta is deeply connected to the rest of California's water system. Storage north and south of the Delta, export operations, farming demand, environmental requirements, and sea-level rise all interact. A change in one place can affect many others. Seeing the Delta as a living place means recognizing how water movement, landscape, communities, and ecosystem health are linked, as well as how management decisions influence long-term resilience.",
-              ],
+              type: "paragraph",
+              text: "Changes in freshwater flows through the Delta from upstream reservoir releases and pumping operations affect currents, water quality, and habitat conditions for different species. But flow is only one influence on Delta ecology. Habitat, invasive species, water temperature, food-web conditions, and other factors also shape ecological outcomes. As a result, changing flows alone may not improve ecosystem health without complementary actions that address other limiting factors.",
+            },
+            {
+              type: "paragraph",
+              text: "**System connections and trade-offs** – The Delta is deeply connected to the rest of California's water system. Reservoir storage and releases, water exports, agricultural and community demands, environmental requirements, and sea-level rise all influence conditions in the Delta. Changes intended to benefit one part of the system can therefore create benefits or burdens elsewhere, sometimes far beyond the Delta itself.",
+            },
+            {
+              type: "paragraph",
+              text: "Some outcomes may be highly responsive to changes in management, such as water deliveries to farms, while others, such as the ecology of the Delta, may take longer to respond and can be affected by factors beyond water management alone. Balancing needs in the Delta therefore involves more than deciding how much water should flow through or be exported from the Delta.",
             },
           ],
         },
@@ -1555,11 +1585,11 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "The Delta responds to seasons and extreme years, not just long-term averages. Short periods of stress can matter.",
-                "Changing river flows alone does not automatically restore ecosystem health. Landscape conditions, habitat changes, levees, and invasive species – not directly evaluated by COEQWAL – also influence outcomes.",
-                "Different regions experience impacts differently. A benefit in one area may create pressure in another.",
-                "Some water standards must legally be met. Certain outcomes may appear stable even when other parts of the system change.",
-                "Key outcomes (i.e. tier outcomes) provide a big-picture view, but local or seasonal variation can still be important.",
+                "In-Delta water quality and salinity are sensitive to freshwater inflows, reservoir operations, exports, sea-level rise, tides, and climate conditions. Changes in these factors can affect freshwater for in-Delta uses and exports, as well as ecosystem conditions.",
+                "Freshwater flow is important to Delta ecology, but Delta outflows alone do not address all factors limiting ecosystem health. Habitat, invasive species, water temperature, food-web conditions, and other factors not fully represented by COEQWAL also influence ecological outcomes.",
+                "A Delta Conveyance Project scenario evaluates how the proposed project could affect modeled water-system outcomes, but does not capture the full range of potential social, cultural, economic, and environmental benefits and impacts associated with the project.",
+                "Changes in operational rules do not always produce simple or direct responses. Even when operational rules change under a scenario, other requirements, such as water quality standards, may remain in place. As a result, management changes do not always translate directly into expected changes in Delta outflows, salinity, or ecosystem conditions.",
+                "Delta conditions are influenced by both management and climate. The hydroclimate futures include changes in freshwater conditions and sea-level rise, which together can affect salinity, ecosystem conditions, in-Delta uses, and water exports.",
               ],
             },
           ],
@@ -1572,20 +1602,35 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This theme allows you to explore how different water management choices affect:",
+              text: "This water issue explores scenarios that affect the volume, timing, and quality of water moving through the Delta. These include alternative Delta outflow targets, changes in reservoir operations and salinity standards, and new conveyance infrastructure. This water issue specifically focuses on scenarios that:",
             },
             {
               type: "list",
               items: [
-                "Freshwater availability for in-Delta farms and communities",
-                "Delta outflows that support estuary health",
-                "Reservoir storage north and south of the Delta",
-                "Water deliveries to farms and cities",
+                "Reduce Delta outflow targets (35% of unimpaired flow)",
+                "Maintain Delta outflow targets (45% of unimpaired flow)",
+                "Increase Delta outflow targets (55% of unimpaired flow)",
+                "Increase Delta outflow targets (65% of unimpaired flow)",
+                "Increase Shasta carry-over storage",
+                "Relax Delta fall salinity standards",
+                "Delta Conveyance Project",
               ],
             },
             {
               type: "paragraph",
-              text: "Looking at these factors together shows how the Delta responds under different conditions.",
+              text: "Together, these scenarios examine how different management actions influence conditions in the Delta and the broader performance of California's interconnected water system.",
+            },
+            {
+              type: "paragraph",
+              text: (
+                <>
+                  For more information about each of these scenarios, visit{" "}
+                  <InlineNavLink to="/data">
+                    DATA AND DOCUMENTATION
+                  </InlineNavLink>
+                  .
+                </>
+              ),
             },
           ],
         },
@@ -1598,19 +1643,186 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "**Trade-offs** – Water is limited. When we support one goal, it can affect another. Increasing flows to improve ecosystem conditions may change storage or deliveries. Protecting storage may influence how much water moves downstream. Managing pumping can shift salinity patterns. The Delta makes these trade-offs visible. Understanding them helps people see the real choices involved.",
+              text: "The Explore Tool allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
             },
             {
-              type: "paragraph",
-              text: "**Equity** – Not everyone is affected in the same way. Where you live, what water rights you hold, how close you are to rising saltwater, and how sensitive ecosystems are can shape how impacts are felt. Exploring multiple outcomes together helps show where benefits are stronger and where pressures may be greater. This supports more informed and fair conversations about the future.",
+              type: "image",
+              src: "/images/themes/delta-fig-02.svg",
+              alt: "Trade-offs radar chart",
+              title: "Trade-offs",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    How do different management strategies affect overall
+                    system performance across multiple outcomes?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The radar chart in the Explore Tool summarizes
+                    performance across nine key outcomes, revealing broad
+                    system-level trade-offs within and between scenarios.
+                    The chart displays the average performance across all
+                    locations of interest for each scenario, providing a
+                    system-wide view of how these management strategies
+                    influence multiple outcomes simultaneously. The chart
+                    specifically compares Current operations (black),
+                    Increase Delta outflow targets (65% of unimpaired flow)
+                    (blue), and Delta Conveyance Project (red) under the
+                    historical hydroclimate. The points show the average
+                    condition across all locations of interest for each
+                    outcome, classified into four outcome levels: optimal,
+                    acceptable, at-risk, and critical. See{" "}
+                    <InlineNavLink to="/data">
+                      DATA AND DOCUMENTATION
+                    </InlineNavLink>{" "}
+                    for more information on how these categories are
+                    defined.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The results show how the two strategies shift the
+                    balance of outcomes within and beyond the Delta.
+                    Increasing Delta outflow targets to 65% of unimpaired
+                    flow increases freshwater moving through and out of the
+                    Delta through a combination of increased upstream flows
+                    and reduced export pumping. This substantially reduces
+                    freshwater available for export while improving
+                    freshwater conditions for in-Delta uses. By contrast,
+                    the Delta Conveyance Project diverts some Sacramento
+                    River water through new intakes in the northern Delta,
+                    increasing freshwater available for export while
+                    producing relatively little change in modeled
+                    freshwater conditions for in-Delta uses.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Both scenarios also affect outcomes elsewhere in the
+                    system. Increasing Delta outflows reduces reservoir and
+                    groundwater storage, while the Delta Conveyance Project
+                    improves both. Community surface-water deliveries
+                    decline slightly under both scenarios relative to
+                    Current operations, but remain at or near the Optimal
+                    threshold. Environmental flows also decline slightly,
+                    while the modeled outcome for winter-run salmon
+                    improves slightly under both scenarios. Agricultural
+                    revenue increases slightly under the increased-outflow
+                    scenario but declines under the Delta Conveyance
+                    Project.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The modeled Delta estuary ecology outcome improves
+                    modestly under the increased-outflow scenario. This
+                    does not mean that freshwater flow is unimportant to
+                    Delta ecosystems. Rather, the result reflects that
+                    ecological conditions are also constrained by habitat,
+                    invasive species, food-web conditions, and other
+                    factors that are not changed by this scenario.
+                    Improving flows alongside habitat restoration and other
+                    complementary actions could potentially produce broader
+                    ecological benefits than changing flows alone.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    These modeled outcomes capture only some dimensions of
+                    the proposed Delta Conveyance Project. They do not
+                    capture many other important considerations, including
+                    effects on Delta communities, Tribal priorities,
+                    agriculture, and ecosystems; construction impacts and
+                    costs; or how benefits and burdens would be distributed
+                    among regions.
+                  </Typography>
+                </>
+              ),
             },
             {
-              type: "paragraph",
-              text: "**Resilience** – Resilience means being able to handle stress and still function. For the Delta, this means handling droughts, floods, rising seas, heat, and changing water demand without losing ecosystem health, water reliability, or ways of life that depend on water. Flows, storage, temperature, salinity, and landscape shape all play a role. Understanding how they interact helps us think about what it takes to support the Delta over time, as both a working water system and a living estuary.",
+              type: "image",
+              src: "/images/themes/delta-fig-03.svg",
+              alt: "Distribution view map of Delta outcomes",
+              title: "Equity",
+              caption:
+                "Where do benefits and impacts occur, and who is most affected?\nSystem-wide averages can hide important differences in scenario impacts. Communities, farms, ecosystems, and water users within and outside the Delta depend on water moving through the system in different ways. As a result, changes in reservoir operations, Delta flows, salinity, or exports can shift the benefits and impacts to different locations.\nThe Distribution view in the Explore Tool shows results for individual locations of interest. The figure summarizes how outcomes shift across locations under the Increase Shasta carry-over storage scenario relative to Current operations under the historical hydroclimate. This scenario targets approximately 20% more September storage in Shasta Reservoir than under Current operations by adjusting water allocations earlier in the year. Arrows indicate direction of change relative to current operations and color represents optimal (green), acceptable (blue), at-risk (orange), or critical (red) outcomes for the scenario. Squares represent locations that did not change condition relative to current operations.\nThe Distribution view shows that increasing Shasta carry-over storage has limited effects on most outcomes and locations. In many years, the additional amount of water needed to reach the September storage target may be relatively modest and can be accumulated through adjustments spread over several preceding months. Other demands and operating constraints can also limit how strongly this change propagates through the system. Community surface water deliveries and agricultural revenues decline at a small number of locations, while reservoir storage improves at two locations. Freshwater for Delta exports declines. Environmental flows, groundwater storage, Delta estuary ecology, and freshwater for in-Delta uses do not change.\nThese results show how a strategy intended to maintain more water in storage can create benefits and negative impacts in different parts of the system. The locations benefiting from increased reservoir storage are not necessarily the same locations experiencing declines in environmental flows, agricultural revenues, or community surface water deliveries.\nOverall, the Distribution view reveals patterns hidden by system-wide averages and helps identify where management strategies create benefits, where they create burdens, and how evenly those effects are distributed.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/delta-fig-04.svg",
+              alt: "Resilience heatmap across hydroclimate scenarios",
+              title: "Resilience",
+              caption: (
+                <>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    How consistently do management strategies perform under
+                    different climate futures?
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Climate change is expected to place increasing stress on
+                    California's water system. A management strategy that
+                    performs well today may respond differently as droughts
+                    become more frequent, temperatures rise, and water
+                    availability changes. The Resilience heatmap in the
+                    Explore Tool examines how management strategies perform
+                    across a range of plausible hydroclimate futures,
+                    representing increasing levels of stress to the water
+                    system. See{" "}
+                    <InlineNavLink to="/data">
+                      DATA AND DOCUMENTATION
+                    </InlineNavLink>{" "}
+                    for more information about hydroclimate futures.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    The Resilience heatmap compares outcomes for Current
+                    operations and Relaxing Delta salinity standards under
+                    the historical hydroclimate and future hydroclimates
+                    representing Moderate, Moderate-High, High and Extreme
+                    levels of stress. This relaxed salinity scenario
+                    removes the fall X2 salinity standard, which regulates
+                    how far saline water can move into the Delta during
+                    fall by setting a required location for the
+                    low-salinity zone. Outcomes are categorized as optimal
+                    (green, 1.00 - 1.99), acceptable (blue, 2.00 - 2.99),
+                    at-risk (orange, 3.00 - 3.99), or critical (red, 4.00 -
+                    4.99), with higher numerical values indicating worse
+                    performance.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Relaxing the fall Delta salinity standard produces
+                    relatively small changes in system outcomes under the
+                    historical hydroclimate. All outcomes remain within the
+                    same performance category. Delta freshwater exports
+                    improve slightly, while freshwater for in-Delta uses
+                    falls from an "acceptable" to "at risk" level under the
+                    historical climate.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Across the hydroclimate futures, many outcomes become
+                    less favorable as the climate becomes more stressful,
+                    but the responses are not always linear. Some outcomes
+                    improve under particular hydroclimates even as overall
+                    climate stress increases. For example, Delta estuary
+                    ecology performs better under the Moderate future than
+                    under historical conditions, for both scenarios. Some
+                    outcomes, including environmental flows, Delta estuary
+                    ecology, Delta exports, freshwater for in-Delta uses,
+                    and winter-run salmon, fall to at-risk or critical
+                    levels with increasing climate stress, while others,
+                    such as community surface water deliveries and
+                    agricultural revenues, remain at acceptable levels.
+                    These patterns show that individual outcomes can
+                    respond differently to the particular combination of
+                    conditions represented by each hydroclimate.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "inherit" }}>
+                    Differences between Current operations and Relaxing
+                    Delta salinity standards generally remain modest across
+                    the hydroclimates examined. In this comparison, changes
+                    associated with the hydroclimate are generally larger
+                    than the differences between the two management
+                    strategies, suggesting that climate has a stronger
+                    influence on overall system performance than relaxing
+                    the fall salinity standard alone.
+                  </Typography>
+                </>
+              ),
             },
           ],
         },
       },
     ],
   },
+
 ]
