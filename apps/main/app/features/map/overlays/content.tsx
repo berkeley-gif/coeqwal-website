@@ -6,6 +6,7 @@ import React from "react"
 import { type OutcomeCode } from "../../../content/outcomes"
 import { WATER_THEMES } from "../../../content/themes"
 import { GlossaryTermLink } from "../../glossary"
+import { InlineNavLink } from "../../../components/InlineNavLink"
 
 export interface WaterIssueTheme {
   title: string
@@ -226,5 +227,12 @@ export const CAVEATS: ReadonlyArray<React.ReactNode> = [
   "All hydroclimates use a historical 1922–2021 weather sequence, adjusted to account for recent climate change (for the historical hydroclimate) and adjusted to account for possible climate conditions the state may experience by 2043 (for all future hydroclimates). They do not specifically represent historical observations or predicted future conditions according to climate models.",
   "Estimates of water deliveries to locations of interest with small water demands may be less reliable than deliveries to water users that receive large volumes.",
   "The outcomes of CalSim3 are best interpreted in a comparative manner – evaluating how outcomes change relative to current operations (as a baseline) is more appropriate than assessing the specific outcomes of any particular scenario.",
-  "COEQWAL scenarios are exploratory model runs and are not intended for direct use in legal or regulatory proceedings. Visit ABOUT US to learn how COEQWAL scenarios were developed.",
+  <>
+    COEQWAL scenarios are exploratory model runs and are not intended for direct use in legal or regulatory proceedings. Visit
+    {" "}<InlineNavLink to="/about">
+      About
+    </InlineNavLink>{" "}
+    to learn how COEQWAL scenarios were developed.
+  </>
+
 ] as const
