@@ -381,14 +381,14 @@ export function Footer() {
           Data
         </Typography>
 
-        {/* About Us */}
+        {/* About */}
         <Typography
           variant="caption"
           component="button"
           onClick={() => router.push("/about")}
           sx={footerLinkButtonSx}
         >
-          About Us
+          About
         </Typography>
 
         <Typography
