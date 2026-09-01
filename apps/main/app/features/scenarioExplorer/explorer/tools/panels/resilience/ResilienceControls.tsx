@@ -6,11 +6,11 @@
  * The control surface is a single one-line sentence:
  *
  *   "{Pivot}, comparing {axes}, covering {scenarios}, {outcomes}, and
- *    {climates}, as average tier."   [Options]
+ *    {climates}, as outcome level."   [Options]
  *
  * The leading phrase is the pivot (biggest lever on chart shape). The
  * following phrases narrow down the axes and scope. Cells are always
- * colored by average tier. That trailing clause is static text.
+ * colored by outcome level. That trailing clause is static text.
  *
  * Writes go through controls/ (read → plan → write). See controls/index.ts.
  * Presentational primitives (PhraseButton, PopoverShell, RadioRow) live
@@ -75,9 +75,9 @@ interface ResilienceControlsProps {
 }
 
 // The sentence used to end with a "read as" phrase button that let the
-// user swap between average tier, climate shift, spread of results,
+// user swap between outcome level, climate shift, spread of results,
 // and leverage encodings. That chooser was removed in favor of a
-// single, static "average tier" clause. The tool is now focused on
+// single, static "outcome level" clause. The tool is now focused on
 // the tier story end-to-end. The CellEncoding / DeltaMode fields
 // remain in state (see `ResiliencePanel`) so presets and the viz
 // layer keep working, but there is no longer any UI that sets them
@@ -109,7 +109,7 @@ export default function ResilienceControls({
 
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
 
-  // Pin the sentence to "average tier" end-to-end: any non-tier
+  // Pin the sentence to "outcome level" end-to-end: any non-tier
   // encoding (legacy density modes, distribution, leverage, glyph)
   // or any non-none delta mode is coerced back to the default. This
   // replaces the old chooser migrations and covers URL / preset /
@@ -428,7 +428,7 @@ export default function ResilienceControls({
             ariaLabel={`Hydroclimates on the chart: ${climatesLabel}. Click to change.`}
           />
           <Box component="span" sx={{ color: theme.palette.grey[700] }}>
-            as average tier.
+            as outcome level.
           </Box>
         </Typography>
       </Box>

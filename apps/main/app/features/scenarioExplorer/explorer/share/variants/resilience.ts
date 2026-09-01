@@ -243,7 +243,7 @@ const resilienceHandler: VariantHandler<ResilienceItem> = {
       extra.push(["Encoding", data.cellEncoding])
     }
     const header = {
-      variantTitle: "Resilience heatmap",
+      variantTitle: "Heatmap",
       scenarios,
       hydroclimate,
       extra,

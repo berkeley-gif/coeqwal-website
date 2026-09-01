@@ -83,7 +83,7 @@ export const EXPLORE_MODE_VIEW_NAME: Record<ExploreMode, string> = {
   bar: "Bar chart comparison",
   radar: "Radar chart",
   equity: "Distribution",
-  resilience: "Resilience heatmap",
+  resilience: "Heatmap",
   data: "Data in Depth",
 }
 
