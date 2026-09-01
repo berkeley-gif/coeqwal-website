@@ -39,7 +39,10 @@ const hydroclimateDescription = [
   {
     segments: [
       { text: "These hydroclimates represent " },
-      { text: "different levels of stress to our water system", mark: "yellow" },
+      {
+        text: "different levels of stress to our water system",
+        mark: "yellow",
+      },
       {
         text: ' that we should be prepared for. For example, an "extreme stress" hydroclimate represents a plausible climate future that will be much more challenging to deal with than a "moderate stress" hydroclimate.',
       },
