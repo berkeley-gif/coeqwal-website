@@ -3,21 +3,23 @@
 /**
  * CompareControls - the explorer's single-axis comparison controls.
  *
- * "Compare by" picks the one axis that holds multiple members; the other two
+ * "Compare by" picks the one axis that holds multiple members; the others
  * are held constant by the pinned selectors:
  *  - scenarios: the workspace scenario selection (Current Operations locked
- *    first as the reference), at a pinned hydroclimate and location.
+ *    first as the reference), at a pinned location.
  *  - climates: a multi-select of climate futures, for one pinned scenario and
  *    location.
- *  - locations: a multi-select of locations, for one pinned scenario and
- *    hydroclimate.
+ *  - locations: a multi-select of locations, for one pinned scenario.
  * Scenario membership is owned by the workspace (the selection sidebar); this
  * control only reflects it and marks the locked reference.
  *
- * Layout rule: the compared members' chips come first, then the two pinned
- * (held-constant) selectors as one non-wrapping cluster, so e.g. the
- * reservoir dropdown always sits next to the hydroclimate dropdown instead
- * of wrapping apart at narrow widths.
+ * The hydroclimate is NOT held here: the shared toolbar's "View by
+ * hydroclimate" control is the tool's only hydroclimate input, so the chart
+ * always reads the workspace value.
+ *
+ * Layout rule: the compared members' chips come first, then the pinned
+ * (held-constant) selectors as one non-wrapping cluster, so the dropdowns do
+ * not wrap apart at narrow widths.
  *
  * Chip swatches use the same sticky per-member colors as the chart and its
  * legend (seriesColorAssignment, shared scope keys with ChartCard).
@@ -75,19 +77,16 @@ export default function CompareControls() {
     view,
     compareBy,
     pinnedScenario,
-    pinnedClimate,
     pinnedLocationByGroup,
     selectedClimates,
     selectedLocationsByGroup,
     setCompareBy,
     setPinnedScenario,
-    setPinnedClimate,
     setPinnedLocation,
     setSelectedClimates,
     setSelectedLocations,
   } = useDataSlice()
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
-  const workspaceHydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
   // The location queued in the add-location control on the Locations axis
   // (picker groups only); cleared once added.
   const [pendingLocation, setPendingLocation] = React.useState("")
@@ -125,7 +124,6 @@ export default function CompareControls() {
     pinnedScenario && compareScenarios.includes(pinnedScenario)
       ? pinnedScenario
       : BASELINE_SCENARIO_ID
-  const heldClimate = pinnedClimate ?? workspaceHydroclimate
   const heldLocation =
     pinnedLocationByGroup[groupId] ?? group.items[0]?.id ?? ""
 
@@ -196,28 +194,6 @@ export default function CompareControls() {
           {compareScenarios.map((id) => (
             <MenuItem key={id} value={id}>
               {scenarioLabel(id)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Box>
-  )
-
-  const climatePin = (
-    <Box>
-      <Typography id="climate-pin-label" variant="caption" sx={pinCaptionSx}>
-        Hydroclimate
-      </Typography>
-      <FormControl size="small" sx={controlSx}>
-        <Select
-          labelId="climate-pin-label"
-          value={heldClimate}
-          onChange={(e) => setPinnedClimate(e.target.value)}
-          sx={pinSelectSx}
-        >
-          {HYDROCLIMATES.map((c) => (
-            <MenuItem key={c} value={c}>
-              {climateLabel(c)}
             </MenuItem>
           ))}
         </Select>
@@ -356,7 +332,6 @@ export default function CompareControls() {
               gap: 2.5,
             }}
           >
-            {climatePin}
             {locationPin}
           </Box>
         </>
@@ -535,7 +510,6 @@ export default function CompareControls() {
             }}
           >
             {scenarioPin}
-            {climatePin}
           </Box>
         </>
       )}

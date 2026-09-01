@@ -206,7 +206,6 @@ export function useVariableData(): VariableData {
     distKind,
     compareBy,
     pinnedScenario,
-    pinnedClimate,
     pinnedLocationByGroup,
     selectedClimates,
     selectedLocationsByGroup,
@@ -229,7 +228,9 @@ export function useVariableData(): VariableData {
       selectedScenarios.includes(pinnedScenario))
       ? pinnedScenario
       : BASELINE_SCENARIO_ID
-  const heldClimate = resolveClimate(pinnedClimate ?? workspaceHydroclimate)
+  // The tool has no climate pin: the workspace value, set by the shared
+  // "View by hydroclimate" control, is the only hydroclimate input.
+  const heldClimate = resolveClimate(workspaceHydroclimate)
   const heldLocation =
     (groupId ? pinnedLocationByGroup[groupId] : undefined) ?? firstLocationId
 

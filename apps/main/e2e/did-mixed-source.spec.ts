@@ -241,7 +241,7 @@ test("a scenario with no served block is detected from its response, not its id"
   expect(errors).toEqual([])
 })
 
-test("pinning a hydroclimate other than the workspace climate keeps the scenarios axis live", async ({
+test("switching the workspace hydroclimate keeps the scenarios axis live", async ({
   page,
 }) => {
   await setupNetwork(page)
@@ -259,15 +259,16 @@ test("pinning a hydroclimate other than the workspace climate keeps the scenario
     .check({ timeout: 10_000 })
   await expect(page.getByText("no data", { exact: true })).toHaveCount(1)
 
-  // Pin "Moderate stress" while the workspace stays on Historical. Before this
-  // change the whole card dropped to sample data here and drew an invented
-  // curve for the DCP scenario under a "Sample data" badge.
+  // Switch the workspace hydroclimate to Moderate stress with the shared
+  // "View by hydroclimate" control, the tool's only hydroclimate input since
+  // the per-tool climate pin was removed. Every compared scenario must
+  // re-resolve to its variant for that climate; an earlier defect dropped the
+  // whole card to sample data on a climate change and drew an invented curve
+  // for the unmodeled scenario under a "Sample data" badge.
   await page
-    .getByRole("combobox")
-    .filter({ hasText: /^Historical$/ })
+    .getByRole("button", { name: /Moderate-wet climate stress/ })
     .first()
     .click()
-  await page.getByRole("option", { name: "Moderate stress" }).click()
 
   // Each compared scenario is requested as its Moderate stress variant.
   await expect
@@ -293,11 +294,9 @@ test("pinning a hydroclimate other than the workspace climate keeps the scenario
 
   // Back to Historical: the Historical variants are requested again.
   await page
-    .getByRole("combobox")
-    .filter({ hasText: /^Moderate stress$/ })
+    .getByRole("button", { name: /^Historical/ })
     .first()
     .click()
-  await page.getByRole("option", { name: "Historical" }).click()
   await expect(
     page.getByText(/under the Historical hydroclimate occupy 55%/),
   ).toBeVisible()
