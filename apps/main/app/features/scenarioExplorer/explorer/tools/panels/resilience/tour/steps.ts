@@ -8,99 +8,92 @@ import type { TourStep } from "../../../tour/types"
 
 export const RESILIENCE_TOUR: TourStep[] = [
   {
-    id: "list.hero", // edit this 
-    eyebrow: "START HERE",
+    id: "resilience.hero",
+    eyebrow: "start here",
     title: "Start here",
     body: "If this is your first time using the Explore Tool, we recommend visiting the Get Started section of the site before beginning your exploration.",
   },
-
-  // Orientation + details for the scenario-list controls band.
   {
-    id: "list.step0.scenarioArea", // edit this
-    anchorId: "list.scenarioArea", // edit this
+    id: "resilience.step1.intro",
     eyebrow: "heatmap",
     title: "",
     body: "The Heatmap displays scenario results for different hydroclimates. The colors of the heat map chart correspond to optimal (green), acceptable (blue), at-risk (orange), and critical (red) outcomes.",
-    placement: "bottom-start", // edit this
   },
   {
-    id: "list.step1.search", // edit this
-    anchorId: "list.toolbar.search", // edit this
+    id: "resilience.step2.cell",
+    anchorId: "resilience.heatmapGrid",
     eyebrow: "reading the data",
     title: "Each box in the grid represents an average outcome level",
     body: "Hover over each point to view the average value and outcome level category. The entire grid displays how outcomes shift under different hydroclimates.",
-    placement: "bottom-start", // edit this
+    placement: "right",
   },
   {
-    id: "list.step1.chips", // edit this
-    anchorId: "list.toolbar.chips", // edit this
+    id: "resilience.step3.chartToolbar",
+    anchorId: "resilience.chartToolbar",
     eyebrow: "chart controls",
     title: "These controls configure the chart",
     body: "Click on the buttons to change how data on the heatmap is displayed.",
-    placement: "bottom-start", // edit this
+    placement: "bottom-start",
   },
   {
-    id: "list.step1.themeFilterChip", // edit this
-    anchorId: "list.toolbar.themeFilterChip", // edit this
+    id: "resilience.step4.pivot",
+    anchorId: "resilience.pivot",
     eyebrow: "arrange chart",
     title: "Select the data to display",
     body: "The chart can be arranged by scenario, outcomes, or hydroclimate.",
-    placement: "bottom-start", // edit this
+    placement: "bottom-start",
   },
   {
-    id: "list.step3.showOnlyChosen", // edit this
-    anchorId: "list.select.showOnlyChosen", // edit this
+    id: "resilience.step5.outcomes",
+    anchorId: "resilience.outcomes",
     eyebrow: "select outcomes",
     title: "Select the outcomes to display",
     body: "Select one or more outcomes to display on the chart.",
-    placement: "bottom", // edit this
+    placement: "bottom",
   },
   {
-    id: "list.step1.operations", // edit this
-    anchorId: "list.toolbar.keyOperationsChip", // edit this
+    id: "resilience.step5.climates",
+    anchorId: "resilience.climates",
     eyebrow: "select hydroclimates",
     title: "Select the hydroclimates to display",
     body: "Select one or more hydroclimates to display on the chart.",
-    placement: "bottom-start", // edit this
+    placement: "bottom-start",
   },
   {
-    id: "list.step1.operationsIcons", // edit this
-    anchorId: "list.row.operations", // edit this
+    id: "resilience.step6.showCellValues",
+    anchorId: "resilience.showCellValues",
     eyebrow: "outcome values",
     title: "Display the average values of outcome levels in the boxes",
     body: "Higher values indicate worse performance.",
-    placement: "left-start", // edit this
+    placement: "bottom-start",
   },
   {
-    id: "list.step1.share", // edit this
-    anchorId: "list.row.share", // edit: anchor ID for the share button
+    id: "resilience.step7.switchOrientation",
+    anchorId: "resilience.switchOrientation",
     eyebrow: "switch heatmap orientation",
-    title: "",
-    body: "Switch the axes of the heatmap grid.",
-    placement: "left-start", // edit this
+    title: "Switch the axes of the heatmap grid",
+    placement: "bottom-start",
   },
   {
-    id: "list.step3.row", // edit this
-    anchorId: "list.select.checkbox", // edit this
+    id: "resilience.step8.saveSnapshot",
+    anchorId: "resilience.saveSnapshot",
     eyebrow: "save snapshot",
     title: "Save one or more distribution plots using this button",
     body: "Click the save snapshot button to export the radar chart to the SHARE folder. All shared items will be saved here to revisit later.",
-    placement: "right", // edit this
+    placement: "bottom-start",
   },
   {
-    id: "list.journey", // edit this
-    anchorId: "", // edit this
+    id: "resilience.step9.showMap",
+    anchorId: "toolbar.showMap",
     eyebrow: "map view",
     title: "The locations of outcomes can be viewed on a map",
     body: "Open the map and click on a box in the heatmap. All locations of interest for that outcome are displayed on the map.",
-    placement: "", // edit this
+    placement: "bottom",
   },
   {
-    id: "list.journey", // edit this
-    anchorId: "", // edit this
+    id: "resilience.journey",
     eyebrow: "explore other views",
     title: "Select other tools to view scenario results in differ ways",
     body: "Use the links above to go to the next tool when you are ready. Your shortlist of scenarios stays with you.",
-    placement: "", // edit this
   },
 ]

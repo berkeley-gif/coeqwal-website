@@ -49,7 +49,7 @@ export const BAR_TOUR: TourStep[] = [
   },
   {
     id: "bar.step7.showMap",
-    anchorId: "bar.showMap",
+    anchorId: "toolbar.showMap",
     eyebrow: "map view",
     title: "The locations of key outcomes can be viewed on a map",
     body: "Open the map and click on a bar chart to see how outcomes vary across individual locations.",

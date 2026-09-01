@@ -41,6 +41,8 @@ import {
 import { SaveSnapshotButton } from "../../chrome/actions/SaveSnapshotButton"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { PhraseButton, PopoverShell, RadioRow } from "./ResilienceControlsParts"
+import { InlineTourAnchor } from "../../tour/anchors/InlineTourAnchor"
+import { useTourAnchor } from "../../tour/anchors/TourAnchorContext"
 import { useWorkspaceSlice, useResilienceSlice } from "../../../store"
 import { useResilienceControlsWriter } from "./useResilienceControlsWriter"
 import {
@@ -93,6 +95,7 @@ export default function ResilienceControls({
 }: ResilienceControlsProps) {
   const theme = useTheme()
   const { siblingGroups } = useScenarioList()
+  const sentenceRowAnchorRef = useTourAnchor("resilience.pivot")
 
   const {
     view,
@@ -348,6 +351,7 @@ export default function ResilienceControls({
         }}
       >
         <Typography
+          ref={sentenceRowAnchorRef}
           variant="compactCaption"
           component="div"
           sx={{
@@ -409,24 +413,28 @@ export default function ResilienceControls({
             component="span"
             sx={{ color: theme.palette.grey[500], mx: 0.25 }}
           ></Box>
-          <PhraseButton
-            label={outcomesLabel}
-            active={Boolean(outcomesAnchor)}
-            onClick={(e) => setOutcomesAnchor(e.currentTarget)}
-            ariaLabel={`Outcomes on the chart: ${outcomesLabel}. Click to change.`}
-          />
+          <InlineTourAnchor anchorId="resilience.outcomes">
+            <PhraseButton
+              label={outcomesLabel}
+              active={Boolean(outcomesAnchor)}
+              onClick={(e) => setOutcomesAnchor(e.currentTarget)}
+              ariaLabel={`Outcomes on the chart: ${outcomesLabel}. Click to change.`}
+            />
+          </InlineTourAnchor>
           <Box
             component="span"
             sx={{ color: theme.palette.grey[700], mx: 0.25 }}
           >
             and
           </Box>
-          <PhraseButton
-            label={climatesLabel}
-            active={Boolean(climatesAnchor)}
-            onClick={(e) => setClimatesAnchor(e.currentTarget)}
-            ariaLabel={`Hydroclimates on the chart: ${climatesLabel}. Click to change.`}
-          />
+          <InlineTourAnchor anchorId="resilience.climates">
+            <PhraseButton
+              label={climatesLabel}
+              active={Boolean(climatesAnchor)}
+              onClick={(e) => setClimatesAnchor(e.currentTarget)}
+              ariaLabel={`Hydroclimates on the chart: ${climatesLabel}. Click to change.`}
+            />
+          </InlineTourAnchor>
           <Box component="span" sx={{ color: theme.palette.grey[700] }}>
             as outcome level.
           </Box>
@@ -457,61 +465,68 @@ export default function ResilienceControls({
         >
           Rows
         </Typography>
-        <InlineToggleChip
-          label="Show cell values"
-          active={showCellNumbers}
-          onClick={() => writeChange({ showCellNumbers: !showCellNumbers })}
-          ariaLabel={
-            showCellNumbers
-              ? "Cell values: shown. Click to hide the tier numbers inside cells."
-              : "Cell values: hidden. Click to show the tier number inside each cell."
-          }
-        />
-        <Button
-          type="button"
-          size="small"
-          variant="outlined"
-          onClick={() => writeChange({ transposed: !transposed })}
-          aria-pressed={transposed}
-          aria-label={
-            transposed
-              ? "Rows and columns switched. Click to use the default row and column layout."
-              : "Switch which dimension runs down the rows versus across the columns."
-          }
-          sx={{
-            ml: 0.25,
-            borderRadius: "10px",
-            textTransform: "none",
-            fontSize: "0.8125rem",
-            fontWeight: 500,
-            lineHeight: 1.2,
-            py: 0.35,
-            px: 1,
-            minHeight: 30,
-            borderColor: transposed
-              ? theme.palette.blue.bright
-              : theme.palette.grey[300],
-            color: transposed
-              ? theme.palette.blue.bright
-              : theme.palette.grey[800],
-            backgroundColor: transposed
-              ? theme.palette.interaction.selectedBackground
-              : theme.palette.common.white,
-            boxShadow: "0 1px 0 rgba(0,0,0,0.04)",
-            "&:hover": {
+        <InlineTourAnchor anchorId="resilience.showCellValues">
+          <InlineToggleChip
+            label="Show cell values"
+            active={showCellNumbers}
+            onClick={() => writeChange({ showCellNumbers: !showCellNumbers })}
+            ariaLabel={
+              showCellNumbers
+                ? "Cell values: shown. Click to hide the tier numbers inside cells."
+                : "Cell values: hidden. Click to show the tier number inside each cell."
+            }
+          />
+        </InlineTourAnchor>
+        <InlineTourAnchor anchorId="resilience.switchOrientation">
+
+          <Button
+            type="button"
+            size="small"
+            variant="outlined"
+            onClick={() => writeChange({ transposed: !transposed })}
+            aria-pressed={transposed}
+            aria-label={
+              transposed
+                ? "Rows and columns switched. Click to use the default row and column layout."
+                : "Switch which dimension runs down the rows versus across the columns."
+            }
+            sx={{
+              ml: 0.25,
+              borderRadius: "10px",
+              textTransform: "none",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              lineHeight: 1.2,
+              py: 0.35,
+              px: 1,
+              minHeight: 30,
               borderColor: transposed
-                ? theme.palette.blue.dark
-                : theme.palette.grey[400],
+                ? theme.palette.blue.bright
+                : theme.palette.grey[300],
+              color: transposed
+                ? theme.palette.blue.bright
+                : theme.palette.grey[800],
               backgroundColor: transposed
                 ? theme.palette.interaction.selectedBackground
-                : theme.palette.grey[50],
-            },
-          }}
-        >
-          Switch rows and columns
-        </Button>
+                : theme.palette.common.white,
+              boxShadow: "0 1px 0 rgba(0,0,0,0.04)",
+              "&:hover": {
+                borderColor: transposed
+                  ? theme.palette.blue.dark
+                  : theme.palette.grey[400],
+                backgroundColor: transposed
+                  ? theme.palette.interaction.selectedBackground
+                  : theme.palette.grey[50],
+              },
+            }}
+          >
+            Switch rows and columns
+          </Button>
+        </InlineTourAnchor>
         {onSaveSnapshot && (
-          <SaveSnapshotButton onClick={onSaveSnapshot} sx={{ ml: 2 }} />
+          <InlineTourAnchor anchorId="resilience.saveSnapshot">
+            <SaveSnapshotButton onClick={onSaveSnapshot} sx={{ ml: 2 }} />
+          </InlineTourAnchor>
         )}
       </Box>
 

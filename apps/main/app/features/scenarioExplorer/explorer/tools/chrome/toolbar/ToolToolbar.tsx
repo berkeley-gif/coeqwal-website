@@ -51,7 +51,7 @@ export default function ToolToolbar({
   // tour. Resilience reuses this control too but its tour does not
   // step through it, so a single id is fine.
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
-  const showMapAnchorRef = useTourAnchor("bar.showMap")
+  const showMapAnchorRef = useTourAnchor("toolbar.showMap")
   // High-level orientation anchor for the list tour: the whole strip
   // of view controls (hydroclimate, map, etc.) on the right side of
   // the toolbar. Registered only in list mode so it does not collide
