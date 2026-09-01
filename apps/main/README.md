@@ -141,7 +141,6 @@ For a link inside body copy (tooltip text, panel copy, explainer strings) that s
 
 Why: this slots into the existing "Important topics" pattern — each subsection here documents a convention a dev should reach for instead of reinventing (Suspense boundaries, error boundary layers, URL state ownership). `InlineNavLink` is the same kind of thing: a small shared helper whose value is that everyone uses it instead of five slightly-different one-off inline links. Placing it right after "URL state and deep links" groups it near the other navigation/routing content rather than burying it at the end of the file.
 
-
 ### State management
 
 Three storage tiers, picked by what the state needs to do.

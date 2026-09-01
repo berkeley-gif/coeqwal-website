@@ -139,7 +139,6 @@ export default function ToolToolbar({
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center" }}>
-
                 <Typography
                   variant="dashboard"
                   sx={{
@@ -153,14 +152,16 @@ export default function ToolToolbar({
                 <InfoIconButton
                   tooltipContent={
                     <>
-                      The historical hydroclimate used in COEQWAL is adjusted for recent
-                      climate change and does not represent the observed historical record.
-                      The flow change reported for the four hydroclimate futures represent
-                      the average change in flow from California&apos;s major water supply
-                      basins over a 30-year period, centered on 2043. An assumed level of
-                      sea level rise is also specified for each hydroclimate future. For
-                      more information, see technical documentation on the{" "}
-                      <InlineNavLink to="/data">Data</InlineNavLink> page.
+                      The historical hydroclimate used in COEQWAL is adjusted
+                      for recent climate change and does not represent the
+                      observed historical record. The flow change reported for
+                      the four hydroclimate futures represent the average change
+                      in flow from California&apos;s major water supply basins
+                      over a 30-year period, centered on 2043. An assumed level
+                      of sea level rise is also specified for each hydroclimate
+                      future. For more information, see technical documentation
+                      on the <InlineNavLink to="/data">Data</InlineNavLink>{" "}
+                      page.
                     </>
                   }
                   placement="right"
