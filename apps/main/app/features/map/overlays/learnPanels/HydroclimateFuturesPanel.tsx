@@ -1,17 +1,16 @@
 "use client"
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { useRouter } from "next/navigation"
 import { WaterDroplet } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
 import { LinedList } from "@repo/ui"
 import { GlossaryTermLink } from "../../../glossary"
 import { HYDROCLIMATE_DEFS } from "../../../../content/scenarios"
+import { InlineNavLink } from "../../../../components/InlineNavLink"
 
 export default function HydroclimateFuturesPanel() {
   const theme = useTheme()
-  const router = useRouter()
   const sp = theme.space.component
   const dropletIcon = <WaterDroplet />
 
@@ -66,21 +65,8 @@ export default function HydroclimateFuturesPanel() {
         over a 30-year period, centered on 2043. An assumed level of sea level
         rise is also specified for each hydroclimate future.{" "}
       </Typography>
-      <Typography
-        variant="body2"
-        component="button"
-        onClick={() => router.push("/data")}
-        sx={{
-          background: "none",
-          border: "none",
-          color: "text.secondary",
-          cursor: "pointer",
-          padding: 0,
-          textAlign: "inherit" as const,
-          mt: sp.sm,
-        }}
-      >
-        Click here to learn more.
+      <Typography variant="body2" color="text.secondary" sx={{ mt: sp.sm }}>
+        Click <InlineNavLink to="/data">here</InlineNavLink> to learn more.
       </Typography>
     </PanelShell>
   )
