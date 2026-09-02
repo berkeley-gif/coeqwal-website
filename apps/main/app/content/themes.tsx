@@ -1459,7 +1459,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "The tension between water operations and salmon conservation is particularly acute in the Sacramento River, where winter-run Chinook salmon are endangered and remain at high risk of extinction. Winter-run salmon historically spawned in cold, spring-fed headwaters and tributaries of the Sacramento River. Today, Shasta Dam blocks access to most of those habitats, and winter-run primarily spawn downstream of Shasta Dam during the warmest part of the year. Their egg survival now depends heavily on cold water stored in Shasta Reservoir and released downstream during summer.",
+              text: (<>The tension between water operations and salmon conservation is particularly acute in the Sacramento River, where winter-run Chinook salmon are endangered and remain at high risk of extinction. Winter-run salmon historically spawned in cold, spring-fed headwaters and tributaries of the <GlossaryTermLink>Sacramento River</GlossaryTermLink>. Today, Shasta Dam blocks access to most of those habitats, and winter-run primarily spawn downstream of Shasta Dam during the warmest part of the year. Their egg survival now depends heavily on cold water stored in Shasta Reservoir and released downstream during summer.</>),
             },
             {
               type: "paragraph",
