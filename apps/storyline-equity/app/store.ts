@@ -11,6 +11,7 @@ import type {
 import {
   CALIFORNIA_TRIBES_VIEW,
   DELTA_INFRASTRUCTURE_VIEW,
+  INDIGENOUS_RIVER_NETWORK_VIEW,
   SHASTA_MCCLOUD_VIEW,
 } from "./components/map/config/cameraPresets"
 
@@ -218,7 +219,15 @@ export const useCameraView = () =>
 
     if (
       state.activeSection === "HistoricalContext" &&
+      state.historicalContextProgress >= HISTORICAL_CONTEXT_RIVERS_PROGRESS &&
       state.historicalContextProgress < HISTORICAL_CONTEXT_MCCLOUD_PROGRESS
+    ) {
+      return INDIGENOUS_RIVER_NETWORK_VIEW
+    }
+
+    if (
+      state.activeSection === "HistoricalContext" &&
+      state.historicalContextProgress < HISTORICAL_CONTEXT_RIVERS_PROGRESS
     ) {
       return CALIFORNIA_TRIBES_VIEW
     }

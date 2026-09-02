@@ -5,8 +5,8 @@ import { Layer, Source } from "@repo/map"
 export type UserGroupArea = "agriculture" | "drinking" | "ecosystem"
 
 const SOURCE_ID = "background-user-group-area-source"
-const SOURCE_LAYER = "usergroup_area"
-const SOURCE_URL = "mapbox://coeqwal.storyline-equity_usergroup_area"
+const SOURCE_LAYER = "usergroup_area.zip-rnssxa"
+const SOURCE_URL = "mapbox://coeqwal.015k90"
 
 export default function UserGroupAreaLayer({
   visible,

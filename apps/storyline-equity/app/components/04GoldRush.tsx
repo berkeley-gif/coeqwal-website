@@ -5,51 +5,32 @@ import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
 
 const goldRushText = {
-  title: { text: "How inequity started and persists" },
-  priorities: {
-    introduction: [
-      {
-        text: "Today’s water rights reflect the values and priorities of colonial settlers during California’s Gold Rush:",
-      },
-    ],
-    points: [
-      {
-        text: "Taking water and other resources with little regard for downstream impacts.",
-      },
-      {
-        text: "Expansion of settlements and agriculture to produce crops for export.",
-      },
-      {
-        text: "Diverting as much water as possible rather than leaving it in rivers.",
-      },
-    ],
-  },
-  exclusion: [
+  title: { text: "How inequity took root" },
+  opening: [
     {
-      text: "New legal and political systems redefined who could access land and water.",
+      text: "Today’s water rights reflect laws and priorities established during California’s Gold Rush.",
     },
     {
-      text: "The 1850 Act for the Government and Protection of Indians legalized forced removal of Indigenous people from their homeland and sacred waters.",
+      text: "As prospectors rushed to California’s Yuba River, the state’s first governor called for a “war of extermination” against Indigenous people. The 1850 Act for the Government and Protection of Indians legalized the forced removal of Indigenous people from their homeland and sacred waters.",
+    },
+  ],
+  transformation: [
+    {
+      text: "The dispossession of the Nisenan people sparked a legal and physical transformation of the Yuba River that bled into all of California’s waters.",
     },
     {
-      text: "Water rights doctrines instituted new patterns of water allocation.",
+      text: "With freedom to profit off the land, prospectors found that blasting high-pressure jets of water onto hillsides accelerated gold extraction. Their need for water far from the river justified a new type of “appropriative” water right: whoever first diverted the water got priority rights to the water, as long as they were white and male.",
     },
     {
-      text: "Riparian rights tied water access to owning land along a river.",
-    },
-    {
-      text: "Appropriative rights gave priority to those who diverted water first, allowing early white settlers, miners, and farmers to establish priority access to water.",
-    },
-    {
-      text: "New laws excluded Indigenous communities. In practice, only white men could claim and hold water rights. Those who secured these rights could deplete rivers without regard for downstream communities, ecosystems, or ways of life.",
+      text: "Miners built miles of ditches to divert streams to hydraulic mines, then dumped mountains of debris into the rivers, burying habitat and flooding downstream farms.",
     },
   ],
   legacy: [
     {
-      text: "These systems of exclusion established a lasting hierarchy of water users. Settlers, supported by state and federal governments, dispossessed Indigenous Peoples of their lands and waters.",
+      text: "As mining declined, irrigation districts and hydropower companies acquired many of these senior water rights.",
     },
     {
-      text: "This legacy continues to shape inequities in access to the water that sustains cultures, health and well-being.",
+      text: "This created a lasting hierarchy of water access. Water could be diverted with little regard for downstream communities, ecosystems, or ways of life, and that legacy continued to shape California’s water system today.",
     },
   ],
 } as const
@@ -67,8 +48,8 @@ export default function GoldRush() {
       <Box
         className="container text-section"
         sx={{
-          width: "min(75ch, calc(100vw - 6rem))",
-          maxWidth: "75ch",
+          width: "min(75ch, calc(100vw - 6rem), calc(55dvw - 5rem))",
+          maxWidth: "calc(55dvw - 5rem)",
           minHeight: "70vh",
           display: "grid",
           alignItems: "center",
@@ -84,17 +65,12 @@ export default function GoldRush() {
           <Box component="header">
             <SectionTitle text={goldRushText.title} />
           </Box>
-          <Stack component="section" spacing={2}>
-            <Box component="article">
-              <Paragraph blocks={goldRushText.priorities.introduction} />
-            </Box>
-            <Box component="ul" sx={{ margin: 0, paddingLeft: 4 }}>
-              {goldRushText.priorities.points.map((point) => (
-                <Box key={point.text} component="li" sx={{ paddingLeft: 1 }}>
-                  <Paragraph blocks={[point]} />
-                </Box>
-              ))}
-            </Box>
+          <Stack component="section" spacing={3.5}>
+            {goldRushText.opening.map((paragraph) => (
+              <Box key={paragraph.text} component="article">
+                <Paragraph blocks={[paragraph]} />
+              </Box>
+            ))}
           </Stack>
         </ScrollElement>
 
@@ -106,12 +82,11 @@ export default function GoldRush() {
           style={{ gridArea: "1 / 1" }}
         >
           <Stack component="section" spacing={3.5}>
-            <Box component="article">
-              <Paragraph blocks={[goldRushText.exclusion[0]]} />
-            </Box>
-            <Box component="article">
-              <Paragraph blocks={goldRushText.exclusion.slice(1)} />
-            </Box>
+            {goldRushText.transformation.map((paragraph) => (
+              <Box key={paragraph.text} component="article">
+                <Paragraph blocks={[paragraph]} />
+              </Box>
+            ))}
           </Stack>
         </ScrollElement>
 
@@ -121,10 +96,10 @@ export default function GoldRush() {
           animation="slideUp"
           style={{ gridArea: "1 / 1" }}
         >
-          <Stack component="section" spacing={6}>
-            {goldRushText.legacy.map((sentence) => (
-              <Box key={sentence.text} component="article">
-                <Paragraph blocks={[sentence]} />
+          <Stack component="section" spacing={3.5}>
+            {goldRushText.legacy.map((paragraph) => (
+              <Box key={paragraph.text} component="article">
+                <Paragraph blocks={[paragraph]} />
               </Box>
             ))}
           </Stack>

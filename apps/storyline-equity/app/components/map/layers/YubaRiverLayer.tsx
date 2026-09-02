@@ -11,6 +11,8 @@ import { useLazyMount } from "../hooks/useLazyMount"
 const YUBA_RIVER_LAYER_IDS = ["yuba-river-halo", "yuba-river-body"] as const
 
 const YUBA_RIVER_SOURCE_ID = "yuba-river-source"
+const YUBA_HEADWATER_SOURCE_ID = "yuba-headwater-source"
+const YUBA_HEADWATER_SOURCE_LAYER = "Yuba_headwater.zip-z0o4c7"
 const RIVER_HALO_COLOR = "#07142c"
 export default function YubaRiverLayer({
   visible,
@@ -52,6 +54,43 @@ export default function YubaRiverLayer({
 
   return (
     <>
+      <Source
+        id={YUBA_HEADWATER_SOURCE_ID}
+        type="vector"
+        url="mapbox://coeqwal.6t1b1o"
+      >
+        <Layer
+          id="yuba-headwater-halo"
+          type="line"
+          source-layer={YUBA_HEADWATER_SOURCE_LAYER}
+          paint={{
+            "line-color": RIVER_HALO_COLOR,
+            "line-width": 4,
+            "line-opacity": 0.55,
+          }}
+          layout={{
+            "line-cap": "round",
+            "line-join": "round",
+            visibility: visibilityValue,
+          }}
+        />
+        <Layer
+          id="yuba-headwater-body"
+          type="line"
+          source-layer={YUBA_HEADWATER_SOURCE_LAYER}
+          paint={{
+            "line-color": FreshWaterColor,
+            "line-width": 2.5,
+            "line-opacity": 0.9,
+          }}
+          layout={{
+            "line-cap": "round",
+            "line-join": "round",
+            visibility: visibilityValue,
+          }}
+        />
+      </Source>
+
       <Source id={YUBA_RIVER_SOURCE_ID} type="geojson" data={yubaRiver}>
         <Layer
           id="yuba-river-halo"

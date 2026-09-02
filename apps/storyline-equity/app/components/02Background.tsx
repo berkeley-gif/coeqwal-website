@@ -11,15 +11,42 @@ const backgroundText = {
       { text: "California's water begins in mountain headwaters." },
       { text: "Water flows downstream through rivers toward the ocean." },
       {
-        text: "Along the way, California's dams and reservoirs, canals and pumps change how and where water flows.",
+        text: "Along the way, California's dams, reservoirs, canals, and pumps reshape how and where water flows.",
       },
-      { text: "They form a vast, complex network that distributes water to:" },
+      {
+        text: "Together, they form a vast, complex network that distributes water to:",
+      },
     ],
-    [{ text: "Agriculture for crops." }],
-    [{ text: "Cities and communities for drinking and commercial use." }],
     [
       {
-        text: "Rivers, wetlands, and fish, as well as the people who depend on healthy rivers for cultural practices, subsistence fishing, recreation, and clean water.",
+        segments: [
+          { text: "Agriculture", mark: "strong" },
+          { text: " for crops." },
+        ],
+      },
+    ],
+    [
+      {
+        segments: [
+          { text: "Cities", mark: "strong" },
+          { text: " and " },
+          { text: "communities", mark: "strong" },
+          { text: " for drinking and commercial use." },
+        ],
+      },
+    ],
+    [
+      {
+        segments: [
+          { text: "Rivers", mark: "strong" },
+          { text: ", " },
+          { text: "wetlands", mark: "strong" },
+          { text: ", and " },
+          { text: "fish", mark: "strong" },
+          {
+            text: ", and people who depend on healthy rivers for cultural practices, subsistence fishing, recreation, and clean water.",
+          },
+        ],
       },
     ],
     [
@@ -49,7 +76,7 @@ function BackgroundNarrative() {
       <Box
         className="container text-section"
         sx={{
-          maxWidth: "75ch",
+          maxWidth: "min(75ch, calc(55dvw - 5rem))",
           minHeight: "70vh",
           display: "grid",
           alignItems: "center",

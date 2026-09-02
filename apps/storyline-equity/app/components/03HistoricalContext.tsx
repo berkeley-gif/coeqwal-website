@@ -3,12 +3,13 @@
 import { ScrollElement, StickyScrollSection } from "@repo/scrollytelling"
 import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
+import { FreshWaterColor } from "./helpers/colorPalette"
 
 const historicalContextText = {
   title: { text: "How Indigenous communities relate to water" },
   opening: [
     {
-      text: "Across California, Indigenous communities have lived in sync with the seasons, rivers, fish and wildlife for millennia.",
+      text: "Across California, Indigenous communities have lived with the seasons, rivers, fish, and wildlife for millennia.",
     },
   ],
   tribalRelations: [
@@ -16,12 +17,42 @@ const historicalContextText = {
       text: "To many California Tribes, salmon are relatives and rivers are sacred places.",
     },
     {
-      text: "Through place-based ecological knowledge and practices, Tribes have sustained relationships with rivers and wildlife as kin. Indigenous names for rivers and other places reflect these enduring relationships, carrying histories, knowledge, and responsibilities that today’s commonly used names often obscure.",
+      segments: [
+        {
+          text: "Through place-based ecological knowledge and practices, Tribes have sustained relationships with rivers and wildlife as kin. Indigenous names for ",
+        },
+        { text: "rivers", mark: "strong" },
+        {
+          text: " and other places reflect these enduring relationships, carrying histories, knowledge, and responsibilities often obscured by today’s commonly used names.",
+        },
+      ],
     },
   ],
   mcCloud: [
     {
-      text: 'For the Winnemem Wintu of the McCloud "Middle Water" River, cold-water springs of Mount Shasta gave birth to humans and the Nur. In the creation story, the Nur (Winter-Run Chinook Salmon) gave their voice to humans. In return, the Winnemem People speak for the salmon.',
+      segments: [
+        {
+          text: 'For the Winnemem Wintu of the McCloud, or "Middle Water" River, ',
+        },
+        {
+          text: "cold-water springs",
+          mark: "freshwater",
+          legend: {
+            color: FreshWaterColor,
+            shape: "circle",
+            position: "after",
+            outlineColor: "#fcfbfa",
+            outlineWidth: 2,
+          },
+        },
+        {
+          text: " of Mount Shasta gave birth to humans and the Nur. In the creation story, ",
+        },
+        { text: "the Nur \u2014 Winter-Run Chinook Salmon", mark: "strong" },
+        {
+          text: ", gave their voice to humans. In return, the Winnemem People speak for the salmon.",
+        },
+      ],
     },
     {
       text: "Through fishing practices, traditions, and ceremonies, the Winnemem Wintu honor the Nur as relatives. By protecting their springs and rivers, they protect salmon and their Tribe’s traditional way of life.",
@@ -29,10 +60,10 @@ const historicalContextText = {
   ],
   closing: [
     {
-      text: "With the arrival of European settlers, forced removal of Indigenous communities from their homelands severed their sacred relationship with water as a source of life.",
+      text: "Colonization and the forced removal of Indigenous communities from their homelands disrupted these relationships and access to sacred waters.",
     },
     {
-      text: "In many ways, inequities take root in the state's history.",
+      text: "These inequities are rooted in the state's history.",
     },
   ],
 } as const
@@ -50,15 +81,15 @@ export default function HistoricalContext() {
       <Box
         className="container text-section"
         sx={{
-          width: "75ch",
+          width: "min(75ch, calc(55dvw - 5rem))",
           minHeight: "70vh",
           display: "grid",
           alignItems: "center",
         }}
       >
         <ScrollElement
-          enter={[0, 0.04]}
-          hold={[0.04, 0.42]}
+          enter={[-0.01, 0]}
+          hold={[0, 0.42]}
           exit={[0.42, 0.44]}
           animation="slideUp"
           style={{ gridArea: "1 / 1" }}
@@ -76,9 +107,15 @@ export default function HistoricalContext() {
               exit={[0.42, 0.44]}
               animation="slideUp"
             >
-              <Box component="article">
-                <Paragraph blocks={historicalContextText.tribalRelations} />
-              </Box>
+              <Stack component="section" spacing={3.5}>
+                {historicalContextText.tribalRelations.map(
+                  (paragraph, index) => (
+                    <Box key={index} component="article">
+                      <Paragraph blocks={[paragraph]} />
+                    </Box>
+                  ),
+                )}
+              </Stack>
             </ScrollElement>
           </Stack>
         </ScrollElement>
@@ -91,9 +128,17 @@ export default function HistoricalContext() {
           style={{ gridArea: "1 / 1" }}
         >
           <Stack component="section" spacing={3.5}>
-            {historicalContextText.mcCloud.map((sentence) => (
-              <Box key={sentence.text} component="article">
-                <Paragraph blocks={[sentence]} />
+            {historicalContextText.mcCloud.map((sentence, index) => (
+              <Box key={index} component="article">
+                <Paragraph
+                  blocks={[sentence]}
+                  markSx={{
+                    freshwater: {
+                      color: FreshWaterColor,
+                      fontWeight: 700,
+                    },
+                  }}
+                />
               </Box>
             ))}
           </Stack>

@@ -19,13 +19,15 @@ function MapErrorFallback() {
         position: "fixed",
         right: 0,
         top: 0,
-        width: "40%",
-        height: "100%",
+        width: "45dvw",
+        height: "100dvh",
         zIndex: 0,
         backgroundColor: theme.palette.grey[900],
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        paddingTop: "15dvh",
+        boxSizing: "border-box",
       }}
     >
       <ErrorFallback

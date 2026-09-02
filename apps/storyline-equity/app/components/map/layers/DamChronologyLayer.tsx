@@ -37,7 +37,7 @@ type DamMarker = {
   capacity: number
 }
 
-const INFRASTRUCTURE_REVEAL_RANGE: [number, number] = [0.05, 0.55]
+const INFRASTRUCTURE_REVEAL_RANGE: [number, number] = [0.04, 0.38]
 
 function normalizeProgress(progress: number, [start, end]: [number, number]) {
   if (end === start) return progress >= start ? 1 : 0
@@ -48,7 +48,7 @@ function parseBuiltYear(value?: string) {
   if (!value?.trim()) return null
 
   const year = Number(value)
-  return Number.isFinite(year) ? year : null
+  return Number.isFinite(year) && year > 0 ? year : null
 }
 
 function readDamMarkers(): DamMarker[] {
@@ -80,12 +80,29 @@ export default function DamChronologyLayer({ progress }: { progress: number }) {
     activeSection === "Infrastructure" &&
     progress < INFRASTRUCTURE_DELTA_PROGRESS
   const markers = useMemo(() => readDamMarkers(), [])
-  const yearRange = useMemo(() => {
-    const years = markers.map((marker) => marker.year)
-    return {
-      min: Math.min(...years),
-      max: Math.max(...years),
-    }
+  const phases = useMemo(() => {
+    const twentiethCenturyDecades = Array.from({ length: 10 }, (_, index) => {
+      const decade = 1900 + index * 10
+      return { endYear: decade + 9, label: `the ${decade}s` }
+    })
+    const post2000Years = markers
+      .map((marker) => marker.year)
+      .filter((year) => year >= 2000)
+    const post2000Phase =
+      post2000Years.length > 0
+        ? [
+            {
+              endYear: Math.max(...post2000Years),
+              label: "2000 and later",
+            },
+          ]
+        : []
+
+    return [
+      { endYear: 1899, label: "before 1900" },
+      ...twentiethCenturyDecades,
+      ...post2000Phase,
+    ]
   }, [markers])
 
   if (!visible || markers.length === 0) return null
@@ -94,15 +111,16 @@ export default function DamChronologyLayer({ progress }: { progress: number }) {
     progress,
     INFRASTRUCTURE_REVEAL_RANGE,
   )
-  const currentYear =
-    yearRange.min + revealProgress * (yearRange.max - yearRange.min)
-  const currentDecade = Math.floor(currentYear / 10) * 10
+  const phaseIndex = Math.min(
+    phases.length - 1,
+    Math.floor(revealProgress * phases.length),
+  )
+  const currentPhase = phases[Math.max(0, phaseIndex)]!
 
   return (
     <>
       {markers.map((marker) => {
-        const builtDecade = Math.floor(marker.year / 10) * 10
-        if (builtDecade > currentDecade) return null
+        if (marker.year > currentPhase.endYear) return null
 
         const size = Math.max(
           12,
@@ -166,7 +184,9 @@ export default function DamChronologyLayer({ progress }: { progress: number }) {
           pointerEvents: "none",
         }}
       >
-        Dam construction through the {currentDecade}s
+        Dam construction{" "}
+        {currentPhase.label.startsWith("before") ? "" : "through "}
+        {currentPhase.label}
       </Typography>
     </>
   )

@@ -197,6 +197,10 @@ export default function LayerOrchestrator() {
   const showDeltaWaterwayTransition =
     activeSection === "Infrastructure" &&
     infrastructureProgress >= INFRASTRUCTURE_DELTA_PROGRESS
+  const infrastructurePhaseProgress = (start: number, end: number) =>
+    Math.min(1, Math.max(0, (infrastructureProgress - start) / (end - start)))
+  const pumpingPlantsProgress = infrastructurePhaseProgress(0.4, 0.5)
+  const canalNetworkProgress = infrastructurePhaseProgress(0.52, 0.64)
 
   return (
     <>
@@ -326,14 +330,20 @@ export default function LayerOrchestrator() {
       <DamChronologyLayer progress={infrastructureProgress} />
       <PumpingPlantsLayer
         visible={
-          activeSection === "Infrastructure" && !showDeltaWaterwayTransition
+          activeSection === "Infrastructure" &&
+          pumpingPlantsProgress > 0 &&
+          !showDeltaWaterwayTransition
         }
+        progress={pumpingPlantsProgress}
       />
       <InfrastructureCanalNetworkLayer
         visible={
           (activeSection === "Infrastructure" &&
             !showDeltaWaterwayTransition) ||
           activeSection === "ClimateResilience"
+        }
+        progress={
+          activeSection === "ClimateResilience" ? 1 : canalNetworkProgress
         }
       />
       <DeltaCanalLayer

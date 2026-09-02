@@ -9,6 +9,7 @@ import {
   FreshWaterColor,
 } from "../../helpers/colorPalette"
 import { useLazyMount } from "../hooks/useLazyMount"
+import ShastaIcon from "../markers/ShastaIcon"
 
 const MCCLOUD_RIVER_SOURCE_ID = "mccloud-river-source"
 const MCCLOUD_HEADWATER_SOURCE_ID = "mccloud-headwater-source"
@@ -22,6 +23,7 @@ const SPRING_RIPPLE_LAYER_IDS = [
 const MOVING_POINT_RANGE: [number, number] = [0.12, 0.38]
 const MOVING_POINT_EXIT_PROGRESS = 0.9
 const SHASTA_DAM_COORDINATE: Coordinate = [-122.42, 40.718]
+const SHASTA_PEAK_COORDINATE: Coordinate = [-122.03, 41.56]
 
 type Coordinate = [number, number]
 type LineGeometry = {
@@ -353,6 +355,22 @@ export default function ShastaMcCloudLayer({
 
       {visible ? (
         <>
+          <Marker
+            longitude={SHASTA_PEAK_COORDINATE[0]}
+            latitude={SHASTA_PEAK_COORDINATE[1]}
+          >
+            <ShastaIcon
+              style={{
+                position: "absolute",
+                width: 220,
+                height: "auto",
+                color: "#f2f0ef",
+                transform: "translate(-50%, -50%)",
+                filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45))",
+              }}
+            />
+          </Marker>
+
           {showMovingPoint && movingPointCoordinate ? (
             <Marker
               longitude={movingPointCoordinate[0]}

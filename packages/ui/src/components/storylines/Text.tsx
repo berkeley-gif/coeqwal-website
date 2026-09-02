@@ -112,6 +112,11 @@ function InlineLegendText({
         height: shape === "line" ? 2 : "0.75em",
         borderRadius: shape === "circle" ? "50%" : 0,
         backgroundColor: shape === "triangle" ? "transparent" : legend.color,
+        border:
+          shape !== "triangle" && legend.outlineColor
+            ? `${legend.outlineWidth ?? 1}px solid ${legend.outlineColor}`
+            : undefined,
+        boxSizing: "border-box",
         ...(shape === "triangle"
           ? {
               width: 0,
