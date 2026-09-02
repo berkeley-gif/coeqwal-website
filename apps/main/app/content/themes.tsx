@@ -482,15 +482,17 @@ export const WATER_THEMES: Theme[] = [
                     performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart in the Explore Tool summarizes performance
-                    across nine key outcomes, revealing broad system-level
-                    trade-offs within and between scenarios. The chart displays
-                    average performance across all locations of interest for
-                    each outcome. This example compares Current operations with
-                    Current operations with historical land use and Current
-                    operations without TUCPs under the historical hydroclimate.
-                    Outcomes are categorized into different performance classes:
-                    optimal, acceptable, at-risk, and critical. See{" "}
+                    The radar chart in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    summarizes performance across nine key outcomes, revealing
+                    broad system-level trade-offs within and between scenarios.
+                    The chart displays average performance across all locations
+                    of interest for each outcome. This example compares Current
+                    operations with Current operations with historical land use
+                    and Current operations without TUCPs under the historical
+                    hydroclimate. Outcomes are categorized into different
+                    performance classes: optimal, acceptable, at-risk, and
+                    critical. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
@@ -567,11 +569,12 @@ export const WATER_THEMES: Theme[] = [
                     substantially from place to place.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Distribution view in the Explore Tool shows results for
-                    individual locations of interest. The figure below shows
-                    outcomes for Current operations under the historical
-                    hydroclimate, while the map highlights community surface
-                    water delivery locations in particular. The markers
+                    The Distribution view in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    shows results for individual locations of interest. The
+                    figure below shows outcomes for Current operations under the
+                    historical hydroclimate, while the map highlights community
+                    surface water delivery locations in particular. The markers
                     represent locations of interest, and the colors represent
                     optimal (green), acceptable (blue), at-risk (orange), or
                     critical (red) outcomes.
@@ -602,10 +605,11 @@ export const WATER_THEMES: Theme[] = [
                     California&apos;s water system. A management strategy that
                     performs well today may respond differently as droughts
                     become more frequent, temperatures rise, and water
-                    availability changes. The Resilience heatmap in the Explore
-                    Tool examines how management strategies perform across a
-                    range of plausible hydroclimates, representing increasing
-                    levels of stress to the water system. See{" "}
+                    availability changes. The Resilience heatmap in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    examines how management strategies perform across a range of
+                    plausible hydroclimates, representing increasing levels of
+                    stress to the water system. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
@@ -1017,16 +1021,17 @@ export const WATER_THEMES: Theme[] = [
                     outcomes in different places.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Distribution view in the Explore Tool shows results for
-                    individual locations of interest. This figure displays
-                    outcomes for community surface water deliveries for
-                    Prioritizing human health delivery levels to community water
-                    systems, relative to Current operations. Arrows indicate the
-                    direction of change relative to current operations, and
-                    color represents optimal (green), acceptable (blue), at-risk
-                    (orange), or critical (red) outcomes for the scenario.
-                    Circles represent locations that did not change condition
-                    relative to current operations.
+                    The Distribution view in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    shows results for individual locations of interest. This
+                    figure displays outcomes for community surface water
+                    deliveries for Prioritizing human health delivery levels to
+                    community water systems, relative to Current operations.
+                    Arrows indicate the direction of change relative to current
+                    operations, and color represents optimal (green), acceptable
+                    (blue), at-risk (orange), or critical (red) outcomes for the
+                    scenario. Circles represent locations that did not change
+                    condition relative to current operations.
                   </Typography>
                 </>
               ),
@@ -1413,13 +1418,14 @@ export const WATER_THEMES: Theme[] = [
                     performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart in the <InlineNavLink to="explore">Explore Tool</InlineNavLink> summarizes performance
-                    across nine key outcomes, revealing broad system-level
-                    trade-offs within and between scenarios. The chart displays
-                    the average performance across all locations of interest for
-                    each scenario, providing a system-wide view of how these
-                    management strategies influence multiple outcomes
-                    simultaneously.
+                    The radar chart in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    summarizes performance across nine key outcomes, revealing
+                    broad system-level trade-offs within and between scenarios.
+                    The chart displays the average performance across all
+                    locations of interest for each scenario, providing a
+                    system-wide view of how these management strategies
+                    influence multiple outcomes simultaneously.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     This chart specifically compares Current operations (black),
@@ -1509,17 +1515,18 @@ export const WATER_THEMES: Theme[] = [
                     different places.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Distribution view in the <InlineNavLink to="explore">Explore Tool</InlineNavLink> shows results for
-                    individual locations of interest. This figure compares
-                    outcomes for aquifer zones and agricultural districts for
-                    Groundwater pumping limits via reduced crop acreage in the
-                    Central Valley relative to the Current operations scenario
-                    under the historical hydroclimate. Arrows indicate the
-                    direction of change relative to current operations and color
-                    represents optimal, acceptable, at-risk, or critical
-                    outcomes for the scenario. Circles on the map indicate
-                    locations where the outcome level did not change relative to
-                    current operations.
+                    The Distribution view in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    shows results for individual locations of interest. This
+                    figure compares outcomes for aquifer zones and agricultural
+                    districts for Groundwater pumping limits via reduced crop
+                    acreage in the Central Valley relative to the Current
+                    operations scenario under the historical hydroclimate.
+                    Arrows indicate the direction of change relative to current
+                    operations and color represents optimal, acceptable,
+                    at-risk, or critical outcomes for the scenario. Circles on
+                    the map indicate locations where the outcome level did not
+                    change relative to current operations.
                   </Typography>
                 </>
               ),
@@ -1547,9 +1554,11 @@ export const WATER_THEMES: Theme[] = [
                     California&apos;s water system. A management strategy that
                     performs well today may respond differently as droughts
                     become more frequent, temperatures rise, and water
-                    availability changes. The Resilience heatmap in the <InlineNavLink to="explore">Explore Tool</InlineNavLink> examines how management strategies perform across a
-                    range of plausible hydroclimates, representing increasing
-                    levels of stress to the water system. Visit{" "}
+                    availability changes. The Resilience heatmap in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    examines how management strategies perform across a range of
+                    plausible hydroclimates, representing increasing levels of
+                    stress to the water system. Visit{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
@@ -1949,11 +1958,12 @@ export const WATER_THEMES: Theme[] = [
                     performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart in the Explore Tool summarizes performance
-                    across nine key outcomes, revealing broad system-level
-                    trade-offs within and between scenarios. This example
-                    compares Current operations with two approaches to
-                    protecting rivers and salmon: Functional environmental
+                    The radar chart in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    summarizes performance across nine key outcomes, revealing
+                    broad system-level trade-offs within and between scenarios.
+                    This example compares Current operations with two approaches
+                    to protecting rivers and salmon: Functional environmental
                     flows, which seek to restore key elements of natural flow
                     patterns, and Winter-run refuge flows, which prioritize
                     cold-water releases from Shasta along with functional flows
@@ -2063,15 +2073,16 @@ export const WATER_THEMES: Theme[] = [
                     burdens in different places.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Distribution view in the Explore Tool shows results for
-                    individual locations of interest. The figure summarizes how
-                    outcomes shift at all locations under the Functional
-                    environmental flows scenario relative to current operations.
-                    Arrows indicate direction of change relative to current
-                    operations and color represents optimal (green), acceptable
-                    (blue), at-risk (orange), or critical (red) outcomes for the
-                    scenario. Boxes represent locations for which the outcome
-                    results remain the same.
+                    The Distribution view in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    shows results for individual locations of interest. The
+                    figure summarizes how outcomes shift at all locations under
+                    the Functional environmental flows scenario relative to
+                    current operations. Arrows indicate direction of change
+                    relative to current operations and color represents optimal
+                    (green), acceptable (blue), at-risk (orange), or critical
+                    (red) outcomes for the scenario. Boxes represent locations
+                    for which the outcome results remain the same.
                   </Typography>
                 </>
               ),
@@ -2099,10 +2110,11 @@ export const WATER_THEMES: Theme[] = [
                     California&apos;s water system. A management strategy that
                     performs well today may respond differently as droughts
                     become more frequent, temperatures rise, and water
-                    availability changes. The Resilience heatmap in the Explore
-                    Tool examines how management strategies perform across a
-                    range of plausible hydroclimates, representing increasing
-                    levels of stress to the water system. See{" "}
+                    availability changes. The Resilience heatmap in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    examines how management strategies perform across a range of
+                    plausible hydroclimates, representing increasing levels of
+                    stress to the water system. See{" "}
                     <InlineNavLink to="/data">
                       Data and documentation
                     </InlineNavLink>{" "}
@@ -2436,19 +2448,21 @@ export const WATER_THEMES: Theme[] = [
                     performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart in the Explore Tool summarizes performance
-                    across nine key outcomes, revealing broad system-level
-                    trade-offs within and between scenarios. The chart displays
-                    the average performance across all locations of interest for
-                    each scenario, providing a system-wide view of how these
-                    management strategies influence multiple outcomes
-                    simultaneously. The chart specifically compares Current
-                    operations (black), Increase Delta outflow targets (65% of
-                    unimpaired flow) (blue), and Delta Conveyance Project (red)
-                    under the historical hydroclimate. The points show the
-                    average condition across all locations of interest for each
-                    outcome, classified into four outcome levels: optimal,
-                    acceptable, at-risk, and critical. See{" "}
+                    The radar chart in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    summarizes performance across nine key outcomes, revealing
+                    broad system-level trade-offs within and between scenarios.
+                    The chart displays the average performance across all
+                    locations of interest for each scenario, providing a
+                    system-wide view of how these management strategies
+                    influence multiple outcomes simultaneously. The chart
+                    specifically compares Current operations (black), Increase
+                    Delta outflow targets (65% of unimpaired flow) (blue), and
+                    Delta Conveyance Project (red) under the historical
+                    hydroclimate. The points show the average condition across
+                    all locations of interest for each outcome, classified into
+                    four outcome levels: optimal, acceptable, at-risk, and
+                    critical. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
@@ -2531,19 +2545,20 @@ export const WATER_THEMES: Theme[] = [
                     can shift the benefits and impacts to different locations.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Distribution view in the Explore Tool shows results for
-                    individual locations of interest. The figure summarizes how
-                    outcomes shift across locations under the Increase Shasta
-                    carry-over storage scenario relative to Current operations
-                    under the historical hydroclimate. This scenario targets
-                    approximately 20% more September storage in Shasta Reservoir
-                    than under Current operations by adjusting water allocations
-                    earlier in the year. Arrows indicate direction of change
-                    relative to current operations and color represents optimal
-                    (green), acceptable (blue), at-risk (orange), or critical
-                    (red) outcomes for the scenario. Squares represent locations
-                    that did not change condition relative to current
-                    operations.
+                    The Distribution view in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    shows results for individual locations of interest. The
+                    figure summarizes how outcomes shift across locations under
+                    the Increase Shasta carry-over storage scenario relative to
+                    Current operations under the historical hydroclimate. This
+                    scenario targets approximately 20% more September storage in
+                    Shasta Reservoir than under Current operations by adjusting
+                    water allocations earlier in the year. Arrows indicate
+                    direction of change relative to current operations and color
+                    represents optimal (green), acceptable (blue), at-risk
+                    (orange), or critical (red) outcomes for the scenario.
+                    Squares represent locations that did not change condition
+                    relative to current operations.
                   </Typography>
                 </>
               ),
@@ -2571,10 +2586,11 @@ export const WATER_THEMES: Theme[] = [
                     California&apos;s water system. A management strategy that
                     performs well today may respond differently as droughts
                     become more frequent, temperatures rise, and water
-                    availability changes. The Resilience heatmap in the Explore
-                    Tool examines how management strategies perform across a
-                    range of plausible hydroclimates, representing increasing
-                    levels of stress to the water system. See{" "}
+                    availability changes. The Resilience heatmap in the{" "}
+                    <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                    examines how management strategies perform across a range of
+                    plausible hydroclimates, representing increasing levels of
+                    stress to the water system. See{" "}
                     <InlineNavLink to="/data">
                       Data and Documentation
                     </InlineNavLink>{" "}
