@@ -1302,9 +1302,14 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/ag_gw-fig-05.svg",
               alt: "Resilience heatmap across hydroclimate scenarios",
-              title: "Resilience",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Resilience
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How consistently do management strategies perform under
                     different climate futures?
@@ -1334,6 +1339,10 @@ export const WATER_THEMES: Theme[] = [
                     critical (4.00 - 4.99), with higher numerical values
                     indicating worse performance.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Groundwater pumping limits via reduced crop acreage in the
                     Central Valley lowers agricultural revenues relative to
@@ -1366,6 +1375,7 @@ export const WATER_THEMES: Theme[] = [
                 </>
               ),
             },
+
           ],
         },
       },
@@ -1936,22 +1946,28 @@ export const WATER_THEMES: Theme[] = [
                     How river flows and water exports affect the Delta
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    Freshwater flowing into the Delta and water exported through
-                    the Delta pumping facilities together influence how water
-                    moves through Delta channels and where fresh and saline
-                    water meet. When river flows are high and exports are low,
-                    freshwater generally moves seaward and limits salinity
-                    intrusion. When freshwater inflows decline or export pumping
-                    increases, flow patterns can shift and saline water can move
-                    farther inland.
+                    Freshwater flowing into the Delta and water exported
+                    through the Delta pumping facilities together
+                    influence how water moves through Delta channels and
+                    where fresh and saline water meet. When river flows
+                    are high and exports are low, freshwater generally
+                    moves seaward and limits salinity intrusion. When
+                    freshwater inflows decline or export pumping
+                    increases, flow patterns can shift and saline water
+                    can move farther inland.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     These interactions create important trade-offs among
-                    freshwater available for export, water quality for in-Delta
-                    water uses, and ecosystem conditions.
+                    freshwater available for export, water quality for
+                    in-Delta water uses, and ecosystem conditions.
                   </Typography>
                 </>
               ),
+            },
+            {
+              type: "image",
+              src: "/images/themes/delta-fig-02.svg",
+              alt: "Delta operations across four quadrants",
             },
           ],
         },
@@ -1962,6 +1978,7 @@ export const WATER_THEMES: Theme[] = [
           type: "mixed",
           gap: "40px",
           blocks: [
+
             {
               type: "paragraph",
               text: "**Seasonal flow, salinity, and water use** – The Delta changes with the seasons. In spring, snowmelt and reservoir releases fill rivers with fresh water, making the Delta less salty. In summer and fall, river flows decline, temperatures rise, and the Bay's saline waters can move farther inland. Salinity is shaped by freshwater inflows, sea level, tides, and the movement of water through the Delta's network of channels and wetlands. Reservoir releases help limit salinity intrusion during dry months, maintaining freshwater for in-Delta uses and for water exported from the Delta to farms and cities.",
@@ -2055,7 +2072,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "image",
-              src: "/images/themes/delta-fig-02.svg",
+              src: "/images/themes/delta-fig-03.svg",
               alt: "Trade-offs radar chart",
               captionBefore: (
                 <>
@@ -2142,7 +2159,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "image",
-              src: "/images/themes/delta-fig-03.svg",
+              src: "/images/themes/delta-fig-04.svg",
               alt: "Distribution view map of Delta outcomes",
               captionBefore: (
                 <>
@@ -2186,7 +2203,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "image",
-              src: "/images/themes/delta-fig-04.svg",
+              src: "/images/themes/delta-fig-05.svg",
               alt: "Resilience heatmap across hydroclimate scenarios",
               captionBefore: (
                 <>
