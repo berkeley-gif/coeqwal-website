@@ -288,7 +288,7 @@ export const WATER_THEMES: Theme[] = [
               items: [
                 "Current operations provide a representation of today's water management system. They are not a neutral starting point, but reflect decades of infrastructure investments, policies, regulations, water rights, contracts, and negotiated trade-offs.",
                 ( <><GlossaryTermLink>COEQWAL</GlossaryTermLink> uses <GlossaryTermLink>CalSim3</GlossaryTermLink>, the water <GlossaryTermLink>allocation</GlossaryTermLink> model used by state and federal agencies to plan and manage the <GlossaryTermLink>Central Valley Project</GlossaryTermLink> and State Water Project. Using the same model makes this decision-making space more accessible to a broader range of people and perspectives.</>),
-                ( <>Models are a simplification of reality. The <GlossaryTermLink>CalSim3</GlossaryTermLink> water <GlossaryTermLink>allocation</GlossaryTermLink> model used by COEQWAL focuses on operations of the <GlossaryTermLink>Central Valley Project</GlossaryTermLink> and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.</>),
+                ( <>Models are a simplification of reality. The <GlossaryTermLink>CalSim3</GlossaryTermLink> water <GlossaryTermLink>allocation</GlossaryTermLink> model used by <GlossaryTermLink>COEQWAL</GlossaryTermLink> focuses on operations of the <GlossaryTermLink>Central Valley Project</GlossaryTermLink> and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.</>),
                 'There is no single model representation of "current operations". State and federal agencies use different assumptions about land use, system operations, regulations, and other conditions, and these representations change as policies and operations evolve.',
                 "Differences between hydroclimates under the same management strategy help reveal climate-driven changes, while differences between management strategies under the same hydroclimate help reveal management-driven changes.",
                 "Current operations already contain benefits, trade-offs, and inequities. Comparing other scenarios to current operations therefore shows how management changes redistribute benefits relative to current conditions, not to a neutral starting point.",
@@ -307,7 +307,7 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: (
                 <>
-                  This water issue compares alternative representations of current operations and provides a foundation for understanding the broader range of management strategies explored by <GlossaryTermLink term="COEQWAL">COEQWAL</GlossaryTermLink>. The scenarios vary assumptions about operating rules, agricultural land use, and Temporary Urgency Change Petitions (TUCPs), which can temporarily modify certain water-right requirements during drought or other urgent conditions.
+                  This water issue compares alternative representations of current operations and provides a foundation for understanding the broader range of management strategies explored by <GlossaryTermLink>COEQWAL</GlossaryTermLink>. The scenarios vary assumptions about operating rules, agricultural land use, and Temporary Urgency Change Petitions (TUCPs), which can temporarily modify certain water-right requirements during drought or other urgent conditions.
                 </>
               ),
             },
@@ -707,7 +707,7 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Community water systems may rely on surface water, groundwater, stored water, or combinations of different sources. Access to these alternative sources varies considerably among systems. COEQWAL evaluates surface water deliveries from major water projects to select community water systems, not each community's complete water supply portfolio.",
+                (<>Community water systems may rely on surface water, groundwater, stored water, or combinations of different sources. Access to these alternative sources varies considerably among systems. <GlossaryTermLink>COEQWAL</GlossaryTermLink> evaluates surface water deliveries from major water projects to select community water systems, not each community's complete water supply portfolio.</>),
                 "Community surface water deliveries are evaluated relative to recent potable water demands, provided by the State Water Resources Control Board's Division of Drinking Water. Project deliveries are influenced by water availability, contracts, water rights, infrastructure, and operating rules and may not fully meet these demands.",
                 "When modeled project deliveries fall below demand, this does not necessarily mean that a community experiences a drinking water shortage. Systems with access to groundwater, local surface water, or other alternatives may be better able to respond to reduced project deliveries than systems with fewer options.",
                 "Community water systems respond to both the severity and frequency of shortages. Water system stress can result from a significant delivery shortfall in a single year or repeated shortfalls over multiple years.",
@@ -1108,8 +1108,8 @@ export const WATER_THEMES: Theme[] = [
                 "Groundwater systems change slowly. Reversing long-term trends in declining groundwater levels may require concerted management over many years or decades. Severe groundwater depletion and land subsidence can also make recovery more difficult.",
                 "Farmers can adapt to reductions in groundwater access by shifting crops, changing water management practices, or retiring farmland, but many of these decisions require long-term planning.",
                 "Impacts vary by region. The Sacramento Valley and San Joaquin Valley face different groundwater conditions and constraints, so system-wide averages can mask important local impacts.",
-                "The models used by COEQWAL primarily focus on the Sacramento and San Joaquin River basins. The Tulare Basin and other parts of the southern San Joaquin Valley are only partially represented, and changes in groundwater storage and agricultural revenues are not evaluated in these regions.",
-                "COEQWAL explores the broader effects of limiting groundwater pumping. Because SGMA is implemented through individual basin plans that use different strategies to achieve groundwater sustainability, these scenarios do not represent how SGMA will be implemented or predict future conditions in individual basins. For more details about SGMA, visit the California Department of Water Resources.",
+                (<>The models used by <GlossaryTermLink>COEQWAL</GlossaryTermLink> primarily focus on the Sacramento and San Joaquin River basins. The Tulare Basin and other parts of the southern San Joaquin Valley are only partially represented, and changes in groundwater storage and agricultural revenues are not evaluated in these regions.</>),
+                (<><GlossaryTermLink>COEQWAL</GlossaryTermLink> explores the broader effects of limiting groundwater pumping. Because SGMA is implemented through individual basin plans that use different strategies to achieve groundwater sustainability, these scenarios do not represent how SGMA will be implemented or predict future conditions in individual basins. For more details about SGMA, visit the California Department of Water Resources.</>),
                 "Some important management options and system connections are not evaluated here. These include managed aquifer recharge and environmental benefits associated with working agricultural lands, such as habitat provided by flooded rice fields and water delivered throughout agricultural infrastructure to wildlife refuges.",
               ],
             },
@@ -1463,7 +1463,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "Reintroducing winter-run to cold-water habitat above Shasta Dam offers another potential pathway for recovery by giving fish access to habitat that is less dependent on reservoir releases. COEQWAL explores how this could change salmon outcomes alongside alternative flow-management strategies.",
+              text: (<>Reintroducing winter-run to cold-water habitat above Shasta Dam offers another potential pathway for recovery by giving fish access to habitat that is less dependent on reservoir releases. <GlossaryTermLink>COEQWAL</GlossaryTermLink> explores how this could change salmon outcomes alongside alternative flow-management strategies.</>),
             },
             {
               type: "paragraph",
@@ -1545,7 +1545,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "Reintroduction above Shasta Dam could reduce this dependence by restoring access to cold, spring-fed habitat. COEQWAL examines how reintroduction could affect winter-run outcomes under different management and climate conditions.",
+              text: (<>Reintroduction above Shasta Dam could reduce this dependence by restoring access to cold, spring-fed habitat. <GlossaryTermLink>COEQWAL</GlossaryTermLink> examines how reintroduction could affect winter-run outcomes under different management and climate conditions.</>),
             },
             {
               type: "paragraph",
@@ -2012,7 +2012,7 @@ export const WATER_THEMES: Theme[] = [
               type: "list",
               items: [
                 "In-Delta water quality and salinity are sensitive to freshwater inflows, reservoir operations, exports, sea-level rise, tides, and climate conditions. Changes in these factors can affect freshwater for in-Delta uses and exports, as well as ecosystem conditions.",
-                "Freshwater flow is important to Delta ecology, but Delta outflows alone do not address all factors limiting ecosystem health. Habitat, invasive species, water temperature, food-web conditions, and other factors not fully represented by COEQWAL also influence ecological outcomes.",
+                (<>Freshwater flow is important to Delta ecology, but Delta outflows alone do not address all factors limiting ecosystem health. Habitat, invasive species, water temperature, food-web conditions, and other factors not fully represented by <GlossaryTermLink>COEQWAL</GlossaryTermLink> also influence ecological outcomes.</>),
                 "A Delta Conveyance Project scenario evaluates how the proposed project could affect modeled water-system outcomes, but does not capture the full range of potential social, cultural, economic, and environmental benefits and impacts associated with the project.",
                 "Changes in operational rules do not always produce simple or direct responses. Even when operational rules change under a scenario, other requirements, such as water quality standards, may remain in place. As a result, management changes do not always translate directly into expected changes in Delta outflows, salinity, or ecosystem conditions.",
                 "Delta conditions are influenced by both management and climate. The hydroclimates include changes in freshwater conditions and sea-level rise, which together can affect salinity, ecosystem conditions, in-Delta uses, and water exports.",
