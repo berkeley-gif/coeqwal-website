@@ -1413,7 +1413,7 @@ export const WATER_THEMES: Theme[] = [
                     performance across multiple outcomes?
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The radar chart in the Explore Tool summarizes performance
+                    The radar chart in the <InlineNavLink to="explore">Explore Tool</InlineNavLink> summarizes performance
                     across nine key outcomes, revealing broad system-level
                     trade-offs within and between scenarios. The chart displays
                     the average performance across all locations of interest for
@@ -1509,7 +1509,7 @@ export const WATER_THEMES: Theme[] = [
                     different places.
                   </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
-                    The Distribution view in the Explore Tool shows results for
+                    The Distribution view in the <InlineNavLink to="explore">Explore Tool</InlineNavLink> shows results for
                     individual locations of interest. This figure compares
                     outcomes for aquifer zones and agricultural districts for
                     Groundwater pumping limits via reduced crop acreage in the
@@ -1547,8 +1547,7 @@ export const WATER_THEMES: Theme[] = [
                     California&apos;s water system. A management strategy that
                     performs well today may respond differently as droughts
                     become more frequent, temperatures rise, and water
-                    availability changes. The Resilience heatmap in the Explore
-                    Tool examines how management strategies perform across a
+                    availability changes. The Resilience heatmap in the <InlineNavLink to="explore">Explore Tool</InlineNavLink> examines how management strategies perform across a
                     range of plausible hydroclimates, representing increasing
                     levels of stress to the water system. Visit{" "}
                     <InlineNavLink to="/data">
