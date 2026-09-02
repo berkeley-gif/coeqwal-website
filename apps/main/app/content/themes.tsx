@@ -191,7 +191,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: (<>California's <GlossaryTermLink>Central Valley</GlossaryTermLink> water system reflects more than a century of investments in reservoirs, canals, levees, groundwater development, environmental regulations, water rights, contracts, and operating agreements. Together, this infrastructure and these management decisions shape how water is stored, moved, allocated, and managed across the state.</>),
+              text: (<>California's <GlossaryTermLink>Central Valley</GlossaryTermLink> water system reflects more than a century of investments in reservoirs, canals, levees, <GlossaryTermLink>groundwater</GlossaryTermLink> development, environmental regulations, water rights, contracts, and operating agreements. Together, this infrastructure and these management decisions shape how water is stored, moved, allocated, and managed across the state.</>),
             },
             {
               type: "paragraph",
@@ -587,7 +587,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Community water systems serve cities, towns, and rural communities across California. Some rely on surface water delivered through rivers and canals, while others depend on groundwater wells. Many use a combination of both.",
+              text: (<>Community water systems serve cities, towns, and rural communities across California. Some rely on surface water delivered through rivers and canals, while others depend on <GlossaryTermLink>groundwater</GlossaryTermLink> wells. Many use a combination of both.</>),
             },
             {
               type: "image",
@@ -969,7 +969,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Farms need water to grow crops and stay economically viable. Agricultural water comes primarily from surface water diverted from rivers and reservoirs, and from groundwater pumped from aquifers. These sources are closely connected. When surface water becomes limited, farmers often rely more heavily on groundwater, particularly during droughts or periods of high demand. Water from rivers and irrigation can percolate through the soil and help recharge aquifers. But if groundwater pumping exceeds recharge over time, groundwater overdraft occurs, putting farms, drinking water supplies, and ecosystems at risk.",
+              text: (<>Farms need water to grow crops and stay economically viable. Agricultural water comes primarily from surface water diverted from rivers and reservoirs, and from groundwater pumped from aquifers. These sources are closely connected. When surface water becomes limited, farmers often rely more heavily on groundwater, particularly during droughts or periods of high demand. Water from rivers and irrigation can percolate through the soil and help recharge aquifers. But if groundwater pumping exceeds recharge over time, <GlossaryTermLink>groundwater</GlossaryTermLink> overdraft occurs, putting farms, drinking water supplies, and ecosystems at risk.</>),
             },
           ],
         },
@@ -1580,7 +1580,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This water issue explores strategies designed to improve river ecosystem conditions and winter-run Chinook salmon populations. Some scenarios establish functional environmental flows that preserve key elements of natural seasonal and year-to-year flow variability. Other strategies adjust reservoir operations to protect cold-water storage and flows that provide refuge for multiple life stages of winter-run salmon. Many of these scenarios are also evaluated with groundwater pumping limits and/or reintroduction of winter-run above Shasta Dam.",
+              text: (<>This water issue explores strategies designed to improve river ecosystem conditions and winter-run Chinook salmon populations. Some scenarios establish functional environmental flows that preserve key elements of natural seasonal and year-to-year flow variability. Other strategies adjust reservoir operations to protect cold-water storage and flows that provide refuge for multiple life stages of winter-run salmon. Many of these scenarios are also evaluated with <GlossaryTermLink>groundwater</GlossaryTermLink> pumping limits and/or reintroduction of winter-run above Shasta Dam.</>),
             },
             {
               type: "paragraph",
