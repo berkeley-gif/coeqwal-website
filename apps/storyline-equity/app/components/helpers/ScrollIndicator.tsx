@@ -28,10 +28,17 @@ const ScrollIndicator = ({
   const controls = useAnimation()
 
   useEffect(() => {
+    // React 19 strict-mode double-invokes this effect on mount; without this
+    // guard the first run's pending `setTimeout`/`controls.start()` promise
+    // chain can still resolve after that first instance's cleanup, calling
+    // `controls.start()` on an unmounted animation and crashing the app.
+    let cancelled = false
+
     const animateIndicator = async () => {
       if (animationComplete) {
         // Wait for specified delay after text animation completes
         await new Promise((resolve) => setTimeout(resolve, delay * 1000))
+        if (cancelled) return
 
         // Start the animation sequence
         await controls.start({
@@ -39,6 +46,7 @@ const ScrollIndicator = ({
           y: 0,
           transition: { duration: showDuration },
         })
+        if (cancelled) return
 
         // Begin the pulsing/bouncing animation
         controls.start({
@@ -68,6 +76,10 @@ const ScrollIndicator = ({
     }
 
     animateIndicator()
+
+    return () => {
+      cancelled = true
+    }
   }, [
     animationComplete,
     controls,

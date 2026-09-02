@@ -37,8 +37,7 @@ export { default as centralValleyBasins } from "./gis/central_valley_basins_4326
 export { default as dams } from "./gis/equity_storyline/dams.geojson"
 export { default as sacramentoRiverMainstem } from "./gis/sacramento_river_mainstem.geojson"
 export { default as sanJoaquinRiverMainstem } from "./gis/san_joaquin_river_mainstem.geojson"
-export { default as metroMapV0 } from "./gis/equity_storyline/metromap_v0.json"
-export { default as metroMapV1 } from "./gis/equity_storyline/metromap_v1.geojson"
+export { default as metroMap } from "./gis/equity_storyline/metromap_v1.geojson"
 export { default as riverNetwork } from "./gis/equity_storyline/river_network.geojson"
 export { default as canalNetwork } from "./gis/equity_storyline/canal_network.geojson"
 export { default as centralValleyBoundary } from "./gis/central_valley_boundary.geojson"
@@ -46,6 +45,7 @@ export { default as deltaLegalBoundary } from "./gis/delta_legal_boundary.geojso
 export { default as flowDrinkingRivers } from "./gis/owens_toulumne_colorado_rivers.geojson"
 export { default as flowDrinkingAqueducts } from "./gis/hetchy_la_colorado_aqueducts.geojson"
 export { default as indigenousTerritoriesLabels } from "./gis/equity_storyline/indigenous_territories_labels.geojson"
+export { default as indigenousWaterwayLabels } from "./gis/equity_storyline/indigenous_waterway_labels.geojson"
 
 // Re-export commonly used utilities for convenience
 // (Full exports available via subpath imports)

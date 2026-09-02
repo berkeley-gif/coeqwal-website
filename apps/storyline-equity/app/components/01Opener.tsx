@@ -33,7 +33,12 @@ const openerText = {
           text: "By exploring water equity across what-if scenarios, COEQWAL helps us explore a bigger question:",
         },
         {
-          text: "How can California meet the needs of communities and ecosystems, fairly and resiliently, for generations to come?",
+          segments: [
+            {
+              text: "How can California meet the needs of communities and ecosystems, fairly and resiliently, for generations to come?",
+              mark: "strong",
+            },
+          ],
         },
       ],
     ],
@@ -56,7 +61,15 @@ export default function Opener() {
           maxWidth: { xs: "100%", lg: "calc(55dvw - 5rem)" },
         },
       }}
-      scrollIndicator={<ScrollIndicator animationComplete />}
+      scrollIndicator={
+        <Box
+          sx={{
+            width: { xs: "100vw", lg: "calc(55dvw - 5rem)" },
+          }}
+        >
+          <ScrollIndicator animationComplete />
+        </Box>
+      }
     >
       <Box
         className="text-section"
@@ -66,7 +79,7 @@ export default function Opener() {
           maxWidth: { xs: "75ch", lg: "calc(55dvw - 5rem)" },
         }}
       >
-        <Stack component="section" spacing={2}>
+        <Stack component="section" spacing={6}>
           {copy.paragraphs.map((sentences, index) => (
             <Box key={index} component="article">
               <Paragraph blocks={sentences} />
@@ -81,7 +94,13 @@ export default function Opener() {
 // Rendered at the page root (outside the Scrollama/StickyScrollSection tree)
 // so its `position: fixed` resolves against the real viewport instead of a
 // transformed scroll-container ancestor, matching how DynamicMap is hoisted.
-export function OpenerVisual({ isVisible }: { isVisible: boolean }) {
+export function OpenerVisual({
+  isVisible,
+  fadeOut = false,
+}: {
+  isVisible: boolean
+  fadeOut?: boolean
+}) {
   if (!isVisible) return null
 
   return (
@@ -97,6 +116,8 @@ export function OpenerVisual({ isVisible }: { isVisible: boolean }) {
         gridTemplateRows: "15dvh 85dvh",
         pointerEvents: "none",
         zIndex: 1,
+        opacity: fadeOut ? 0 : 1,
+        transition: "opacity 0.35s ease-out",
       }}
     >
       <Box component="header" sx={{ minHeight: 0 }} />

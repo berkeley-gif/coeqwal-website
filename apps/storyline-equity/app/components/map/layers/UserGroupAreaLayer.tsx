@@ -7,6 +7,7 @@ export type UserGroupArea = "agriculture" | "drinking" | "ecosystem"
 const SOURCE_ID = "background-user-group-area-source"
 const SOURCE_LAYER = "usergroup_area.zip-rnssxa"
 const SOURCE_URL = "mapbox://coeqwal.015k90"
+export const USER_GROUP_AREA_COLOR = "#f4e7a1"
 
 export default function UserGroupAreaLayer({
   visible,
@@ -27,7 +28,7 @@ export default function UserGroupAreaLayer({
           source-layer={SOURCE_LAYER}
           filter={["==", ["get", "group"], group]}
           paint={{
-            "fill-color": "#f4e7a1",
+            "fill-color": USER_GROUP_AREA_COLOR,
             "fill-opacity": 0.52 * Math.max(0, Math.min(1, opacities[group])),
             "fill-outline-color": "rgba(255, 244, 184, 0.9)",
             "fill-antialias": true,

@@ -3,7 +3,7 @@
 import { ScrollElement, StickyScrollSection } from "@repo/scrollytelling"
 import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
-import { InfrastructureColor } from "./helpers/colorPalette"
+import { InfrastructureColor, FreshWaterColor } from "./helpers/colorPalette"
 
 const infrastructureText = {
   en: {
@@ -17,7 +17,15 @@ const infrastructureText = {
         ],
         [
           {
-            text: "Large-scale projects such as the Central Valley Project and the State Water Project transformed rivers into highly engineered systems for storing and delivering water.",
+            segments: [
+              {
+                text: "Large-scale projects such as the Central Valley Project and the State Water Project transformed ",
+              },
+              { text: "rivers", mark: "river" },
+              {
+                text: " into highly engineered systems for storing and delivering water.",
+              },
+            ],
           },
         ],
         [
@@ -34,7 +42,7 @@ const infrastructureText = {
               },
               { text: ", " },
               {
-                text: "reservoirs",
+                text: "pumps",
                 mark: "infrastructure",
                 legend: {
                   color: InfrastructureColor,
@@ -53,7 +61,15 @@ const infrastructureText = {
                 },
               },
               {
-                text: " expanded water supplies for agricultural water districts and growing cities, fueling economic growth and population expansion. But their benefits and costs were not shared equally.",
+                text: " expanded water supplies for agricultural water districts and growing cities, fueling economic growth and population expansion.",
+              },
+            ],
+          },
+          {
+            segments: [
+              {
+                text: "But their benefits and costs were not shared equally.",
+                mark: "strong",
               },
             ],
           },
@@ -62,7 +78,23 @@ const infrastructureText = {
       [
         [
           {
-            text: "Nowhere is this more visible than in the Delta. Once a vast landscape of tidal wetlands, floodplains, and meandering waterways, much of the Delta was diked and drained to support agriculture and urbanization. Levees and canals cemented the separation between land and water.",
+            segments: [
+              {
+                text: "Nowhere is this more visible than in the Delta. Once a vast landscape of ",
+              },
+              { text: "tidal wetlands", mark: "freshwater" },
+              { text: ", " },
+              { text: "floodplains", mark: "freshwater" },
+              { text: ", and meandering " },
+              { text: "waterways", mark: "freshwater" },
+              {
+                text: ", much of the Delta was diked and drained to support agriculture and urbanization. ",
+              },
+              { text: "Levees and canals", mark: "infrastructure" },
+              {
+                text: " cemented the separation between land and water.",
+              },
+            ],
           },
         ],
         [
@@ -100,41 +132,72 @@ export default function Infrastructure() {
           alignItems: "center",
         }}
       >
-        {infrastructureText.en.sections.map((groups, index) => {
-          const start = index / infrastructureText.en.sections.length
-          const end = (index + 1) / infrastructureText.en.sections.length
-          return (
-            <ScrollElement
-              key={index}
-              enter={[start, start + 0.04]}
-              hold={[start + 0.04, end - 0.04]}
-              exit={[end - 0.04, end]}
-              animation="slideUp"
-              style={{ gridArea: "1 / 1" }}
-            >
-              {index === 0 ? (
-                <Box component="header">
-                  <SectionTitle text={infrastructureText.en.title} />
-                </Box>
-              ) : null}
-              <Stack component="section" spacing={3.5}>
-                {groups.map((sentences, paragraphIndex) => (
-                  <Box key={paragraphIndex} component="article">
-                    <Paragraph
-                      blocks={sentences}
-                      markSx={{
-                        infrastructure: {
-                          color: InfrastructureColor,
-                          fontWeight: 700,
-                        },
-                      }}
-                    />
-                  </Box>
-                ))}
-              </Stack>
-            </ScrollElement>
-          )
-        })}
+        <ScrollElement
+          enter={[0, 0.04]}
+          hold={[0.04, 0.4]}
+          exit={[0.4, 0.44]}
+          animation="slideUp"
+          style={{ gridArea: "1 / 1" }}
+        >
+          <Box component="header">
+            <SectionTitle text={infrastructureText.en.title} />
+          </Box>
+          <Stack component="section" spacing={3.5}>
+            <Box component="article">
+              <Paragraph blocks={infrastructureText.en.sections[0][0]} />
+            </Box>
+            <Box component="article">
+              <Paragraph
+                blocks={infrastructureText.en.sections[0][1]}
+                markSx={{
+                  river: { color: FreshWaterColor, fontWeight: 700 },
+                }}
+              />
+            </Box>
+            <Box component="article">
+              <Paragraph
+                blocks={infrastructureText.en.sections[0][2]}
+                markSx={{
+                  infrastructure: {
+                    color: InfrastructureColor,
+                    fontWeight: 700,
+                  },
+                }}
+              />
+            </Box>
+          </Stack>
+        </ScrollElement>
+
+        <ScrollElement
+          enter={[0.44, 0.46]}
+          hold={[0.46, 1]}
+          animation="slideUp"
+          style={{ gridArea: "1 / 1" }}
+        >
+          <Stack component="section" spacing={3.5}>
+            <Box component="article">
+              <Paragraph
+                blocks={infrastructureText.en.sections[1][0]}
+                markSx={{
+                  freshwater: {
+                    color: FreshWaterColor,
+                    fontWeight: 700,
+                  },
+                  infrastructure: {
+                    color: InfrastructureColor,
+                    fontWeight: 700,
+                  },
+                }}
+              />
+            </Box>
+            <Box component="article">
+              <Paragraph blocks={infrastructureText.en.sections[1][1]} />
+            </Box>
+            <Box component="article">
+              <Paragraph blocks={infrastructureText.en.sections[1][2]} />
+            </Box>
+          </Stack>
+        </ScrollElement>
       </Box>
     </StickyScrollSection>
   )

@@ -1,0 +1,180 @@
+{
+  "type": "FeatureCollection",
+  "name": "IndigenousPlaceNames",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-119.57849024772152, 37.06560186343133]
+      },
+      "properties": {
+        "Indigenous Name": "Tihshachu",
+        "Tribe": "Southern Yokuts",
+        "River": "San Joaquin River",
+        "Translation": "salmon spearing place",
+        "Source": "Marston et al 2008 p25 cites Latta 1949,  Handbook of Yokuts Indians,  p4"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-119.18843917055213, 37.53708445933393]
+      },
+      "properties": {
+        "Indigenous Name": "Typici h huu’",
+        "Tribe": "Nim,  North Fork Mono",
+        "River": "North Fork San Joaquin River",
+        "Translation": "great river",
+        "Source": "MacDonald, S.  1958.  Mono Grammar,  p 327"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.20683437444109, 40.96378541760768]
+      },
+      "properties": {
+        "Indigenous Name": "Winnemem Waywaket",
+        "Tribe": "Winnemem Wintu",
+        "River": "McCloud River",
+        "Translation": "middle water river",
+        "Source": "Winnemem Wintu Tribe at http://winnememwintu.us"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.43080007558436, 40.80491710468516]
+      },
+      "properties": {
+        "Indigenous Name": "Nomtipom Waywaket",
+        "Tribe": "Winnemem Wintu",
+        "River": "Upper Sacramento River",
+        "Translation": "western hillside river",
+        "Source": "Winnemem Wintu Tribe at http://winnemumwintu.us"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.60476758469832, 41.58368933457107]
+      },
+      "properties": {
+        "Indigenous Name": "Sáttítla",
+        "Tribe": "Achomawi,  Pit River,  Modoc",
+        "River": "Fall River headwaters",
+        "Translation": "obsidian place",
+        "Source": "https://www.protectsattitla.org/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-119.57693387135812, 37.743828234191874]
+      },
+      "properties": {
+        "Indigenous Name": "Ahwahnee",
+        "Tribe": "Ahwahnechee,  Southern Sierra Miwok",
+        "River": "Merced River",
+        "Translation": "big gaping mouth",
+        "Source": "https://www.yosemite.ca.us/library/yosemite_nature_notes/47/3/names_and_meanings_for_yosemite_valley.html"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.67540059857454, 39.01247668918216]
+      },
+      "properties": {
+        "Indigenous Name": "Xa’wi-na",
+        "Tribe": "Southeastern Pomo",
+        "River": "Cache Creek",
+        "Translation": "water on top of",
+        "Source": "McLendon,  S.  1977 https://escholarship.org/content/qt5ps2t6f0/qt5ps2t6f0.pdf"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120.74919663298881, 36.08038020633528]
+      },
+      "properties": {
+        "Indigenous Name": "Pa’ashi",
+        "Tribe": "Tachi Yokut",
+        "River": "Tulare Lake",
+        "Translation": "big water",
+        "Source": "Hok,  S.  2023.  https://www.kvpr.org/local-news/2023-06-07/it-would-come-back-one-day-the-yokuts-and-tulare-lake-meet-again"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.16479834547738, 38.697702723311366]
+      },
+      "properties": {
+        "Indigenous Name": "Kum Sayo",
+        "Tribe": "Nisenan",
+        "River": "American River",
+        "Translation": "roundhouse river",
+        "Source": "Faragher,  2022.  https://doi.org/10.2307/j.ctv2jn91mp.23"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120.65474942013618, 39.80631854127464]
+      },
+      "properties": {
+        "Indigenous Name": "Wuwáyonoktom Sewí",
+        "Tribe": "Maidu",
+        "River": "Middle Fork of the Feather River",
+        "Translation": "the river that throws into piles",
+        "Source": "Redbud Resource Group,  https://www.redbudresourcegroup.org/post/wuw%C3%A1yonoktom-sew%C3%AD-power-along-the-feather-river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.17941871784417, 40.26656889888259]
+      },
+      "properties": {
+        "Indigenous Name": "Nakam Koyo",
+        "Tribe": "Yamani Maidu",
+        "River": "North Fork Feather River",
+        "Translation": "Big Meadows",
+        "Source": "Akers,  2018. https://www.norcalfishreports.com/fish_reports/130485/lets-check-out-lake-almanor.php"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120.21823868955879, 38.320949215735766]
+      },
+      "properties": {
+        "Indigenous Name": "Wakalu Hep Yo",
+        "Tribe": "Miwok",
+        "River": "Stanislaus River",
+        "Translation": "wild river",
+        "Source": "USFS Campground name, https://www.fs.usda.gov/r05/stanislaus/recreation/wakalu-hep-yo-wild-river-campground"
+      }
+    }
+  ]
+}
