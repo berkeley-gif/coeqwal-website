@@ -237,7 +237,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "**A reference point for comparison** – The representation of current operations provides a common reference point for comparison. Comparing alternative water management strategies to current operations reveals management-driven changes, while comparing the same operations across hydroclimates reveals climate-driven changes. Together, these comparisons help distinguish the effects of management decisions, climate change, and their interactions.",
+              text: (<><strong>A reference point for comparison</strong> – The representation of current operations provides a common reference point for comparison. Comparing alternative water <GlossaryTermLink>management strategies</GlossaryTermLink> to current operations reveals management-driven changes, while comparing the same operations across hydroclimates reveals climate-driven changes. Together, these comparisons help distinguish the effects of management decisions, climate change, and their interactions.</>),
             },
             {
               type: "paragraph",
@@ -763,7 +763,7 @@ export const WATER_THEMES: Theme[] = [
                 <>
                   The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
                   allows you to explore how scenario outcomes compare under
-                  alternative management strategies and climate conditions.
+                  alternative <GlossaryTermLink>management strategies</GlossaryTermLink> and climate conditions.
                   There are complementary ways to visualize tradeoffs, equity,
                   and resilience of water management strategies. The examples
                   below illustrate results from select scenarios for this water
@@ -1123,7 +1123,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This water issue compares water management strategies that reduce groundwater use through direct pumping limits and/or reductions in irrigated crop acreage, including:",
+              text: (<>This water issue compares water <GlossaryTermLink>management strategies</GlossaryTermLink> that reduce groundwater use through direct pumping limits and/or reductions in irrigated crop acreage, including:</>),
             },
             {
               type: "list",
@@ -1642,7 +1642,7 @@ export const WATER_THEMES: Theme[] = [
                 <>
                   The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
                   allows you to explore how scenario outcomes compare under
-                  alternative management strategies and climate conditions.
+                  alternative <GlossaryTermLink>management strategies</GlossaryTermLink> and climate conditions.
                   There are complementary ways to visualize tradeoffs, equity,
                   and resilience of water management strategies. The examples
                   below illustrate results from select scenarios for this water
@@ -2069,7 +2069,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "The Explore Tool allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
+              text: (<>The Explore Tool allows you to explore how scenario outcomes compare under alternative <GlossaryTermLink>management strategies</GlossaryTermLink> and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.</>),
             },
             {
               type: "image",
