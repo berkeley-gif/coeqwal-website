@@ -476,7 +476,7 @@ export const CURRENT_OPERATIONS_ICONS: OperationIcon[] = [
     path: "/images/icons/tucp.svg",
     alt: "TUCP considerations",
     description:
-      "Temporary Urgent Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
+      "Temporary Urgency Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
     label: "TUCP's\nallowed",
   },
 ]
