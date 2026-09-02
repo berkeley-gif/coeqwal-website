@@ -74,14 +74,13 @@ export function CenterImageText({
         justifyContent: "center",
         alignItems: "center",
         boxSizing: "border-box",
-        height: "100vh",
-        maxHeight: "100vh",
+        minHeight: "100vh",
         gap: { xs: theme.spacing(4), md: theme.spacing(7) },
         paddingTop: {
           xs: theme.spacing(paddingTop / 8 + 4),
-          md: `${paddingTop}px`,
+          md: `calc(${paddingTop}px + ${theme.spacing(4)})`,
         },
-        paddingBottom: { xs: theme.spacing(6), md: "0px" },
+        paddingBottom: { xs: theme.spacing(6), md: theme.spacing(6) },
         paddingX: {
           xs: theme.space.page.x.xs,
           sm: theme.space.page.x.sm,
@@ -90,23 +89,30 @@ export function CenterImageText({
         backgroundColor: backgroundColor,
       }}
     >
-      {/* Image.centered on mobile and desktop */}
+      {/* Image: wrapped so it can shrink to whatever vertical space is left after text + arrow */}
       <Box
-        component="img"
-        src={imgSrc}
-        alt={imgAlt}
         sx={{
-          width: {
-            xs: "200px",
-            sm: "500px",
-            md: "280px",
-            lg: "300px",
-            xl: "600px",
-          },
-          height: "auto",
-          objectFit: "contain",
+          flex: "1 1 auto",
+          minHeight: "15vh",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
         }}
-      />
+      >
+        <Box
+          component="img"
+          src={imgSrc}
+          alt={imgAlt}
+          sx={{
+            maxWidth: "100%",
+            maxHeight: "60vh",
+            width: "auto",
+            height: "auto",
+            objectFit: "contain",
+          }}
+        />
+      </Box>
 
       {/* Text */}
       <Box
@@ -116,6 +122,7 @@ export function CenterImageText({
           m: "0 auto",
           display: "flex",
           flexDirection: "column",
+          flexShrink: 0,
           gap: { xs: 4, md: 4 },
           textAlign: { xs: "center", md: "left" },
           width: "100%",
@@ -141,6 +148,7 @@ export function CenterImageText({
           sx={{
             pointerEvents: "auto",
             margin: "0 auto",
+            flexShrink: 0,
             bottom: "clamp(24px, 4vh, 48px)",
             left: "50%",
             transform: "translateX(-50%)",

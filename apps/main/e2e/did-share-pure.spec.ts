@@ -3,6 +3,7 @@ import {
   shareFigureFooter,
   shareFigureFooterText,
 } from "../app/features/scenarioExplorer/explorer/share/figureFooter"
+import { toolFigureTitle } from "../app/features/scenarioExplorer/explorer/share/figureTitle"
 import { thumbnailAspectRatioFor } from "../app/features/scenarioExplorer/explorer/share/thumbnailAspect"
 import {
   buildStatsPanels,
@@ -429,4 +430,33 @@ test("buildStatsPanels returns mean and CV, plus trend on the level view", () =>
   expect(dist[0]?.valueOf(member)).toBe(13)
   expect(dist[1]?.valueOf(member)).toBe(0.2)
   expect(level[2]?.valueOf(member)).toBeCloseTo(2, 6)
+})
+
+// The other Explore tools title their figures the same way Data in Depth
+// does, so a story mixing cards from several tools reads as one set.
+test("toolFigureTitle builds the standardized line for the non-data tools", () => {
+  expect(
+    toolFigureTitle({
+      toolName: "Radar chart",
+      memberSummary: "3 scenarios",
+      hydroclimateLabel: "Historical",
+    }),
+  ).toBe("Radar Chart, 3 Scenarios, Historical Hydroclimate")
+
+  expect(
+    toolFigureTitle({
+      toolName: "Key outcomes",
+      memberSummary: "Current operations",
+      hydroclimateLabel: "Moderate stress",
+    }),
+  ).toBe("Key Outcomes, Current Operations, Moderate Stress Hydroclimate")
+
+  // A figure spanning several climates omits the clause rather than
+  // inventing one.
+  expect(
+    toolFigureTitle({
+      toolName: "Heatmap",
+      memberSummary: "4 scenarios",
+    }),
+  ).toBe("Heatmap, 4 Scenarios")
 })

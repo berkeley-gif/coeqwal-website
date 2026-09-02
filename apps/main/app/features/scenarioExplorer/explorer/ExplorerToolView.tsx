@@ -20,7 +20,7 @@ import CollapsedRailStrip, {
 import ToolToolbar from "./tools/chrome/toolbar/ToolToolbar"
 import KeyboardShortcuts from "./tools/chrome/overlays/KeyboardShortcuts"
 import ShareDrawer from "./share/ShareDrawer"
-import { ToolTour, TourAnchorProvider } from "./tools/tour"
+import { ToolTour } from "./tools/tour"
 import ActiveToolPanel from "./ActiveToolPanel"
 import ExplorerSidebar from "./ExplorerSidebar"
 import { useExploreHoverCoordination } from "./useExploreHoverCoordination"
@@ -61,7 +61,7 @@ export default function ExplorerToolView() {
   }, [exploreMode, startToolTour])
 
   return (
-    <TourAnchorProvider>
+    <>
       <Box sx={{ flex: 1, overflow: "hidden" }}>
         <UnifiedToolView
           sidebarWidth={sidebarCollapsed ? COLLAPSED_RAIL_WIDTH : undefined}
@@ -104,6 +104,6 @@ export default function ExplorerToolView() {
       <ErrorBoundary fallback={null}>
         <ToolTour />
       </ErrorBoundary>
-    </TourAnchorProvider>
+    </>
   )
 }

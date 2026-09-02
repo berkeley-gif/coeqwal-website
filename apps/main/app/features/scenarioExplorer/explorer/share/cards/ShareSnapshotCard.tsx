@@ -29,6 +29,10 @@ interface ShareSnapshotCardProps {
    * the same context block.
    */
   scenarioDefinition?: string
+  /** Standardized figure-title line, shown under the card's own heading so
+   *  an exported figure names its tool, members and hydroclimate the same
+   *  way a Data in Depth figure does. */
+  standardTitle?: string
   /** Additional context line shown under the title. */
   subtitle?: string
   /** Context chips, each a short phrase. */
@@ -71,6 +75,7 @@ export default function ShareSnapshotCard({
   toolLabel,
   title,
   scenarioDefinition,
+  standardTitle,
   subtitle,
   chips = [],
   hydroclimate,
@@ -130,6 +135,20 @@ export default function ShareSnapshotCard({
           }}
         >
           {scenarioDefinition}
+        </Typography>
+      )}
+
+      {standardTitle && (
+        <Typography
+          sx={{
+            fontSize: "0.6875rem",
+            lineHeight: 1.35,
+            color: theme.palette.grey[600],
+            mt: 0.25,
+            pr: 3,
+          }}
+        >
+          {standardTitle}
         </Typography>
       )}
 

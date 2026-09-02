@@ -19,6 +19,7 @@ import {
   Alert,
   useTheme,
   icons,
+  Link,
 } from "@repo/ui/mui"
 import { CircularArrowButton, ScenarioBadge } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
@@ -41,16 +42,13 @@ import {
 } from "../content/outcomeLevelMethodology"
 import {
   BACKGROUND_BRIEF_DOCUMENTS,
+  BACKGROUND_BRIEF_STANDALONE_DOCUMENTS,
   getBackgroundBriefDocumentUrl,
 } from "../content/backgroundBriefs"
 import {
-  RESULT_SUMMARY_STRATEGY_DOCUMENTS,
-  getResultSummaryStrategyDocumentUrl,
-} from "../content/resultSummaryStrategy"
-import {
-  RESULT_SUMMARY_OUTCOME_DOCUMENTS,
-  getResultSummaryOutcomeDocumentUrl,
-} from "../content/resultSummaryOutcome"
+  WATER_ISSUE_DOCUMENTS,
+  getWaterIssueDocumentUrl,
+} from "../content/waterIssues"
 
 const { OpenInNew: OpenInNewIcon } = icons
 
@@ -408,11 +406,11 @@ function BackgroundBriefDocumentSelect({
 }
 
 /**
- * Flat (non-grouped) Select for the result summary (by strategy) documents.
+ * Flat (non-grouped) Select for the water issues documents.
  * Options are just {id, label} pairs — no theme grouping needed since these
  * PDFs aren't scenario-resolved.
  */
-function ResultSummaryStrategyDocumentSelect({
+function WaterIssueDocumentSelect({
   id,
   value,
   onChange,
@@ -454,72 +452,11 @@ function ResultSummaryStrategyDocumentSelect({
         sx={SELECT_SX}
         MenuProps={menuProps}
         renderValue={(v) => {
-          const doc = RESULT_SUMMARY_STRATEGY_DOCUMENTS.find((d) => d.id === v)
-          return doc ? doc.label : "Choose a strategy"
+          const doc = WATER_ISSUE_DOCUMENTS.find((d) => d.id === v)
+          return doc ? doc.label : "Choose a water issue"
         }}
       >
-        {RESULT_SUMMARY_STRATEGY_DOCUMENTS.map((doc) => (
-          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
-            {doc.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  )
-}
-
-/**
- * Flat (non-grouped) Select for the result summary (by outcome) documents.
- * Options are just {id, label} pairs — no theme grouping needed since these
- * PDFs aren't scenario-resolved.
- */
-function ResultSummaryOutcomeDocumentSelect({
-  id,
-  value,
-  onChange,
-}: {
-  id: string
-  value: string
-  onChange: (event: SelectChangeEvent<string>) => void
-}) {
-  const theme = useTheme()
-  const menuProps = {
-    PaperProps: {
-      sx: {
-        mt: 0.5,
-        backgroundColor: "common.white",
-        boxShadow: theme.shadow.sm,
-        border: `1px solid ${theme.palette.grey[200]}`,
-        borderRadius: theme.borderRadius.md,
-        "& .MuiMenuItem-root": {
-          py: 1,
-          whiteSpace: "normal" as const,
-          wordBreak: "break-word" as const,
-          "&:hover": { backgroundColor: theme.palette.grey[50] },
-          "&.Mui-selected": {
-            backgroundColor: theme.palette.grey[100],
-            "&:hover": { backgroundColor: theme.palette.grey[100] },
-          },
-        },
-      },
-    },
-  }
-
-  return (
-    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
-      <Select
-        id={id}
-        value={value}
-        onChange={onChange}
-        displayEmpty
-        sx={SELECT_SX}
-        MenuProps={menuProps}
-        renderValue={(v) => {
-          const doc = RESULT_SUMMARY_OUTCOME_DOCUMENTS.find((d) => d.id === v)
-          return doc ? doc.label : "Choose an outcome"
-        }}
-      >
-        {RESULT_SUMMARY_OUTCOME_DOCUMENTS.map((doc) => (
+        {WATER_ISSUE_DOCUMENTS.map((doc) => (
           <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
             {doc.label}
           </MenuItem>
@@ -550,12 +487,7 @@ export default function DataPage() {
   const [selectedOutcomeLevelDoc, setSelectedOutcomeLevelDoc] = useState("")
   const [selectedBackgroundBriefDoc, setSelectedBackgroundBriefDoc] =
     useState("")
-  const [
-    selectedResultSummaryStrategyDoc,
-    setSelectedResultSummaryStrategyDoc,
-  ] = useState("")
-  const [selectedResultSummaryOutcomeDoc, setSelectedResultSummaryOutcomeDoc] =
-    useState("")
+  const [selectedWaterIssueDoc, setSelectedWaterIssueDoc] = useState("")
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -615,16 +547,8 @@ export default function DataPage() {
     setSelectedBackgroundBriefDoc(event.target.value)
   }
 
-  const handleResultSummaryStrategyDocChange = (
-    event: SelectChangeEvent<string>,
-  ) => {
-    setSelectedResultSummaryStrategyDoc(event.target.value)
-  }
-
-  const handleResultSummaryOutcomeDocChange = (
-    event: SelectChangeEvent<string>,
-  ) => {
-    setSelectedResultSummaryOutcomeDoc(event.target.value)
+  const handleWaterIssueDocChange = (event: SelectChangeEvent<string>) => {
+    setSelectedWaterIssueDoc(event.target.value)
   }
 
   // Filter scenarios that have zip files
@@ -677,14 +601,9 @@ export default function DataPage() {
   const selectedBackgroundBriefDocument = BACKGROUND_BRIEF_DOCUMENTS.find(
     (d) => d.id === selectedBackgroundBriefDoc,
   )
-  const selectedResultSummaryStrategyDocument =
-    RESULT_SUMMARY_STRATEGY_DOCUMENTS.find(
-      (d) => d.id === selectedResultSummaryStrategyDoc,
-    )
-  const selectedResultSummaryOutcomeDocument =
-    RESULT_SUMMARY_OUTCOME_DOCUMENTS.find(
-      (d) => d.id === selectedResultSummaryOutcomeDoc,
-    )
+  const selectedWaterIssueDocument = WATER_ISSUE_DOCUMENTS.find(
+    (d) => d.id === selectedWaterIssueDoc,
+  )
 
   return (
     <>
@@ -1004,7 +923,7 @@ export default function DataPage() {
                     variant="h5"
                     sx={{ mb: (theme) => theme.space.component.lg }}
                   >
-                    Water management strategies
+                    COEQWAL scenario library
                   </Typography>
                   <Typography
                     variant="body1"
@@ -1015,6 +934,31 @@ export default function DataPage() {
                     Documentation of COEQWAL&apos;s water management strategies
                     and CalSim3 model specifications.
                   </Typography>
+
+                  {/* Standalone briefs, shown as fixed buttons above the
+                      strategy dropdown rather than as dropdown options. */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: (theme) => theme.space.gap.lg,
+                      mb: (theme) => theme.space.section.sm,
+                    }}
+                  >
+                    {BACKGROUND_BRIEF_STANDALONE_DOCUMENTS.map((doc) => (
+                      <DownloadButton
+                        key={doc.id}
+                        fileId={doc.id}
+                        filename={doc.file}
+                        downloadUrl={getBackgroundBriefDocumentUrl(doc.file)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        icon={<OpenInNewIcon />}
+                      >
+                        View {doc.label}
+                      </DownloadButton>
+                    ))}
+                  </Box>
 
                   <StrategyDocumentSelect
                     id="strategy-doc-select"
@@ -1096,70 +1040,49 @@ export default function DataPage() {
                       mb: (theme) => theme.space.section.sm,
                     }}
                   >
-                    Briefs that summarize outcome level results by Location of
-                    interest, Strategy, and Outcome.
+                    Briefs that summarize key water issues explored by the
+                    COEQWAL project.
                   </Typography>
 
-                  <ResultSummaryStrategyDocumentSelect
-                    id="result-summary-strategy-doc-select"
-                    value={selectedResultSummaryStrategyDoc}
-                    onChange={handleResultSummaryStrategyDocChange}
+                  <WaterIssueDocumentSelect
+                    id="water-issue-doc-select"
+                    value={selectedWaterIssueDoc}
+                    onChange={handleWaterIssueDocChange}
                   />
 
-                  {/* Reserve the button's footprint so the outcome dropdown
-                      below doesn't shift when a strategy is selected. */}
-                  <Box
-                    sx={{
-                      mb: (theme) => theme.space.section.xs,
-                      minHeight: 56,
-                    }}
-                  >
-                    {selectedResultSummaryStrategyDocument && (
+                  {selectedWaterIssueDocument && (
+                    <Box sx={{ mb: (theme) => theme.space.section.xs }}>
                       <DownloadButton
-                        fileId={selectedResultSummaryStrategyDocument.id}
-                        filename={selectedResultSummaryStrategyDocument.file}
-                        downloadUrl={getResultSummaryStrategyDocumentUrl(
-                          selectedResultSummaryStrategyDocument.file,
+                        fileId={selectedWaterIssueDocument.id}
+                        filename={selectedWaterIssueDocument.file}
+                        downloadUrl={getWaterIssueDocumentUrl(
+                          selectedWaterIssueDocument.file,
                         )}
                         target="_blank"
                         rel="noopener noreferrer"
                         icon={<OpenInNewIcon />}
                       >
-                        View {selectedResultSummaryStrategyDocument.label}
+                        View {selectedWaterIssueDocument.label}
                       </DownloadButton>
-                    )}
-                  </Box>
-
-                  <ResultSummaryOutcomeDocumentSelect
-                    id="result-summary-outcome-doc-select"
-                    value={selectedResultSummaryOutcomeDoc}
-                    onChange={handleResultSummaryOutcomeDocChange}
-                  />
-
-                  {/* Reserve the button's footprint so this section's total
-                      height stays stable regardless of selection state. */}
-                  <Box
-                    sx={{
-                      mb: (theme) => theme.space.section.xs,
-                      minHeight: 56,
-                    }}
-                  >
-                    {selectedResultSummaryOutcomeDocument && (
-                      <DownloadButton
-                        fileId={selectedResultSummaryOutcomeDocument.id}
-                        filename={selectedResultSummaryOutcomeDocument.file}
-                        downloadUrl={getResultSummaryOutcomeDocumentUrl(
-                          selectedResultSummaryOutcomeDocument.file,
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        icon={<OpenInNewIcon />}
-                      >
-                        View {selectedResultSummaryOutcomeDocument.label}
-                      </DownloadButton>
-                    )}
-                  </Box>
+                    </Box>
+                  )}
                 </Box>
+
+                {/* Plain HTML directory of every document above, so search
+                    engines can discover pages that would otherwise only be
+                    reachable through the dropdowns' client-side state. */}
+                <Typography
+                  variant="body2"
+                  sx={{ mt: (theme) => theme.space.section.lg }}
+                >
+                  <Link
+                    href="/documents/index.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Browse the full document library
+                  </Link>
+                </Typography>
               </Grid>
             </Grid>
           </Container>

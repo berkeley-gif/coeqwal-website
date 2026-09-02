@@ -7,9 +7,10 @@
  * with StrategyGrid columns. Otherwise uses a flex layout.
  */
 
-import React, { useCallback } from "react"
+import React from "react"
 import { Box, Typography, useTheme, Switch } from "@repo/ui/mui"
-import { HydroclimateBadge } from "@repo/ui"
+import { InfoIconButton, HydroclimateBadge } from "@repo/ui"
+import { InlineNavLink } from "../../../../../../components/InlineNavLink"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import {
@@ -51,7 +52,7 @@ export default function ToolToolbar({
   // tour. Resilience reuses this control too but its tour does not
   // step through it, so a single id is fine.
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
-  const listClimateTourRef = useTourAnchor("list.toolbar.climate")
+  const showMapAnchorRef = useTourAnchor("toolbar.showMap")
   // High-level orientation anchor for the list tour: the whole strip
   // of view controls (hydroclimate, map, etc.) on the right side of
   // the toolbar. Registered only in list mode so it does not collide
@@ -64,16 +65,6 @@ export default function ToolToolbar({
   // Same strip again for the Data in Depth tour, which renders through the
   // same non-list toolbar row.
   const dataViewAreaTourRef = useTourAnchor("data.viewArea")
-  // One DOM node serves both the Radar climate-chip tour and the new
-  // List hydroclimate tour step. Merge callback refs so both registries
-  // resolve to the same element without re-wrapping the chooser.
-  const climateMergedRef = useCallback(
-    (el: HTMLElement | null) => {
-      climateChipsAnchorRef(el)
-      if (exploreMode === "list") listClimateTourRef(el)
-    },
-    [climateChipsAnchorRef, listClimateTourRef, exploreMode],
-  )
 
   // The list view's "Outcome view" toggle (Average / Bar /
   // Distribution) is intentionally deactivated for the current demo
@@ -106,7 +97,10 @@ export default function ToolToolbar({
 
         {mapPaired && (
           <>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Box
+              ref={showMapAnchorRef}
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
               <Typography
                 variant="dashboard"
                 sx={{
@@ -132,7 +126,7 @@ export default function ToolToolbar({
             {mapPaired && <VerticalDivider />}
 
             <Box
-              ref={climateMergedRef}
+              ref={climateChipsAnchorRef}
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -140,16 +134,35 @@ export default function ToolToolbar({
                 flexWrap: "wrap",
               }}
             >
-              <Typography
-                variant="dashboard"
-                sx={{
-                  fontWeight: 500,
-                  color: theme.palette.text.primary,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                View by hydroclimate
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <InfoIconButton
+                  tooltipContent={
+                    <>
+                      The historical hydroclimate used in COEQWAL is adjusted
+                      for recent climate change and does not represent the
+                      observed historical record. The flow change reported for
+                      the four hydroclimate futures represent the average change
+                      in flow from California&apos;s major water supply basins
+                      over a 30-year period, centered on 2043. An assumed level
+                      of sea level rise is also specified for each hydroclimate
+                      future. For more information, see technical documentation
+                      on the <InlineNavLink to="/data">Data</InlineNavLink>{" "}
+                      page.
+                    </>
+                  }
+                  placement="right"
+                />
+                <Typography
+                  variant="dashboard"
+                  sx={{
+                    fontWeight: 500,
+                    color: theme.palette.text.primary,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  View by hydroclimate
+                </Typography>
+              </Box>
               <HydroclimateChooser
                 layout="horizontal"
                 showTitle={false}
