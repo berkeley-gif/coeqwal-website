@@ -63,6 +63,14 @@ interface ShareSnapshotCardProps {
   note?: string
   onNoteChange?: (note: string) => void
   onRemove?: (id: string) => void
+  /** Color key for the plotted members: one labeled swatch per row. Give it
+   *  to any variant whose captured chart draws several colored series but
+   *  carries no legend of its own. */
+  legend?: { label: string; color: string }[]
+  /** Label and value rows naming exactly what the figure shows (variable,
+   *  view, members, water years, units), so an exported figure reads without
+   *  the surrounding page. */
+  figureFacts?: { label: string; value: string }[]
   /** Provenance footer rendered by the shell inside the exported area. */
   figureFooter?: ShareFigureFooter
   /** Width over height of the captured chart; the thumbnail box takes it so
@@ -83,6 +91,8 @@ export default function ShareSnapshotCard({
   cachedImageDataUrl,
   liveChart,
   showTierLegend = false,
+  legend,
+  figureFacts,
   note,
   onNoteChange,
   onRemove,
@@ -157,12 +167,50 @@ export default function ShareSnapshotCard({
           variant="caption"
           sx={{
             display: "block",
-            color: theme.palette.text.secondary,
+            // Not text.secondary: that token is the theme's white, which is
+            // the card's own background, so the line rendered invisible.
+            color: theme.palette.grey[600],
             mt: 0.25,
           }}
         >
           {subtitle}
         </Typography>
+      )}
+
+      {figureFacts && figureFacts.length > 0 && (
+        <Box
+          sx={{
+            mt: 0.75,
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.25,
+          }}
+        >
+          {figureFacts.map((fact) => (
+            <Box key={fact.label} sx={{ display: "flex", gap: 0.5 }}>
+              <Typography
+                sx={{
+                  fontSize: "0.6875rem",
+                  lineHeight: 1.35,
+                  color: theme.palette.grey[500],
+                  minWidth: 76,
+                  flexShrink: 0,
+                }}
+              >
+                {fact.label}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "0.6875rem",
+                  lineHeight: 1.35,
+                  color: theme.palette.grey[700],
+                }}
+              >
+                {fact.value}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
       )}
 
       {hydroclimate && (
@@ -181,6 +229,48 @@ export default function ShareSnapshotCard({
       />
 
       {showTierLegend && <ShareCardTierLegend />}
+
+      {legend && legend.length > 0 && (
+        <Box
+          sx={{
+            mt: 0.75,
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.25,
+          }}
+        >
+          {legend.map((row) => (
+            <Box
+              key={row.label}
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              <Box
+                data-share-legend-swatch=""
+                role="img"
+                aria-label={`Legend: ${row.label}`}
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: theme.borderRadius.circle,
+                  // A row without a color (an unknown compare scope) still
+                  // paints a neutral swatch instead of an invisible one.
+                  backgroundColor: row.color || theme.palette.grey[400],
+                  flexShrink: 0,
+                }}
+              />
+              <Typography
+                sx={{
+                  fontSize: "0.6875rem",
+                  lineHeight: 1.3,
+                  color: theme.palette.grey[700],
+                }}
+              >
+                {row.label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      )}
 
       {chips.length > 0 && (
         <Box

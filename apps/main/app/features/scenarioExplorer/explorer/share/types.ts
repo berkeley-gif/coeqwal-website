@@ -138,6 +138,11 @@ export type ShareItem =
       memberIds: string[]
       /** Ordered display labels, aligned with memberIds */
       memberLabels: string[]
+      /** Sticky per-member chart colors, aligned with memberIds. Optional:
+       *  items staged before the card carried a legend, and URL-restored
+       *  items, have none, and the card falls back to the deterministic
+       *  assignment for the same ids. */
+      memberColors?: string[]
       /** Data provenance at capture time. "mixed" when the figure's series
        *  did not share one provenance, so no single label describes it. */
       source: "live" | "mock" | "mixed"

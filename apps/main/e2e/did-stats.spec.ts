@@ -77,7 +77,9 @@ test("Stats style adds the trend plot on the groundwater level view", async ({
   ).toBeEnabled()
   await page.getByRole("button", { name: "save snapshot" }).click()
   const drawer = page.locator(".MuiDrawer-root")
-  await expect(drawer.getByText(/Groundwater Storage/i)).toBeVisible({
+  // Match the standardized card title (it carries the location
+  // parenthetical); the figure-facts block also names the bare variable.
+  await expect(drawer.getByText(/Groundwater Storage \(/i)).toBeVisible({
     timeout: 20_000,
   })
   await expect(
@@ -133,6 +135,7 @@ test("Stats style saves a composed snapshot to the share drawer", async ({
   await expect(
     drawer.getByRole("img", { name: /April Reservoir Storage/ }),
   ).toBeVisible()
-  // The card names the style it captured.
-  await expect(drawer.getByText(/Stats/)).toBeVisible()
+  // The card names the style it captured (in the subtitle and again in
+  // the figure-facts View row).
+  await expect(drawer.getByText(/Stats/).first()).toBeVisible()
 })
