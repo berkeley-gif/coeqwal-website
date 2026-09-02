@@ -10,6 +10,7 @@ import type { ReactNode } from "react"
 import { Typography } from "@repo/ui/mui"
 import { WATER_THEME_REGISTRY } from "@repo/ui/themes/theme"
 import { InlineNavLink } from "../components/InlineNavLink"
+import { GlossaryTermLink } from "../features/glossary/GlossaryTermLink"
 
 // Looks up a theme's canonical display name from the shared registry in
 // @repo/ui (the actual source of truth — packages/ui can't import from
@@ -32,7 +33,7 @@ export type ParagraphBlock = {
 
 export type ListBlock = {
   type: "list"
-  items: string[]
+  items: ReactNode[]
 }
 
 export type ImageBlock = {
@@ -286,8 +287,8 @@ export const WATER_THEMES: Theme[] = [
               type: "list",
               items: [
                 "Current operations provide a representation of today's water management system. They are not a neutral starting point, but reflect decades of infrastructure investments, policies, regulations, water rights, contracts, and negotiated trade-offs.",
-                "COEQWAL uses CalSim3, the water allocation model used by state and federal agencies to plan and manage the Central Valley Project and State Water Project. Using the same model makes this decision-making space more accessible to a broader range of people and perspectives.",
-                "Models are a simplification of reality. The CalSim3 water allocation model used by COEQWAL focuses on operations of the Central Valley Project and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.",
+                ( <><GlossaryTermLink>COEQWAL</GlossaryTermLink> uses <GlossaryTermLink>CalSim3</GlossaryTermLink>, the water <GlossaryTermLink>allocation</GlossaryTermLink> model used by state and federal agencies to plan and manage the Central Valley Project and State Water Project. Using the same model makes this decision-making space more accessible to a broader range of people and perspectives.</>),
+                ( <>Models are a simplification of reality. The CalSim3 water <GlossaryTermLink>allocation</GlossaryTermLink> model used by COEQWAL focuses on operations of the Central Valley Project and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.</>),
                 'There is no single model representation of "current operations". State and federal agencies use different assumptions about land use, system operations, regulations, and other conditions, and these representations change as policies and operations evolve.',
                 "Differences between hydroclimates under the same management strategy help reveal climate-driven changes, while differences between management strategies under the same hydroclimate help reveal management-driven changes.",
                 "Current operations already contain benefits, trade-offs, and inequities. Comparing other scenarios to current operations therefore shows how management changes redistribute benefits relative to current conditions, not to a neutral starting point.",
@@ -304,7 +305,11 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This water issue compares alternative representations of current operations and provides a foundation for understanding the broader range of management strategies explored by COEQWAL. The scenarios vary assumptions about operating rules, agricultural land use, and Temporary Urgency Change Petitions (TUCPs), which can temporarily modify certain water-right requirements during drought or other urgent conditions.",
+              text: (
+                <>
+                  This water issue compares alternative representations of current operations and provides a foundation for understanding the broader range of management strategies explored by <GlossaryTermLink term="COEQWAL">COEQWAL</GlossaryTermLink>. The scenarios vary assumptions about operating rules, agricultural land use, and Temporary Urgency Change Petitions (TUCPs), which can temporarily modify certain water-right requirements during drought or other urgent conditions.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -313,9 +318,9 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Current operations, with DWR (2023) operating rules, recent (2020) land use, and allowing for TUCP actions",
-                "Current operations with historical agricultural land use, with DWR (2023) operating rules, historical (2004-2013) land use, and allowing for TUCP actions",
-                "Current operations without TUCPs, with DWR (2023) operating rules and recent (2020) land use, but without TUCP actions",
+                (<>Current operations, with <GlossaryTermLink term="California Department of Water Resources (DWR)">DWR</GlossaryTermLink> (2023) operating rules, recent (2020) land use, and allowing for TUCP actions"</>),
+                (<>Current operations with historical agricultural land use, with <GlossaryTermLink term="California Department of Water Resources (DWR)">DWR</GlossaryTermLink> (2023) operating rules, historical (2004-2013) land use, and allowing for TUCP actions</>),
+                (<>Current operations without TUCPs, with <GlossaryTermLink term="California Department of Water Resources (DWR)">DWR</GlossaryTermLink> (2023) operating rules and recent (2020) land use, but without TUCP actions</>),
                 "Current USBR operations, with U.S. Bureau of Reclamation (2024) operating rules, recent (2020) land use, and TUCPs",
                 "Current USBR operations without TUCPs, with U.S. Bureau of Reclamation (2024) operating rules and recent (2020) land use, but without TUCPs",
               ],
