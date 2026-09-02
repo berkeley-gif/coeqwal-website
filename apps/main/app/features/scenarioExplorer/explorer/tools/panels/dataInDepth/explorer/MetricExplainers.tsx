@@ -2,8 +2,8 @@
 
 /**
  * MetricExplainers - the explainer accordions under the chart card: what the
- * metric is and how to read the current chart. Copy is ported from the
- * team's design prototype (registry + interpretiveText); this component only
+ * variable is and how to read the current chart. Copy comes from the
+ * registry (`plain` and `tech`) and interpretiveText; this component only
  * lays it out.
  */
 
@@ -18,11 +18,13 @@ import {
   useTheme,
 } from "@repo/ui/mui"
 import { useDataSlice } from "../../../../store"
+import { useTourAnchor } from "../../../tour"
 import { getVariable } from "../config/variableRegistry"
 import { howToReadText } from "../hooks/interpretiveText"
 
 export default function MetricExplainers() {
   const theme = useTheme()
+  const explainersAnchorRef = useTourAnchor("data.explainers")
   const { selectedVariableId, view, distKind } = useDataSlice()
   const variable = getVariable(selectedVariableId)
   if (!variable) return null
@@ -30,7 +32,7 @@ export default function MetricExplainers() {
   const items: { key: string; title: string; body: React.ReactNode }[] = [
     {
       key: "what",
-      title: "What is this metric?",
+      title: "What is this variable?",
       body: (
         <>
           <Typography variant="body2" sx={{ mb: 1 }}>
@@ -53,7 +55,7 @@ export default function MetricExplainers() {
   ]
 
   return (
-    <Box sx={{ mt: 2 }}>
+    <Box ref={explainersAnchorRef} sx={{ mt: 2 }}>
       {items.map((item) => (
         <Accordion
           key={item.key}

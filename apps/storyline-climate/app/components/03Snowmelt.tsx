@@ -236,10 +236,7 @@ function SierraNevadaContent() {
               sx={{
                 width: "100%",
                 color: OFF_WHITE,
-                fontWeight: "bold",
-                fontSize: { xs: "1rem", md: "1.05rem", xl: "1.15rem" },
-                lineHeight: 1.25,
-                letterSpacing: 0,
+                fontWeight: "fontWeightBold",
                 textAlign: "left !important",
               }}
             >
@@ -250,7 +247,6 @@ function SierraNevadaContent() {
               sx={{
                 color: "rgba(255, 255, 255, 0.82)",
                 maxWidth: "56rem",
-                lineHeight: 1.45,
                 textAlign: "left !important",
               }}
             >
@@ -270,8 +266,7 @@ function SierraNevadaContent() {
               sx={{
                 mt: 1.5,
                 color: OFF_WHITE,
-                fontWeight: "bold",
-                letterSpacing: 0,
+                fontWeight: "fontWeightBold",
                 textAlign: "left",
                 whiteSpace: "nowrap",
               }}
@@ -353,8 +348,10 @@ function SierraNevadaContent() {
                           ? "translateX(-100%)"
                           : "translateX(-50%)",
                       color: isActive ? GOLD : OFF_WHITE,
-                      fontWeight: isActive ? "bold" : "normal",
-                      lineHeight: 1.2,
+                      typography: "compactMicro",
+                      fontWeight: isActive
+                        ? "fontWeightBold"
+                        : "fontWeightRegular",
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -473,7 +470,7 @@ function SnowmeltContent() {
 
       <Box
         className="text-section"
-        width="50%"
+        width={{ xs: "47%", md: "45%", lg: "50%" }}
         height="100%"
         sx={{
           position: "relative",
@@ -511,16 +508,19 @@ function SnowmeltContent() {
       </Box>
 
       <Box
-        width="50%"
+        width={{ xs: "53%", md: "55%", lg: "50%" }}
         height="100%"
         sx={{
           position: "absolute",
           inset: 0,
-          left: "50%",
+          left: { xs: "47%", md: "45%", lg: "50%" },
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          paddingRight: "5rem",
+          paddingRight: { xs: "1.5rem", md: "2.5rem", lg: "5rem" },
+          minWidth: 0,
+          "@media (min-width: 750px) and (max-width: 1199.95px) and (max-height: 800px)":
+            { paddingTop: "2.5rem", boxSizing: "border-box" },
           pointerEvents: "auto",
           zIndex: 1,
         }}
@@ -536,7 +536,9 @@ function SnowmeltContent() {
           )}
           sx={{
             width: "100%",
-            height: { xs: "64vh", md: "70vh" },
+            height: { xs: "70vh", md: "72vh", lg: "70vh" },
+            "@media (min-width: 750px) and (max-width: 1199.95px) and (max-height: 800px)":
+              { height: "82vh" },
             pointerEvents: "auto",
           }}
         >
@@ -566,7 +568,11 @@ function SnowmeltContent() {
           <Box
             ref={alignment.chartRef}
             width="100%"
-            height={{ xs: "42vh", md: "52vh" }}
+            height={{ xs: "48vh", md: "54vh", lg: "52vh" }}
+            sx={{
+              "@media (min-width: 750px) and (max-width: 1199.95px) and (max-height: 800px)":
+                { height: "59vh" },
+            }}
           >
             <SnowpackLine
               scrollProgress={progress}

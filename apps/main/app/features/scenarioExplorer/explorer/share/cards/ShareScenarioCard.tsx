@@ -12,10 +12,15 @@ import {
 import { getSingleValueLocationCount } from "../../../../../content/outcomes"
 import type { OutcomeDisplayMode } from "../../store"
 import ShareCardShell from "../ShareCardShell"
+import type { ShareFigureFooter } from "../figureFooter"
 import HydroclimateBadge from "./HydroclimateBadge"
 import ShareCardTierLegend from "./ShareCardTierLegend"
 
 interface ShareScenarioCardProps {
+  /** Uppercase tool label above the title, matching the other share cards. */
+  toolLabel?: string
+  /** Standardized figure-title line, shown under the scenario name. */
+  standardTitle?: string
   scenarioId: string
   name: string
   scenarioDefinition?: string
@@ -27,9 +32,13 @@ interface ShareScenarioCardProps {
   viewMode?: OutcomeDisplayMode
   note?: string
   onNoteChange?: (note: string) => void
+  /** Provenance footer rendered by the shell inside the exported area. */
+  figureFooter?: ShareFigureFooter
 }
 
 export default function ShareScenarioCard({
+  toolLabel,
+  standardTitle,
   scenarioId,
   name,
   scenarioDefinition,
@@ -41,16 +50,34 @@ export default function ShareScenarioCard({
   viewMode,
   note,
   onNoteChange,
+  figureFooter,
 }: ShareScenarioCardProps) {
   const theme = useTheme()
 
   return (
     <ShareCardShell
+      figureFooter={figureFooter}
       onRemove={onRemove ? () => onRemove(scenarioId) : undefined}
       note={note}
       onNoteChange={onNoteChange}
       removeAriaLabel="Remove scenario from share tray"
     >
+      {toolLabel && (
+        <Typography
+          variant="caption"
+          sx={{
+            display: "block",
+            color: theme.palette.blue.bright,
+            fontWeight: 600,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            mb: 0.25,
+          }}
+        >
+          {toolLabel}
+        </Typography>
+      )}
+
       {/* Scenario title */}
       <Typography
         variant="body2"
@@ -76,6 +103,20 @@ export default function ShareScenarioCard({
           }}
         >
           {scenarioDefinition}
+        </Typography>
+      )}
+
+      {standardTitle && (
+        <Typography
+          sx={{
+            fontSize: "0.6875rem",
+            lineHeight: 1.35,
+            color: theme.palette.grey[600],
+            mt: 0.25,
+            pr: onRemove ? 2.5 : 0,
+          }}
+        >
+          {standardTitle}
         </Typography>
       )}
 

@@ -14,14 +14,11 @@
  */
 
 import { MainContent } from "./components/MainContent"
-import { FloatingGlossary } from "./features/glossary"
 import IntroSection from "./sections/IntroSection"
 
 export default function Home() {
   return (
     <>
-      <FloatingGlossary />
-
       {/* WCAG 2.4.1: SkipLink target lives on the <main> element below */}
       <MainContent>
         <IntroSection />

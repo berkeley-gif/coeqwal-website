@@ -10,7 +10,7 @@
  * - WCAG 1.3.1: Semantic <section> with aria-label
  */
 
-import React from "react"
+import React, { ReactNode } from "react"
 import { motion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { fadeIn } from "../lib/constants/motionAnimations"
@@ -23,15 +23,17 @@ export interface TieredImageTextProps {
   /** Title for the section */
   title: string
   /** First body paragraph */
-  body1: string
+  body1?: string
   /** Second body paragraph (optional) */
-  body2: string
+  body2?: string
+  /** Third body paragraph (optional) */
+  body3?: string
   /** Footer logo */
   logoSrc: string
   /** Footer logo alt text */
   logoAlt: string
   /** Footer logo paragraph */
-  logoText: string
+  logoText: ReactNode
   /** Image source */
   imgSrc: string
   /** Image alt text */
@@ -44,6 +46,7 @@ export function TieredImageText({
   title,
   body1,
   body2,
+  body3,
   logoSrc,
   logoAlt,
   logoText,
@@ -126,6 +129,17 @@ export function TieredImageText({
             }}
           >
             {body2}
+          </Typography>
+
+          {/* Body text 3 */}
+          <Typography
+            variant="body1"
+            sx={{
+              flex: "3 1 0",
+              minWidth: 0,
+            }}
+          >
+            {body3}
           </Typography>
         </Box>
       </Box>

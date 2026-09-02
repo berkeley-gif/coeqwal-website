@@ -9,7 +9,8 @@
 
 import React from "react"
 import { Box, Typography, useTheme, Switch } from "@repo/ui/mui"
-import { HydroclimateBadge } from "@repo/ui"
+import { InfoIconButton, HydroclimateBadge } from "@repo/ui"
+import { InlineNavLink } from "../../../../../../components/InlineNavLink"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import {
@@ -62,6 +63,9 @@ export default function ToolToolbar({
   // rendered as a plain row (not the list grid), so we anchor the
   // radar orientation popper on that row directly.
   const radarViewAreaTourRef = useTourAnchor("radar.viewArea")
+  // Same strip again for the Data in Depth tour, which renders through the
+  // same non-list toolbar row.
+  const dataViewAreaTourRef = useTourAnchor("data.viewArea")
 
   // The list view's "Outcome view" toggle (Average / Bar /
   // Distribution) is intentionally deactivated for the current demo
@@ -131,16 +135,35 @@ export default function ToolToolbar({
                 flexWrap: "wrap",
               }}
             >
-              <Typography
-                variant="dashboard"
-                sx={{
-                  fontWeight: 500,
-                  color: theme.palette.text.primary,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                View by climate
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <InfoIconButton
+                  tooltipContent={
+                    <>
+                      The historical hydroclimate used in COEQWAL is adjusted
+                      for recent climate change and does not represent the
+                      observed historical record. The flow change reported for
+                      the four hydroclimate futures represent the average change
+                      in flow from California&apos;s major water supply basins
+                      over a 30-year period, centered on 2043. An assumed level
+                      of sea level rise is also specified for each hydroclimate
+                      future. For more information, see technical documentation
+                      on the <InlineNavLink to="/data">Data</InlineNavLink>{" "}
+                      page.
+                    </>
+                  }
+                  placement="right"
+                />
+                <Typography
+                  variant="dashboard"
+                  sx={{
+                    fontWeight: 500,
+                    color: theme.palette.text.primary,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  View by hydroclimate
+                </Typography>
+              </Box>
               <HydroclimateChooser
                 layout="horizontal"
                 showTitle={false}
@@ -236,7 +259,11 @@ export default function ToolToolbar({
 
   // Non-list modes: search + chips live in the sidebar, toolbar only has view controls
   const nonListViewAreaRef =
-    exploreMode === "radar" ? radarViewAreaTourRef : undefined
+    exploreMode === "radar"
+      ? radarViewAreaTourRef
+      : exploreMode === "data"
+        ? dataViewAreaTourRef
+        : undefined
   return (
     <Box
       ref={nonListViewAreaRef}

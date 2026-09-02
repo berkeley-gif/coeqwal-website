@@ -49,7 +49,9 @@ export function useScrollamaSection() {
 
     appActions.setMcCloudRiverProgress(0)
     appActions.setHistoricalContextProgress(0)
+    appActions.setClimateResilienceProgress(0)
     appActions.setTransparencyProgress(0)
+    appActions.setConclusionProgress(0)
     appActions.setActiveSection(data)
   }, [])
 
@@ -76,8 +78,18 @@ export function useScrollamaSection() {
         return
       }
 
+      if (data === "ClimateResilience") {
+        appActions.setClimateResilienceProgress(progress)
+        return
+      }
+
       if (data === "Transparency") {
         appActions.setTransparencyProgress(progress)
+        return
+      }
+
+      if (data === "Conclusion") {
+        appActions.setConclusionProgress(progress)
         return
       }
 

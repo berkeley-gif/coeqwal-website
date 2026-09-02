@@ -79,3 +79,26 @@ test("share drawer has no blocking a11y violations", async ({ page }) => {
   ).toBeVisible()
   expect(await blockingViolations(page, "share-drawer")).toEqual([])
 })
+
+test("locations axis with the grouped picker has no blocking a11y violations", async ({
+  page,
+}) => {
+  await openDataInDepth(page)
+  // Agricultural water lists 134 locations, so the Locations axis renders the
+  // selected chips plus an add-location select instead of a chip cloud.
+  await page
+    .getByRole("list")
+    .filter({ has: page.getByRole("button", { name: "Groundwater pumping" }) })
+    .getByRole("button", { name: "Surface water deliveries" })
+    .click()
+  await page.getByRole("button", { name: "Locations", exact: true }).click()
+  await expect(
+    page.getByRole("combobox", { name: "Add location" }),
+  ).toBeVisible()
+  expect(await blockingViolations(page, "did-locations-picker")).toEqual([])
+  await page.getByRole("combobox", { name: "Add location" }).click()
+  await expect(page.getByRole("listbox")).toBeVisible()
+  expect(await blockingViolations(page, "did-locations-picker-open")).toEqual(
+    [],
+  )
+})

@@ -33,7 +33,7 @@ export function useRadarPlotTheme(): RadarPlotPalette {
       gridStroke,
       tierLabelText,
       dotStroke: commonWhite,
-      tierZoneFills: [commonWhite, commonWhite, commonWhite, commonWhite],
+      tierZoneFills: ["#1ca367", "#31b2c5", "#f2944f", "#ee5d32"],
       rangeBandFill,
       rangeBandStroke,
       // The "baseline gold" matches `CURRENT_OPS_COLOR` (s0020 / Current

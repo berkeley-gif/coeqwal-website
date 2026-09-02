@@ -17,11 +17,11 @@ import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
 import { useWorkspaceSlice, useListSlice } from "../../../store"
 import StrategyGrid from "./grid"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
-import type { ChartDataPoint } from "../../../../../scenarios/components/shared"
 import { getScenariosWithIcon } from "../../../../../scenarios/components/shared/iconRegistry"
 import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
 import VisualizeRail from "./VisualizeRail"
+import { useListVisualizeRailSync } from "./tour/useListVisualizeRailSync"
 
 interface ListViewProps {
   highlightedIds?: Set<string> | null
@@ -31,8 +31,6 @@ export default function ListView({ highlightedIds }: ListViewProps) {
   const theme = useTheme()
 
   const {
-    allChartData,
-    outcomeNames,
     allScoreData,
     isLoading: tiersLoading,
     error: tiersError,
@@ -55,12 +53,6 @@ export default function ListView({ highlightedIds }: ListViewProps) {
   const isLoading = listLoading || tiersLoading
   const error = listError ?? tiersError ?? null
 
-  const getChartDataForScenario = useMemo(
-    () => (scenarioId: string) =>
-      (allChartData[scenarioId] ?? {}) as Record<string, ChartDataPoint[]>,
-    [allChartData],
-  )
-
   const listScrollRef = useRef<HTMLDivElement>(null)
 
   const {
@@ -82,6 +74,12 @@ export default function ListView({ highlightedIds }: ListViewProps) {
     setSelectedIconId,
     groupByTheme,
   } = useListSlice()
+
+  useListVisualizeRailSync(
+    orderedScenarios[0]?.scenarioId,
+    selectedScenarios,
+    selectScenarios,
+  )
 
   const handleToggleScenario = (scenarioId: string) => {
     toggleScenario(scenarioId)
@@ -165,8 +163,6 @@ export default function ListView({ highlightedIds }: ListViewProps) {
   const showNoResultsMessage = searchQuery.trim() !== "" && !hasSearchResults
 
   const strategyGridProps = {
-    getChartDataForScenario,
-    outcomeNames,
     scenarios: orderedScenarios,
     highlightedScenarios: mergedHighlighted,
     showSearchDivider: hasSearchResults,

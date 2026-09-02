@@ -237,12 +237,11 @@ export function useTierChartData(
         }
       }
 
-      if (hydroclimate !== HC_HISTORICAL) continue
       for (const code of NOD_SOD_OUTCOME_CODES) {
         const raw = getRegionalTierMean(
           scenarioId,
           code as RegionalOutcomeCode,
-          "historical",
+          hydroclimate as RegionalHydroclimate,
         )
         if (raw == null) continue
         const v = tierMeanToRadarValue(raw)

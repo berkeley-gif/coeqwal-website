@@ -5,6 +5,7 @@ import { LinedList } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
 import { INTERPRETING_LENSES, VIZ_TOOLS } from "../content"
+import { GlossaryTermLink } from "../../../glossary"
 
 export default function InterpretingOutcomesPanel() {
   const theme = useTheme()
@@ -13,7 +14,7 @@ export default function InterpretingOutcomesPanel() {
 
   return (
     <PanelShell background={exploreBg}>
-      <PanelHeading title="Interpreting scenario outcomes" />
+      <PanelHeading title="How do you interpret scenario outcomes?" />
 
       <Box
         sx={{
@@ -29,8 +30,9 @@ export default function InterpretingOutcomesPanel() {
             color="text.secondary"
             sx={{ mb: theme.space.section.md }}
           >
-            The visualization tools help to understand how different management
-            strategies and hydroclimate conditions affect:
+            The different data views provide insight into how different{" "}
+            <GlossaryTermLink>management strategies</GlossaryTermLink> and{" "}
+            <GlossaryTermLink>hydroclimate</GlossaryTermLink> affect:
           </Typography>
           <LinedList
             items={INTERPRETING_LENSES.map(({ label, description }) => ({

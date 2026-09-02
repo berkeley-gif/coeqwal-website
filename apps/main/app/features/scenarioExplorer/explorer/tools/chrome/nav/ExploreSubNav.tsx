@@ -27,6 +27,7 @@ import { useWorkspaceSlice, type ExploreMode } from "../../../store"
 import { useTabs } from "../../../../../../context/Tabs"
 import { useTabNavigation } from "../../../../../../hooks/useTabNavigation"
 import { motion, useReducedMotion } from "@repo/motion"
+import { useTourAnchor } from "../../tour"
 
 /**
  * Flow map steps for the curation loop (List -> Radar -> Distribution ->
@@ -56,13 +57,13 @@ const FLOW: FlowStep[] = [
     mode: "bar",
     icon: <BarChartIcon sx={{ fontSize: "1.1rem" }} />,
     label: "Bar",
-    purpose: "Compare outcomes side by side",
+    purpose: "Compare scenarios",
   },
   {
     mode: "radar",
     icon: <AdjustIcon sx={{ fontSize: "1.1rem" }} />,
     label: "Radar",
-    purpose: "Compare tradeoffs",
+    purpose: "Evaluate trade-offs",
   },
   {
     mode: "equity",
@@ -73,8 +74,8 @@ const FLOW: FlowStep[] = [
   {
     mode: "resilience",
     icon: <GridOnIcon sx={{ fontSize: "1.1rem" }} />,
-    label: "Resilience",
-    purpose: "Stress-test",
+    label: "Heatmap",
+    purpose: "Test climate stress",
   },
   {
     mode: "data",
@@ -92,6 +93,13 @@ export default function ExploreSubNav() {
 
   const { exploreMode, setExploreMode, selectedScenarios } = useWorkspaceSlice()
   const prefersReducedMotion = useReducedMotion()
+
+  // List tour Step 1 highlights this specific tab, not the whole sub-nav.
+  const homeTabAnchorRef = useTourAnchor("list.homeTab")
+  // Bar tour Step 1 highlights the Bar tab
+  const barTabAnchorRef = useTourAnchor("bar.tab")
+  // Radar tour Step 1 highlights the Radar tab
+  const radarTabAnchorRef = useTourAnchor("radar.tab")
 
   // Research-only tools hidden by default, toggled with "A" key
   const [showResearchTools, setShowResearchTools] = useState(false)
@@ -153,6 +161,15 @@ export default function ExploreSubNav() {
           return (
             <React.Fragment key={step.label}>
               <Box
+                ref={
+                  step.mode === "list"
+                    ? homeTabAnchorRef
+                    : step.mode === "bar"
+                      ? barTabAnchorRef
+                      : step.mode === "radar"
+                        ? radarTabAnchorRef
+                        : undefined
+                }
                 component="button"
                 type="button"
                 role="tab"

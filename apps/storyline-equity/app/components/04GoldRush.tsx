@@ -9,18 +9,18 @@ const goldRushText = {
   priorities: {
     introduction: [
       {
-        text: "Today’s water rights reflect the values and priorities of California’s Gold Rush:",
+        text: "Today’s water rights reflect the values and priorities of colonial settlers during California’s Gold Rush:",
       },
     ],
     points: [
       {
-        text: "Rapid resource extraction with no regard for downstream impacts.",
+        text: "Taking water and other resources with little regard for downstream impacts.",
       },
       {
-        text: "Expansion of settlement and export-driven agriculture.",
+        text: "Expansion of settlements and agriculture to produce crops for export.",
       },
       {
-        text: 'Maximized water diversions to avoid "waste" of water.',
+        text: "Diverting as much water as possible rather than leaving it in rivers.",
       },
     ],
   },
@@ -29,29 +29,27 @@ const goldRushText = {
       text: "New legal and political systems redefined who could access land and water.",
     },
     {
-      text: "Indigenous water practices were communal, seasonal and protective of water flows.",
+      text: "The 1850 Act for the Government and Protection of Indians legalized forced removal of Indigenous people from their homeland and sacred waters.",
     },
-    { text: "New laws excluded them." },
-    { text: "In practice, only white men could claim and hold water rights." },
     {
-      text: "In effect, rivers could go dry without regard for downstream communities, ecosystems, or ways of life.",
+      text: "Water rights doctrines instituted new patterns of water allocation.",
+    },
+    {
+      text: "Riparian rights tied water access to owning land along a river.",
+    },
+    {
+      text: "Appropriative rights gave priority to those who diverted water first, allowing early white settlers, miners, and farmers to establish priority access to water.",
+    },
+    {
+      text: "New laws excluded Indigenous communities. In practice, only white men could claim and hold water rights. Those who secured these rights could deplete rivers without regard for downstream communities, ecosystems, or ways of life.",
     },
   ],
   legacy: [
     {
-      text: "Legalized systems of exclusion began with European settlement and cemented a lasting hierarchy of “legitimate” water users.",
+      text: "These systems of exclusion established a lasting hierarchy of water users. Settlers, supported by state and federal governments, dispossessed Indigenous Peoples of their lands and waters.",
     },
     {
-      text: "Much of California’s available water was claimed under these early rights, locking in inequities that dominate today’s water allocations.",
-    },
-    {
-      text: "The state’s systematic dispossession of California's Indigenous peoples from their land, water and ways of life did not happen in isolation.",
-    },
-    {
-      text: "It was one dimension of state-sponsored policies and acts of violence, genocide and cultural erasure.",
-    },
-    {
-      text: "This racist legacy persists by denying the rights to water that sustain cultures, health and well-being.",
+      text: "This legacy continues to shape inequities in access to the water that sustains cultures, health and well-being.",
     },
   ],
 } as const
@@ -87,7 +85,9 @@ export default function GoldRush() {
             <SectionTitle text={goldRushText.title} />
           </Box>
           <Stack component="section" spacing={2}>
-            <Paragraph blocks={goldRushText.priorities.introduction} />
+            <Box component="article">
+              <Paragraph blocks={goldRushText.priorities.introduction} />
+            </Box>
             <Box component="ul" sx={{ margin: 0, paddingLeft: 4 }}>
               {goldRushText.priorities.points.map((point) => (
                 <Box key={point.text} component="li" sx={{ paddingLeft: 1 }}>
@@ -105,9 +105,13 @@ export default function GoldRush() {
           animation="slideUp"
           style={{ gridArea: "1 / 1" }}
         >
-          <Stack component="section" spacing={1.25}>
-            <Paragraph blocks={[goldRushText.exclusion[0]]} />
-            <Paragraph blocks={goldRushText.exclusion.slice(1)} />
+          <Stack component="section" spacing={3.5}>
+            <Box component="article">
+              <Paragraph blocks={[goldRushText.exclusion[0]]} />
+            </Box>
+            <Box component="article">
+              <Paragraph blocks={goldRushText.exclusion.slice(1)} />
+            </Box>
           </Stack>
         </ScrollElement>
 
@@ -117,13 +121,12 @@ export default function GoldRush() {
           animation="slideUp"
           style={{ gridArea: "1 / 1" }}
         >
-          <Stack spacing={6}>
-            <Stack component="section" spacing={1.25}>
-              <Paragraph blocks={goldRushText.legacy.slice(0, 2)} />
-            </Stack>
-            <Stack spacing={1.25}>
-              <Paragraph blocks={goldRushText.legacy.slice(2)} />
-            </Stack>
+          <Stack component="section" spacing={6}>
+            {goldRushText.legacy.map((sentence) => (
+              <Box key={sentence.text} component="article">
+                <Paragraph blocks={[sentence]} />
+              </Box>
+            ))}
           </Stack>
         </ScrollElement>
       </Box>

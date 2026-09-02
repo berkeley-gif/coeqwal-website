@@ -26,6 +26,9 @@ const VALUE_BY_SUBJECT: Record<string, number> = {
   DEL_SWP_TOT_N: 900,
   C_CVPSWP_TOTAL_EXPORTS: 4800,
   DEL_CVP_PAG_NOD: 2900,
+  D_CAA238_CVPCV: 100,
+  D_MLRTN_FRK000: 800,
+  SWP_TA_KERNAG: 400,
 }
 
 function sysdelPayload(subjectsCsv: string) {
@@ -178,14 +181,28 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
     .poll(() => requestedSubjects.includes("DEL_CVP_PRF_TOTAL"))
     .toBe(true)
 
-  // Southern SJV exports: the three served routes are the locations; the
-  // presentation is provisional pending confirmation, and switching routes
-  // fetches each route's own subject.
+  // Southern SJV exports: the presentation is confirmed (no provisional
+  // chip), and the default location is the all-routes total, which fetches
+  // ALL THREE route subjects in one request and sums them client-side
+  // (fixture routes 100 + 800 + 400 -> 1,300).
   await page
     .getByRole("button", { name: "Southern San Joaquin Valley exports" })
     .click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
-  await expect(page.getByText(/^Provisional$/)).toBeVisible()
+  await expect(page.getByText(/^Provisional$/)).toHaveCount(0)
+  await expect
+    .poll(() =>
+      requestedSubjects.includes("D_CAA238_CVPCV,D_MLRTN_FRK000,SWP_TA_KERNAG"),
+    )
+    .toBe(true)
+  await expect(page.getByText(/1,300 TAF/).first()).toBeVisible()
+
+  // Switching to a single route fetches that route's own subject.
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "All routes (total)" })
+    .click()
+  await page.getByRole("option", { name: "Cross Valley Canal" }).click()
   await expect
     .poll(() => requestedSubjects.includes("D_CAA238_CVPCV"))
     .toBe(true)
@@ -216,4 +233,41 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
     .toBe(true)
 
   expect(errors).toEqual([])
+})
+
+test("ssjv all-routes total fails closed to sample when a route series is missing", async ({
+  page,
+}) => {
+  await setupNetwork(page)
+  await page.route("**/api/scenarios", (route) =>
+    route.fulfill({ json: SCENARIOS_FIXTURE }),
+  )
+  // Serve only two of the three requested route subjects: the client-side
+  // sum must refuse the partial total and fall back to sample labeling,
+  // never summing what is present.
+  await page.route("**/api/data-in-depth/system-deliveries*", (route) => {
+    const url = new URL(route.request().url())
+    const served = (url.searchParams.get("subjects") ?? "")
+      .split(",")
+      .filter((code) => code && code !== "SWP_TA_KERNAG")
+    return route.fulfill({ json: sysdelPayload(served.join(",")) })
+  })
+  await page.route("**/api/data-in-depth/reservoir-storage*", (route) =>
+    route.fulfill({ json: { wyt_filter: null, scenarios: [] } }),
+  )
+  await page.route("**/api/tiers/batch*", (route) =>
+    route.fulfill({ json: { scenarios: {}, count: 0 } }),
+  )
+  await page.route("**/api/tiers/scenarios/*/locations*", (route) =>
+    route.fulfill({ json: { scenario: "", results: {}, missing: [] } }),
+  )
+
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  await page
+    .getByRole("button", { name: "Southern San Joaquin Valley exports" })
+    .click()
+  await expect(page.getByText(/^Sample data$/)).toBeVisible()
 })

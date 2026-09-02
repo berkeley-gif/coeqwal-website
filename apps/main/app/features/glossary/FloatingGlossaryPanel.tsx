@@ -143,6 +143,7 @@ export function FloatingGlossaryPanel({
     border: "none",
     padding: 0,
     font: "inherit",
+    ...theme.typography.glossaryTerm,
     "&:hover": {
       color: theme.palette.blue.darkest,
     },

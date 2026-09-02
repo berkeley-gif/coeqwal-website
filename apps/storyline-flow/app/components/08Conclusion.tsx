@@ -8,6 +8,7 @@ import {
   useTheme,
 } from "@repo/ui/mui"
 import { useStoryline } from "../store"
+import { getExploreUrl } from "@repo/ui"
 import AnimatedWaves from "./helpers/AnimatedWave"
 import { useEffect, useRef, useState } from "react"
 import {
@@ -120,7 +121,7 @@ export function Resolution() {
                 <Typography variant="h4">
                   <strong>
                     <a
-                      href="https://dev.coeqwal.org/?tab=explore"
+                      href={getExploreUrl()}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ color: "inherit", textDecoration: "underline" }}

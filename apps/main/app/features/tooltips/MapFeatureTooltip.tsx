@@ -36,9 +36,7 @@ function TierBadge({ level, label }: { level: number; label: string }) {
           flexShrink: 0,
         }}
       />
-      <Typography variant="dashboard">
-        <strong>Tier {level}:</strong> {label}
-      </Typography>
+      <Typography variant="dashboard">{label}</Typography>
     </Box>
   )
 }

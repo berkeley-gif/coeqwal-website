@@ -4,6 +4,9 @@
  * sidebar. URL prefix `b`.
  */
 
+import { shareFigureFooter } from "../figureFooter"
+import { toolFigureTitle } from "../figureTitle"
+import { HYDROCLIMATE_SHORT_LABELS } from "../../../../../content/scenarios"
 import React, { useEffect } from "react"
 import type { ChartDataPoint } from "../../../../scenarios/components/shared/types"
 import { barChartDataToCSV } from "../export/csv/barChartCsv"
@@ -33,6 +36,14 @@ const barChartHandler: VariantHandler<BarChartItem> = {
         | Record<string, ChartDataPoint[]>
         | undefined)
     return React.createElement(ShareScenarioCard, {
+      toolLabel: "Bar chart",
+      standardTitle: toolFigureTitle({
+        toolName: viewLabel,
+        memberSummary: info?.description ?? info?.name ?? item.scenarioId,
+        hydroclimateLabel:
+          HYDROCLIMATE_SHORT_LABELS[item.hydroclimate] ?? item.hydroclimate,
+      }),
+      figureFooter: shareFigureFooter(item),
       scenarioId: item.id,
       name: info?.description ?? info?.name ?? item.scenarioId,
       scenarioDefinition: info?.definition,

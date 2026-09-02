@@ -174,7 +174,7 @@ const DEFAULT_RADAR_PALETTE: RadarPlotPalette = {
   gridStroke: "#dce3ea",
   tierLabelText: "#718096",
   dotStroke: "#ffffff",
-  tierZoneFills: ["#ffffff", "#ffffff", "#ffffff", "#ffffff"] as const,
+  tierZoneFills: ["#1ca367", "#31b2c5", "#f2944f", "#ee5d32"] as const,
   rangeBandFill: "#cbd5e0",
   rangeBandStroke: "#a0aec0",
   baselineColor: "#cc9a06",
@@ -189,29 +189,6 @@ const AXIS_DETAIL_DISMISS_MS = 500
 
 const FONT_FAMILY =
   '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif'
-
-const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
-  "Community deliveries": ["Community", "deliveries"],
-  "Community surface water": ["Community surface", "water"],
-  "Agricultural revenue": ["Agricultural", "revenue"],
-  "Environmental flows": ["Environmental", "flows"],
-  "Reservoir storage": ["Reservoir", "storage"],
-  "Groundwater storage": ["Groundwater", "storage"],
-  "Delta estuary ecology": ["Delta estuary", "ecology"],
-  "Freshwater for Delta exports": ["Freshwater for", "Delta exports"],
-  "Freshwater for in-Delta uses": ["Freshwater for", "in-Delta uses"],
-  "Winter-run salmon": ["Winter-run", "salmon"],
-  "NOD: Community deliveries": ["NOD:", "Community deliveries"],
-  "SOD: Community deliveries": ["SOD:", "Community deliveries"],
-  "NOD: Agricultural revenue": ["NOD:", "Agricultural revenue"],
-  "SOD: Agricultural revenue": ["SOD:", "Agricultural revenue"],
-  "NOD: Environmental flows": ["NOD:", "Environmental flows"],
-  "SOD: Environmental flows": ["SOD:", "Environmental flows"],
-  "NOD: Reservoir storage": ["NOD:", "Reservoir storage"],
-  "SOD: Reservoir storage": ["SOD:", "Reservoir storage"],
-  "NOD: Groundwater storage": ["NOD:", "Groundwater storage"],
-  "SOD: Groundwater storage": ["SOD:", "Groundwater storage"],
-}
 
 /** Simple deterministic hash: scenario ID -> stable integer */
 function stableHash(s: string): number {
@@ -902,12 +879,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           //    covers the inner portion of the previous one)
           if (showTierZones) {
             ;[...TIER_POSITIONS].forEach((t, i) => {
-              const r = rScale(t - 0.5)
+              const r = rScale(t)
               g.append("circle")
                 .attr("cx", cx)
                 .attr("cy", cy)
                 .attr("r", r)
                 .attr("fill", palette.tierZoneFills[i] ?? palette.dotStroke)
+                .attr("fill-opacity", "0.05")
                 .attr("stroke", "none")
             })
           }
@@ -926,7 +904,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           axes.forEach((_, i) => {
             const angle = getAngle(i)
-            const outerR = rScale(0.5)
+            const outerR = rScale(1)
             g.append("line")
               .attr("x1", cx)
               .attr("y1", cy)
@@ -938,7 +916,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           // Tier labels along the first spoke (top)
           TIER_POSITIONS.forEach((t, i) => {
-            const r = rScale(t)
+            const r = rScale(t + 1)
             g.append("text")
               .attr("x", cx + 6)
               .attr("y", cy - r - 3)
@@ -1759,7 +1737,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           }[] = []
           axes.forEach((axis, i) => {
             const angle = getAngle(i)
-            const labelR = radius + 24
+            const labelR = radius
             const lx = cx + labelR * Math.cos(angle)
             const ly = cy + labelR * Math.sin(angle)
 
@@ -1939,6 +1917,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         palette,
         interactive,
         animate,
+        labelBreaks,
       ],
     )
 

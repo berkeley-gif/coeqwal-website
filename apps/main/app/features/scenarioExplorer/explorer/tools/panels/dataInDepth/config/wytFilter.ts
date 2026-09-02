@@ -33,8 +33,10 @@ export function filterSeriesByWyt(
  * is selected, otherwise undefined (no `wyt=` request param, no mock-side
  * filtering). Variables that opt out (`wytApplicable: false` in the registry:
  * metrics that do not decompose by water-year type, e.g. salmon population
- * metrics, welfare loss) keep the stored selection INERT rather than cleared,
- * so it revives when the user switches back to a variable it applies to.
+ * metrics and welfare loss, plus the CWS series, which are aggregated by
+ * calendar year upstream) keep the stored selection INERT rather than
+ * cleared, so it revives when the user switches back to a variable it
+ * applies to.
  */
 export function effectiveWytSelection(
   wytApplicable: boolean,

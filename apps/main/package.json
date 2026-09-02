@@ -14,7 +14,11 @@
     "e2e:record": "RECORD_FIXTURES=1 playwright test --workers=1",
     "e2e:ui": "playwright test --ui",
     "perf:unit": "playwright test --config playwright.perf.config.ts --project unit",
-    "perf:driver": "playwright test --config playwright.perf.config.ts --project driver"
+    "perf:driver": "playwright test --config playwright.perf.config.ts --project driver",
+    "did:entities": "node scripts/did-entity-locations/generate.mjs",
+    "did:entities:check": "node scripts/did-entity-locations/generate.mjs --check",
+    "did:names": "node scripts/did-display-names/import.mjs",
+    "test:scripts": "node --test scripts/**/*.test.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

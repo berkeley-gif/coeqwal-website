@@ -382,7 +382,6 @@ const palette = {
     unthemed: { background: "#e0e0e0", text: "#616161" },
   },
 
-  // Data visualization colors for outcome categories
   get outcomes() {
     return {
       communityWater: this.blue.medium,
@@ -397,7 +396,30 @@ const palette = {
   },
 }
 
+// Canonical set of water theme ids + display names, shared by the main
+// app (header, footer, theme panels) and the 4 storyline apps' nav.
+// This package can't import from apps/main, so this is the actual source
+// of truth other packages/apps derive from — including
+// apps/main/app/content/themes.tsx itself, which can import this package.
+// Keys match palette.waterThemes above and ScenarioTheme in
+// apps/main/app/content/scenarios.ts.
+export type WaterThemeId = "baseline" | "cws" | "ag_gw" | "eco" | "delta"
+
+export interface WaterThemeRegistryEntry {
+  id: WaterThemeId
+  shortLabel: string
+}
+
+export const WATER_THEME_REGISTRY: WaterThemeRegistryEntry[] = [
+  { id: "baseline", shortLabel: "Understanding Today's Water System" },
+  { id: "cws", shortLabel: "Securing Community Water Supplies" },
+  { id: "ag_gw", shortLabel: "Sustaining Farms and Groundwater" },
+  { id: "eco", shortLabel: "Protecting Rivers and Salmon" },
+  { id: "delta", shortLabel: "Balancing Needs in the Delta" },
+]
+
 // Border radius
+
 const borderRadius = {
   none: "0px",
   xs: "2px", // Very small (checkboxes, tiny indicators)
@@ -1176,9 +1198,18 @@ const theme = createTheme({
     // Display body - for hero/panel body text (frontmatter, video hero)
     displayBody: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1.4rem", // 22.4px
+      fontSize: "clamp(0.8rem, 0.5rem + 1.5vw, 1.4rem)",
       fontWeight: 400,
       lineHeight: 1.5,
+    },
+
+    // Glossary term links - the single source of truth for bold+underline
+    // emphasis on linked terms. No fontSize/lineHeight: this is meant to be
+    // spread into an inline element that inherits its surrounding text size.
+    glossaryTerm: {
+      fontFamily: themeValues.fontFamily.text,
+      fontWeight: 700,
+      textDecoration: "underline",
     },
   },
   shape: {
@@ -1590,6 +1621,7 @@ const theme = createTheme({
           compactCaption: "span",
           compactMicro: "span",
           dashboardBold: "span",
+          glossaryTerm: "span",
         },
       },
       variants: [
@@ -1975,6 +2007,7 @@ declare module "@mui/material/styles" {
     tooltipHeader: React.CSSProperties
     scenarioTitle: React.CSSProperties
     storyBody: React.CSSProperties
+    glossaryTerm: React.CSSProperties
   }
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
@@ -1995,6 +2028,7 @@ declare module "@mui/material/styles" {
     tooltipHeader?: React.CSSProperties
     scenarioTitle?: React.CSSProperties
     storyBody?: React.CSSProperties
+    glossaryTerm?: React.CSSProperties
   }
 }
 
@@ -2026,5 +2060,6 @@ declare module "@mui/material/Typography" {
     tooltipHeader: true
     scenarioTitle: true
     storyBody: true
+    glossaryTerm: true
   }
 }

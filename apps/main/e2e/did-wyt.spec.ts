@@ -100,47 +100,8 @@ test("wyt chips filter the sample data and persist across reload", async ({
   expect(errors).toEqual([])
 })
 
-test("a value-view capture with a lingering filter exports filtered, labeled data", async ({
-  page,
-}) => {
-  // The chip row hides on the single-value view, but a selection made on
-  // another view still applies to the underlying series, matching the live
-  // request behavior (wyt is sent in every view). The exported CSV must
-  // therefore carry BOTH the filter header row and a filtered series, never
-  // a filter claim over unfiltered data or vice versa.
-  const errors = collectConsoleErrors(page)
-  await setupNetwork(page)
-  await page.goto("/explore")
-  await page
-    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
-    .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
-
-  // Select a class where the chips are visible, then move to the single
-  // summary-value view of a variable that offers one (chips hidden there).
-  await page.getByRole("button", { name: "Critical", exact: true }).click()
-  await page.getByRole("button", { name: /Gross crop revenues/ }).click()
-  await page.getByRole("button", { name: "Summary value" }).click()
-  await expect(page.getByText("Water year types")).toBeHidden()
-
-  await page.getByRole("button", { name: "save snapshot" }).click()
-  // dispatchEvent, not click: the drawer's footer button sits just below the
-  // 720px headless viewport (same workaround as did-share.spec.ts).
-  await page.getByRole("button", { name: "Go to Share" }).dispatchEvent("click")
-  await page.getByRole("button", { name: "Add to story" }).click()
-  const downloadPromise = page.waitForEvent("download")
-  await page.getByRole("button", { name: "Download data" }).click()
-  const download = await downloadPromise
-  const stream = await download.createReadStream()
-  const chunks: Buffer[] = []
-  for await (const chunk of stream) chunks.push(chunk as Buffer)
-  const csv = Buffer.concat(chunks).toString("utf8")
-  expect(csv).toContain("Water year types,Critical")
-  const yearRows = (csv.split("Year index")[1] ?? "")
-    .split("\n")
-    .filter((line) => /^\d+,/.test(line)).length
-  expect(yearRows).toBeGreaterThan(0)
-  expect(yearRows).toBeLessThan(100)
-
-  expect(errors).toEqual([])
-})
+// The summary-value view, the one view that hid the water-year-type chips
+// while the filter still applied to the exported series, was retired with
+// the last variable that offered it (gross crop revenues is a distribution
+// now). Every remaining view shows the chips, and the exceedance case above
+// covers the filter travelling with the export.

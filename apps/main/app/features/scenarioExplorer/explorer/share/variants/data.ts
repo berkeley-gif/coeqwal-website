@@ -16,10 +16,13 @@ import {
 } from "../export/csv/dataCsv"
 import {
   getVariable,
+  resolveFoldedVariable,
   VIEW_LABELS,
   type VariableView,
 } from "../../tools/panels/dataInDepth/config/variableRegistry"
 import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"
+import { shareFigureFooter } from "../figureFooter"
+import { thumbnailAspectRatioFor } from "../thumbnailAspect"
 import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"
 
@@ -28,6 +31,7 @@ type DataItem = ShareItemOfType<"data">
 const DIST_LABELS: Record<string, string> = {
   exceedance: "Exceedance",
   box: "Box plot",
+  stats: "Stats",
 }
 
 function viewLabelFor(item: DataItem): string {
@@ -35,8 +39,13 @@ function viewLabelFor(item: DataItem): string {
     getVariable(item.variableId)?.viewLabels?.[item.view as VariableView] ??
     VIEW_LABELS[item.view as VariableView] ??
     item.view
+  // Every view that offers the distribution-style toggle names the style it
+  // captured (ViewBar shows the toggle for these four).
   const dist =
-    item.view === "dist" || item.view === "pct" || item.view === "level"
+    item.view === "dist" ||
+    item.view === "pct" ||
+    item.view === "pct_demand" ||
+    item.view === "level"
       ? DIST_LABELS[item.distKind]
       : undefined
   return dist ? `${view} (${dist})` : view
@@ -60,9 +69,20 @@ const dataHandler: VariantHandler<DataItem> = {
       id: item.id,
       toolLabel: "Data in depth",
       title: figureTitle ?? variableName,
-      subtitle: viewLabelFor(item),
+      // A title that counts its members ("3 scenarios") names them here so
+      // the figure reads on its own.
+      subtitle:
+        item.memberLabels.length > 1
+          ? `${viewLabelFor(item)}. Compared: ${item.memberLabels.join(", ")}.`
+          : viewLabelFor(item),
+      figureFooter: shareFigureFooter(item),
+      thumbnailAspectRatio: thumbnailAspectRatioFor(item),
       chips: [
-        item.source === "live" ? "Live data" : "Sample data",
+        item.source === "mixed"
+          ? "Mixed data"
+          : item.source === "live"
+            ? "Live data"
+            : "Sample data",
         ...item.memberLabels,
       ],
       hydroclimate: item.hydroclimate,
@@ -92,16 +112,20 @@ const dataHandler: VariantHandler<DataItem> = {
   decodeUrlToken(parts) {
     if (parts.length < 1 || !parts[0]) return null
     const memberIds = (parts[4] ?? "").split("~").filter(Boolean)
+    // A link minted before a variable was folded into a view of another one
+    // must land on the same chart, not on a stranger or a blank panel.
+    const resolved = resolveFoldedVariable(parts[0], parts[1] || "dist")
     return {
       id: crypto.randomUUID(),
       type: "data",
-      variableId: parts[0],
-      view: parts[1] || "dist",
+      variableId: resolved.id,
+      view: resolved.view,
       distKind: parts[2] || "exceedance",
       compareBy: parts[3] || "scenarios",
       memberIds,
       memberLabels: memberIds,
-      source: parts[5] === "live" ? "live" : "mock",
+      source:
+        parts[5] === "live" ? "live" : parts[5] === "mixed" ? "mixed" : "mock",
       hydroclimate: parts[6] || "historical",
     }
   },

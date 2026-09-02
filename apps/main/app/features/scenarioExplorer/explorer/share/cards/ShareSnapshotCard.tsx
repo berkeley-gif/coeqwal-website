@@ -10,6 +10,7 @@
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import ShareCardShell from "../ShareCardShell"
+import type { ShareFigureFooter } from "../figureFooter"
 import HydroclimateBadge from "./HydroclimateBadge"
 import ChartThumbnail from "./ChartThumbnail"
 import ShareCardTierLegend from "./ShareCardTierLegend"
@@ -28,6 +29,10 @@ interface ShareSnapshotCardProps {
    * the same context block.
    */
   scenarioDefinition?: string
+  /** Standardized figure-title line, shown under the card's own heading so
+   *  an exported figure names its tool, members and hydroclimate the same
+   *  way a Data in Depth figure does. */
+  standardTitle?: string
   /** Additional context line shown under the title. */
   subtitle?: string
   /** Context chips, each a short phrase. */
@@ -58,6 +63,11 @@ interface ShareSnapshotCardProps {
   note?: string
   onNoteChange?: (note: string) => void
   onRemove?: (id: string) => void
+  /** Provenance footer rendered by the shell inside the exported area. */
+  figureFooter?: ShareFigureFooter
+  /** Width over height of the captured chart; the thumbnail box takes it so
+   *  the chart is not letterboxed. Default 1. */
+  thumbnailAspectRatio?: number
 }
 
 export default function ShareSnapshotCard({
@@ -65,6 +75,7 @@ export default function ShareSnapshotCard({
   toolLabel,
   title,
   scenarioDefinition,
+  standardTitle,
   subtitle,
   chips = [],
   hydroclimate,
@@ -75,11 +86,14 @@ export default function ShareSnapshotCard({
   note,
   onNoteChange,
   onRemove,
+  figureFooter,
+  thumbnailAspectRatio = 1,
 }: ShareSnapshotCardProps) {
   const theme = useTheme()
 
   return (
     <ShareCardShell
+      figureFooter={figureFooter}
       onRemove={onRemove ? () => onRemove(id) : undefined}
       note={note}
       onNoteChange={onNoteChange}
@@ -124,6 +138,20 @@ export default function ShareSnapshotCard({
         </Typography>
       )}
 
+      {standardTitle && (
+        <Typography
+          sx={{
+            fontSize: "0.6875rem",
+            lineHeight: 1.35,
+            color: theme.palette.grey[600],
+            mt: 0.25,
+            pr: 3,
+          }}
+        >
+          {standardTitle}
+        </Typography>
+      )}
+
       {subtitle && (
         <Typography
           variant="caption"
@@ -149,6 +177,7 @@ export default function ShareSnapshotCard({
         liveChart={liveChart}
         ariaLabel={title}
         variant="bordered"
+        aspectRatio={thumbnailAspectRatio}
       />
 
       {showTierLegend && <ShareCardTierLegend />}

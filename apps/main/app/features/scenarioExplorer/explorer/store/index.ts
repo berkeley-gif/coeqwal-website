@@ -26,10 +26,8 @@ export {
 export type {
   ResilienceControlsState,
   ResilienceView,
-  AggregateOver,
   CellEncoding,
   DeltaMode,
-  AggregateScope,
   ResilienceControlFields,
 } from "./resilienceStoreSlice"
 

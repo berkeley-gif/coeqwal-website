@@ -8,6 +8,13 @@ const __dirname = path.dirname(__filename)
 const nextConfig = {
   output: "export",
 
+  // Emit directory-style pages (explore/index.html, not explore.html) so the
+  // static host serves the trailing-slash form of every URL. The host
+  // redirects the slash-less form to the slash form and forwards query
+  // strings, so both shapes of every deep link resolve. Before this,
+  // /explore/, /learn/, /data/ and /about/ all returned 404 in production.
+  trailingSlash: true,
+
   transpilePackages: [
     "@repo/map",
     "@repo/state",
@@ -34,7 +41,13 @@ const nextConfig = {
   },
 
   experimental: {
-    optimizePackageImports: ["@mui/icons-material", "@mui/material", "d3"],
+    optimizePackageImports: [
+      "@mui/icons-material",
+      "@mui/material",
+      "d3",
+      "@repo/map",
+      "@repo/viz",
+    ],
   },
 
   // Webpack rule (used when you run with --webpack, and for non-turbo tooling paths)

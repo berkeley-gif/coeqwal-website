@@ -114,10 +114,10 @@ test("climate futures axis fetches each hydroclimate variant and goes live", asy
   await expect(page.getByText(/^Sample data$/)).not.toBeVisible()
   for (const label of [
     "Historical",
-    "Moderate risk",
-    "Moderate-high risk",
-    "High risk",
-    "Extreme risk",
+    "Moderate stress",
+    "Moderate-high stress",
+    "High stress",
+    "Extreme stress",
   ]) {
     await expect(page.getByText(label, { exact: true }).first()).toBeVisible()
   }

@@ -51,6 +51,13 @@ scripts
 apps/main/scripts
 !.github/scripts/
 !.github/scripts/**
+# Data in Depth maintenance scripts are part of the app, not scratch:
+# the entity-locations generator (`did:entities`) and the display-name
+# importer (`did:names`).
+!apps/main/scripts/
+apps/main/scripts/*
+!apps/main/scripts/did-entity-locations/
+!apps/main/scripts/did-display-names/
 
 # local perf-driver measurement output (never committed)
 apps/main/e2e/perf/results/

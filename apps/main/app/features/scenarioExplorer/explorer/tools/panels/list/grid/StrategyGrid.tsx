@@ -35,8 +35,6 @@ import { useContainerWidth } from "./useContainerWidth"
  * - "contentOnly": Renders only scenario rows (for scrollable content)
  */
 const StrategyGrid = React.memo(function StrategyGridComponent({
-  getChartDataForScenario,
-  outcomeNames,
   scenarios: scenariosProp,
   highlightedScenarios,
   showSearchDivider = false,
@@ -72,10 +70,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   const containerWidth = useContainerWidth(containerRef)
 
   const SM_BREAKPOINT = 600
-  const MD_BREAKPOINT = 900
   const FULL_BREAKPOINT = theme.scenarios.grid.fullBreakpoint
-
-  const glyphSize = containerWidth >= MD_BREAKPOINT ? 60 : 50
 
   /**
    * Layout mode determines how columns are arranged:
@@ -212,9 +207,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             showAlternativeBaselines={showAlternativeBaselines}
             layoutMode={layoutMode}
             showOperations={showOperations}
-            outcomeNames={outcomeNames}
-            getChartDataForScenario={getChartDataForScenario}
-            glyphSize={glyphSize}
             onToggleScenario={onToggleScenario}
             onThemeBadgeClick={onThemeBadgeClick}
             onIconClick={onIconClick}

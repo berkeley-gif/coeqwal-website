@@ -2,19 +2,11 @@
  * StrategyGrid type definitions
  */
 
-import type {
-  ChartDataPoint,
-  OutcomeName,
-  ScenarioForDisplay,
-} from "../../../../../../scenarios/components/shared"
+import type { ScenarioForDisplay } from "../../../../../../scenarios/components/shared"
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
 
 export interface StrategyGridProps {
   // Data
-  getChartDataForScenario: (
-    scenarioId: string,
-  ) => Record<string, ChartDataPoint[]>
-  outcomeNames: OutcomeName[]
   /** Scenarios to display (from useScenarioList().scenarios) */
   scenarios: ScenarioForDisplay[]
   highlightedScenarios?: Set<string>

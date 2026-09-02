@@ -4,8 +4,9 @@
  * Bridges the explorer's registry ids (variable ids, location ids) to the
  * /api/data-in-depth/* request vocabulary (domain, subject short_code, period,
  * unit token, include facets). Self-contained on purpose: no React, no store,
- * no registry import, so it is trivially unit-testable and safe to import from
- * a Node-side spec. The variable-to-tier and location metadata stay in
+ * no registry import (only the generated entity id sets, which carry no
+ * runtime dependency), so it is trivially unit-testable and safe to import
+ * from a Node-side spec. The variable-to-tier and location metadata stay in
  * variableRegistry; this module only owns the registry-id -> API-code bridge,
  * which is an API-side fact (verified against the live DB, 2026-07-20).
  *
@@ -13,6 +14,12 @@
  * everything else falls back to the deterministic mock engine (a null
  * return here = mock).
  */
+
+import {
+  AG_ENTITY_IDS,
+  CWS_DELIVERY_ENTITY_IDS,
+  CWS_SHORTAGE_ENTITY_IDS,
+} from "./entityLocations.generated"
 
 /** A live data-in-depth domain (one endpoint each). */
 export type DidDomain =
@@ -22,6 +29,8 @@ export type DidDomain =
   | "sysdel"
   | "gw"
   | "salmon"
+  | "cws"
+  | "ag"
 /** Request unit token (not the response unit key). */
 export type DidUnitToken =
   | "volume"
@@ -29,6 +38,15 @@ export type DidUnitToken =
   | "km"
   | "level"
   | "nof_3yr_avg"
+  | "delivery"
+  | "shortage_total"
+  | "shortage_pct"
+  | "pct_demand_met"
+  | "net_diversion"
+  | "gw_pumping"
+  | "shortage"
+  | "welfare_loss"
+  | "revenue"
 /** Which computed facets to request. */
 export type DidIncludeToken = "values" | "exceedance" | "box" | "statistics"
 /** Request period token (river is annual; reservoir/delta are april/sept). */
@@ -39,6 +57,7 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   res_apr: "reservoir",
   res_sep: "reservoir",
   riv_flow: "river",
+  ndo: "river",
   x2_apr: "delta",
   x2_sep: "delta",
   cvp_del: "sysdel",
@@ -54,6 +73,14 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   ssjv_exp: "sysdel",
   gw_stor: "gw",
   salmon_abund: "salmon",
+  cws_del: "cws",
+  cws_del_short: "cws",
+  cws_short: "cws",
+  cws_welfare: "cws",
+  ag_del: "ag",
+  ag_pump: "ag",
+  ag_short: "ag",
+  ag_rev: "ag",
 }
 
 /** One pinned period per live variable, so `values` is a clean annual series. */
@@ -61,6 +88,7 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   res_apr: "april",
   res_sep: "sept",
   riv_flow: "annual",
+  ndo: "annual",
   x2_apr: "april",
   x2_sep: "sept",
   cvp_del: "annual",
@@ -76,6 +104,14 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   ssjv_exp: "annual",
   gw_stor: "annual",
   salmon_abund: "annual",
+  cws_del: "annual",
+  cws_del_short: "annual",
+  cws_short: "annual",
+  cws_welfare: "annual",
+  ag_del: "annual",
+  ag_pump: "annual",
+  ag_short: "annual",
+  ag_rev: "annual",
 }
 
 /**
@@ -144,13 +180,30 @@ const SYSDEL_SUBJECT_BY_VARIABLE: Record<string, Record<string, string>> = {
     DELTA: "C_CAA003_SWP",
   },
   // Southern San Joaquin Valley exports: the three served routes are the
-  // locations; no combined total is served and none is computed client-side.
+  // locations. No combined total is served; the "All routes (total)"
+  // location is synthetic, summed client-side from the three route series
+  // (fail-closed via sumAlignedSeriesPoints), so it stays out of this
+  // single-subject map on purpose.
   ssjv_exp: {
     CVC: "D_CAA238_CVPCV",
     FRIANT: "D_MLRTN_FRK000",
     KERN: "SWP_TA_KERNAG",
   },
 }
+
+/**
+ * The synthetic SSJV total location and the three served route subjects it
+ * sums (2026-08-19 team decision: client-side computation of served data is
+ * allowed, and the total presentation is confirmed). The caller fetches all
+ * three subjects in one request and adopts the sum only when
+ * `sumAlignedSeriesPoints` accepts them.
+ */
+export const SSJV_ALL_ROUTES_LOCATION = "ALL_ROUTES"
+export const SSJV_ROUTE_SUBJECTS: readonly string[] = [
+  "D_CAA238_CVPCV",
+  "D_MLRTN_FRK000",
+  "SWP_TA_KERNAG",
+]
 
 /**
  * Groundwater: the NOD/SOD aggregates use dedicated aggregate subjects; every
@@ -226,6 +279,34 @@ const SALMON_SUBJECT_BY_LOCATION: Record<string, string> = {
 }
 
 /**
+ * Community water systems: the two aggregates remap to their served subject
+ * codes; every entity's registry id IS its served code, checked against the
+ * generated id set of the measure family the variable reads (deliveries:
+ * 74 systems; shortage and welfare: 63 systems, overlapping but separate per
+ * the data team). A code outside the variable's family stays unmapped.
+ */
+const CWS_AGGREGATE_SUBJECTS: Record<string, string> = {
+  AGG_CWS_NOD: "NOD_CWS",
+  AGG_CWS_SOD: "SOD_CWS",
+}
+
+/** Variables that read the shortage/welfare measure family. */
+const CWS_SHORTAGE_FAMILY_VARIABLES: ReadonlySet<string> = new Set([
+  "cws_short",
+  "cws_welfare",
+])
+
+/**
+ * Agriculture: the two aggregates remap to their served subject codes; every
+ * demand unit's registry id IS its served code (132, generated from the
+ * live API), and all four measures are served on every subject.
+ */
+const AG_AGGREGATE_SUBJECTS: Record<string, string> = {
+  AGG_AG_NOD: "NOD_Agriculture",
+  AGG_AG_SOD: "SOD_Agriculture",
+}
+
+/**
  * Display-unit scale applied to adopted live series, per variable. The
  * salmon endpoint serves NOF_3YR_AVG in percent (0-100, the same units as
  * the Salmon Data Drop csv metric_avg_roll column, verified against the
@@ -236,11 +317,40 @@ const SALMON_SUBJECT_BY_LOCATION: Record<string, string> = {
  */
 const LIVE_SERIES_SCALE: Record<string, number> = {
   salmon_abund: 0.01,
+  // The cws welfare_loss and ag revenue measures are served in USD; the
+  // tool displays millions of dollars per year.
+  cws_welfare: 1e-6,
+  ag_rev: 1e-6,
 }
 
 /** Scale from a live series' served units to display units (1 = as served). */
 export function didLiveScaleForVariable(variableId: string): number {
   return LIVE_SERIES_SCALE[variableId] ?? 1
+}
+
+/**
+ * Served-series -> display transform per variable, for the cases a
+ * multiplicative scale cannot express. The surface water delivery shortage
+ * is the complement of the served percent-of-demand-met series (100 - x),
+ * so a fully met year reads 0 and the series is never negative (the served
+ * measure is capped at 100 upstream).
+ */
+const LIVE_SERIES_TRANSFORM: Record<string, (v: number) => number> = {
+  cws_del_short: (v) => 100 - v,
+}
+
+/**
+ * The function that maps one served value to display units for a variable,
+ * or null when the series is used exactly as served. Composes the affine
+ * cases above with `LIVE_SERIES_SCALE`. Pure.
+ */
+export function didLiveSeriesTransformForVariable(
+  variableId: string,
+): ((v: number) => number) | null {
+  const affine = LIVE_SERIES_TRANSFORM[variableId]
+  if (affine) return affine
+  const scale = didLiveScaleForVariable(variableId)
+  return scale === 1 ? null : (v) => v * scale
 }
 
 /** Registry reservoir-location id -> API subject short_code (only the differences). */
@@ -271,6 +381,13 @@ const RIVER_SUBJECT_REMAP: Record<string, string> = {
   TLG: "TUO003",
   MRC: "MCD005",
   MKM: "MOK028",
+  // Delta outflow (ndo) rides the river domain: the modeling team confirmed
+  // C_SAC000 as the outflow series, and the endpoint serves it as the bare
+  // subject code SAC000. DELTA is ndo's own location id (riv_flow uses the
+  // rivers group), so this entry cannot affect any other variable, and ndo
+  // keeps its "Delta (NDO node)" display name instead of inheriting
+  // riv_flow's confluence label for the same subject.
+  DELTA: "SAC000",
 }
 
 /** The river subjects the API actually serves. */
@@ -331,6 +448,22 @@ export function toDidSubject(
   if (domain === "salmon") {
     return SALMON_SUBJECT_BY_LOCATION[locationId] ?? null
   }
+  if (domain === "cws") {
+    const aggregate = CWS_AGGREGATE_SUBJECTS[locationId]
+    if (aggregate) return aggregate
+    // Entities resolve only within the family the variable reads; with no
+    // variable there is no family, so only the aggregates resolve.
+    if (!variableId) return null
+    const family = CWS_SHORTAGE_FAMILY_VARIABLES.has(variableId)
+      ? CWS_SHORTAGE_ENTITY_IDS
+      : CWS_DELIVERY_ENTITY_IDS
+    return family.has(locationId) ? locationId : null
+  }
+  if (domain === "ag") {
+    const aggregate = AG_AGGREGATE_SUBJECTS[locationId]
+    if (aggregate) return aggregate
+    return AG_ENTITY_IDS.has(locationId) ? locationId : null
+  }
   if (domain === "reservoir") {
     const code = RESERVOIR_SUBJECT_REMAP[locationId] ?? locationId
     return RESERVOIR_SUBJECTS.has(code) ? code : null
@@ -348,19 +481,93 @@ export function toDidSubject(
  * until someone proves its surfaces are live-backed and adds it here.
  */
 export function viewHasLiveSource(view: string): boolean {
-  return view === "dist" || view === "pct" || view === "level" || view === "cv"
+  return (
+    view === "dist" ||
+    view === "pct" ||
+    view === "level" ||
+    view === "cv" ||
+    view === "pct_demand"
+  )
 }
 
-/** Request unit token for a domain and view (delta is always km). */
+/**
+ * Request unit token for a domain and view (delta is always km). The cws
+ * domain is measure-keyed PER VARIABLE (its two variables read different
+ * measures from the same endpoint), so callers pass `variableId` for it;
+ * without one, cws falls back to the delivery measure.
+ */
 export function unitTokenForView(
   domain: DidDomain,
   view: string,
+  variableId?: string,
 ): DidUnitToken {
   if (domain === "delta") return "km"
   if (domain === "gw") return view === "level" ? "level" : "volume"
   if (domain === "salmon") return "nof_3yr_avg"
+  if (domain === "cws") {
+    if (variableId === "cws_del_short") return "pct_demand_met"
+    if (variableId === "cws_short") {
+      return view === "pct_demand" ? "shortage_pct" : "shortage_total"
+    }
+    if (variableId === "cws_welfare") return "welfare_loss"
+    return "delivery"
+  }
+  if (domain === "ag") {
+    if (variableId === "ag_pump") return "gw_pumping"
+    // Shortage is the primary series in BOTH of ag_short's views. The percent
+    // view derives from it plus the companion net_diversion series rather
+    // than switching to a served percent measure the way cws does.
+    if (variableId === "ag_short") return "shortage"
+    if (variableId === "ag_rev") return "revenue"
+    return "net_diversion"
+  }
   if (view === "pct") return "pct_capacity"
   return "volume"
+}
+
+/**
+ * Extra measures a request needs beyond the view's primary unit token.
+ *
+ * Only the agriculture percent-of-demand view needs one. The ag endpoint
+ * serves no percent measure, so that view is DERIVED on the site from the
+ * shortage and net_diversion series together and both must be fetched in the
+ * same request. (Community water systems differ: their endpoint serves
+ * shortage_pct directly, so their percent view adopts it and needs no
+ * companion.)
+ */
+export function companionUnitTokensForView(
+  domain: DidDomain,
+  view: string,
+  variableId?: string,
+): DidUnitToken[] {
+  if (domain === "ag" && variableId === "ag_short" && view === "pct_demand") {
+    return ["net_diversion"]
+  }
+  return []
+}
+
+/**
+ * True when a live request RESOLVED but the endpoint served no block for that
+ * scenario, i.e. the scenario is not modeled for this variable at all.
+ *
+ * Detection is response-driven on purpose, never an id list. Salmon results do
+ * not exist for the Delta Conveyance Project scenarios, and that family spans
+ * one short_code per hydroclimate (s0065, s0085, s0105, s0131, s0157), of
+ * which only one appears in site content today. A hardcoded list would
+ * silently miss the variants and quietly draw a sample curve for them.
+ *
+ * The endpoint answers 200 with `{ scenarios: [] }` in that case, so `hasData`
+ * (which is just `!!data`) is TRUE and cannot distinguish it. The distinction
+ * is the empty array, checked only once loading has settled.
+ */
+export function hasEmptyScenariosResponse(
+  slot:
+    | { hasData: boolean; isLoading: boolean; scenarios: unknown[] }
+    | undefined,
+): boolean {
+  return (
+    !!slot && slot.hasData && !slot.isLoading && slot.scenarios.length === 0
+  )
 }
 
 /**
@@ -425,12 +632,15 @@ const RESPONSE_ARRAY_BY_DOMAIN: Record<
   sysdel: "subjects",
   gw: "subjects",
   salmon: "subjects",
+  cws: "subjects",
+  ag: "subjects",
 }
 
 /**
  * Request unit token -> response series key. Unit-keyed domains use unit
  * codes (TAF, PCT_CAP, km); measure-keyed domains use the measure name
- * itself (gw: volume/level) or the metric code (salmon: NOF_3YR_AVG).
+ * itself (gw: volume/level; cws: delivery/pct_demand_met/shortage_total/shortage_pct/welfare_loss) or
+ * the metric code (salmon: NOF_3YR_AVG).
  */
 const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   volume: "TAF",
@@ -438,6 +648,15 @@ const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   km: "km",
   level: "level",
   nof_3yr_avg: "NOF_3YR_AVG",
+  delivery: "delivery",
+  shortage_total: "shortage_total",
+  shortage_pct: "shortage_pct",
+  pct_demand_met: "pct_demand_met",
+  welfare_loss: "welfare_loss",
+  net_diversion: "net_diversion",
+  gw_pumping: "gw_pumping",
+  shortage: "shortage",
+  revenue: "revenue",
 }
 
 /** The series key for a domain + request token (gw is keyed by measure name). */
@@ -479,6 +698,80 @@ export function pickLiveSeries(
   return seriesFromValues(facet?.values)
 }
 
+/** Request subjects and per-member selectors for the locations axis. */
+export interface LocationAxisRequest {
+  /** Deduplicated request subjects in first-seen order */
+  subjects: string[]
+  /** Per member, index-aligned with the location ids: one subject, the SSJV
+   *  route list for the synthetic total, or null when unmapped (sample). */
+  memberSubjects: (string | readonly string[] | null)[]
+}
+
+/**
+ * The locations axis fetches ONE block for the held scenario carrying every
+ * selected location's subject; each member then picks its own series by
+ * subject id. Two locations that map to the same subject collapse in the
+ * request and still get two members. Pure.
+ */
+export function locationAxisRequest(
+  domain: DidDomain,
+  variableId: string,
+  locationIds: readonly string[],
+): LocationAxisRequest {
+  const subjects: string[] = []
+  const seen = new Set<string>()
+  const push = (code: string) => {
+    if (!seen.has(code)) {
+      seen.add(code)
+      subjects.push(code)
+    }
+  }
+  const memberSubjects = locationIds.map((id) => {
+    if (variableId === "ssjv_exp" && id === SSJV_ALL_ROUTES_LOCATION) {
+      SSJV_ROUTE_SUBJECTS.forEach(push)
+      return SSJV_ROUTE_SUBJECTS
+    }
+    const code = toDidSubject(domain, id, variableId)
+    if (code) push(code)
+    return code
+  })
+  return { subjects, memberSubjects }
+}
+
+/**
+ * Whether a served scenario block carries `subject` at all. A block that
+ * exists but lacks the subject means the subject is not modeled for that
+ * scenario (KCWA is absent from the Delta Conveyance Project family on the
+ * cws endpoint), which is a fact to show, not a reason to draw sample data.
+ */
+export function blockHasSubject(
+  block: LiveScenarioBlock | undefined,
+  domain: DidDomain,
+  subject: string,
+): boolean {
+  const subjects = block?.[RESPONSE_ARRAY_BY_DOMAIN[domain]]
+  return !!subjects?.some((s) => s.subject === subject)
+}
+
+/**
+ * Keep only the points whose year lies in `range` (inclusive), index-aligned
+ * across `series` and `waterYears`. Fails closed: with no years to judge by,
+ * the points are returned untouched rather than partially trimmed. Pure.
+ */
+export function trimPointsToYearRange(
+  points: SeriesPoints,
+  range: { min: number; max: number },
+): SeriesPoints {
+  if (points.waterYears.length !== points.series.length) return points
+  if (points.waterYears.length === 0) return points
+  const keep = points.waterYears.map((y) => y >= range.min && y <= range.max)
+  if (keep.every(Boolean)) return points
+  return {
+    series: points.series.filter((_, i) => keep[i]),
+    waterYears: points.waterYears.filter((_, i) => keep[i]),
+  }
+}
+
 /**
  * Like `pickLiveSeries` but returns water years alongside the values so
  * exports can label rows with real years. Same fallback contract: an empty
@@ -496,4 +789,33 @@ export function pickLiveSeriesPoints(
   const match = subjects?.find((s) => s.subject === subject)
   const facet = match?.periods?.[period]?.[responseSeriesKey(domain, unitToken)]
   return pointsFromValues(facet?.values)
+}
+
+/**
+ * Sum several extracted live series into one, FAIL-CLOSED: the sum exists
+ * only when every input has a non-empty series with verifiable, identical
+ * water years (equal length, same year at every index). Anything less -
+ * a missing route, a length mismatch, misaligned or unverifiable years -
+ * returns null so the caller falls back to sample labeling instead of ever
+ * drawing a partial total. Used by the synthetic SSJV all-routes location.
+ */
+export function sumAlignedSeriesPoints(
+  pointsList: readonly SeriesPoints[],
+): SeriesPoints | null {
+  const first = pointsList[0]
+  if (!first) return null
+  const n = first.series.length
+  if (n === 0 || first.waterYears.length !== n) return null
+  for (const points of pointsList.slice(1)) {
+    if (points.series.length !== n || points.waterYears.length !== n) {
+      return null
+    }
+    for (let i = 0; i < n; i++) {
+      if (points.waterYears[i] !== first.waterYears[i]) return null
+    }
+  }
+  const series = first.series.map((_, i) =>
+    pointsList.reduce((acc, points) => acc + (points.series[i] as number), 0),
+  )
+  return { series, waterYears: [...first.waterYears] }
 }

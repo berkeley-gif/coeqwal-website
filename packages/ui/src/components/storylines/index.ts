@@ -25,12 +25,6 @@ export type {
 } from "./StorylineOpener"
 export { ImageCaption } from "./ImageCaption"
 export type { ImageCaptionPlacement, ImageCaptionProps } from "./ImageCaption"
-export {
-  getStorylineWaterThemesOptions,
-  goToMainAbout,
-  goToMainData,
-  goToMainHome,
-} from "./headerLinks"
 export type {
   InlineLegend,
   Legend,

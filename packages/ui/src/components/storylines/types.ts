@@ -1,12 +1,13 @@
 import type { ReactNode } from "react"
 import type { SxProps, Theme } from "../../mui-components"
 
-export type LegendShape = "circle" | "square" | "line"
+export type LegendShape = "circle" | "square" | "line" | "triangle"
 
 export interface InlineLegend {
   variant?: "inline"
   color: string
   shape?: LegendShape
+  position?: "before" | "after"
   label?: string
 }
 

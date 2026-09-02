@@ -5,6 +5,9 @@ import { WaterDroplet } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
 import { LinedList } from "@repo/ui"
+import { GlossaryTermLink } from "../../../glossary"
+import { HYDROCLIMATE_DEFS } from "../../../../content/scenarios"
+import { InlineNavLink } from "../../../../components/InlineNavLink"
 
 export default function HydroclimateFuturesPanel() {
   const theme = useTheme()
@@ -24,14 +27,20 @@ export default function HydroclimateFuturesPanel() {
         }}
       >
         <Typography variant="body2" color="text.secondary">
-          COEQWAL specifically evaluates how the outcomes of water management
-          strategies change with climate-driven shifts in temperature,
-          precipitation, and river flows.
+          <GlossaryTermLink>COEQWAL</GlossaryTermLink> makes it possible to look
+          at how the outcomes of water{" "}
+          <GlossaryTermLink term="Management strategies">
+            management strategies
+          </GlossaryTermLink>{" "}
+          change with climate-driven shifts in temperature, precipitation, and
+          river flows.
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Hydroclimates are represented by historical conditions and four
-          possible futures, representing different levels of stress to our water
-          supply system that we should plan for.
+          <GlossaryTermLink term="Hydroclimate">Hydroclimates</GlossaryTermLink>{" "}
+          are simulations of historical and future conditions that represent
+          different levels of stress to our water supply system. COEQWAL
+          evaluates all management strategies under five hydroclimate,
+          including:
         </Typography>
       </Box>
 
@@ -40,32 +49,24 @@ export default function HydroclimateFuturesPanel() {
         icon={dropletIcon}
         labelVariant="body2"
         sx={{ mt: sp.sm }}
-        items={[
-          {
-            label:
-              "Historical hydroclimate: Temperature, precipitation, and streamflow patterns reflect historical conditions",
-          },
-          {
-            label:
-              "Moderate climate stress: Slightly warmer and wetter conditions (+7% runoff change)",
-          },
-          {
-            label:
-              "Moderate-high climate stress: Warmer and slightly drier conditions (-1% runoff change)",
-          },
-          {
-            label:
-              "High climate stress: Much warmer and much drier conditions (-7% runoff change)",
-          },
-          {
-            label:
-              "Extreme climate stress: Warmer and substantially drier conditions (-19% runoff change)",
-          },
-        ]}
+        items={HYDROCLIMATE_DEFS.map((d) => ({
+          label: `${d.label}: ${d.learnPanelDescription}`,
+        }))}
       />
 
-      <Typography variant="body2" color="text.secondary" sx={{ my: sp.lg }}>
-        Click here to learn more.
+      <Typography variant="body2" color="text.secondary">
+        NOTE:
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: sp.sm }}>
+        The historical hydroclimate used in COEQWAL is adjusted for recent
+        climate change and does not represent the observed historical record.
+        The flow change reported for the four hydroclimate futures represent the
+        average change in flow from California&#39;s major water supply basins
+        over a 30-year period, centered on 2043. An assumed level of sea level
+        rise is also specified for each hydroclimate future.{" "}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: sp.sm }}>
+        Click <InlineNavLink to="/data">here</InlineNavLink> to learn more.
       </Typography>
     </PanelShell>
   )

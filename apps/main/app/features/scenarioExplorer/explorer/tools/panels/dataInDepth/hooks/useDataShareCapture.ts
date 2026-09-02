@@ -9,6 +9,7 @@
  * Side effects: appends one item to the workspace share store per call.
  */
 
+import { axisLabelFor } from "../explorer/chartMarks"
 import { useCallback, useMemo } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { stageShareItem } from "../../../../share/stage"
@@ -36,22 +37,18 @@ export function useDataShareCapture(
 ): DataShareCapture {
   const theme = useTheme()
   const { addShareItem, hydroclimate } = useWorkspaceSlice()
-  const {
-    selectedVariableId,
-    compareBy,
-    distKind,
-    pinnedClimate,
-    selectedWaterYearTypes,
-  } = useDataSlice()
+  const { selectedVariableId, compareBy, distKind, selectedWaterYearTypes } =
+    useDataSlice()
 
-  // The Stats style renders a composite of bar plots the offscreen capture
-  // pipeline cannot draw yet (it captures a single chart SVG), so the save
-  // button disables instead of exporting a chart that does not match the
-  // screen. Stats snapshot support needs a composed multi-chart capture.
-  const statsStyle =
-    distKind === "stats" &&
-    (data.view === "dist" || data.view === "pct" || data.view === "level")
-  const canSnapshot = data.members.length > 0 && !data.isLoading && !statsStyle
+  // Every chart style can be captured: the Stats style stitches its bar
+  // panels into one composed SVG (see OffscreenDataCapture). The capture
+  // needs at least one DRAWN member: when every compared scenario is
+  // unmodeled for the variable the card shows a no-data message instead of a
+  // chart, and capturing then would export panels the card never drew.
+  const canSnapshot =
+    data.members.some((m) => !m.liveDataMissing) &&
+    !data.isLoading &&
+    !data.unavailableReason
 
   const saveSnapshot = useCallback(async () => {
     if (data.members.length === 0) return
@@ -59,6 +56,7 @@ export function useDataShareCapture(
     // Same standardized title the on-screen card shows above the chart.
     const figureTitle = dataFigureTitle({
       variableName,
+      figureTitleHead: data.variable?.figureTitleHead,
       compareBy,
       memberCount: data.members.length,
       firstMemberLabel: data.members[0]?.label,
@@ -73,11 +71,10 @@ export function useDataShareCapture(
       data.variable?.viewLabels?.[data.view as VariableView] ??
       VIEW_LABELS[data.view as VariableView] ??
       data.view
-    // Record the climate the chart was actually generated under: the pinned
-    // (held) climate when one is set, except on the climates axis where the
-    // members themselves are climates and the workspace value stands.
-    const capturedHydroclimate =
-      compareBy === "climates" ? hydroclimate : (pinnedClimate ?? hydroclimate)
+    // The chart is always generated under the workspace hydroclimate: the
+    // per-tool climate pin was removed, so "View by hydroclimate" is the
+    // only hydroclimate input, on every compare axis.
+    const capturedHydroclimate = hydroclimate
     const waterYearTypesLabel = !data.wytApplicable
       ? "Not applicable"
       : selectedWaterYearTypes.length > 0
@@ -96,9 +93,13 @@ export function useDataShareCapture(
           viewLabel,
           compareByLabel: COMPARE_LABELS[compareBy] ?? compareBy,
           unitLabel: data.unitLabel,
-          source: data.source,
+          // A figure whose series do not share one provenance must not claim
+          // one; the per-member Source column carries the detail.
+          source: data.mixedSource ? "mixed" : data.source,
           waterYearTypesLabel,
           figureTitle,
+          axisLabel: axisLabelFor(data.variable, data.view, data.unit),
+          yearBasis: data.variable?.yearBasis,
         }),
       buildItem: (captured) => ({
         id: `data-${selectedVariableId}-${crypto.randomUUID()}`,
@@ -109,7 +110,7 @@ export function useDataShareCapture(
         compareBy,
         memberIds: data.members.map((m) => m.id),
         memberLabels: data.members.map((m) => m.label),
-        source: data.source,
+        source: data.mixedSource ? "mixed" : data.source,
         hydroclimate: capturedHydroclimate,
         cachedSvg: captured?.svg,
         cachedImageDataUrl: captured?.dataUrl,
@@ -127,7 +128,6 @@ export function useDataShareCapture(
     selectedVariableId,
     compareBy,
     distKind,
-    pinnedClimate,
     selectedWaterYearTypes,
     hydroclimate,
     addShareItem,

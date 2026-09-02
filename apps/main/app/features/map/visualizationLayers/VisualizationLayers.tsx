@@ -487,7 +487,7 @@ export default function VisualizationLayers({
                         flexShrink: 0,
                       }}
                     />
-                    Tier {hl.tierLevel}: {hl.tierLabel}
+                    {hl.tierLabel}
                   </Box>
                 </Box>
               </Popup>

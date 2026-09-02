@@ -56,7 +56,7 @@ export interface MultiValueTier {
  *
  */
 export interface TierScores {
-  /** Average tier score (1.0-5.0, lower = better). Use for sorting */
+  /** outcome level score (1.0-5.0, lower = better). Use for sorting */
   average_score: number | null
   /** Normalized score (0.0-1.0, higher = better). Use for radar plot Y-axis */
   normalized_score: number | null
@@ -1801,7 +1801,14 @@ export interface DidCwsScenario {
   subjects: DidCwsSubject[]
 }
 
-/** Request options for the data-in-depth CWS endpoint. */
+/**
+ * Request options for the data-in-depth CWS endpoint.
+ *
+ * WYT is intentionally not part of the CWS request contract: these series are
+ * aggregated by CALENDAR year upstream, so a water-year-type filter cannot be
+ * applied to them without misrepresenting the result. Adding a `wyt` field
+ * here (or passing one through a cast) is a bug; the builder throws on it.
+ */
 export interface CwsDataInDepthOptions {
   /** Subject short_codes (e.g. "02_PU", "MWD", "NOD_CWS"). */
   subjects?: string[]
@@ -1811,8 +1818,6 @@ export interface CwsDataInDepthOptions {
   measures?: DidCwsMeasure[]
   /** Which facets to return; default all. */
   include?: DidInclude[]
-  /** Water-year-types 1-5; default all. */
-  wyt?: number[]
 }
 
 /** Response from GET /api/data-in-depth/cws */

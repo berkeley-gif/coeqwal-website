@@ -10,7 +10,36 @@ import type {
   CategoricalBarDatum,
   ExceedanceSeries,
 } from "@repo/viz"
-import { toExceedancePoints, type SeriesStats } from "../config/mockDataEngine"
+import {
+  linearTrendPerYear,
+  toExceedancePoints,
+  type SeriesStats,
+} from "../config/mockDataEngine"
+import { formatValue } from "../hooks/interpretiveText"
+import type { VariableDef } from "../config/variableRegistry"
+
+/** Long form of the thousand acre-feet unit for y-axis titles. */
+const TAF_AXIS_LABEL = "thousand acre feet (TAF)"
+
+/**
+ * Y-axis label for a chart of `variable` in `view`, given the view-resolved
+ * display unit the card already computes. Order of precedence: the CV view
+ * reads "CV"; a registry `axisLabel` wins (salmon, X2); the thousand
+ * acre-feet unit reads its long form so no chart shows a bare "TAF";
+ * everything else (percent, feet, proportion, dollars) reads the unit.
+ * Shared by the distribution charts and the Stats mean panel so the two
+ * cannot disagree. Pure.
+ */
+export function axisLabelFor(
+  variable: VariableDef | undefined,
+  view: string,
+  unit: string,
+): string {
+  if (view === "cv") return "CV"
+  if (variable?.axisLabel) return variable.axisLabel
+  if (unit === "TAF") return TAF_AXIS_LABEL
+  return unit
+}
 
 /** The member fields the mark builders need (structural subset of VariableMember). */
 export interface MarkMember {
@@ -22,6 +51,11 @@ export interface MarkMember {
   waterYears?: number[]
   /** Per-member provenance, carried through to the CSV payload (not drawn) */
   isLive?: boolean
+  /** True when the scenario is not modeled for this variable at all. Such a
+   *  member is recorded in exports (labeled, with empty values) but is never
+   *  DRAWN: its series exists only because the sample engine always produces
+   *  one, and drawing it would put a fabricated curve on the figure. */
+  liveDataMissing?: boolean
 }
 
 /** One bar per member (the "cv" and "value" views). */
@@ -70,4 +104,55 @@ export function toSeries(
     points: toExceedancePoints(m.series),
     color: colors[i],
   }))
+}
+
+/** One panel of the Stats chart style. */
+export interface StatsPanelSpec {
+  key: "mean" | "cv" | "trend"
+  /** Panel caption on screen, and the panel's y-axis label in the composed
+   *  export, so a stitched figure still says what each panel shows. */
+  title: string
+  /** Y-axis label on screen (the full unit sentence for the mean panel). */
+  yLabel: string
+  format: (v: number) => string
+  valueOf: (m: MarkMember) => number
+}
+
+/**
+ * The side-by-side summary panels of the Stats chart style: mean and CV for
+ * every variable, plus the linear level trend (ft/yr) on the groundwater
+ * level view. One builder shared by the live ChartCard and the off-screen
+ * capture, so a Stats export cannot disagree with the Stats card. Pure.
+ */
+export function buildStatsPanels(
+  view: string,
+  unit: string,
+  axisLabel: string,
+): StatsPanelSpec[] {
+  const panels: StatsPanelSpec[] = [
+    {
+      key: "mean",
+      title: `Mean (${unit})`,
+      yLabel: axisLabel,
+      format: (v) => formatValue(v, unit),
+      valueOf: (m) => m.stats.mean,
+    },
+    {
+      key: "cv",
+      title: "CV",
+      yLabel: "CV",
+      format: (v) => v.toFixed(2),
+      valueOf: (m) => m.stats.cv,
+    },
+  ]
+  if (view === "level") {
+    panels.push({
+      key: "trend",
+      title: "Trend (ft/yr)",
+      yLabel: "ft/yr",
+      format: (v) => formatValue(v, "ft/yr"),
+      valueOf: (m) => linearTrendPerYear(m.series),
+    })
+  }
+  return panels
 }

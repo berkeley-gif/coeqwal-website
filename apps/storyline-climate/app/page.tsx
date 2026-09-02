@@ -9,10 +9,12 @@ import { Temperature, TemperatureBuilder } from "./components/02Temperature"
 import { AnimatePresence, motion } from "@repo/motion"
 import {
   BaseHeader,
-  getStorylineWaterThemesOptions,
+  getWaterThemeOptions,
   goToMainAbout,
   goToMainData,
   goToMainHome,
+  goToMainLearn,
+  goToMainExplore,
 } from "@repo/ui"
 import {
   SCROLLAMA_CONFIG,
@@ -33,7 +35,7 @@ import {
 
 export default function StoryContainer() {
   const isMapReady = true //useStoryStore((state) => state.isMapReady)
-  const waterThemesOptions = useMemo(() => getStorylineWaterThemesOptions(), [])
+  const waterThemesOptions = useMemo(() => getWaterThemeOptions(), [])
 
   return (
     <>
@@ -43,6 +45,8 @@ export default function StoryContainer() {
         onLogoClick={goToMainHome}
         onAboutClick={goToMainAbout}
         onGetDataClick={goToMainData}
+        onGetStartedClick={goToMainLearn}
+        onToolsClick={goToMainExplore}
         waterThemesOptions={waterThemesOptions}
       />
       <ContentContainer />

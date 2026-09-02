@@ -17,26 +17,28 @@
  * - Map is preloaded during IntroSection scroll
  */
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useEffect, useRef, useCallback } from "react"
 import { Box, useTheme, Typography } from "@repo/ui/mui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
+
+import VerticalNav, {
+  NAV_WIDTH_COLLAPSED,
+  NAV_WIDTH_EXPANDED,
+} from "../verticalNav/VerticalNav"
 import {
   useMapReady,
   useMapError,
   mapActions,
   useActiveSubSection,
   useLearnNavSection,
+  useIsVertNavExpanded,
 } from "../../features/map/store"
 import { InfoCard, InfoCardGrid } from "@repo/ui"
 import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { WATER_ISSUE_THEMES } from "../../features/map/overlays/content"
 import { WATER_STORIES } from "../../content/stories"
 import type { LearnNavSection } from "../../features/map/config/sectionLayers"
-
-import VerticalNav, {
-  NAV_WIDTH_COLLAPSED,
-  NAV_WIDTH_EXPANDED,
-} from "../verticalNav/VerticalNav"
+const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
 
 export default function LearnPanel() {
   const mapReady = useMapReady()
@@ -46,7 +48,7 @@ export default function LearnPanel() {
   const activeSubSection = useActiveSubSection()
   const activeSection = useLearnNavSection()
   const { openThemePanel } = usePanelRoute()
-  const [isVertNavExpanded, setIsVertNavExpanded] = useState(false)
+  const isVertNavExpanded = useIsVertNavExpanded()
   const navWidth = isVertNavExpanded ? NAV_WIDTH_EXPANDED : NAV_WIDTH_COLLAPSED
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
@@ -108,7 +110,7 @@ export default function LearnPanel() {
         activeSectionId={activeSection}
         activeSubSectionId={activeSubSection}
         isExpanded={isVertNavExpanded}
-        onToggleExpanded={() => setIsVertNavExpanded((prev) => !prev)}
+        onToggleExpanded={mapActions.toggleVertNavExpanded}
         onNavigate={handleNavigate}
       />
 
@@ -118,6 +120,7 @@ export default function LearnPanel() {
           style={{
             position: "relative",
             pointerEvents: "none", // Allow map panning through - child elements re-enable as needed
+            flex: "1 0 auto",
           }}
         >
           {/* 
@@ -196,36 +199,40 @@ export default function LearnPanel() {
         <Box
           sx={{
             p: 4,
-            color: theme.palette.common.white,
-            backgroundColor: theme.palette.blue.dark,
-            minHeight: "100vh",
-            paddingTop: (theme) => theme.space.panel.paddingXl,
+            color: theme.palette.text.secondary,
+            backgroundColor: theme.palette.blue.medium,
+            backgroundImage: `url(${DELTA_AERIALS_SRC})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom -160px",
+            backgroundRepeat: "no-repeat",
+            flex: "1 0 auto",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            pointerEvents: "auto",
+            paddingTop: (theme) => theme.space.panel.padding,
+            paddingBottom: (theme) => theme.space.panel.padding,
             paddingLeft: (theme) =>
               `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
             paddingRight: (theme) => theme.space.panel.padding,
           }}
         >
-          <Typography variant="h3" sx={{ maxWidth: "66%" }}>
+          <Typography variant="h3" sx={{ maxWidth: "100%" }}>
             What water issues matter to you?
           </Typography>
           <Typography
             variant="body1"
-            sx={{ maxWidth: "66%", mt: theme.space.listGap.sm }}
+            sx={{ maxWidth: "75%", mt: theme.space.listGap.sm }}
           >
-            Water is important to all of us — from farmers in the Central Valley
+            Water is important to all of us – from farmers in the Central Valley
             to communities in the Delta, from salmon in the Sacramento River to
-            urban water users in Los Angeles. We can consider how decisions
-            affect the issues people care about.
+            urban water users in Los Angeles. COEQWAL considers how decisions
+            affect the water issues that people care about.
           </Typography>
           <Box sx={{ mt: theme.space.listGap.sm }}>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: theme.space.listGap.xs }}
+            <InfoCardGrid
+              columns={{ xs: 2, sm: 3, md: WATER_ISSUE_THEMES.length }}
             >
-              Click on each water issue to learn more.
-            </Typography>
-            <InfoCardGrid columns={5}>
               {WATER_ISSUE_THEMES.map(
                 ({ title, description, themeKey, dimmed }) => (
                   <InfoCard
@@ -236,7 +243,7 @@ export default function LearnPanel() {
                       dimmed ? undefined : () => openThemePanel(themeKey)
                     }
                     dimmed={dimmed}
-                    variant="onDark"
+                    variant="onLight"
                   />
                 ),
               )}
@@ -250,47 +257,54 @@ export default function LearnPanel() {
           sx={{
             p: 4,
             color: theme.palette.common.white,
+            flex: "1 0 auto",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
             backgroundColor: theme.palette.nature.forest,
-            paddingTop: (theme) => theme.space.panel.paddingXl,
+            pointerEvents: "auto",
+            paddingTop: (theme) => theme.space.panel.padding,
+            paddingBottom: (theme) => theme.space.panel.padding,
             paddingLeft: (theme) =>
               `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
             paddingRight: (theme) => theme.space.panel.padding,
           }}
         >
           <Typography variant="h3" sx={{ maxWidth: "66%" }}>
-            Did you know that California has one of the most complex water
-            systems in the world?
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ maxWidth: "66%", mt: theme.space.listGap.sm }}
-          >
-            Here is a paragraph that will explain what the water stories cover
+            Want to learn more about California water?
           </Typography>
           <Box sx={{ mt: theme.space.listGap.sm }}>
             <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: theme.space.listGap.xs }}
+              variant="body1"
+              sx={{ maxWidth: "75%", mt: theme.space.listGap.sm }}
             >
-              Click on each water story to learn more.
+              Do you know that California has one of the most complex water
+              systems in the world? Learn about how water flows through
+              California’s Central Valley, how the state’s history influenced
+              who has access to water today, and the ways in which climate
+              change is affecting our water system.
             </Typography>
-            <InfoCardGrid columns={5}>
-              {WATER_STORIES.map(({ id, label, description, href, dimmed }) => (
-                <InfoCard
-                  key={id}
-                  title={label}
-                  description={description}
-                  onClick={
-                    dimmed || !href
-                      ? undefined
-                      : () => window.open(href, "_blank", "noopener,noreferrer")
-                  }
-                  dimmed={dimmed}
-                  variant="onDark"
-                />
-              ))}
-            </InfoCardGrid>
+            <Box sx={{ mt: theme.space.listGap.sm }}>
+              <InfoCardGrid columns={5}>
+                {WATER_STORIES.map(
+                  ({ id, label, description, href, dimmed }) => (
+                    <InfoCard
+                      key={id}
+                      title={label}
+                      description={description}
+                      onClick={
+                        dimmed || !href
+                          ? undefined
+                          : () =>
+                              window.open(href, "_blank", "noopener,noreferrer")
+                      }
+                      dimmed={dimmed}
+                      variant="onDark"
+                    />
+                  ),
+                )}
+              </InfoCardGrid>
+            </Box>
           </Box>
         </Box>
       )}

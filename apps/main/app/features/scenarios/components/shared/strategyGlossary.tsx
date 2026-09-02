@@ -43,16 +43,88 @@ export interface GlossaryTerm {
  */
 export const GLOSSARY_TERMS: GlossaryTerm[] = [
   {
-    pattern: /\bTUCPs?\b/g,
-    glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)",
+    pattern: /\bCalSim3\b/g,
+    glossaryTerm: "CalSim3",
+  },
+  {
+    pattern: /\bCentral Valley\b/g,
+    glossaryTerm: "Central Valley",
+  },
+  {
+    pattern: /\bCOEQWAL\b/g,
+    glossaryTerm: "COEQWAL",
+  },
+  {
+    pattern: /\bDelta\b/g,
+    glossaryTerm: "Delta",
+  },
+  {
+    pattern: /\bDelta Conveyance Project\b/g,
+    glossaryTerm: "Delta Conveyance Project",
+  },
+  {
+    pattern: /\bDepartment of Water Resources\b/g,
+    glossaryTerm: "California Department of Water Resources (DWR)",
+  },
+  {
+    pattern: /\bDWR\b/g,
+    glossaryTerm: "California Department of Water Resources (DWR)",
+  },
+  {
+    pattern: /\bfall \(X2\) salinity\b/g,
+    glossaryTerm: "Fall X2 Salinity Standard",
+  },
+  {
+    pattern: /\bgroundwater basins?\b/g,
+    glossaryTerm: "Groundwater basin",
+  },
+  {
+    pattern: /\bhydroclimates?\b/g,
+    glossaryTerm: "Hydroclimate",
+  },
+  {
+    pattern: /\bkey outcomes?\b/g,
+    glossaryTerm: "Key outcomes",
+  },
+  {
+    pattern: /\blocations of interest?\b/g,
+    glossaryTerm: "Location of interest",
+  },
+  {
+    pattern: /\bmanagement strategies\b/g,
+    glossaryTerm: "Management strategies",
+  },
+  {
+    pattern: /\bmanagement strategy\b/g,
+    glossaryTerm: "Management strategies",
+  },
+  {
+    pattern: /\bSacramento River\b/g,
+    glossaryTerm: "Sacramento River",
+  },
+  {
+    pattern: /\bsalinity\b/g,
+    glossaryTerm: "Salinity",
+  },
+  {
+    pattern: /\bscenarios?\b/g,
+    glossaryTerm: "Scenario",
   },
   {
     pattern: /\bSGMA\b/g,
     glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
   },
   {
-    pattern: /\bDelta Conveyance Project\b/g,
-    glossaryTerm: "Delta Conveyance Project",
+    pattern: /\bTUCPs?\b/g,
+    glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)",
+  },
+  {
+    pattern: /\bU\.S\. Bureau of Reclamation\b/g,
+    glossaryTerm: "U.S. Bureau of Reclamation",
+  },
+  {
+    pattern: /\bwinter-run Chinook salmon\b/g,
+    glossaryTerm: "Winter-run Chinook salmon",
   },
 ]
 
@@ -97,6 +169,7 @@ export function useGlossaryRenderer(
       border: "none",
       padding: 0,
       font: "inherit",
+      ...theme.typography.glossaryTerm,
       textDecoration: "underline",
       "&:focus-visible": {
         outline: `2px solid ${theme.palette.blue.bright}`,
@@ -104,7 +177,7 @@ export function useGlossaryRenderer(
         borderRadius: "2px",
       },
     }),
-    [theme.palette.blue.bright],
+    [theme.palette.blue.bright, theme.typography.glossaryTerm],
   )
 
   return useCallback(() => {

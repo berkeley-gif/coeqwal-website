@@ -35,8 +35,6 @@ export default function ExplorerSidebar({
             shareDisabledTooltip: "Select at least one axis to share",
           }
         : {})}
-      {...(exploreMode === "equity" ? share.equity.sidebarProps : {})}
-      {...(exploreMode === "resilience" ? share.resilience.sidebarProps : {})}
     />
   )
 }

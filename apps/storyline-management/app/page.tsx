@@ -3,15 +3,17 @@
 import { useMemo } from "react"
 import {
   BaseHeader,
-  getStorylineWaterThemesOptions,
+  getWaterThemeOptions,
   goToMainAbout,
   goToMainData,
   goToMainHome,
+  goToMainLearn,
+  goToMainExplore,
 } from "@repo/ui"
 import { Box } from "@repo/ui/mui"
 
 export default function ManagementContainer() {
-  const waterThemesOptions = useMemo(() => getStorylineWaterThemesOptions(), [])
+  const waterThemesOptions = useMemo(() => getWaterThemeOptions(), [])
 
   return (
     <>
@@ -20,6 +22,8 @@ export default function ManagementContainer() {
         onLogoClick={goToMainHome}
         onAboutClick={goToMainAbout}
         onGetDataClick={goToMainData}
+        onGetStartedClick={goToMainLearn}
+        onToolsClick={goToMainExplore}
         waterThemesOptions={waterThemesOptions}
       />
       <Box

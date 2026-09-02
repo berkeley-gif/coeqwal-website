@@ -5,25 +5,22 @@
  *
  * Control state lives on the explorer store. This panel reads
  * `resilience*` fields directly (same pattern as RadarPanel).
- * and useResilienceAggregate for aggregate-view cells.
  *
  * CONTENTS (in source order)
  * --------------------------
  *  1. Types and props   Result/data types live in ./types. ResiliencePanelProps here.
- *  2. Store reads        resilience* slice fields + derived scenario/aggregate scope.
+ *  2. Store reads        resilience* slice fields + derived scenario scope.
  *  3. Columns and rows   Hydroclimate/scenario columns, outcome row codes, row ids.
- *  4. Cell value builders buildValueFn, valueGrid, ordered keys, rows/cells.
- *  5. Small multiples     byScenario / byHydroclimate / byOutcome tile builders.
- *  6. Marginals           Row/column mean strips.
- *  7. Interaction         Cell/tile/row/col/square hover + click handlers.
- *  8. Map highlights       LOI distribution, pinned squares, highlight emission.
- *  9. Sidebar highlights   Row/col/tile highlight + dim derivations from sidebar.
- * 10. Latest-value refs    Refs mirroring reactive values for the capture closures.
- * 11. Capture              Solo / panel / tile capture + onCapture* wiring.
- * 12. Chart-view state     Assembles the props handed to ResiliencePanelChartView.
- * 13. Render               Error / loading / chart states.
+ *  4. Small multiples    byScenario / byHydroclimate / byOutcome tile builders.
+ *  5. Interaction         Cell/tile/row/col/square hover + click handlers.
+ *  6. Map highlights       LOI distribution, pinned squares, highlight emission.
+ *  7. Sidebar highlights   Row/col/tile highlight + dim derivations from sidebar.
+ *  8. Latest-value refs    Refs mirroring reactive values for the capture closures.
+ *  9. Capture              Solo / panel / tile capture + onCapture* wiring.
+ * 10. Chart-view state     Assembles the props handed to ResiliencePanelChartView.
+ * 11. Render               Error / loading / chart states.
  *
- * This file is large. Sections 4, 5, 7, and 11 are candidates for
+ * This file is large. Sections 4, 5, and 9 are candidates for
  * extraction into colocated hooks/modules, but they close heavily over
  * component scope. See resilience/README.md ("Refactor backlog").
  */
@@ -48,13 +45,10 @@ import { motion, AnimatePresence, useReducedMotion } from "@repo/motion"
 import {
   type ResilienceAxisItem,
   type ResilienceHeatmapCell,
-  type ResilienceHeatmapMarginals,
   type ResilienceGlyphEntry,
   type ResilienceSmallMultiplesTile,
-  hierarchicalRowOrder,
 } from "@repo/viz"
 import { useResilienceSlice, useWorkspaceSlice } from "../../../store"
-import { useResilienceSelectionSync } from "./hooks/useResilienceSelectionSync"
 import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
 import ScrollRightIndicator from "../../chrome/layout/ScrollRightIndicator"
 
@@ -62,15 +56,13 @@ export type {
   ResilienceView,
   CellEncoding,
   DeltaMode,
-  AggregateScope,
   ResilienceControlsState,
 } from "../../../store"
-import type { ResilienceView, DeltaMode } from "../../../store"
+import type { ResilienceView } from "../../../store"
 import {
   useResilienceMatrix,
   type ResilienceHydroclimate,
 } from "./useResilienceMatrix"
-import { useResilienceAggregate } from "./useResilienceAggregate"
 import { useResilienceLoiDistribution } from "./useResilienceLoiDistribution"
 import { useOutcomeMapAction } from "../../../../../map/hooks"
 import { mapActions, type LocationHighlight } from "../../../../../map/store"
@@ -105,8 +97,6 @@ import ResiliencePanelChartView, {
 import type { HoveredInteraction } from "../../../useExploreHoverCoordination"
 import { useResilienceHeatmapTheme } from "./useResilienceHeatmapTheme"
 import {
-  clampTier,
-  transposeCell,
   transposeTile,
   resolveCellRender,
   getMapLinkBlockedMessage,
@@ -134,6 +124,7 @@ import type {
   ResilienceScenarioSoloCaptureFn,
 } from "../../../share/capture/types"
 
+import { useTourAnchor } from "../../tour/anchors/TourAnchorContext"
 interface ResiliencePanelProps {
   highlightedIds?: Set<string> | null
   onChartHover?: (info: HoveredInteraction | null) => void
@@ -158,8 +149,7 @@ interface ResiliencePanelProps {
    * the panel's current view. The scenario sidebar uses this so
    * clicking a row's share icon always produces a card scoped to
    * that scenario (matching radar / equity sidebar semantics)
-   * even when the live panel is in `aggregate`, `outcome`, or
-   * `hydroclimate` view.
+   * even when the live panel is showing a different view.
    */
   onCaptureScenarioSoloReady?: (
     capture: ResilienceScenarioSoloCaptureFn,
@@ -185,24 +175,18 @@ export default function ResiliencePanel({
   onCaptureScenarioSoloReady,
   onTileShare,
 }: ResiliencePanelProps) {
-  useResilienceSelectionSync()
   const theme = useTheme()
   const {
     resilienceView: view,
     resilienceCellEncoding: cellEncoding,
     resilienceDeltaMode: deltaMode,
     resilienceDeltaBaselineScenarioId: deltaBaselineScenarioId,
-    resilienceAggregateScope: aggregateScope,
-    resilienceReorderBySimilarity: reorderBySimilarity,
-    resilienceShowMarginals: showMarginals,
     resilienceShowAllScenarios: showAllScenarios,
     resilienceSelectedHydroclimates: selectedHydroclimates,
     resilienceShowCellNumbers: showCellNumbers,
     resiliencePrimaryOutcomeCode: primaryOutcomeCode,
     resilienceCompareOutcomeCodes: compareOutcomeCodes,
-    resilienceExpandedRegionalOutcomes: expandedRegionalOutcomes,
     resilienceTransposed: transposed,
-    resilienceAggregateOver: aggregateOver,
     showResilienceOutcomeSelector,
     setShowResilienceOutcomeSelector,
     resilienceVisibleOutcomes,
@@ -211,7 +195,7 @@ export default function ResiliencePanel({
     resilienceDistributionMode: distributionMode,
   } = useResilienceSlice()
   const { selectedScenarios, setHydroclimate } = useWorkspaceSlice()
-
+  const heatmapGridAnchorRef = useTourAnchor("resilience.heatmapGrid")
   // ============================================================
   // Store-derived scope, columns, and rows
   // ============================================================
@@ -220,14 +204,6 @@ export default function ResiliencePanel({
     return selectedScenarios
   }, [showAllScenarios, selectedScenarios])
 
-  // Scenarios mode is sidebar-driven: when selection is non-empty we
-  // render small multiples of those scenarios, and when it is empty we
-  // fall through to the Overview aggregate view. This is not a silent
-  // mode swap. The rail entry is named "Scenarios" precisely because
-  // both states are expected. Outcome mode still has an explicit empty
-  // state when no primary outcome has been chosen.
-  const scenarioRendersAsOverview =
-    view === "scenario" && selectedScenarios.length === 0
   // "Empty" per-outcome only when neither the outcome-axis picker nor
   // the primary/compare fields yield any renderable outcome.
   const hasOutcomeAxisSelection = useMemo(
@@ -242,9 +218,7 @@ export default function ResiliencePanel({
     primaryOutcomeCode == null &&
     compareOutcomeCodes.length === 0 &&
     !hasOutcomeAxisSelection
-  const effectiveView: ResilienceView = scenarioRendersAsOverview
-    ? "aggregate"
-    : view
+  const effectiveView: ResilienceView = view
 
   const {
     scenarioIds,
@@ -258,18 +232,18 @@ export default function ResiliencePanel({
   } = useResilienceMatrix()
 
   /**
-   * Heatmap axis ticks use the API `shortCode` (e.g. s0020) so dense
-   * columns of scenarios stay legible. `fullLabel` and optional
-   * `definitionTooltip` carry the long name and description for hover.
+   * Heatmap axis ticks show the scenario's full display name. Dense
+   * axes stay legible via truncation-with-ellipsis in ResilienceHeatmap
+   * (native `<title>` tooltip on truncation), not a short code.
+   * `definitionTooltip` carries the description for the richer hover
+   * card when one is on file.
    */
   const resolveScenarioAxisItem = useCallback(
     (sid: string): ResilienceAxisItem => {
       const s = scenarios.find((x) => x.scenarioId === sid)
-      const full = getDisplayName(sid)
       return {
         key: sid,
-        label: s?.shortCode ?? sid,
-        fullLabel: full,
+        label: getDisplayName(sid),
         definitionTooltip:
           s?.description && s.description.length > 0
             ? s.description
@@ -279,35 +253,8 @@ export default function ResiliencePanel({
     [scenarios, getDisplayName],
   )
 
-  const {
-    showOutcomeOnMap,
-    showOutcomeOnMapFixed,
-    isOutcomeActive,
-    isMapVisible,
-    activeOutcome,
-  } = useOutcomeMapAction()
-
-  // Aggregate hook reads the already-fetched matrix. We key it on the
-  // effective scope so it only recomputes when the set changes.
-  const aggregateScenarioIds = useMemo(() => {
-    if (aggregateScope === "selected") return selectedScenarios
-    return undefined
-  }, [aggregateScope, selectedScenarios])
-
-  // When the aggregate view is reducing over outcomes or hydroclimates,
-  // we route the same hook through a different `groupBy` axis. The hook
-  // returns cells keyed by (rowKey, colKey) that match the corresponding
-  // 2D slice: scenarios×HC (groupBy=outcomes) or outcomes×scenarios
-  // (groupBy=hydroclimates). All other views still use the legacy axis
-  // (groupBy=scenarios) because their rows / cols are concrete
-  // (matrix-backed) rather than aggregated.
-  const aggregateGroupBy =
-    effectiveView === "aggregate" ? aggregateOver : "scenarios"
-
-  const aggregate = useResilienceAggregate({
-    scenarioIds: aggregateScenarioIds,
-    groupBy: aggregateGroupBy,
-  })
+  const { showOutcomeOnMap, isOutcomeActive, isMapVisible, activeOutcome } =
+    useOutcomeMapAction()
 
   // Tier colors, labels, and heatmap chrome palette shared with the
   // Share-tab live thumbnails so the viz stays theme-agnostic without
@@ -319,10 +266,8 @@ export default function ResiliencePanel({
   } = useResilienceHeatmapTheme()
 
   // Hydroclimate (X axis) items: the selected HC chips in canonical
-  // order. Used by every view whose column axis is hydroclimates: by-
-  // scenario tiles, by-outcome tiles, and the aggregate view unless it
-  // is reducing over hydroclimates (where the column axis becomes
-  // scenarios, see `columns` below).
+  // order. Used by every view's column axis: by-scenario tiles,
+  // by-outcome tiles, and (transposed) by-hydroclimate tiles.
   const hydroclimateColumns: ResilienceAxisItem[] = useMemo(() => {
     return hydroclimates
       .filter((hc) => selectedHydroclimates.has(hc))
@@ -338,86 +283,33 @@ export default function ResiliencePanel({
       })
   }, [hydroclimates, selectedHydroclimates])
 
-  // Scenario-as-columns axis. Used by the aggregate view when
-  // aggregateOver="hydroclimates" and by the per-hydroclimate small
-  // multiples (each tile has scenarios on X). Respects the
-  // aggregate-scope filter when the aggregate view drives it.
-  const scenarioColumnItems = useMemo<ResilienceAxisItem[]>(() => {
-    const ids =
-      effectiveView === "aggregate" &&
-      aggregateScope === "selected" &&
-      selectedScenarios.length > 0
-        ? selectedScenarios
-        : scenarioIds
-    return ids.map((sid) => resolveScenarioAxisItem(sid))
-  }, [
-    effectiveView,
-    aggregateScope,
-    selectedScenarios,
-    scenarioIds,
-    resolveScenarioAxisItem,
-  ])
-
-  // Main column axis used by the single-heatmap render path (the
-  // aggregate view only. Pivoted views always render as small
-  // multiples). Small multiples tiles always read `hydroclimateColumns`
-  // or `scenarioColumnItems` directly depending on the per-tile
-  // semantics.
-  const columns: ResilienceAxisItem[] = useMemo(() => {
-    if (effectiveView === "aggregate" && aggregateOver === "hydroclimates") {
-      return scenarioColumnItems
-    }
-    return hydroclimateColumns
-  }, [effectiveView, aggregateOver, scenarioColumnItems, hydroclimateColumns])
-
-  // Outcome-row order. Both Scenario and Overview honor the user's
-  // Rows chooser (`resilienceVisibleOutcomes`). Scenario mode adds no
-  // extra filtering but is no longer forced to the full outcome list.
-  // NOD/SOD variants are interleaved whenever the parent outcome is
-  // listed in `expandedRegionalOutcomes`, or when the user has
-  // explicitly picked a variant in Overview.
-  //   - Outcome mode: handled separately via outcomeSmallMultiplesCodes.
-  const regionalExpandSet = useMemo(
-    () => new Set(expandedRegionalOutcomes),
-    [expandedRegionalOutcomes],
-  )
+  // Outcome-row order, shared by every view. A row shows up when its
+  // own code is selected in the Rows chooser (`resilienceVisibleOutcomes`)
+  // - this applies to parent outcomes and to NOD/SOD variants alike, so
+  // picking "North of Delta" on its own is enough, with no dependency on
+  // the parent also being selected.
+  //   - Outcome mode's tile set is handled separately via
+  //     outcomeSmallMultiplesCodes; this only governs rows within a
+  //     tile (by-scenario, by-hydroclimate) or the LOI-distribution scope.
   const outcomeRowCodes = useMemo(() => {
     const rows: string[] = []
     const selected = new Set(resilienceVisibleOutcomes)
-    if (view === "scenario") {
-      for (const code of OUTCOME_CODE_ORDER) {
-        if (!selected.has(code)) continue
-        rows.push(code)
-        if (regionalExpandSet.has(code)) {
-          const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
-          if (variants) {
-            for (const v of variants) rows.push(v)
-          }
-        }
-      }
-      return rows
-    }
-    // Overview / Outcome mode: fall back to the existing Rows-backed set.
     for (const code of OUTCOME_CODE_ORDER) {
       if (selected.has(code)) rows.push(code)
       const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
       if (variants) {
-        const expanded = regionalExpandSet.has(code)
         for (const v of variants) {
-          // Overview mode keeps the user's explicit regional picks. When
-          // they expand the parent we also auto-insert the variants.
-          if (selected.has(v) || expanded) rows.push(v)
+          if (selected.has(v)) rows.push(v)
         }
       }
     }
     return rows
-  }, [view, resilienceVisibleOutcomes, regionalExpandSet])
+  }, [resilienceVisibleOutcomes])
 
   // Outcome-mode small-multiples codes. Driven primarily by the
-  // outcome-axis picker (`resilienceVisibleOutcomes`) so the per-outcome
-  // view is never empty when the aggregate view has rows to show. A
-  // user-chosen "primary outcome" floats to the front, and any compare
-  // codes follow it. Remaining visible outcomes fill in after. Regional
+  // outcome-axis picker (`resilienceVisibleOutcomes`). A user-chosen
+  // "primary outcome" floats to the front, and any compare codes
+  // follow it. Remaining visible outcomes fill in after. Regional
   // NOD/SOD variants are dropped at tile level (they don't have
   // standalone definitions).
   const outcomeSmallMultiplesCodes = useMemo<string[]>(() => {
@@ -447,23 +339,13 @@ export default function ResiliencePanel({
 
   const loiDistributionScope = useMemo<readonly string[]>(() => {
     if (!loiDistributionEnabled) return []
-    if (view === "aggregate") {
-      return aggregateScenarioIds ?? scenarioIds
-    }
     // By-scenario and by-outcome views both fall back to all 24 when no
     // sidebar selection is present.
     if (showAllScenarios || selectedScenarios.length === 0) {
       return scenarioIds
     }
     return selectedScenarios
-  }, [
-    loiDistributionEnabled,
-    view,
-    aggregateScenarioIds,
-    scenarioIds,
-    showAllScenarios,
-    selectedScenarios,
-  ])
+  }, [loiDistributionEnabled, scenarioIds, showAllScenarios, selectedScenarios])
 
   const loiDistributionOutcomes = useMemo<readonly string[]>(() => {
     if (!loiDistributionEnabled) return []
@@ -480,11 +362,10 @@ export default function ResiliencePanel({
   })
   // Destructure stable members so consumers can list them as memo deps
   // without invalidating on every render (the hook returns a new object
-  // literal each call, which would otherwise cascade through buildValueFn
-  // → cells → updateChart and rebuild the SVG on every parent re-render -
+  // literal each call, which would otherwise cascade through the tile
+  // cell builders and rebuild the SVG on every parent re-render -
   // observed as a hover-induced infinite render loop on outcomes whose
   // hover sets hoveredSquareHighlight to a non-null value).
-  const loiByCell = loiDistribution.byCell
   const loiBuildEntriesForScope = loiDistribution.buildEntriesForScope
 
   // Scenario-row order (for outcome view): primary baseline first, then
@@ -499,24 +380,10 @@ export default function ResiliencePanel({
     return ids
   }, [scenarioIds])
 
-  // By-outcome view Y axis: sidebar-driven. When the sidebar selection
-  // is non-empty we show those scenarios in canonical order. When empty
-  // we fall back to all 24 so the chart always has something to draw.
-  // `showAllScenarios` stays as an internal override used by previews
-  // and legacy call sites.
-  const scenarioRowIds = useMemo(() => {
-    if (showAllScenarios || selectedScenarios.length === 0) {
-      return scenarioRowIdsAll
-    }
-    const selectedSet = new Set(selectedScenarios)
-    return scenarioRowIdsAll.filter((id) => selectedSet.has(id))
-  }, [showAllScenarios, scenarioRowIdsAll, selectedScenarios])
-
   // By-scenario view focus: sidebar-driven. Scenario mode no longer
   // has its own picker. We key the focused scenario off the first
   // selected one, falling back to the primary baseline so the map
-  // layer always has a valid scenario id. When the sidebar is empty
-  // Scenario mode renders Overview instead (see scenarioRendersAsOverview).
+  // layer always has a valid scenario id.
   const effectiveFocusScenarioId = useMemo<string | null>(() => {
     if (selectedScenarios.length > 0) return selectedScenarios[0] ?? null
     if (showAllScenarios) return PRIMARY_SCENARIO_BASELINE_ID
@@ -525,8 +392,7 @@ export default function ResiliencePanel({
 
   // Scenario-mode small-multiples scope: the sidebar selection in
   // canonical order, with the primary baseline pinned first. Empty
-  // when the sidebar is empty. The render path falls through to
-  // Overview in that case.
+  // when the sidebar is empty.
   const scenarioSmallMultiplesIds = useMemo<string[]>(() => {
     if (view !== "scenario") return []
     if (selectedScenarios.length === 0) return []
@@ -534,465 +400,30 @@ export default function ResiliencePanel({
     return scenarioRowIdsAll.filter((id) => selectedSet.has(id))
   }, [view, selectedScenarios, scenarioRowIdsAll])
 
-  // Best-effort scenario id for map actions. In aggregate views there is
-  // no single "focused" scenario, but the map layer still needs a scenario
-  // to key the visualization request. We fall back through: explicit
-  // focus → first aggregated scenario → baseline. The layer geometry is
-  // scenario-invariant for the outcomes we show, so any valid id is fine.
+  // Best-effort scenario id for map actions. The map layer always
+  // needs a scenario to key the visualization request. We fall back
+  // through: explicit focus → first selected → baseline. The layer
+  // geometry is scenario-invariant for the outcomes we show, so any
+  // valid id is fine.
   const mapScenarioFallback = useMemo<string>(() => {
     return (
       effectiveFocusScenarioId ??
-      aggregateScenarioIds?.[0] ??
       selectedScenarios[0] ??
       PRIMARY_SCENARIO_BASELINE_ID
     )
-  }, [effectiveFocusScenarioId, aggregateScenarioIds, selectedScenarios])
+  }, [effectiveFocusScenarioId, selectedScenarios])
 
   const effectiveCellRender = useMemo(
-    () => resolveCellRender(view, cellEncoding, deltaMode, aggregateOver),
-    [view, cellEncoding, deltaMode, aggregateOver],
+    () => resolveCellRender(view, deltaMode),
+    [view, deltaMode],
   )
 
-  // Build the underlying row keys + per-(row, col) value arrays. The
-  // "displayable" value is whatever drives the primary visual encoding
-  // (tier mean, delta, density fraction, aggregate mean). Used both for
-  // cells and for marginals / clustering.
-  type RowValueFn = (
-    rowKey: string,
-    col: ResilienceHydroclimate,
-  ) => {
-    continuousValue: number | null
-    tierLevel: number | null
-    available: boolean
-    unavailableReason?: string
-    divergingValue?: number | null
-    densityValue?: number | null
-    distribution?: ReadonlyArray<ResilienceGlyphEntry>
-    leverageValue?: number | null
-    type?: "single_value" | "multi_value" | "nod_sod"
-    rowLabel: string
-    /** Value used for marginal row/col means + clustering. */
-    signal: number | null
-  }
-
-  // ============================================================
-  // 4. Cell value builders
-  // Refactor backlog: this and valueGrid/rows/cells below are a
-  // candidate hook (useResilienceCells) but close over view scope.
-  // ============================================================
-  const buildValueFn = useCallback<
-    () => {
-      rowKeys: string[]
-      rowLabels: Record<string, string>
-      valueFn: RowValueFn
-      subjectLabel: string
-    }
-  >(() => {
-    if (effectiveView === "scenario") {
-      const focusId = effectiveFocusScenarioId
-      const focusName = focusId ? getDisplayName(focusId) : ""
-      const rowKeys = [...outcomeRowCodes]
-      const rowLabels: Record<string, string> = {}
-      for (const code of rowKeys) rowLabels[code] = getOutcomeName(code)
-
-      const valueFn: RowValueFn = (rowKey, hc) => {
-        const cell = focusId ? getCell(focusId, rowKey, hc) : null
-        if (!cell) {
-          return {
-            continuousValue: null,
-            tierLevel: null,
-            available: false,
-            unavailableReason: "No data for this row",
-            rowLabel: rowLabels[rowKey] ?? rowKey,
-            signal: null,
-          }
-        }
-        const base = {
-          continuousValue: cell.continuousValue,
-          tierLevel: cell.tierLevel,
-          available: cell.available,
-          unavailableReason: cell.unavailableReason,
-          type: cell.type,
-          rowLabel: rowLabels[rowKey] ?? rowKey,
-        }
-        if (deltaMode === "none" || !cell.available) {
-          return { ...base, signal: cell.continuousValue }
-        }
-        // Compute delta
-        let reference: number | null = null
-        if (deltaMode === "vs_historical") {
-          const ref = focusId ? getCell(focusId, rowKey, HISTORICAL_HC) : null
-          reference = ref?.available ? ref.continuousValue : null
-        } else {
-          const ref = getCell(deltaBaselineScenarioId, rowKey, hc)
-          reference = ref?.available ? ref.continuousValue : null
-        }
-        if (reference == null || cell.continuousValue == null) {
-          return {
-            ...base,
-            available: false,
-            unavailableReason: "Delta baseline unavailable",
-            divergingValue: null,
-            signal: null,
-          }
-        }
-        const dv = cell.continuousValue - reference
-        return { ...base, divergingValue: dv, signal: dv }
-      }
-
-      return {
-        rowKeys,
-        rowLabels,
-        valueFn,
-        subjectLabel: focusName,
-      }
-    }
-
-    if (effectiveView === "outcome") {
-      // The by-outcome view renders `byOutcomeTiles` via
-      // ResilienceHeatmapSmallMultiples, so the single-heatmap data
-      // produced here is never consumed. We still return a valid shape
-      // (using the first visible outcome as the subject) so downstream
-      // memos that depend on `buildValueFn` stay stable and typed.
-      const fallbackOutcome = outcomeRowCodes[0] ?? OUTCOME_CODE_ORDER[0] ?? ""
-      const outcomeName = fallbackOutcome ? getOutcomeName(fallbackOutcome) : ""
-      const rowKeys = [...scenarioRowIds]
-      const rowLabels: Record<string, string> = {}
-      for (const sid of rowKeys) rowLabels[sid] = getDisplayName(sid)
-
-      const valueFn: RowValueFn = (rowKey) => ({
-        continuousValue: null,
-        tierLevel: null,
-        available: false,
-        unavailableReason: "",
-        rowLabel: rowLabels[rowKey] ?? rowKey,
-        signal: null,
-      })
-
-      return { rowKeys, rowLabels, valueFn, subjectLabel: outcomeName }
-    }
-
-    if (effectiveView === "hydroclimate") {
-      // Per-hydroclimate view renders `byHydroclimateTiles` via
-      // ResilienceHeatmapSmallMultiples. The single-heatmap data built
-      // here is not consumed. Return a valid shape (outcomes × scenario
-      // column axis) so downstream memos stay stable and typed.
-      const rowKeys = [...outcomeRowCodes]
-      const rowLabels: Record<string, string> = {}
-      for (const code of rowKeys) rowLabels[code] = getOutcomeName(code)
-
-      const valueFn: RowValueFn = (rowKey) => ({
-        continuousValue: null,
-        tierLevel: null,
-        available: false,
-        unavailableReason: "",
-        rowLabel: rowLabels[rowKey] ?? rowKey,
-        signal: null,
-      })
-
-      return {
-        rowKeys,
-        rowLabels,
-        valueFn,
-        subjectLabel: "",
-      }
-    }
-
-    // effectiveView === "aggregate". Row axis depends on aggregateOver:
-    //   - scenarios (legacy): rows = outcomes.
-    //   - outcomes: rows = scenarios in scope.
-    //   - hydroclimates: rows = outcomes, cols = scenarios (columns is
-    //     `scenarioColumnItems` via the dynamic `columns` memo).
-    let rowKeys: string[]
-    const rowLabels: Record<string, string> = {}
-    let rowKind: "outcome" | "scenario"
-    if (aggregateOver === "outcomes") {
-      rowKeys =
-        aggregateScope === "selected" && selectedScenarios.length > 0
-          ? [...selectedScenarios]
-          : [...scenarioIds]
-      for (const sid of rowKeys) rowLabels[sid] = getDisplayName(sid)
-      rowKind = "scenario"
-    } else {
-      // scenarios OR hydroclimates
-      rowKeys =
-        outcomeRowCodes.length === 0
-          ? [...OUTCOME_CODE_ORDER]
-          : [...outcomeRowCodes]
-      for (const code of rowKeys) rowLabels[code] = getOutcomeName(code)
-      rowKind = "outcome"
-    }
-
-    // Column axis is hydroclimates when aggregateOver != hydroclimates,
-    // and scenarios when aggregateOver === hydroclimates. vs_historical
-    // needs HISTORICAL_HC to exist on the col axis, so we disable delta
-    // when it doesn't.
-    const colAxisIsHydroclimate = aggregateOver !== "hydroclimates"
-    // Delta is only coherent when the col axis is hydroclimates and
-    // (for vs_baseline) the row axis is outcomes (so the per-outcome
-    // matrix lookup makes sense). Otherwise we treat the chart as
-    // non-delta and fall back to the tier encoding downstream.
-    const effectiveDeltaMode: DeltaMode = !colAxisIsHydroclimate
-      ? "none"
-      : deltaMode === "vs_baseline" && rowKind !== "outcome"
-        ? "none"
-        : deltaMode
-
-    // For distribution / glyph encodings: label + scenarioId on each
-    // entry depend on the reduced-axis member kind.
-    const labelForMember = (entry: {
-      memberId: string
-      memberKind: "scenario" | "outcome" | "hydroclimate"
-    }): string => {
-      if (entry.memberKind === "scenario") return getDisplayName(entry.memberId)
-      if (entry.memberKind === "outcome") return getOutcomeName(entry.memberId)
-      return HYDROCLIMATE_LABELS[entry.memberId] ?? entry.memberId
-    }
-
-    const valueFn: RowValueFn = (rowKey, col) => {
-      const agg = aggregate.getCell(rowKey, col)
-      if (!agg || agg.availableCount === 0) {
-        return {
-          continuousValue: null,
-          tierLevel: null,
-          available: false,
-          unavailableReason: "No available data in aggregate",
-          rowLabel: rowLabels[rowKey] ?? rowKey,
-          signal: null,
-        }
-      }
-
-      const baseCell = {
-        continuousValue: agg.mean,
-        tierLevel: agg.mean != null ? clampTier(agg.mean) : null,
-        available: agg.mean != null,
-        rowLabel: rowLabels[rowKey] ?? rowKey,
-      }
-
-      if (cellEncoding === "density_opp") {
-        return {
-          ...baseCell,
-          densityValue: agg.opportunityDensity,
-          available: true,
-          signal: agg.opportunityDensity,
-        }
-      }
-      if (cellEncoding === "glyph" || cellEncoding === "distribution") {
-        let distribution: ResilienceGlyphEntry[]
-        if (
-          cellEncoding === "distribution" &&
-          distributionMode === "location" &&
-          aggregateOver === "scenarios" &&
-          colAxisIsHydroclimate
-        ) {
-          // Location-mode distribution only makes sense in the legacy
-          // aggregate (rows=outcomes, reducing across scenarios). The
-          // per-LOI data is keyed by (outcome, hc).
-          const entries =
-            loiByCell[rowKey]?.[col as ResilienceHydroclimate] ?? []
-          distribution = [...entries]
-        } else {
-          distribution = agg.distribution.map((d) => ({
-            tierLevel: d.tierLevel,
-            label: labelForMember(d),
-            scenarioId: d.scenarioId,
-            tierValue: d.continuousValue ?? undefined,
-          }))
-        }
-        return {
-          ...baseCell,
-          distribution,
-          available: true,
-          signal: agg.mean,
-        }
-      }
-      if (cellEncoding === "leverage") {
-        const vals = agg.distribution
-          .map((d) => d.continuousValue)
-          .filter((v): v is number => v != null && Number.isFinite(v))
-        if (vals.length < 2) {
-          return {
-            ...baseCell,
-            available: false,
-            unavailableReason: "Insufficient sibling coverage",
-            leverageValue: null,
-            signal: null,
-          }
-        }
-        const min = Math.min(...vals)
-        const max = Math.max(...vals)
-        const range = Math.max(0, max - min)
-        return {
-          ...baseCell,
-          leverageValue: range,
-          available: true,
-          signal: range,
-        }
-      }
-      // cellEncoding === "tier" or "delta"
-      if (effectiveDeltaMode === "none") {
-        return { ...baseCell, signal: agg.mean }
-      }
-      let reference: number | null = null
-      if (effectiveDeltaMode === "vs_historical") {
-        const ref = aggregate.getCell(rowKey, HISTORICAL_HC)
-        reference =
-          ref && ref.availableCount > 0 && ref.mean != null ? ref.mean : null
-      } else if (rowKind === "outcome") {
-        const ref = getCell(
-          deltaBaselineScenarioId,
-          rowKey,
-          col as ResilienceHydroclimate,
-        )
-        reference = ref?.available ? ref.continuousValue : null
-      }
-      if (reference == null || agg.mean == null) {
-        return {
-          ...baseCell,
-          available: false,
-          unavailableReason: "Delta baseline unavailable",
-          divergingValue: null,
-          signal: null,
-        }
-      }
-      const dv = agg.mean - reference
-      return { ...baseCell, divergingValue: dv, signal: dv }
-    }
-
-    return {
-      rowKeys,
-      rowLabels,
-      valueFn,
-      subjectLabel: aggregate.subjectLabel,
-    }
-  }, [
-    effectiveView,
-    cellEncoding,
-    deltaMode,
-    deltaBaselineScenarioId,
-    outcomeRowCodes,
-    scenarioRowIds,
-    effectiveFocusScenarioId,
-    getCell,
-    getDisplayName,
-    aggregate,
-    distributionMode,
-    loiByCell,
-    aggregateOver,
-    aggregateScope,
-    selectedScenarios,
-    scenarioIds,
-  ])
-
-  // Compute the (rowKey, col) value grid once, then derive cells,
-  // clustering, and marginals from it.
-  const { rowKeys, rowLabels, valueFn, subjectLabel } = useMemo(buildValueFn, [
-    buildValueFn,
-  ])
-
-  const valueGrid = useMemo(() => {
-    const grid: Record<string, Record<string, ReturnType<RowValueFn>>> = {}
-    for (const rk of rowKeys) {
-      const row: Record<string, ReturnType<RowValueFn>> = {}
-      for (const col of columns) {
-        row[col.key] = valueFn(rk, col.key as ResilienceHydroclimate)
-      }
-      grid[rk] = row
-    }
-    return grid
-  }, [rowKeys, columns, valueFn])
-
-  // Optional hierarchical row reordering by the row's signal vector.
-  const orderedRowKeys = useMemo(() => {
-    if (!reorderBySimilarity || rowKeys.length <= 2 || columns.length === 0) {
-      return rowKeys
-    }
-    const matrix: (number | null)[][] = rowKeys.map((rk) =>
-      columns.map((col) => valueGrid[rk]?.[col.key]?.signal ?? null),
-    )
-    const order = hierarchicalRowOrder(matrix)
-    return order.map((i) => rowKeys[i]!).filter((k): k is string => !!k)
-  }, [reorderBySimilarity, rowKeys, columns, valueGrid])
-
-  // Build rows + cells for the heatmap
-  const { rows, cells } = useMemo(() => {
-    const out: ResilienceHeatmapCell[] = []
-
-    const rowItems: ResilienceAxisItem[] = orderedRowKeys.map((rk) => {
-      if (effectiveView === "outcome") {
-        return {
-          key: rk,
-          label: rowLabels[rk] ?? rk,
-          definitionTooltip:
-            scenarios.find((s) => s.scenarioId === rk)?.description ||
-            rowLabels[rk] ||
-            rk,
-        }
-      }
-      return {
-        key: rk,
-        label: rowLabels[rk] ?? rk,
-        definitionTooltip: getOutcomeDefinition(rk),
-      }
-    })
-
-    // When aggregating across hydroclimates, the column axis becomes
-    // scenarios, so col.key is a scenarioId and the cell is not pinned
-    // to any one HC. Every other main-heatmap layout has HC columns.
-    const columnsAreHydroclimate = !(
-      effectiveView === "aggregate" && aggregateOver === "hydroclimates"
-    )
-
-    for (const rk of orderedRowKeys) {
-      for (const col of columns) {
-        const v = valueGrid[rk]?.[col.key]
-        if (!v) continue
-        out.push({
-          rowKey: rk,
-          colKey: col.key,
-          continuousValue: v.continuousValue,
-          tierLevel: v.tierLevel,
-          available: v.available,
-          unavailableReason: v.unavailableReason,
-          rowLabel: rowLabels[rk] ?? rk,
-          colLabel: col.label,
-          colLabelFull: col.fullLabel,
-          subjectLabel,
-          scenarioId:
-            effectiveView === "scenario"
-              ? (effectiveFocusScenarioId ?? undefined)
-              : effectiveView === "outcome"
-                ? rk
-                : undefined,
-          outcomeCode: rk,
-          hydroclimate: columnsAreHydroclimate ? col.key : undefined,
-          type: v.type,
-          divergingValue: v.divergingValue,
-          densityValue: v.densityValue,
-          distribution: v.distribution,
-          leverageValue: v.leverageValue,
-        })
-      }
-    }
-
-    return { rows: rowItems, cells: out }
-  }, [
-    orderedRowKeys,
-    columns,
-    valueGrid,
-    rowLabels,
-    subjectLabel,
-    effectiveView,
-    effectiveFocusScenarioId,
-    scenarios,
-    aggregateOver,
-  ])
-
   // Per-scenario cell computation for the by-scenario small-multiples
-  // view. Mirrors the scenario branch in `buildValueFn`, but parameterized
-  // over scenarioId so each tile can consume its own cells. Honors the
-  // active delta mode so the small-multiples respect the Climate shift
-  // control when set.
+  // view. Honors the active delta mode so the small-multiples respect
+  // the Climate shift control when set.
+  // ============================================================
+  // 4. Small multiples (by scenario / hydroclimate / outcome)
+  // ============================================================
   const computeScenarioTileCell = useCallback(
     (
       scenarioId: string,
@@ -1080,17 +511,23 @@ export default function ResiliencePanel({
   )
 
   // Effective list of scenarios for the by-scenario small-multiples
-  // view. Primary + compare by default. Full 24 when "show all" is on
-  // for backward-compat browse-all flows.
+  // view. Primary + compare by default. Full 24 when "show all" is on,
+  // or when nothing is selected in the sidebar, so the panel is never
+  // left with an empty grid.
   const byScenarioScope = useMemo<readonly string[]>(() => {
     if (view !== "scenario") return []
-    if (showAllScenarios) return scenarioRowIdsAll
+    if (showAllScenarios || selectedScenarios.length === 0) {
+      return scenarioRowIdsAll
+    }
     return scenarioSmallMultiplesIds
-  }, [view, showAllScenarios, scenarioRowIdsAll, scenarioSmallMultiplesIds])
+  }, [
+    view,
+    showAllScenarios,
+    selectedScenarios,
+    scenarioRowIdsAll,
+    scenarioSmallMultiplesIds,
+  ])
 
-  // ============================================================
-  // 5. Small-multiples tile builders (by scenario / hydroclimate / outcome)
-  // ============================================================
   const byScenarioTiles = useMemo<ResilienceSmallMultiplesTile[]>(() => {
     if (view !== "scenario" || byScenarioScope.length === 0) return []
     const tiles: ResilienceSmallMultiplesTile[] = []
@@ -1124,9 +561,7 @@ export default function ResiliencePanel({
     getDisplayName,
   ])
 
-  // Shared row axis for by-scenario tiles. Separate from `rows` above
-  // (which is the single-heatmap Y axis) so the tiles don't depend on
-  // the single-heatmap value grid.
+  // Shared row axis for by-scenario tiles.
   const byScenarioRows = useMemo<ResilienceAxisItem[]>(
     () =>
       outcomeRowCodes.map((code) => ({
@@ -1251,10 +686,8 @@ export default function ResiliencePanel({
     return scenarioRowIdsAll.filter((id) => selectedSet.has(id))
   }, [showAllScenarios, scenarioRowIdsAll, selectedScenarios])
 
-  // Column axis (scenarios) for by-hydroclimate tiles. Separate from
-  // `scenarioColumnItems` (which drives the single-heatmap aggregate
-  // view) so by-HC tiles can respect the sidebar selection the same
-  // way the by-outcome gallery does.
+  // Column axis (scenarios) for by-hydroclimate tiles. Respects the
+  // sidebar selection the same way the by-outcome gallery does.
   const byHydroclimateColumnItems = useMemo<ResilienceAxisItem[]>(
     () =>
       byHydroclimateScenarioColIds.map((sid) => resolveScenarioAxisItem(sid)),
@@ -1442,39 +875,6 @@ export default function ResiliencePanel({
     getDisplayName,
   ])
 
-  // Row and column marginals: mean of each row's/col's signal values.
-  // ============================================================
-  // 6. Marginals (row / column mean strips)
-  // ============================================================
-  const marginalsData = useMemo<ResilienceHeatmapMarginals | undefined>(() => {
-    if (!showMarginals) return undefined
-    const row: (number | null)[] = orderedRowKeys.map((rk) => {
-      let sum = 0
-      let count = 0
-      for (const col of columns) {
-        const v = valueGrid[rk]?.[col.key]?.signal
-        if (v != null && Number.isFinite(v)) {
-          sum += v
-          count += 1
-        }
-      }
-      return count > 0 ? sum / count : null
-    })
-    const col: (number | null)[] = columns.map((c) => {
-      let sum = 0
-      let count = 0
-      for (const rk of orderedRowKeys) {
-        const v = valueGrid[rk]?.[c.key]?.signal
-        if (v != null && Number.isFinite(v)) {
-          sum += v
-          count += 1
-        }
-      }
-      return count > 0 ? sum / count : null
-    })
-    return { row, col }
-  }, [showMarginals, orderedRowKeys, columns, valueGrid])
-
   // Hover coordination with the sidebar (debounced)
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastHoverKeyRef = useRef<string | null>(null)
@@ -1518,7 +918,7 @@ export default function ResiliencePanel({
   }, [])
 
   // ============================================================
-  // 7. Interaction handlers (cell / tile / row / col / square hover + click)
+  // 5. Interaction handlers (cell / tile / row / col / square hover + click)
   // Refactor backlog: the most interdependent cluster (timers, refs,
   // pinned-square state). Highest regression risk. Extract last.
   // ============================================================
@@ -1528,18 +928,14 @@ export default function ResiliencePanel({
         notifyChartHover(null)
         return
       }
-      const scenarioId = resolveScenarioIdFromCell(
-        cell,
-        effectiveView,
-        aggregateOver,
-      )
+      const scenarioId = resolveScenarioIdFromCell(cell)
       if (!scenarioId) {
         notifyChartHover(null)
         return
       }
       notifyChartHover(hoverPayloadFromCell(cell, scenarioId))
     },
-    [effectiveView, aggregateOver, notifyChartHover],
+    [notifyChartHover],
   )
 
   const handleTileHover = useCallback(
@@ -1575,43 +971,23 @@ export default function ResiliencePanel({
     [notifyChartHover],
   )
 
-  // Aggregate view has no "current" scenario/hydroclimate. Every column
-  // and row aggregates across them. We anchor the map call on the
-  // historical baseline (same scenarioId Get Started uses, which has the
-  // widest /locations coverage) and bypass hydroclimate re-resolution so
-  // react-marker outcomes render reliably.
   const triggerMapForOutcome = useCallback(
     (outcomeCode: string, hydroclimateAwareSid: string | null) => {
-      if (view === "aggregate") {
-        const sid = PRIMARY_SCENARIO_BASELINE_ID
-        if (!isOutcomeActive(outcomeCode, sid)) {
-          showOutcomeOnMapFixed(outcomeCode, sid)
-        }
-        return
-      }
       const sid = hydroclimateAwareSid ?? mapScenarioFallback
       if (!isOutcomeActive(outcomeCode, sid)) {
         showOutcomeOnMap(outcomeCode, sid)
       }
     },
-    [
-      view,
-      mapScenarioFallback,
-      showOutcomeOnMap,
-      showOutcomeOnMapFixed,
-      isOutcomeActive,
-    ],
+    [mapScenarioFallback, showOutcomeOnMap, isOutcomeActive],
   )
 
-  // Whether clicking this cell can drive the map today. The Overview
-  // (aggregate) view and the derived encodings (climate shift, density,
-  // leverage) do not map cleanly onto the per-LOI tier paint that the
-  // map pipeline serves, so we explain that in a Snackbar instead of
-  // painting an approximation.
+  // Whether clicking this cell can drive the map today. The derived
+  // encodings (climate shift, density, leverage) do not map cleanly
+  // onto the per-LOI tier paint that the map pipeline serves, so we
+  // explain that in a Snackbar instead of painting an approximation.
   const cellMapsCleanly = useCallback(
     (cell: ResilienceHeatmapCell): boolean => {
       if (!cell.outcomeCode) return false
-      if (effectiveView === "aggregate") return false
       if (
         cellEncoding === "delta" ||
         cellEncoding === "density_opp" ||
@@ -1621,13 +997,13 @@ export default function ResiliencePanel({
       }
       return true
     },
-    [effectiveView, cellEncoding],
+    [cellEncoding],
   )
 
   // Snackbar message for clicks that can't drive the map. We store the
   // reason as a string so each click shows copy that matches its own
-  // gating condition (overview vs. derived encoding vs. missing outcome)
-  // rather than the generic "coming soon" line. `null` means closed.
+  // gating condition (derived encoding vs. missing outcome) rather
+  // than the generic "coming soon" line. `null` means closed.
   const [mapBlockedMessage, setMapBlockedMessage] = useState<string | null>(
     null,
   )
@@ -1644,15 +1020,11 @@ export default function ResiliencePanel({
     (cell: ResilienceHeatmapCell) => {
       if (!isMapVisible) return
       if (!cell.outcomeCode) {
-        openMapBlockedMessage(
-          getMapLinkBlockedMessage(effectiveView, cellEncoding, false),
-        )
+        openMapBlockedMessage(getMapLinkBlockedMessage(cellEncoding, false))
         return
       }
       if (!cellMapsCleanly(cell)) {
-        openMapBlockedMessage(
-          getMapLinkBlockedMessage(effectiveView, cellEncoding, true),
-        )
+        openMapBlockedMessage(getMapLinkBlockedMessage(cellEncoding, true))
         return
       }
       // Align the toolbar HC with the clicked column so the sibling-
@@ -1668,7 +1040,6 @@ export default function ResiliencePanel({
       isMapVisible,
       cellMapsCleanly,
       openMapBlockedMessage,
-      effectiveView,
       cellEncoding,
       setHydroclimate,
       triggerMapForOutcome,
@@ -1737,7 +1108,7 @@ export default function ResiliencePanel({
   // Merged [pinned ∪ hovered] emitter. Reads both sources from refs so
   // its own identity is stable across renders.
   // ============================================================
-  // 8. Map highlights (LOI distribution, pinned squares, emission)
+  // 6. Map highlights (LOI distribution, pinned squares, emission)
   // ============================================================
   const emitLocationHighlights = useCallback(() => {
     const list: LocationHighlight[] = []
@@ -1796,7 +1167,7 @@ export default function ResiliencePanel({
 
   // Per-square click. Opens the outcome's map layer and (location mode)
   // toggles a persistent pin for the clicked LOI. No-op when the map
-  // is hidden, same guard as handleCellClick above. Overview / derived
+  // is hidden, same guard as handleCellClick above. Derived-encoding
   // cells short-circuit to the reason-specific Snackbar - even the LOI
   // pin is gated, since the pin's tier color would disagree with the
   // cell's reduced scalar.
@@ -1806,15 +1177,11 @@ export default function ResiliencePanel({
       const outcomeCode = cell.outcomeCode
       if (!isMapVisible) return
       if (!outcomeCode) {
-        openMapBlockedMessage(
-          getMapLinkBlockedMessage(effectiveView, cellEncoding, false),
-        )
+        openMapBlockedMessage(getMapLinkBlockedMessage(cellEncoding, false))
         return
       }
       if (!cellMapsCleanly(cell)) {
-        openMapBlockedMessage(
-          getMapLinkBlockedMessage(effectiveView, cellEncoding, true),
-        )
+        openMapBlockedMessage(getMapLinkBlockedMessage(cellEncoding, true))
         return
       }
 
@@ -1825,9 +1192,9 @@ export default function ResiliencePanel({
       if (distributionMode === "location") {
         // Location mode encodes LOIs. Entries carry no scenarioId, so we
         // defer to triggerMapForOutcome which picks between the
-        // hydroclimate-aware and fixed-baseline paths based on view. Pin
-        // state below updates regardless. The guard inside the trigger
-        // prevents repeat clicks from toggling the layer off.
+        // hydroclimate-aware and fallback scenario. Pin state below
+        // updates regardless. The guard inside the trigger prevents
+        // repeat clicks from toggling the layer off.
         triggerMapForOutcome(outcomeCode, cell.scenarioId ?? null)
 
         const built = buildLocationHighlight(cell, entry)
@@ -1852,7 +1219,6 @@ export default function ResiliencePanel({
       isMapVisible,
       cellMapsCleanly,
       openMapBlockedMessage,
-      effectiveView,
       cellEncoding,
       setHydroclimate,
       distributionMode,
@@ -1896,47 +1262,19 @@ export default function ResiliencePanel({
 
   // Sidebar → chart: emphasize scenario rows, columns, or tiles.
   // ============================================================
-  // 9. Sidebar-driven highlight + dim derivations
+  // 7. Sidebar-driven highlight + dim derivations
   // ============================================================
   const highlightedRowKeysFromSidebar = useMemo<Set<string> | null>(() => {
     if (!highlightedIds || highlightedIds.size === 0) return null
     if (view === "outcome") return new Set(highlightedIds)
-    if (
-      effectiveView === "aggregate" &&
-      aggregateOver === "outcomes" &&
-      !transposed
-    ) {
-      return new Set(highlightedIds)
-    }
-    if (
-      effectiveView === "aggregate" &&
-      aggregateOver === "hydroclimates" &&
-      transposed
-    ) {
-      return new Set(highlightedIds)
-    }
     return null
-  }, [highlightedIds, view, effectiveView, aggregateOver, transposed])
+  }, [highlightedIds, view])
 
   const highlightedColKeysFromSidebar = useMemo<Set<string> | null>(() => {
     if (!highlightedIds || highlightedIds.size === 0) return null
     if (view === "hydroclimate") return new Set(highlightedIds)
-    if (
-      effectiveView === "aggregate" &&
-      aggregateOver === "hydroclimates" &&
-      !transposed
-    ) {
-      return new Set(highlightedIds)
-    }
-    if (
-      effectiveView === "aggregate" &&
-      aggregateOver === "outcomes" &&
-      transposed
-    ) {
-      return new Set(highlightedIds)
-    }
     return null
-  }, [highlightedIds, view, effectiveView, aggregateOver, transposed])
+  }, [highlightedIds, view])
 
   const highlightedTileIdsFromSidebar = useMemo<Set<string> | null>(() => {
     if (!highlightedIds || highlightedIds.size === 0) return null
@@ -1968,20 +1306,13 @@ export default function ResiliencePanel({
           : row.key === "FW_DELTA_USES"
             ? "In-Delta freshwater"
             : row.label
-      if (
-        effectiveView === "aggregate" &&
-        transposed &&
-        aggregateOver === "hydroclimates"
-      ) {
-        return row.fullLabel?.trim() || label
-      }
       if (view === "outcome") return label
       if ((NOD_SOD_OUTCOME_CODES as readonly string[]).includes(row.key)) {
         return `  ${label}`
       }
       return label
     },
-    [view, effectiveView, transposed, aggregateOver],
+    [view],
   )
 
   // Show cell values and transpose both live in the chart controls
@@ -1992,27 +1323,12 @@ export default function ResiliencePanel({
   // }, [])
 
   // View-level transpose transform. Applied just before render so the
-  // underlying buildValueFn / tile compute pipeline stays unchanged.
-  // Marginals swap row/col arrays when transposed.
+  // underlying tile compute pipeline stays unchanged.
   //
   // These hooks must sit above the early returns below so React
   // always sees the same hook-call order on every render (the
   // `error` / `isLoading && !hasData` branches bail out before the
   // main tree renders).
-  const displayRows = transposed ? columns : rows
-  const displayColumns = transposed ? rows : columns
-  const displayCells = useMemo(
-    () => (transposed ? cells.map(transposeCell) : cells),
-    [transposed, cells],
-  )
-  const displayMarginals = useMemo<ResilienceHeatmapMarginals | undefined>(
-    () =>
-      marginalsData && transposed
-        ? { row: marginalsData.col, col: marginalsData.row }
-        : marginalsData,
-    [transposed, marginalsData],
-  )
-
   const displayByScenarioRows = transposed
     ? hydroclimateColumns
     : byScenarioRows
@@ -2047,8 +1363,8 @@ export default function ResiliencePanel({
 
   /**
    * One by-scenario small-multiples tile for any valid scenario id, even
-   * when the panel is in aggregate/outcome/HC view or the scenario is
-   * not in the on-screen small-multiples scope. Used for share/capture
+   * when the panel is showing a different view or the scenario is not
+   * in the on-screen small-multiples scope. Used for share/capture
    * without duplicating the full grid in the DOM.
    */
   const makeScenarioSoloMultiplesTile = useCallback(
@@ -2105,15 +1421,10 @@ export default function ResiliencePanel({
   // `data-tile-id` attribute that `ResilienceHeatmapSmallMultiples`
   // stamps on each tile wrapper.
   // ============================================================
-  // 10. Latest-value refs
-  // Mirror reactive values so the capture closures (section 11) can
+  // 8. Latest-value refs
+  // Mirror reactive values so the capture closures (section 9) can
   // read current data without being re-created on every change.
   // ============================================================
-  const effectiveViewRef = useRef(effectiveView)
-  useEffect(() => {
-    effectiveViewRef.current = effectiveView
-  }, [effectiveView])
-
   const cellEncodingRef = useRef(cellEncoding)
   useEffect(() => {
     cellEncodingRef.current = cellEncoding
@@ -2134,16 +1445,11 @@ export default function ResiliencePanel({
     byHydroclimateTilesRef.current = displayByHydroclimateTiles
   }, [displayByHydroclimateTiles])
 
-  const displayCellsRef = useRef(displayCells)
-  useEffect(() => {
-    displayCellsRef.current = displayCells
-  }, [displayCells])
-
   // ============================================================
-  // 11. Capture (solo / panel / tile) + onCapture* wiring
+  // 9. Capture (solo / panel / tile) + onCapture* wiring
   // Refactor backlog: candidate useResilienceCapture hook, but it
   // threads ~8 refs + ~15 reactive values + the capture props, and two
-  // refs (chartViewState/Visuals) are declared in section 12. Deferred;
+  // refs (chartViewState/Visuals) are declared in section 10. Deferred;
   // see resilience/README.md before extracting.
   // ============================================================
   const cellsToRows = useCallback(
@@ -2239,8 +1545,7 @@ export default function ResiliencePanel({
       // canvas would either squish them or clip everything below the
       // fold via the live grid's `overflowY: auto`. Compute a
       // content-aware height so every tile renders into the composed
-      // SVG at the same row pitch the live grid uses. Aggregate /
-      // single-heatmap captures keep the default fixed height.
+      // SVG at the same row pitch the live grid uses.
       const captureState = chartViewStateRef.current
       const dynamicHeight =
         captureState.kind === "smallMultiples"
@@ -2257,40 +1562,37 @@ export default function ResiliencePanel({
         backgroundColor: theme.palette.common.white,
         ...(dynamicHeight ? { height: dynamicHeight } : {}),
       })
-      const view = effectiveViewRef.current
       let rowsOut: ResilienceChartDataRow[]
-      let tileScope: "panel" | "scenario" | "outcome" | "hydroclimate" = "panel"
-      if (view === "scenario") {
+      const tileScope: "panel" | "scenario" | "outcome" | "hydroclimate" =
+        "panel"
+      if (effectiveView === "scenario") {
         rowsOut = byScenarioTilesRef.current.flatMap((t) =>
           cellsToRows(t.cells).map((r) => ({
             ...r,
             rowLabel: `${t.title} / ${r.rowLabel}`,
           })),
         )
-        tileScope = "panel"
-      } else if (view === "outcome") {
+      } else if (effectiveView === "outcome") {
         rowsOut = byOutcomeTilesRef.current.flatMap((t) =>
           cellsToRows(t.cells).map((r) => ({
             ...r,
             rowLabel: `${t.title} / ${r.rowLabel}`,
           })),
         )
-      } else if (view === "hydroclimate") {
+      } else {
         rowsOut = byHydroclimateTilesRef.current.flatMap((t) =>
           cellsToRows(t.cells).map((r) => ({
             ...r,
             rowLabel: `${t.title} / ${r.rowLabel}`,
           })),
         )
-      } else {
-        rowsOut = cellsToRows(displayCellsRef.current)
       }
       return {
         svg,
         dataUrl,
         chartData: {
           kind: "resilience",
-          view,
+          view: effectiveView,
           cellEncoding: cellEncodingRef.current,
           tileScope,
           rows: rowsOut,
@@ -2300,21 +1602,20 @@ export default function ResiliencePanel({
       console.error("[ResiliencePanel] captureResilience failed:", err)
       return null
     }
-  }, [cellsToRows, theme])
+  }, [cellsToRows, theme, effectiveView])
 
   const captureResilienceTile = useCallback<ResilienceTileCaptureFn>(
     async (tileId) => {
-      const view = effectiveViewRef.current
       let tileScope: "scenario" | "outcome" | "hydroclimate"
       let tileSource: ResilienceSmallMultiplesTile[]
       let rows: ResilienceAxisItem[]
       let columns: ResilienceAxisItem[]
-      if (view === "outcome") {
+      if (effectiveView === "outcome") {
         tileScope = "outcome"
         tileSource = byOutcomeTilesRef.current
         rows = displayByOutcomeRows
         columns = displayByOutcomeColumns
-      } else if (view === "hydroclimate") {
+      } else if (effectiveView === "hydroclimate") {
         tileScope = "hydroclimate"
         tileSource = byHydroclimateTilesRef.current
         rows = displayByHydroclimateRows
@@ -2330,7 +1631,10 @@ export default function ResiliencePanel({
       // requested scenario is not on screen (the small-multiples grid
       // hides scenarios outside the current selection).
       if (!tile) {
-        if (view === "scenario" && scenarioRowIdsAll.includes(tileId)) {
+        if (
+          effectiveView === "scenario" &&
+          scenarioRowIdsAll.includes(tileId)
+        ) {
           return await renderSoloScenarioForShare(tileId)
         }
         return null
@@ -2360,7 +1664,7 @@ export default function ResiliencePanel({
           dataUrl,
           chartData: {
             kind: "resilience",
-            view,
+            view: effectiveView,
             cellEncoding: cellEncodingRef.current,
             tileScope,
             tileLabel: tile.title,
@@ -2373,6 +1677,7 @@ export default function ResiliencePanel({
       }
     },
     [
+      effectiveView,
       cellsToRows,
       renderSoloScenarioForShare,
       scenarioRowIdsAll,
@@ -2457,21 +1762,19 @@ export default function ResiliencePanel({
   // expects. Both the live render and captureResilience read this so the
   // toolbar share produces the same chart at fixed dimensions.
   // ============================================================
-  // 12. Chart-view state assembly
+  // 10. Chart-view state assembly
   // ============================================================
   const chartViewState = useMemo<ResiliencePanelChartViewState>(() => {
+    // Scenario names land on the column axis - needing the same
+    // rotate-to-fit treatment - whenever transpose puts them there:
+    // by-hydroclimate view untransposed, or by-outcome view transposed.
     const labelRotation =
-      !transposed &&
-      (effectiveView === "hydroclimate" ||
-        (effectiveView === "aggregate" && aggregateOver === "hydroclimates"))
+      (!transposed && effectiveView === "hydroclimate") ||
+      (transposed && effectiveView === "outcome")
         ? -90
         : 0
-    if (columns.length === 0) return { kind: "noColumns" }
-    if (
-      effectiveView === "aggregate" &&
-      outcomeRowCodes.length === 0 &&
-      !outcomeEmpty
-    ) {
+    if (hydroclimateColumns.length === 0) return { kind: "noColumns" }
+    if (outcomeRowCodes.length === 0 && !outcomeEmpty) {
       return { kind: "noOutcomesSelected" }
     }
     if (outcomeEmpty) {
@@ -2501,47 +1804,24 @@ export default function ResiliencePanel({
         columns: displayByOutcomeColumns,
         tiles: displayByOutcomeTiles,
         tileAspect: transposed ? "wide" : "tall",
+        columnLabelRotation: labelRotation,
         highlightedRowKeys: effectiveRowHighlight,
       }
     }
-    if (effectiveView === "hydroclimate") {
-      return {
-        kind: "smallMultiples",
-        view: "hydroclimate",
-        rows: displayByHydroclimateRows,
-        columns: displayByHydroclimateColumns,
-        tiles: displayByHydroclimateTiles,
-        tileAspect: transposed ? "tall" : "wide",
-        columnLabelRotation: labelRotation,
-        highlightedColKeys: highlightedColKeysFromSidebar,
-      }
-    }
     return {
-      kind: "aggregate",
-      rows: displayRows,
-      columns: displayColumns,
-      cells: displayCells,
-      marginals: displayMarginals,
-      showMarginals,
-      highlightedRowKeys: transposed
-        ? highlightedColKeysFromSidebar
-        : highlightedRowKeysFromSidebar,
-      highlightedColKeys: transposed
-        ? highlightedRowKeysFromSidebar
-        : highlightedColKeysFromSidebar,
-      scenarioRowAxisHover:
-        (aggregateOver === "outcomes" && !transposed) ||
-        (aggregateOver === "hydroclimates" && transposed),
-      scenarioColAxisHover:
-        (aggregateOver === "hydroclimates" && !transposed) ||
-        (aggregateOver === "outcomes" && transposed),
+      kind: "smallMultiples",
+      view: "hydroclimate",
+      rows: displayByHydroclimateRows,
+      columns: displayByHydroclimateColumns,
+      tiles: displayByHydroclimateTiles,
+      tileAspect: transposed ? "tall" : "wide",
       columnLabelRotation: labelRotation,
+      highlightedColKeys: highlightedColKeysFromSidebar,
     }
   }, [
     effectiveView,
     transposed,
-    aggregateOver,
-    columns.length,
+    hydroclimateColumns.length,
     outcomeRowCodes.length,
     outcomeEmpty,
     displayByScenarioRows,
@@ -2553,13 +1833,7 @@ export default function ResiliencePanel({
     displayByHydroclimateRows,
     displayByHydroclimateColumns,
     displayByHydroclimateTiles,
-    displayRows,
-    displayColumns,
-    displayCells,
-    displayMarginals,
-    showMarginals,
     effectiveRowHighlight,
-    highlightedRowKeysFromSidebar,
     highlightedColKeysFromSidebar,
     highlightedTileIdsFromSidebar,
   ])
@@ -2602,7 +1876,7 @@ export default function ResiliencePanel({
   ])
 
   // ============================================================
-  // 13. Render (error / loading / chart states)
+  // 11. Render (error / loading / chart states)
   // ============================================================
 
   if (error) {
@@ -2627,7 +1901,9 @@ export default function ResiliencePanel({
   }
 
   const hasData =
-    !!matrixCells && Object.keys(matrixCells).length > 0 && columns.length > 0
+    !!matrixCells &&
+    Object.keys(matrixCells).length > 0 &&
+    hydroclimateColumns.length > 0
 
   if (isLoading && !hasData) {
     return (
@@ -2652,14 +1928,8 @@ export default function ResiliencePanel({
     onCellHover: handleCellHover,
     onCellClick: isMapVisible ? handleCellClick : undefined,
     onTileHover: view === "scenario" ? handleTileHover : undefined,
-    onRowKeyHover:
-      view === "outcome" || effectiveView === "aggregate"
-        ? handleRowKeyHover
-        : undefined,
-    onColKeyHover:
-      view === "hydroclimate" || effectiveView === "aggregate"
-        ? handleColKeyHover
-        : undefined,
+    onRowKeyHover: view === "outcome" ? handleRowKeyHover : undefined,
+    onColKeyHover: view === "hydroclimate" ? handleColKeyHover : undefined,
     onSquareHover: handleSquareHover,
     onSquareClick: handleSquareClick,
     renderTileActions: renderTileShareAction,
@@ -2693,40 +1963,24 @@ export default function ResiliencePanel({
             flexDirection: "column",
             flex: 1,
             minHeight: 0,
-            minWidth: 720,
+            minWidth: 960,
           }}
         >
           {/* Panel-level title. Names the pivot (what the chart is) and
           spells out the specific subject it exhibits (which scenarios /
-          outcomes / climates, or the aggregate framing). Kept
-          intentionally different in shape from the one-line sentence
-          header so the two don't read as duplicates: the sentence
-          describes how the user is currently configuring the chart;
-          the title describes what the chart IS. */}
+          outcomes / climates). Kept intentionally different in shape
+          from the one-line sentence header so the two don't read as
+          duplicates: the sentence describes how the user is currently
+          configuring the chart; the title describes what the chart IS. */}
           <ResiliencePanelTitle
             view={view}
-            aggregateOver={aggregateOver}
             scenarioCount={selectedScenarios.length}
             outcomeCount={resilienceVisibleOutcomes.length}
             climateCount={selectedHydroclimates.size}
           />
 
-          {isMapVisible && effectiveView === "aggregate" && (
-            <Typography
-              variant="caption"
-              sx={{
-                px: theme.space.component.lg,
-                pb: theme.space.component.xs,
-                color: theme.palette.grey[700],
-                lineHeight: 1.3,
-              }}
-            >
-              Overview cells aggregate across scenarios. Switch to Scenarios,
-              Outcomes, or Hydroclimates to link cells to the map.
-            </Typography>
-          )}
-
           <Box
+            ref={heatmapGridAnchorRef}
             sx={{
               flex: 1,
               minHeight: 0,

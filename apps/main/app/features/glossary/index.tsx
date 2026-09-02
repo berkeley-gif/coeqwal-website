@@ -5,3 +5,4 @@
 export { FloatingGlossary } from "./FloatingGlossary"
 export { FloatingGlossaryButton } from "./FloatingGlossaryButton"
 export { FloatingGlossaryPanel } from "./FloatingGlossaryPanel"
+export { GlossaryTermLink } from "./GlossaryTermLink"

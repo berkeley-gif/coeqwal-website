@@ -3,21 +3,23 @@
 /**
  * CompareControls - the explorer's single-axis comparison controls.
  *
- * "Compare by" picks the one axis that holds multiple members; the other two
+ * "Compare by" picks the one axis that holds multiple members; the others
  * are held constant by the pinned selectors:
  *  - scenarios: the workspace scenario selection (Current Operations locked
- *    first as the reference), at a pinned hydroclimate and location.
+ *    first as the reference), at a pinned location.
  *  - climates: a multi-select of climate futures, for one pinned scenario and
  *    location.
- *  - locations: a multi-select of locations, for one pinned scenario and
- *    hydroclimate.
+ *  - locations: a multi-select of locations, for one pinned scenario.
  * Scenario membership is owned by the workspace (the selection sidebar); this
  * control only reflects it and marks the locked reference.
  *
- * Layout rule: the compared members' chips come first, then the two pinned
- * (held-constant) selectors as one non-wrapping cluster, so e.g. the
- * reservoir dropdown always sits next to the hydroclimate dropdown instead
- * of wrapping apart at narrow widths.
+ * The hydroclimate is NOT held here: the shared toolbar's "View by
+ * hydroclimate" control is the tool's only hydroclimate input, so the chart
+ * always reads the workspace value.
+ *
+ * Layout rule: the compared members' chips come first, then the pinned
+ * (held-constant) selectors as one non-wrapping cluster, so the dropdowns do
+ * not wrap apart at narrow widths.
  *
  * Chip swatches use the same sticky per-member colors as the chart and its
  * legend (seriesColorAssignment, shared scope keys with ChartCard).
@@ -44,9 +46,18 @@ import {
   HYDROCLIMATES,
   HYDROCLIMATE_SHORT_LABELS,
 } from "../../../../../../../content/scenarios"
+import { CompactSelect } from "@repo/ui"
+import { InlineTourAnchor } from "../../../tour"
 import { getVariable, LOCATION_GROUPS } from "../config/variableRegistry"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 import { getStableSeriesColors } from "../config/seriesColorAssignment"
+import { AddEntityPicker } from "../components/shared/AddEntityPicker"
+import {
+  levelUnavailableIds,
+  locationOptionGroups,
+  usesLocationPicker,
+} from "./locationOptions"
+import { LEVEL_VIEW_UNAVAILABLE_REASON } from "../config/variableRegistry"
 
 const MAX_COMPARE_LOCATIONS = 6
 const DEFAULT_LOCATION_COUNT = 3
@@ -64,27 +75,43 @@ export default function CompareControls() {
   const theme = useTheme()
   const {
     selectedVariableId,
+    view,
     compareBy,
     pinnedScenario,
-    pinnedClimate,
     pinnedLocationByGroup,
     selectedClimates,
     selectedLocationsByGroup,
     setCompareBy,
     setPinnedScenario,
-    setPinnedClimate,
     setPinnedLocation,
     setSelectedClimates,
     setSelectedLocations,
   } = useDataSlice()
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
-  const workspaceHydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
+  // The location queued in the add-location control on the Locations axis
+  // (picker groups only); cleared once added.
+  const [pendingLocation, setPendingLocation] = React.useState("")
 
   const variable = getVariable(selectedVariableId)
   if (!variable) return null
   const groupId = variable.locationGroup
   const group = LOCATION_GROUPS[groupId]
   const multiLoc = group.items.length > 1
+  // Large groups (demand units, community water systems, basins) are picked
+  // from a grouped select; small groups keep the chip cloud.
+  const picker = usesLocationPicker(group)
+  // On the groundwater Level view the totals cannot be chosen; they stay
+  // listed, disabled, with the reason on screen.
+  const levelBlockedIds = view === "level" ? levelUnavailableIds(group) : []
+  const levelCaption =
+    levelBlockedIds.length > 0 ? (
+      <Typography
+        variant="caption"
+        sx={{ display: "block", mt: 0.5, color: theme.palette.grey[600] }}
+      >
+        {LEVEL_VIEW_UNAVAILABLE_REASON}
+      </Typography>
+    ) : null
 
   // Comparison scenario set: reference first, then the workspace selection.
   const compareScenarios = [
@@ -98,7 +125,6 @@ export default function CompareControls() {
     pinnedScenario && compareScenarios.includes(pinnedScenario)
       ? pinnedScenario
       : BASELINE_SCENARIO_ID
-  const heldClimate = pinnedClimate ?? workspaceHydroclimate
   const heldLocation =
     pinnedLocationByGroup[groupId] ?? group.items[0]?.id ?? ""
 
@@ -176,49 +202,52 @@ export default function CompareControls() {
     </Box>
   )
 
-  const climatePin = (
-    <Box>
-      <Typography id="climate-pin-label" variant="caption" sx={pinCaptionSx}>
-        Hydroclimate
-      </Typography>
-      <FormControl size="small" sx={controlSx}>
-        <Select
-          labelId="climate-pin-label"
-          value={heldClimate}
-          onChange={(e) => setPinnedClimate(e.target.value)}
-          sx={pinSelectSx}
-        >
-          {HYDROCLIMATES.map((c) => (
-            <MenuItem key={c} value={c}>
-              {climateLabel(c)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Box>
-  )
-
   const locationPin = multiLoc ? (
     <Box>
       <Typography id="location-pin-label" variant="caption" sx={pinCaptionSx}>
         {group.label}
       </Typography>
-      <FormControl size="small" sx={controlSx}>
-        <Select
-          labelId="location-pin-label"
-          value={heldLocation}
-          onChange={(e) => setPinnedLocation(groupId, e.target.value)}
-          sx={pinSelectSx}
-        >
-          {group.items.map((l) => (
-            <MenuItem key={l.id} value={l.id}>
-              {l.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      {picker ? (
+        <>
+          <CompactSelect
+            value={heldLocation}
+            onChange={(id) => setPinnedLocation(groupId, id)}
+            groups={locationOptionGroups(group, { disabled: levelBlockedIds })}
+            aria-label={group.label}
+            minWidth={260}
+            maxMenuHeight={420}
+          />
+          {levelCaption}
+        </>
+      ) : (
+        <FormControl size="small" sx={controlSx}>
+          <Select
+            labelId="location-pin-label"
+            value={heldLocation}
+            onChange={(e) => setPinnedLocation(groupId, e.target.value)}
+            sx={pinSelectSx}
+          >
+            {group.items.map((l) => (
+              <MenuItem
+                key={l.id}
+                value={l.id}
+                disabled={levelBlockedIds.includes(l.id)}
+              >
+                {l.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
+      {!picker && levelCaption}
     </Box>
   ) : null
+
+  const addLocation = () => {
+    if (!pendingLocation) return
+    toggleLocation(pendingLocation)
+    setPendingLocation("")
+  }
 
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2.5, py: 1.5 }}>
@@ -233,26 +262,28 @@ export default function CompareControls() {
         >
           Compare by
         </Typography>
-        <ToggleButtonGroup
-          exclusive
-          size="small"
-          value={compareBy}
-          onChange={(_, next: DataCompareBy | null) => {
-            if (next) setCompareBy(next)
-          }}
-          aria-label="Compare by"
-        >
-          {COMPARE_OPTIONS.map((opt) => (
-            <ToggleButton
-              key={opt.value}
-              value={opt.value}
-              disabled={opt.value === "locations" && !multiLoc}
-              sx={{ textTransform: "none", px: 1.5 }}
-            >
-              {opt.label}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
+        <InlineTourAnchor anchorId="data.compareBy">
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            value={compareBy}
+            onChange={(_, next: DataCompareBy | null) => {
+              if (next) setCompareBy(next)
+            }}
+            aria-label="Compare by"
+          >
+            {COMPARE_OPTIONS.map((opt) => (
+              <ToggleButton
+                key={opt.value}
+                value={opt.value}
+                disabled={opt.value === "locations" && !multiLoc}
+                sx={{ textTransform: "none", px: 1.5 }}
+              >
+                {opt.label}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        </InlineTourAnchor>
       </Box>
 
       {compareBy === "scenarios" && (
@@ -304,7 +335,6 @@ export default function CompareControls() {
               gap: 2.5,
             }}
           >
-            {climatePin}
             {locationPin}
           </Box>
         </>
@@ -381,41 +411,99 @@ export default function CompareControls() {
             >
               {group.label}s (up to {MAX_COMPARE_LOCATIONS})
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
-              {group.items.map((l) => {
-                const on = effectiveLocations.includes(l.id)
-                return (
-                  <Tooltip
-                    key={l.id}
-                    title={l.aggregate ? "Aggregate rollup" : ""}
-                  >
-                    <Chip
-                      size="small"
-                      clickable
-                      onClick={() => toggleLocation(l.id)}
-                      label={l.name}
-                      variant={on ? "filled" : "outlined"}
-                      icon={
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            ml: 1,
-                            backgroundColor: on
-                              ? locationColors[effectiveLocations.indexOf(l.id)]
-                              : "transparent",
-                            border: on
-                              ? "none"
-                              : `1px solid ${theme.palette.grey[500]}`,
-                          }}
+            {picker ? (
+              <>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+                  {effectiveLocations.map((id, i) => {
+                    const l = group.items.find((item) => item.id === id)
+                    if (!l) return null
+                    return (
+                      <Tooltip key={id} title={l.longName ?? ""}>
+                        <Chip
+                          size="small"
+                          label={l.name}
+                          variant="filled"
+                          sx={{ maxWidth: 320 }}
+                          onDelete={
+                            effectiveLocations.length > 1
+                              ? () => toggleLocation(id)
+                              : undefined
+                          }
+                          icon={
+                            <Box
+                              sx={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: "50%",
+                                ml: 1,
+                                backgroundColor: locationColors[i],
+                              }}
+                            />
+                          }
                         />
-                      }
-                    />
-                  </Tooltip>
-                )
-              })}
-            </Box>
+                      </Tooltip>
+                    )
+                  })}
+                </Box>
+                <Box sx={{ mt: 1 }}>
+                  <AddEntityPicker
+                    value={pendingLocation}
+                    onChange={setPendingLocation}
+                    groups={locationOptionGroups(group, {
+                      exclude: effectiveLocations,
+                      disabled: levelBlockedIds,
+                    })}
+                    onAdd={addLocation}
+                    placeholder="add a location"
+                    addLabel="Add"
+                    disabled={
+                      effectiveLocations.length >= MAX_COMPARE_LOCATIONS
+                    }
+                    minWidth={260}
+                    maxMenuHeight={420}
+                    selectAriaLabel="Add location"
+                  />
+                </Box>
+              </>
+            ) : (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+                {group.items.map((l) => {
+                  const on = effectiveLocations.includes(l.id)
+                  return (
+                    <Tooltip
+                      key={l.id}
+                      title={l.aggregate ? "Aggregate rollup" : ""}
+                    >
+                      <Chip
+                        size="small"
+                        clickable
+                        onClick={() => toggleLocation(l.id)}
+                        label={l.name}
+                        variant={on ? "filled" : "outlined"}
+                        icon={
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              ml: 1,
+                              backgroundColor: on
+                                ? locationColors[
+                                    effectiveLocations.indexOf(l.id)
+                                  ]
+                                : "transparent",
+                              border: on
+                                ? "none"
+                                : `1px solid ${theme.palette.grey[500]}`,
+                            }}
+                          />
+                        }
+                      />
+                    </Tooltip>
+                  )
+                })}
+              </Box>
+            )}
           </Box>
           <Box
             sx={{
@@ -425,7 +513,6 @@ export default function CompareControls() {
             }}
           >
             {scenarioPin}
-            {climatePin}
           </Box>
         </>
       )}

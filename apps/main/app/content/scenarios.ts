@@ -83,6 +83,15 @@ export interface HydroclimateDef {
   shortLabel: string
   /** Long-form description for tooltips and info panels */
   description: string
+  /**
+   * Shorter description for the "How are climate change impacts
+   * evaluated?" learn panel list. Omits the sea-level-rise /
+   * historical-adjustment clause that `description` carries, since that
+   * panel states it once for all hydroclimates in a shared NOTE
+   * paragraph below the list — repeating it per bullet would be
+   * redundant there.
+   */
+  learnPanelDescription: string
 }
 
 /**
@@ -102,39 +111,49 @@ export const HYDROCLIMATE_DEFS = [
     label: "Historical",
     shortLabel: "Historical",
     description:
-      "Temperature, precipitation, and streamflow patterns reflect historical conditions",
+      "Temperature, precipitation, and flow patterns reflect historical conditions, adjusted for recent climate change",
+    learnPanelDescription:
+      "Temperature, precipitation, and flow patterns reflect historical conditions",
   },
   {
     value: "ecv",
     apiId: 7,
-    label: "Moderate-wet climate risk",
-    shortLabel: "Moderate risk",
+    label: "Moderate-wet climate stress",
+    shortLabel: "Moderate stress",
     description:
-      "44th percentile level of concern: warmer and wetter conditions (\u002b6.7% runoff change)",
+      "Slightly warmer and moderately wetter conditions (+3.5% flow change) and assuming 15 cm of sea level rise",
+    learnPanelDescription:
+      "Slightly warmer and moderately wetter conditions (+3.5% flow change)",
   },
   {
     value: "cc50",
     apiId: 3,
-    label: "Moderate-dry climate risk",
-    shortLabel: "Moderate-high risk",
+    label: "Moderate-dry climate stress",
+    shortLabel: "Moderate-high stress",
     description:
-      "50th percentile level of concern: warmer and slightly drier conditions (\u22121% runoff change)",
+      "Moderately warmer with little change in precipitation (-1% flow change) and assuming 15 cm of sea level rise",
+    learnPanelDescription:
+      "Moderately warmer with little change in precipitation (-1% flow change)",
   },
   {
     value: "cc95",
     apiId: 4,
-    label: "High climate risk",
-    shortLabel: "High risk",
+    label: "High climate stress",
+    shortLabel: "High stress",
     description:
-      "95th percentile level of concern: warmer and much drier conditions (\u22127% runoff change)",
+      "Much warmer and moderately drier conditions (-6.5% flow change) and assuming 30 cm of sea level rise",
+    learnPanelDescription:
+      "Much warmer and moderately drier conditions (-6.5% flow change)",
   },
   {
     value: "tai",
     apiId: 5,
-    label: "Extreme climate risk",
-    shortLabel: "Extreme risk",
+    label: "Extreme climate stress",
+    shortLabel: "Extreme stress",
     description:
-      ">99th percentile level of concern: warmer and considerably drier conditions (\u221221% runoff change)",
+      "Much warmer and much drier conditions (-19.2% flow change) and assuming 30 cm of sea level rise",
+    learnPanelDescription:
+      "Much warmer and much drier conditions (-19.2% flow change)",
   },
 ] as const satisfies readonly HydroclimateDef[]
 
@@ -197,32 +216,32 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0011: {
     theme: "baseline",
     iconPath: "/images/icons/land_use_prev.svg",
-    shortLabel: "Historical ag land use",
+    shortLabel: "Current operations with historical land use",
   },
   s0020: {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Current ops",
+    shortLabel: "Current operations",
   },
   "s0020-R": {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Current ops with reintroduction",
+    shortLabel: "Current operations with reintroduction",
   },
   s0021: {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Without TUCPs",
+    shortLabel: "Current operations without TUCPs",
   },
   s0023: {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "2024 BiOps (no TUCPs)",
+    shortLabel: "Current USBR operations without TUCPs",
   },
   s0024: {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "2024 BiOps",
+    shortLabel: "Current USBR operations",
   },
 
   // ---------------------------------------------------------------------------
@@ -231,22 +250,24 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0025: {
     theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
-    shortLabel: "SGMA: SJ pumping",
+    shortLabel: "Groundwater pumping limits in the San Joaquin Valley",
   },
   s0026: {
     theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
-    shortLabel: "SGMA: SJ reduced ag",
+    shortLabel:
+      "Groundwater pumping limits via reduced crop acreage in the San Joaquin Valley",
   },
   s0027: {
     theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
-    shortLabel: "SGMA: CV pumping",
+    shortLabel: "Groundwater pumping limits in the Central Valley",
   },
   s0028: {
     theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
-    shortLabel: "SGMA: CV reduced ag",
+    shortLabel:
+      "Groundwater pumping limits via reduced crop acreage in the Central Valley",
   },
 
   // ---------------------------------------------------------------------------
@@ -260,47 +281,49 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0030: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "No flow req.",
+    shortLabel: "No flow requirements",
   },
   s0031: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Salmon flows",
+    shortLabel: "Winter-run refuge flows",
   },
   "s0031-R": {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Winter-run flows with reintroduction",
+    shortLabel: "Winter-run refuge flows with reintroduction",
   },
   s0032: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Func. flows + reduced ag",
+    shortLabel: "Functional environmental flows with reduced crop acreage",
   },
   "s0032-R": {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Func. flows + reduced ag with reintroduction",
+    shortLabel:
+      "Functional environmental flows with reduced crop acreage and reintroduction",
   },
   s0033: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Salmon flows + reduced ag",
+    shortLabel: "Winter-run refuge flows with reduced crop acreage",
   },
   "s0033-R": {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Winter-run flows + reduced ag with reintroduction",
+    shortLabel:
+      "Winter-run refuge flows with reduced crop acreage and reintroduction",
   },
   s0046: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Func. flows (v2)",
+    shortLabel: "Functional environmental flows",
   },
   "s0046-R": {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
-    shortLabel: "Func. flows (v2) with reintroduction",
+    shortLabel: "Functional environmental flows with reintroduction",
   },
 
   // ---------------------------------------------------------------------------
@@ -309,7 +332,8 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0035: {
     theme: "cws",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "CWS priority: HHS level",
+    shortLabel:
+      "Prioritizing human health water deliveries to community water systems",
   },
   s0036: {
     theme: "cws",
@@ -319,7 +343,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0037: {
     theme: "cws",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "CWS priority: full contract",
+    shortLabel: "Prioritizing full demands of community water systems",
   },
 
   // ---------------------------------------------------------------------------
@@ -328,37 +352,37 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0039: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Alt 3: 65% unimp.",
+    shortLabel: "Increase Delta outflows (65% unimpaired flow target)",
   },
   s0040: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Alt 3: 35% unimp.",
+    shortLabel: "Reduce delta outflows (35% unimpaired flow target)",
   },
   s0041: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Alt 3: 45% unimp.",
+    shortLabel: "Maintain Delta outflows (45% unimpaired flow target)",
   },
   s0042: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Alt 3: 55% unimp.",
+    shortLabel: "Increase Delta outflows (55% unimpaired flow target)",
   },
   s0044: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "Shasta +20% carryover",
+    shortLabel: "Increase Shasta carry-over storage",
   },
   s0045: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "No fall X2",
+    shortLabel: "Relax Delta salinity standards",
   },
   s0065: {
     theme: "delta",
     iconPath: "/images/icons/current_ops.svg",
-    shortLabel: "DWR 2025 DCP",
+    shortLabel: "Delta Conveyance Project",
   },
 }
 

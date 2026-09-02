@@ -70,13 +70,19 @@ export interface FigureTitleParts {
    *  means water-year typing does not apply to this variable (e.g. salmon
    *  population metrics, welfare loss) and the clause is omitted. */
   waterYearTypeLabels: readonly string[] | null
+  /** Verbatim replacement for the "<Variable> (<Location>)" head, used as
+   *  written (no title-casing) and with no location parenthetical, e.g.
+   *  "April X2 Position (in km)". */
+  headVerbatim?: string
 }
 
 /** Build the standardized figure title from its parts. */
 export function buildFigureTitle(parts: FigureTitleParts): string {
-  const head = parts.locationName
-    ? `${titleCaseLabel(parts.variableName)} (${titleCaseLabel(parts.locationName)})`
-    : titleCaseLabel(parts.variableName)
+  const head =
+    parts.headVerbatim ??
+    (parts.locationName
+      ? `${titleCaseLabel(parts.variableName)} (${titleCaseLabel(parts.locationName)})`
+      : titleCaseLabel(parts.variableName))
   const waterYears =
     parts.waterYearTypeLabels === null
       ? undefined
@@ -90,4 +96,30 @@ export function buildFigureTitle(parts: FigureTitleParts): string {
     waterYears,
   ].filter((s): s is string => Boolean(s))
   return segments.join(", ")
+}
+
+export interface ToolFigureTitleParts {
+  /** Tool display name, e.g. "Radar chart", "Key outcomes". */
+  toolName: string
+  /** The single member's label, or a count summary such as "3 scenarios". */
+  memberSummary: string
+  /** Hydroclimate label as it should read in the title. Omit for figures
+   *  that span several climates (the resilience heatmap). */
+  hydroclimateLabel?: string
+}
+
+/**
+ * Standardized figure-title line for the tools other than Data in Depth,
+ * matching its pattern: "<Head>, <Members>, <Hydroclimate> Hydroclimate".
+ * Content-free on purpose: callers resolve their own labels. Pure.
+ */
+export function toolFigureTitle(parts: ToolFigureTitleParts): string {
+  return buildFigureTitle({
+    variableName: parts.toolName,
+    memberSummary: parts.memberSummary,
+    hydroclimateName: parts.hydroclimateLabel
+      ? `${parts.hydroclimateLabel} hydroclimate`
+      : undefined,
+    waterYearTypeLabels: null,
+  })
 }

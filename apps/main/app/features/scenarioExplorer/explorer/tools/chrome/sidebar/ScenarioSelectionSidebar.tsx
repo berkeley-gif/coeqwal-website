@@ -10,7 +10,6 @@
  *    optional theme badge, scenario title, description)
  *
  * Row order comes from `useOrderedScenarios` so it stays in lockstep with ListView.
- * Share dispatch lives in `useSidebarShareActions`.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from "react"
@@ -28,7 +27,6 @@ import {
   StrategyHeader,
   OperationsIconGroup,
 } from "../../../../../scenarios/components/shared"
-import { InlineRowActions } from "../../panels/list/grid"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
 import {
   useOrderedScenarios,
@@ -37,7 +35,7 @@ import {
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
 import { useTourAnchor } from "../../tour"
-import { useSidebarShareActions } from "./useSidebarShareActions"
+
 import {
   getTierLabel,
   getTierColorsFromTheme,
@@ -52,36 +50,6 @@ interface ScenarioSelectionSidebarProps {
   } | null
   onRowHover?: (scenarioIds: string[] | null) => void
   singleSelect?: boolean
-  onCaptureRadarScenario?: (scenarioId: string) => Promise<{
-    svg: string
-    dataUrl: string
-    color: string
-    chartData: Record<string, unknown>
-  } | null>
-  /**
-   * Multi-scenario capture for the theme-header "share all"
-   * action in the radar chart. Returns one combined chart with all scenarios overlaid
-   * (radar's traces compose on a single canvas, unlike equity or
-   * resilience which use one card per scenario).
-   */
-  onCaptureRadarScenarios?: (scenarioIds: string[]) => Promise<{
-    svg: string
-    dataUrl: string
-    colors: string[]
-    scenarioIds: string[]
-    chartData: Record<string, unknown>
-  } | null>
-  onResilienceScenarioShare?: (scenarioId: string) => void | Promise<void>
-  onEquityScenarioShare?: (scenarioId: string) => void | Promise<void>
-  /**
-   * When true, the per-row share icon and the theme-header
-   * "share all" icon are rendered as disabled. Mode-specific gates.
-   * Currently radar uses this when no axes are selected, since capturing
-   * a blank wireframe would produce a useless card.
-   */
-  shareDisabled?: boolean
-  /** Tooltip shown over disabled share icons explaining the gate. */
-  shareDisabledTooltip?: React.ReactNode
   /**
    * When provided, the header shows a collapse control that calls this.
    * The Data in Depth tool uses it to shrink the sidebar to a slim strip;
@@ -95,24 +63,10 @@ export default function ScenarioSelectionSidebar({
   hoveredInteraction,
   onRowHover,
   singleSelect = false,
-  onCaptureRadarScenario,
-  onCaptureRadarScenarios,
-  onResilienceScenarioShare,
-  onEquityScenarioShare,
-  shareDisabled = false,
-  shareDisabledTooltip,
   onCollapse,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
-
-  const { shareScenario, shareThemeScenarios } = useSidebarShareActions({
-    scenarioColors,
-    onCaptureRadarScenario,
-    onCaptureRadarScenarios,
-    onEquityScenarioShare,
-    onResilienceScenarioShare,
-  })
 
   const {
     selectedScenarios,
@@ -122,9 +76,9 @@ export default function ScenarioSelectionSidebar({
     highlightedScenario,
     showDefinitions,
     showKeyOperations,
-    outcomeDisplayMode,
     exploreMode,
   } = useWorkspaceSlice()
+
   const { showOnlyChosen, groupByTheme, searchQuery } = useListSlice()
 
   // In single-select mode (Distribution / equity) a click sets the
@@ -194,12 +148,6 @@ export default function ScenarioSelectionSidebar({
     [radarSidebarAnchorRef, exploreMode],
   )
 
-  // Separate anchor for the "search + visibility chips" strip inside
-  // the sidebar. The radar tour uses it for a single brief review of
-  // the scenario-list controls (the list view tour covers each chip
-  // individually).
-  const sidebarControlsAnchorRef = useTourAnchor("radar.sidebarControls")
-
   return (
     <Box
       ref={sidebarAnchorRef}
@@ -249,7 +197,6 @@ export default function ScenarioSelectionSidebar({
 
       {/* Search + visibility chips */}
       <Box
-        ref={sidebarControlsAnchorRef}
         sx={{
           flexShrink: 0,
           display: "flex",
@@ -332,9 +279,6 @@ export default function ScenarioSelectionSidebar({
                 layout="flex"
                 onRowHover={onRowHover}
                 singleSelect={singleSelect}
-                onShareScenarios={shareThemeScenarios}
-                shareDisabled={shareDisabled}
-                shareDisabledTooltip={shareDisabledTooltip}
               />,
             )
           }
@@ -467,21 +411,6 @@ export default function ScenarioSelectionSidebar({
                         }}
                       />
                     ) : undefined
-                  }
-                  inlineActions={
-                    <InlineRowActions
-                      scenarioId={scenario.scenarioId}
-                      scenarioLabel={scenario.label}
-                      displayMode={outcomeDisplayMode}
-                      accentColor={accentColor}
-                      dense
-                      shareIconNudgeTop="-2px"
-                      onShare={() => {
-                        void shareScenario(scenario.scenarioId)
-                      }}
-                      shareDisabled={shareDisabled}
-                      shareDisabledTooltip={shareDisabledTooltip}
-                    />
                   }
                 />
 

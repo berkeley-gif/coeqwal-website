@@ -23,19 +23,21 @@ const NARRATION_BY_BEAT: readonly (readonly string[])[] = [
   [], // [0] intro + tier legend, rendered separately
   [
     "For example, each colored location on the map represents an agricultural water district in the Central Valley receiving surface water deliveries.",
-    "The colors correspond to different water delivery outcome levels that affect agricultural revenue, ranging from optimal levels (blue) to critical levels (red).",
+    "The colors correspond to different levels of water delivery shortages that affect agricultural revenue, ranging from minimal shortages, which yield optimal revenues (blue), to significant shortages, which result in critically low revenues (red).",
   ],
   [
-    "These are the outcomes for the {scenario}. Each location becomes a square colored by its outcome level, and together they form a distribution view showing agricultural revenue across the Central Valley districts in CalSim at a glance.",
+    "Each location can be represented as a square colored by its outcome level and, together, they form a distribution view showing how agricultural revenues vary for that scenario at a glance.",
   ],
   [
-    "For each scenario, outcome levels are calculated for all key outcomes across locations.",
+    "For each scenario, outcome levels are displayed for all key outcomes across locations of interest.",
   ],
   [
-    "Outcomes can be displayed in different ways. The distribution view displays outcomes at individual locations of interest.",
+    "Outcomes can be displayed in different ways. The distribution view displays outcomes at individual locations.",
     "Locations of interest can be selected on the map or from the chart.",
   ],
-  ["The list view summarizes key outcomes as bar charts."],
+  [
+    "The bar view displays key outcomes as bar charts. This is helpful for summarizing scenario results for all key outcomes.",
+  ],
   [
     "The radar chart displays the average values of key outcomes on a circular plot and is useful for scenario comparison.",
   ],
@@ -198,7 +200,7 @@ export default function Narration({
                 sx={{ maxWidth: "66%", opacity: 0.85, mt: theme.space.gap.lg }}
               >
                 Click the play button and follow the steps to understand how
-                scenario results are measured.
+                scenario results are displayed.
               </Typography>
             </motion.div>
           )}

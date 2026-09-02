@@ -476,6 +476,7 @@ function XTick({
   idx: number
   month: string
 }) {
+  const theme = useTheme()
   const range: [number, number] = [0.45 + 0.01 * idx, 0.53 + 0.01 * idx]
   const tickControl = usePlayAnimationOnce(scrollYProgress, range, [0, 1])
 
@@ -485,7 +486,7 @@ function XTick({
         fill={OffWhiteColor}
         dy="1.5em"
         textAnchor="middle"
-        fontSize="1rem"
+        fontSize={theme.typography.caption.fontSize}
         style={{ opacity: tickControl }}
       >
         {month}

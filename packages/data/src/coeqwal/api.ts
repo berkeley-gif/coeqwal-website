@@ -390,9 +390,25 @@ export const ENDPOINTS = {
     opts: DeltaSalinityDidOptions = {},
   ) => dataInDepthPath("/data-in-depth/delta-salinity", scenarios, opts),
 
-  /** Annual CWS delivery + percent-demand-met + welfare-outcome measures with live-computed stats. */
-  cwsDataInDepth: (scenarios: string[], opts: CwsDataInDepthOptions = {}) =>
-    dataInDepthPath("/data-in-depth/cws", scenarios, opts),
+  /**
+   * Annual CWS delivery + percent-demand-met + welfare-outcome measures with
+   * live-computed stats.
+   *
+   * Water-year-type filtering does not apply: these series are aggregated by
+   * calendar year upstream. `wyt` is absent from CwsDataInDepthOptions, and a
+   * value smuggled past that with a cast THROWS rather than being silently
+   * dropped, so a caller that believes it filtered finds out immediately.
+   * (The salmon builder strips silently; that predates this rule.)
+   */
+  cwsDataInDepth: (scenarios: string[], opts: CwsDataInDepthOptions = {}) => {
+    const smuggled = (opts as CwsDataInDepthOptions & { wyt?: number[] }).wyt
+    if (smuggled?.length) {
+      throw new Error(
+        "cwsDataInDepth: wyt is not applicable to CWS (calendar-year aggregation); omit it",
+      )
+    }
+    return dataInDepthPath("/data-in-depth/cws", scenarios, opts)
+  },
 
   /** Annual salmon abundance (calendar-year) with live-computed stats. WYT filtering is intentionally not exposed here. */
   salmonDataInDepth: (scenarios: string[], opts: SalmonDidOptions = {}) => {

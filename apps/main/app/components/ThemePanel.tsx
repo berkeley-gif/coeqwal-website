@@ -25,11 +25,18 @@ import { CenteredTextSection } from "./CenteredTextSection"
 import { useWhichScrollSection } from "../hooks/useWhichScrollSection"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import { themeValues } from "@repo/ui/themes/theme"
+import { InlineNavLink } from "./InlineNavLink"
 
 interface ThemePanelProps {
   // All the theme content and information
   theme: Theme | null
 }
+
+// The shared closing section rendered below every theme's own sections
+// (see CenteredTextSection near the bottom of this component) — not part
+// of any individual theme's `sections` array, but still tracked in the
+// tab bar and scroll position like a real section.
+const HOW_TO_EXPLORE_FURTHER_ID = "how-to-explore-further"
 
 // Order matches THEME_SECTION_IDS exactly.
 const SECTION_LABELS: Record<string, { long: string; short: string }> = {
@@ -42,7 +49,7 @@ const SECTION_LABELS: Record<string, { long: string; short: string }> = {
     short: "Importance",
   },
   "what-this-theme-focuses-on": {
-    long: "What this theme focuses on",
+    long: "What this water issue focuses on",
     short: "Focus",
   },
   "what-to-keep-in-mind": {
@@ -138,15 +145,19 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   // Ref for the scrollable content container
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  // Look for the sections that are active
-  const activeSectionIds = useMemo(
-    () => theme?.sections.map((s) => s.id as string) ?? [],
-    [theme?.sections],
+  // All section ids to track for scroll position and the tab bar,
+  // including the shared closing section that lives outside theme.sections
+  const allSectionIds = useMemo(
+    () =>
+      theme
+        ? [
+            ...theme.sections.map((s) => s.id as string),
+            HOW_TO_EXPLORE_FURTHER_ID,
+          ]
+        : [],
+    [theme],
   )
-  const activeSection = useWhichScrollSection(
-    activeSectionIds,
-    scrollContainerRef,
-  )
+  const activeSection = useWhichScrollSection(allSectionIds, scrollContainerRef)
 
   // Ref for the tab bar scroll container
   const tabBarRef = useRef<HTMLDivElement>(null)
@@ -354,10 +365,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                           exit={{ opacity: 0 }}
                           transition={{ duration: duration.fast }}
                         >
-                          <Typography
-                            variant="h5"
-                            sx={{ textTransform: "capitalize" }}
-                          >
+                          <Typography variant="h5">
                             {theme.label.replace(/\n/g, " ")}
                           </Typography>
                         </motion.div>
@@ -369,10 +377,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                           exit={{ opacity: 0 }}
                           transition={{ duration: duration.fast }}
                         >
-                          <Typography
-                            variant="h3"
-                            sx={{ textTransform: "capitalize" }}
-                          >
+                          <Typography variant="h3">
                             {theme.label.replace(/\n/g, " ")}
                           </Typography>
                         </motion.div>
@@ -433,18 +438,18 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   flexShrink: 0,
                 }}
               >
-                {theme.sections
-                  .filter((s) => SECTION_LABELS[s.id]?.short !== "")
-                  .map((section) => {
-                    const isActive = activeSection === section.id
+                {allSectionIds
+                  .filter((id) => SECTION_LABELS[id]?.short !== "")
+                  .map((sectionId) => {
+                    const isActive = activeSection === sectionId
                     return (
                       <Box
-                        key={section.id}
+                        key={sectionId}
                         component="button"
-                        data-section-id={section.id}
-                        onClick={() => scrollToSection(section.id)}
+                        data-section-id={sectionId}
+                        onClick={() => scrollToSection(sectionId)}
                         aria-pressed={isActive}
-                        aria-label={SECTION_LABELS[section.id]?.long}
+                        aria-label={SECTION_LABELS[sectionId]?.long}
                         sx={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -479,7 +484,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                             transition: "opacity 0.15s ease",
                           }}
                         >
-                          {SECTION_LABELS[section.id]?.short}
+                          {SECTION_LABELS[sectionId]?.short}
                         </Typography>
                       </Box>
                     )
@@ -533,9 +538,38 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                 ))}
               </Box>
               <CenteredTextSection
-                id="conclusion"
-                ariaLabel="Conclusion"
-                text="Together, these views make trade-offs, equity, and resilience visible, providing a shared, data-grounded basis for comparison, discussion, and learning."
+                id={HOW_TO_EXPLORE_FURTHER_ID}
+                ariaLabel="How to explore further"
+                title="How To Explore Further"
+                text={
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: muiTheme.space.listGap.md,
+                    }}
+                  >
+                    <Typography variant="body1">
+                      Together, the trade-offs, equity, and resilience views
+                      show how different water management strategies affect
+                      outcomes across California&apos;s water system, how
+                      benefits and impacts are distributed across locations, and
+                      how outcomes may change under increasing climate stress.
+                    </Typography>
+                    <Typography variant="body1">
+                      Visit the{" "}
+                      <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
+                      to compare strategies, outcomes, locations and
+                      hydroclimates in greater detail.
+                    </Typography>
+                    <Typography variant="body1">
+                      If this is your first time using the Explore Tool, we
+                      recommend visiting{" "}
+                      <InlineNavLink to="learn">Get Started</InlineNavLink>{" "}
+                      before beginning your exploration.
+                    </Typography>
+                  </Box>
+                }
                 bgColor={muiTheme.palette.brand.water}
                 textColor={muiTheme.palette.text.secondary}
               />

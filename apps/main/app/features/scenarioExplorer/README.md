@@ -81,7 +81,7 @@ All tools are rendered inside `UnifiedToolView`, which provides a persistent thr
 ```
 
 - **Sidebar** (optional): `ExplorerSidebar` wraps `ScenarioSelectionSidebar`. Shown in non-list modes. Omitted in list mode.
-- **Toolbar**: `ToolToolbar`. Show-map toggle and hydroclimate chooser ("View by climate"). Search and visibility chips live in the sidebar (`SearchAndChips`), not here.
+- **Toolbar**: `ToolToolbar`. Show-map toggle and hydroclimate chooser ("View by hydroclimate"). Search and visibility chips live in the sidebar (`SearchAndChips`), not here.
 - **Active tool**: `ActiveToolPanel` - chart controls + panel paired per mode, each inside `ToolErrorBoundary`.
 - **Map panel**: Optional transparent reveal area (25% width). Toggled by the "Show map" switch in the toolbar.
 

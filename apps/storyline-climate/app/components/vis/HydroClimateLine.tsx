@@ -23,7 +23,7 @@ export type FlowEntry = {
   Qthree: number
 }
 
-const margin = { top: 20, right: 40, bottom: 60, left: 180 }
+const defaultMargin = { top: 20, right: 40, bottom: 60, left: 180 }
 const yTicks = [65, 40, 20, 0, -20, -40, -65]
 
 function FlowLine({
@@ -38,13 +38,25 @@ function FlowLine({
   const svgRef = useRef<SVGSVGElement | null>(null)
   const theme = useTheme()
   const [size, setSize] = useState<ContainerSize>({ width: 0, height: 0 })
+  const margin = useMemo(
+    () =>
+      size.width < 620
+        ? { top: 28, right: 18, bottom: 54, left: 116 }
+        : defaultMargin,
+    [size.width],
+  )
   const months = new Array(12).fill(0).map((_, i) => i + 1)
 
   useEffect(() => {
-    if (svgRef.current) {
-      const { width, height } = svgRef.current.getBoundingClientRect()
+    if (!svgRef.current) return
+    const measure = () => {
+      const { width, height } = svgRef.current!.getBoundingClientRect()
       setSize({ width, height })
     }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(svgRef.current)
+    return () => observer.disconnect()
   }, [])
 
   const xScale = useMemo(() => {
@@ -52,14 +64,14 @@ function FlowLine({
       .domain(months.map((m) => m.toString()))
       .range([margin.left, size.width - margin.right])
       .padding(0.5)
-  }, [months, size.width])
+  }, [margin.left, margin.right, months, size.width])
 
   const yScale = useMemo(() => {
     return scaleLinear()
       .domain(yExtents)
       .range([size.height - margin.bottom, margin.top])
       .nice()
-  }, [size.height, yExtents])
+  }, [margin.bottom, margin.top, size.height, yExtents])
 
   return (
     <motion.svg
@@ -102,8 +114,13 @@ function FlowLine({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
       >
-        <XAxis size={size} yOffset={yScale(0)} xScale={xScale} />
-        <YAxis yScale={yScale} />
+        <XAxis
+          size={size}
+          yOffset={yScale(0)}
+          xScale={xScale}
+          margin={margin}
+        />
+        <YAxis yScale={yScale} margin={margin} />
       </motion.g>
       <motion.g
         key={selected}
@@ -164,10 +181,12 @@ function XAxis({
   size,
   yOffset,
   xScale,
+  margin,
 }: {
   size: ContainerSize
   yOffset: number
   xScale: ScalePoint<string>
+  margin: typeof defaultMargin
 }) {
   const xTicks = ["Oct", "Dec", "Mar", "Jul", "Sep"]
   const xTicksNum = [1, 3, 6, 9, 12]
@@ -216,7 +235,13 @@ function XAxis({
   )
 }
 
-function YAxis({ yScale }: { yScale: ScaleLinear<number, number> }) {
+function YAxis({
+  yScale,
+  margin,
+}: {
+  yScale: ScaleLinear<number, number>
+  margin: typeof defaultMargin
+}) {
   const theme = useTheme()
   return (
     <>

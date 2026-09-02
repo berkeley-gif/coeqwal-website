@@ -7,10 +7,10 @@
  */
 
 import React from "react"
+import type { ReactNode } from "react"
 import { motion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { fadeIn } from "../lib/constants/motionAnimations"
-import { themeValues } from "@repo/ui/themes/theme"
 
 export interface CenteredTextSectionProps {
   /** Panel ID for navigation */
@@ -20,7 +20,7 @@ export interface CenteredTextSectionProps {
   /** Title for the section */
   title?: string
   /** Logos for the grid */
-  text: string
+  text: ReactNode
   /** Email address */
   email?: string
   /** Background color */
@@ -98,17 +98,12 @@ export function CenteredTextSection({
           variants={fadeIn}
           sx={{
             width: "100%",
-            maxWidth: "800px", // Max width of grid
+            maxWidth: "1000px", // Max width of grid
             margin: "60px auto", // Centers the grid horizontally
-            textAlign: "center",
+            textAlign: "left",
           }}
         >
-          <Typography
-            variant="body1"
-            sx={{ maxSize: themeValues.spacing.paragraphMaxWidth.default }}
-          >
-            {text}
-          </Typography>
+          {text}
         </Box>
       )}
     </Box>

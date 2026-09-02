@@ -7,7 +7,7 @@ import {
   useTheme,
   type Theme,
 } from "@repo/ui/mui"
-import { Paragraph, SectionTitle, Visualization } from "@repo/ui"
+import { Paragraph, SectionTitle, Visualization, getExploreUrl } from "@repo/ui"
 import { useRef } from "react"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import HydroClimateContainer from "./vis/HydroClimate"
@@ -39,9 +39,12 @@ const hydroclimateDescription = [
   {
     segments: [
       { text: "These hydroclimates represent " },
-      { text: "different levels of risk to our water system", mark: "yellow" },
       {
-        text: ' that we should be prepared for. For example, a "moderate risk" hydroclimate future represents a change in conditions that are likely to occur, while the "extreme risk" hydroclimate future is less likely, but possible.',
+        text: "different levels of stress to our water system",
+        mark: "yellow",
+      },
+      {
+        text: ' that we should be prepared for. For example, an "extreme stress" hydroclimate represents a plausible climate future that will be much more challenging to deal with than a "moderate stress" hydroclimate.',
       },
     ],
   },
@@ -68,8 +71,8 @@ const hydroclimateContentMaxWidth = {
 } as const
 
 const hydroclimateChartHeight = {
-  xs: "24rem",
-  md: "28rem",
+  xs: "20rem",
+  md: "24rem",
   lg: "31rem",
   xl: "34rem",
 } as const
@@ -98,7 +101,7 @@ const conclusionLink = [
     You can start{" "}
     <strong>
       <a
-        href="https://dev.coeqwal.org/?tab=explore"
+        href={getExploreUrl()}
         target="_blank"
         rel="noopener noreferrer"
         style={{ color: "inherit", textDecoration: "underline" }}
@@ -180,6 +183,10 @@ function HydroclimateContent() {
         flexDirection: "column",
         justifyContent: "center",
         py: { xs: "3rem", md: "3.5rem", lg: "4rem" },
+        "@media (min-width: 750px) and (max-width: 1399.95px)": {
+          pt: "3.5rem",
+          pb: "0.75rem",
+        },
       }}
     >
       <Box
@@ -189,6 +196,12 @@ function HydroclimateContent() {
           width: "100%",
           boxSizing: "border-box",
           pointerEvents: "auto",
+          "@media (min-width: 750px) and (max-width: 1399.95px)": {
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 46%) minmax(0, 54%)",
+            columnGap: "1.5rem",
+            alignItems: "center",
+          },
         }}
       >
         <Stack
@@ -198,6 +211,9 @@ function HydroclimateContent() {
             maxWidth: hydroclimateContentMaxWidth,
             textAlign: "left",
             gap: { xs: 1, md: 1, lg: 2 },
+            "@media (min-width: 750px) and (max-width: 1399.95px)": {
+              gridColumn: 1,
+            },
           }}
         >
           <motion.div style={{ opacity: titleOpacity }}>
@@ -235,6 +251,10 @@ function HydroclimateContent() {
           caption="Changes in total average streamflow by month for each hydroclimate based on the period 1922 - 2021."
           sx={{
             width: "100%",
+            "@media (min-width: 750px) and (max-width: 1399.95px)": {
+              gridColumn: 2,
+              gridRow: 1,
+            },
           }}
         >
           <Box
@@ -243,6 +263,9 @@ function HydroclimateContent() {
               height: hydroclimateChartHeight,
               display: "flex",
               justifyContent: "flex-start",
+              "@media (min-width: 750px) and (max-width: 1399.95px)": {
+                height: "24rem",
+              },
             }}
           >
             <HydroClimateContainer />
@@ -675,21 +698,21 @@ export function Themes() {
               top: "17.77%",
               pointerEvents: "auto",
               maxWidth: "400px",
+              textAlign: "left",
             }}
           >
             <SectionTitle
-              variant="h6"
+              variant="subtitle1"
               text="Community water systems"
               sx={{
-                fontWeight: "bold",
+                fontWeight: "fontWeightBold",
                 color: "#ffb347",
-                fontSize: theme.typography.body1.fontSize,
-                textAlign: "right",
+                textAlign: "left",
                 width: "100%",
               }}
             />
             <Paragraph
-              variant="body2"
+              variant="subtitle1"
               blocks={[
                 {
                   segments: [
@@ -700,14 +723,13 @@ export function Themes() {
               ]}
               markSx={{
                 action: {
-                  color: "#ffb347",
-                  fontWeight: "bold",
+                  color: theme.palette.common.white,
+                  fontWeight: "fontWeightBold",
                 },
               }}
               sx={{
                 color: theme.palette.common.white,
-                fontSize: theme.typography.body1.fontSize,
-                lineHeight: 1.4,
+                textAlign: "left",
               }}
             />
           </Box>
@@ -728,16 +750,15 @@ export function Themes() {
             }}
           >
             <SectionTitle
-              variant="h6"
+              variant="subtitle1"
               text="Farms and groundwater"
               sx={{
-                fontWeight: "bold",
+                fontWeight: "fontWeightBold",
                 color: "#ffb347",
-                fontSize: theme.typography.body1.fontSize,
               }}
             />
             <Paragraph
-              variant="body2"
+              variant="subtitle1"
               blocks={[
                 {
                   segments: [
@@ -750,14 +771,12 @@ export function Themes() {
               ]}
               markSx={{
                 action: {
-                  color: "#ffb347",
-                  fontWeight: "bold",
+                  color: theme.palette.common.white,
+                  fontWeight: "fontWeightBold",
                 },
               }}
               sx={{
                 color: theme.palette.common.white,
-                fontSize: theme.typography.body1.fontSize,
-                lineHeight: 1.4,
               }}
             />
           </Box>
@@ -779,18 +798,17 @@ export function Themes() {
             }}
           >
             <SectionTitle
-              variant="h6"
+              variant="subtitle1"
               text="Rivers, salmon, and the Delta ecosystem"
               sx={{
-                fontWeight: "bold",
+                fontWeight: "fontWeightBold",
                 color: "#ffb347",
-                fontSize: theme.typography.body1.fontSize,
                 textAlign: "right",
                 width: "100%",
               }}
             />
             <Paragraph
-              variant="body2"
+              variant="subtitle1"
               blocks={[
                 {
                   segments: [
@@ -803,14 +821,12 @@ export function Themes() {
               ]}
               markSx={{
                 action: {
-                  color: "#ffb347",
-                  fontWeight: "bold",
+                  color: theme.palette.common.white,
+                  fontWeight: "fontWeightBold",
                 },
               }}
               sx={{
                 color: theme.palette.common.white,
-                fontSize: theme.typography.body1.fontSize,
-                lineHeight: 1.4,
                 textAlign: "right",
               }}
             />
@@ -833,16 +849,15 @@ export function Themes() {
             }}
           >
             <SectionTitle
-              variant="h6"
+              variant="subtitle1"
               text="Operations and impacts"
               sx={{
-                fontWeight: "bold",
+                fontWeight: "fontWeightBold",
                 color: "#ffb347",
-                fontSize: theme.typography.body1.fontSize,
               }}
             />
             <Paragraph
-              variant="body2"
+              variant="subtitle1"
               blocks={[
                 {
                   segments: [
@@ -855,14 +870,12 @@ export function Themes() {
               ]}
               markSx={{
                 action: {
-                  color: "#ffb347",
-                  fontWeight: "bold",
+                  color: theme.palette.common.white,
+                  fontWeight: "fontWeightBold",
                 },
               }}
               sx={{
                 color: theme.palette.common.white,
-                fontSize: theme.typography.body1.fontSize,
-                lineHeight: 1.4,
                 textAlign: "right",
               }}
             />
@@ -885,18 +898,17 @@ export function Themes() {
             }}
           >
             <SectionTitle
-              variant="h5"
+              variant="subtitle1"
               text="Delta exports"
               sx={{
-                fontWeight: "bold",
+                fontWeight: "fontWeightBold",
                 color: "#ffb347",
-                fontSize: theme.typography.body1.fontSize,
                 textAlign: "right",
                 width: "100%",
               }}
             />
             <Paragraph
-              variant="body1"
+              variant="subtitle1"
               blocks={[
                 {
                   segments: [
@@ -907,14 +919,12 @@ export function Themes() {
               ]}
               markSx={{
                 action: {
-                  color: "#ffb347",
-                  fontWeight: "bold",
+                  color: theme.palette.common.white,
+                  fontWeight: "fontWeightBold",
                 },
               }}
               sx={{
                 color: theme.palette.common.white,
-                fontSize: theme.typography.body1.fontSize,
-                lineHeight: 1.4,
                 textAlign: "right",
               }}
             />

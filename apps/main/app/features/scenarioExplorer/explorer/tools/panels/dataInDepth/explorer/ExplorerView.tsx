@@ -14,7 +14,11 @@
 import React from "react"
 import { Box, Chip, Typography, useTheme } from "@repo/ui/mui"
 import { useDataSlice } from "../../../../store"
-import { getSector, getVariable } from "../config/variableRegistry"
+import {
+  getSector,
+  getVariable,
+  keyOutcomeChipText,
+} from "../config/variableRegistry"
 import SectorRail from "./SectorRail"
 import CompareControls from "./CompareControls"
 import ViewBar from "./ViewBar"
@@ -27,6 +31,7 @@ export default function ExplorerView() {
   const selectedVariableId = useDataSlice((s) => s.selectedVariableId)
   const variable = getVariable(selectedVariableId)
   const sector = variable ? getSector(variable.sectorId) : undefined
+  const chipText = variable ? keyOutcomeChipText(variable) : null
 
   return (
     <Box
@@ -67,11 +72,11 @@ export default function ExplorerView() {
               </strong>{" "}
               › {variable.name}
             </Typography>
-            {variable.tierOutcomeName && (
+            {chipText && (
               <Chip
                 size="small"
                 variant="outlined"
-                label={`feeds tier: ${variable.tierOutcomeName}`}
+                label={chipText}
                 sx={{
                   fontSize: "0.72rem",
                   color: theme.palette.grey[600],

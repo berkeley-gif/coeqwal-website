@@ -4,6 +4,10 @@
  * tool's hydroclimate badge.
  */
 
+import { shareFigureFooter } from "../figureFooter"
+import { toolFigureTitle } from "../figureTitle"
+import { HYDROCLIMATE_SHORT_LABELS } from "../../../../../content/scenarios"
+import { thumbnailAspectRatioFor } from "../thumbnailAspect"
 import React, { useEffect } from "react"
 import {
   OUTCOME_NAMES,
@@ -97,9 +101,17 @@ const equityHandler: VariantHandler<EquityItem> = {
           compareToBaseline: item.compareToBaseline,
         })
     return React.createElement(ShareSnapshotCard, {
+      figureFooter: shareFigureFooter(item),
+      thumbnailAspectRatio: thumbnailAspectRatioFor(item),
       id: item.id,
       toolLabel: "Distribution",
       title: info?.description ?? info?.name ?? item.scenarioId,
+      standardTitle: toolFigureTitle({
+        toolName: "Distribution view",
+        memberSummary: info?.description ?? info?.name ?? item.scenarioId,
+        hydroclimateLabel:
+          HYDROCLIMATE_SHORT_LABELS[item.hydroclimate] ?? item.hydroclimate,
+      }),
       scenarioDefinition: info?.definition,
       subtitle: item.compareToBaseline
         ? "Compared to today's operations"

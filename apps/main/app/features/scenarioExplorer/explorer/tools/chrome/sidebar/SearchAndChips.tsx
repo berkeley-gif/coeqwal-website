@@ -62,6 +62,7 @@ export default function SearchAndChips({
 
   const searchAnchorRef = useTourAnchor("list.toolbar.search")
   const chipsRowAnchorRef = useTourAnchor("list.toolbar.chips")
+  const showDefinitionsAnchorRef = useTourAnchor("list.select.showDefinitions")
   const themeGroupAnchorRef = useTourAnchor("list.toolbar.themeGroup")
   const showOnlyChosenAnchorRef = useTourAnchor("list.select.showOnlyChosen")
   const showBaselinesAnchorRef = useTourAnchor("list.select.showBaselines")
@@ -232,11 +233,13 @@ export default function SearchAndChips({
             flexWrap: "wrap",
           }}
         >
-          <ToggleChip
-            label="definitions"
-            active={showDefinitions}
-            onClick={() => setShowDefinitions(!showDefinitions)}
-          />
+          <Box ref={showDefinitionsAnchorRef} sx={{ display: "inline-flex" }}>
+            <ToggleChip
+              label="definitions"
+              active={showDefinitions}
+              onClick={() => setShowDefinitions(!showDefinitions)}
+            />
+          </Box>
           <Box ref={showBaselinesAnchorRef} sx={{ display: "inline-flex" }}>
             <ToggleChip
               label="baselines"
@@ -255,7 +258,7 @@ export default function SearchAndChips({
           </Box>
           <Box ref={themeGroupAnchorRef} sx={{ display: "inline-flex" }}>
             <ToggleChip
-              label="group by theme"
+              label="group by issue"
               active={groupByTheme}
               onClick={() => setGroupByTheme(!groupByTheme)}
             />

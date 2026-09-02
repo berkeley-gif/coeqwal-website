@@ -13,6 +13,7 @@
 
 import React from "react"
 import { themeValues } from "@repo/ui/themes/theme"
+import { THEME_LABEL_CONFIG } from "../../../../content/themes"
 import { OpsCircleIcon } from "./OpsCircleIcon"
 
 const white = themeValues.palette.common.white
@@ -105,7 +106,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     lines: [],
     color: THEME_COLOR,
     customSvg: BaselineGearSvg,
-    label: "Current operations",
+    label: THEME_LABEL_CONFIG.baseline.label,
     description:
       "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated.",
   },
@@ -114,7 +115,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     type: "circle",
     lines: ["Farms"],
     color: THEME_COLOR,
-    label: "Farms, groundwater & food systems",
+    label: THEME_LABEL_CONFIG.ag_gw.label,
     description:
       "Scenario exploring groundwater management changes, such as SGMA pumping limits.",
   },
@@ -123,7 +124,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     type: "circle",
     lines: ["Rivers"],
     color: THEME_COLOR,
-    label: "Rivers, salmon & ecosystems",
+    label: THEME_LABEL_CONFIG.eco.label,
     description:
       "Scenario exploring changes to environmental or functional flow requirements.",
   },
@@ -132,7 +133,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     type: "circle",
     lines: ["CWS"],
     color: THEME_COLOR,
-    label: "Community water systems",
+    label: THEME_LABEL_CONFIG.cws.label,
     description:
       "Scenario exploring changes to community water system deliveries and allocations.",
   },
@@ -141,7 +142,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     type: "circle",
     lines: ["Delta"],
     color: THEME_COLOR,
-    label: "The Delta as a living place",
+    label: THEME_LABEL_CONFIG.delta.label,
     description:
       "Scenario exploring changes to Delta operations, conveyance, or export rules.",
   },

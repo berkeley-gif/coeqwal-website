@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useCallback } from "react"
-import { Box, Typography, Button, useTheme } from "@repo/ui/mui"
+import { Box, Typography, Button, icons, useTheme } from "@repo/ui/mui"
 import { useWorkspaceSlice } from "../../store"
 import type { ShareItem } from "../types"
 import type { ShareRadarLiveDataFields } from "../utils/shareRadarLiveData"
@@ -17,6 +17,7 @@ import { ShareRadarLiveProvider } from "../ShareRadarLiveProvider"
 import TrayCard, { TRAY_CARD_WIDTH } from "../components/TrayCard"
 import StoryCanvas from "../components/StoryCanvas"
 import ShareExportBar from "../components/ShareExportBar"
+import { GlossaryTermLink } from "../../../../glossary"
 
 /**
  * Per-hydroclimate radar fields for share. See `buildShareRadarLiveDataFields`
@@ -56,6 +57,7 @@ function SharePanelContent() {
     removeFromStory,
     reorderStory,
     updateShareItem,
+    clearShareItems,
   } = useWorkspaceSlice()
 
   const handleNoteChange = useCallback(
@@ -140,20 +142,34 @@ function SharePanelContent() {
         }}
       >
         <Typography variant="h3" component="h2" color="text.secondary">
-          Share
+          What scenarios align with your interests?
         </Typography>
         <Typography
           sx={{
             fontSize: "0.9375rem",
             color: theme.palette.text.secondary,
             textAlign: "center",
-            maxWidth: 420,
+            maxWidth: 800,
             opacity: 0.8,
           }}
         >
-          No scenarios staged for sharing yet. Go to the Explore tab, find
-          scenarios that you want to share, and click the share icon on each
-          one.
+          Review snapshots of{" "}
+          <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink> to
+          access data, gain insights, and share what you have learned.
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: "0.9375rem",
+            color: theme.palette.text.secondary,
+            textAlign: "center",
+            maxWidth: 500,
+            opacity: 0.8,
+          }}
+        >
+          No results staged for sharing yet. Go to the Explore tab and find
+          scenario results that you want to share by clicking on the{" "}
+          <icons.IosShare sx={{ fontSize: "1rem", ml: 0.5 }} fontWeight={600} />
+          .
         </Typography>
         <Button
           variant="outlined"
@@ -195,34 +211,94 @@ function SharePanelContent() {
           pb: theme.space.section.md,
         }}
       >
-        <Typography variant="h3" component="h2" color="text.secondary">
-          Tell your water story
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography variant="h3" component="h2" color="text.secondary">
+            What scenarios align with your interests?
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: "0.9375rem",
+              color: theme.palette.text.secondary,
+              textAlign: "center",
+              maxWidth: 800,
+              opacity: 0.8,
+            }}
+          >
+            Review snapshots of{" "}
+            <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink> to
+            access data, gain insights, and share what you have learned.
+          </Typography>
+          {/* Clears the tray AND the story, and the store persists the empty
+              state immediately. No confirm step, matching the drawer's
+              existing "Clear all" chip: two different confirmation habits for
+              the same action would be worse than none. Whether this more
+              deliberate workspace warrants one is an open product question. */}
+          {shareItems.length > 0 && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<icons.Close sx={{ fontSize: "0.875rem" }} />}
+              onClick={clearShareItems}
+              sx={{
+                textTransform: "none",
+                mt: 1,
+                color: theme.palette.text.secondary,
+                borderColor: theme.palette.text.secondary,
+              }}
+            >
+              Clear share tray
+            </Button>
+          )}
+        </Box>
         <ShareUrlVersionNotice />
       </Box>
 
+      {/* Below md the tray stacks ABOVE the canvas instead of sitting beside
+          it. A fixed 312px column is 41% of a 768px tablet and 52% of a
+          600px window, which squeezes the story canvas (the actual work
+          surface) into a strip too narrow to lay cards out in. */}
       <Box
         sx={{
           display: "flex",
-          flexDirection: "row",
+          flexDirection: { xs: "column", md: "row" },
           flex: 1,
           minHeight: 0,
           overflow: "hidden",
         }}
       >
-        {/* Scorecard tray (left, fixed-width, vertical scroll) */}
+        {/* Scorecard tray: a fixed-width column beside the canvas on desktop,
+            a full-width horizontal strip above it below md. */}
         <Box
+          data-share-region="tray"
           sx={{
             flexShrink: 0,
-            width: TRAY_CARD_WIDTH + 32,
-            borderRight: `1px solid ${theme.palette.divider}`,
+            width: { xs: "100%", md: TRAY_CARD_WIDTH + 32 },
+            maxHeight: { xs: "40vh", md: "none" },
+            borderRight: {
+              xs: "none",
+              md: `1px solid ${theme.palette.divider}`,
+            },
+            borderBottom: {
+              xs: `1px solid ${theme.palette.divider}`,
+              md: "none",
+            },
             backgroundColor: theme.palette.grey[50],
             px: 2,
             py: 2,
             display: "flex",
-            flexDirection: "column",
+            flexDirection: { xs: "row", md: "column" },
             gap: 2,
-            overflowY: "auto",
+            overflowX: { xs: "auto", md: "visible" },
+            overflowY: { xs: "hidden", md: "auto" },
             "&::-webkit-scrollbar": { width: 6 },
             "&::-webkit-scrollbar-thumb": {
               backgroundColor: theme.palette.grey[300],
@@ -246,8 +322,9 @@ function SharePanelContent() {
           ))}
         </Box>
 
-        {/* Story canvas (right, scrollable) */}
+        {/* Story canvas (right on desktop, below the tray on tablet) */}
         <Box
+          data-share-region="canvas"
           sx={{
             flex: 1,
             minWidth: 0,

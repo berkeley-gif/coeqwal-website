@@ -218,6 +218,8 @@ export default function BarPanel() {
   const { orderedScenarios } = useOrderedScenarios(allScoreData)
 
   const barGlyphTourRef = useTourAnchor("bar.outcome.glyph")
+  const barPinTourRef = useTourAnchor("bar.row.pin")
+  const barShareTourRef = useTourAnchor("bar.row.share")
 
   const {
     openTooltip: activeTooltip,
@@ -343,6 +345,7 @@ export default function BarPanel() {
   // Bar chart scenario card
   const renderCard = (scenario: (typeof cardScenarios)[number]) => {
     const chartData = allChartData[scenario.scenarioId] ?? {}
+
     const isFirstCard = scenario.scenarioId === cardScenarios[0]?.scenarioId
 
     return (
@@ -370,6 +373,8 @@ export default function BarPanel() {
               accentColor={theme.palette.blue.bright}
               onShare={handleShare(scenario)}
               togglePinnedScenario={togglePinnedScenario}
+              pinTourRef={isFirstCard ? barPinTourRef : undefined}
+              shareTourRef={isFirstCard ? barShareTourRef : undefined}
             />
           }
         />
@@ -378,6 +383,13 @@ export default function BarPanel() {
             mt: theme.space.gap.md,
             display: "flex",
             gap: theme.space.gap.sm,
+            // Without an explicit width, this row's width:auto has been
+            // observed resolving to a shrink-to-fit size (matching its
+            // children's flex-basis sum) on first paint instead of
+            // filling the card - self-correcting on any later reflow
+            // (e.g. expanding the description). Pinning it to 100% of
+            // the card's content width removes that ambiguity outright.
+            width: "100%",
           }}
         >
           {outcomeNames.map(({ shortCode, displayName }, outcomeIndex) => (

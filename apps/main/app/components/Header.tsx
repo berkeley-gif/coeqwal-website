@@ -1,13 +1,14 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { BaseHeader } from "@repo/ui"
+import { BaseHeader, getWaterThemeOptions } from "@repo/ui"
 import { useRouter, usePathname } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import { WATER_THEMES } from "../content/themes"
 import { useTabNavigation } from "../hooks/useTabNavigation"
+import { normalizePathname } from "../lib/routePath"
 
 /**
  * Main application header
@@ -19,7 +20,9 @@ import { useTabNavigation } from "../hooks/useTabNavigation"
  */
 export function Header() {
   const router = useRouter()
-  const pathname = usePathname()
+  // Normalized: the export serves directory-style URLs, so the live pathname
+  // can be "/explore/" while the comparisons below use "/explore".
+  const pathname = normalizePathname(usePathname())
   const theme = useTheme()
   const { navigateToTab } = useTabNavigation()
 
@@ -55,6 +58,19 @@ export function Header() {
     pathname === "/explore" ||
     pathname === "/share" ||
     isNavigatingToTabs
+
+  // Warm the tab routes' JS (map/viz bundle included) as soon as the
+  // homepage lands, so a user clicking "Explore Tools" or "Get Started"
+  // is likely hitting a cache instead of a cold ~4MB fetch. Fired at
+  // mount rather than on scroll/idle so even a near-immediate click
+  // gets the largest possible head start - this narrows the cold-load
+  // window, it doesn't eliminate it for someone who clicks instantly.
+  useEffect(() => {
+    if (!isHomePage) return
+    router.prefetch("/learn")
+    router.prefetch("/explore")
+    router.prefetch("/share")
+  }, [isHomePage, router])
 
   // Defer isPastHero until after hydration so server and client render
   // the same initial markup (variant="light"). Once mounted, the real
@@ -97,17 +113,17 @@ export function Header() {
     requestAnimationFrame(animateScroll)
   }
 
-  const waterThemesOptions = useMemo(
-    () =>
-      WATER_THEMES.map((wt) => ({
-        key: wt.id,
-        label: wt.label.replace(/\n/g, " "),
-        onClick: () => openThemePanel(wt.id),
-        active: activeThemeKey === wt.id,
-        disabled: wt.sections.length === 0,
-      })),
-    [activeThemeKey, openThemePanel],
-  )
+  const waterThemesOptions = useMemo(() => {
+    const disabledKeys = WATER_THEMES.filter(
+      (theme) => theme.sections.length === 0,
+    ).map((theme) => theme.id)
+
+    return getWaterThemeOptions({
+      activeKey: activeThemeKey,
+      disabledKeys,
+      onThemeClick: openThemePanel,
+    })
+  }, [activeThemeKey, openThemePanel])
 
   return (
     <BaseHeader
@@ -119,11 +135,7 @@ export function Header() {
       waterThemesOptions={waterThemesOptions}
       backgroundColor={isPastHero ? theme.palette.common.white : "transparent"}
       textColor={isPastHero ? "#555555" : theme.palette.common.white}
-      borderBottom={
-        isPastHero
-          ? "none"
-          : `${theme.strokeWidth.accent}px solid ${theme.palette.common.white}`
-      }
+      borderBottom="none"
       navTextShadow={isPastHero ? "none" : theme.textShadow.nav}
       logoVariant={isPastHero ? "color" : "light"}
       shrinkOnScroll={shrinkOnScroll}

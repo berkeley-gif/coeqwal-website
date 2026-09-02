@@ -1,9 +1,13 @@
 /**
  * List tour module. Plug-in entry consumed by `tour/registry.ts`.
  *
- * The colocated `useListInfoTooltipSync` hook is not part of the module
- * surface because it needs `StrategyGrid`'s local tooltip state. The
- * grid calls it directly.
+ * Two colocated hooks are not part of the module surface because they
+ * need component-local state the runner doesn't have:
+ *   - `useListInfoTooltipSync` needs `StrategyGrid`'s local tooltip
+ *     state; the grid calls it directly.
+ *   - `useListVisualizeRailSync` needs `ListView`'s ordered-scenario
+ *     data (from an SWR-backed hook `ListTourEffects` shouldn't
+ *     duplicate); `ListView` calls it directly.
  */
 
 import type { TourModule } from "../../../tour/types"

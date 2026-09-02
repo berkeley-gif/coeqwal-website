@@ -26,6 +26,7 @@ export {
   AccordionDetails,
   Tabs,
   Tab,
+  MobileStepper,
   Link,
 
   // Typography and content
@@ -160,6 +161,7 @@ import AdjustIcon from "@mui/icons-material/Adjust"
 import BuildIcon from "@mui/icons-material/Build"
 import ExploreIcon from "@mui/icons-material/Explore"
 import MailOutlineIcon from "@mui/icons-material/MailOutline"
+import GrassIcon from "@mui/icons-material/Grass"
 
 // Export individually imported icons
 export {
@@ -237,6 +239,7 @@ export {
   AdjustIcon,
   BuildIcon,
   ExploreIcon,
+  GrassIcon,
 }
 
 // Export the full icons library for access to other icons as needed

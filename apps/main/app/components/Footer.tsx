@@ -16,6 +16,7 @@
  */
 
 import * as React from "react"
+import { WATER_STORIES, getWaterThemeOptions } from "@repo/ui"
 import {
   Box,
   Typography,
@@ -32,6 +33,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useTabNavigation } from "../hooks/useTabNavigation"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import { WATER_THEMES } from "../content/themes"
+import { normalizePathname } from "../lib/routePath"
 
 // TODO: swap placeholder logos/credit text for real COEQWAL partner assets
 const PARTNER_LOGOS = [
@@ -44,32 +46,6 @@ const PARTNER_LOGOS = [
     src: "/images/GIF-logo.png",
     alt: "Geospatial Innovation Facilities",
     width: 185,
-  },
-]
-
-// Mirrors the Water Stories dropdown in BaseHeader.tsx. Duplicated here
-// (not imported) because BaseHeader keeps this URL list module-private —
-// if BaseHeader's URLS ever change, update both.
-const WATER_STORIES = [
-  {
-    key: "flow",
-    label: "How water flows through California",
-    href: "https://flow.coeqwal.org",
-  },
-  {
-    key: "climate",
-    label: "How climate affects California water",
-    href: "https://climate.coeqwal.org",
-  },
-  {
-    key: "managed",
-    label: "How California water is managed",
-    href: "https://management.coeqwal.org",
-  },
-  {
-    key: "equity",
-    label: "How equity shapes California water",
-    href: "https://equity.coeqwal.org",
   },
 ]
 
@@ -109,7 +85,7 @@ const footerLinkButtonSx = {
 }
 
 const accordionSummarySx = {
-  justifyContent: "left",
+  justifyContent: { xs: "center", lg: "left" },
   minHeight: "25px",
   paddingLeft: 0,
   paddingRight: 0,
@@ -122,7 +98,9 @@ export function Footer() {
   // below must come AFTER this block, or navigating between a tabs
   // route and a marketing route mid-session throws "rendered more
   // hooks than during the previous render."
-  const pathname = usePathname()
+  // Normalized: the export serves directory-style URLs, so the live pathname
+  // can be "/explore/" while the comparison below uses "/explore".
+  const pathname = normalizePathname(usePathname())
   const theme = useTheme()
   const router = useRouter()
   const { navigateToTab } = useTabNavigation()
@@ -140,12 +118,12 @@ export function Footer() {
     pathname === "/learn" || pathname === "/explore" || pathname === "/share"
   if (isTabsPage) return null
 
-  const waterIssues = WATER_THEMES.map((wt) => ({
-    key: wt.id,
-    label: wt.label.replace(/\n/g, " "),
-    onClick: () => openThemePanel(wt.id),
-    disabled: wt.sections.length === 0,
-  }))
+  const waterIssues = getWaterThemeOptions({
+    disabledKeys: WATER_THEMES.filter(
+      (theme) => theme.sections.length === 0,
+    ).map((theme) => theme.id),
+    onThemeClick: openThemePanel,
+  })
 
   return (
     <Box
@@ -157,6 +135,7 @@ export function Footer() {
         py: { xs: 8, lg: 8 },
         px: { xs: 2, lg: 13 },
         display: "flex",
+        gap: { xs: 2, md: "none" },
         flexDirection: { xs: "column", lg: "row" },
         textAlign: { xs: "center", lg: "left" },
       }}
@@ -164,13 +143,13 @@ export function Footer() {
       {/* Left: credit text + partner logos */}
       <Box
         sx={{
+          order: { xs: 2, lg: 0 },
           flexBasis: { lg: "65%" },
           borderRight: { lg: `1px solid ${theme.palette.common.white}` },
           pr: { lg: 12 },
         }}
       >
         <Typography variant="dashboard">
-          {/* TODO: replace with real COEQWAL credit text */}
           This research project is supported by funds from the California
           Climate Action Seed and Matching Grants Program of the University of
           California (Grant Number R02CM7222). This funding is part of the
@@ -216,12 +195,37 @@ export function Footer() {
           <Typography variant="compactSubtitle" sx={{ display: "block" }}>
             © COEQWAL 2026
           </Typography>
+          <Typography variant="dashboard">
+            All data and graphics retrieved from this website may be freely
+            reproduced and distributed. Any use of the data or content provided
+            should be cited as:
+          </Typography>
+          <Typography variant="compactSubtitle" sx={{ display: "block" }}>
+            COEQWAL. 2026. COEQWAL data platform, https://coeqwal.org/, accessed
+            &lt;date&gt;
+          </Typography>
+          <Typography variant="dashboard">
+            All content on this website is provided &quot;as is&quot;, without
+            warranty of any kind, either express or implied. COEQWAL scenarios
+            are exploratory model runs and are not intended for direct use in
+            legal or regulatory proceedings. Visit{" "}
+            <Typography
+              variant="dashboard"
+              component="button"
+              onClick={() => router.push("/about")}
+              sx={footerLinkButtonSx}
+            >
+              ABOUT
+            </Typography>{" "}
+            to learn how COEQWAL scenarios were developed.
+          </Typography>
         </Box>
       </Box>
 
       {/* Right: nav links mirroring BaseHeader */}
       <Box
         sx={{
+          order: { xs: 1, lg: 0 },
           flexBasis: { lg: "35%" },
           pl: { lg: 12 },
           display: "flex",
@@ -277,11 +281,18 @@ export function Footer() {
               {WATER_STORIES.map((story) => (
                 <li key={story.key}>
                   <Typography
-                    component="a"
-                    href={story.href}
-                    target="_blank"
+                    component={story.disabled ? "span" : "a"}
+                    href={story.disabled ? undefined : story.href}
+                    target={story.disabled ? undefined : "_blank"}
+                    aria-disabled={story.disabled}
                     variant="dashboard"
-                    sx={{ color: "inherit" }}
+                    sx={{
+                      color: "inherit",
+                      ...(story.disabled && {
+                        opacity: 0.5,
+                        pointerEvents: "none",
+                      }),
+                    }}
                   >
                     {story.label}
                   </Typography>

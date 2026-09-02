@@ -128,16 +128,11 @@ export const RESILIENCE_PERSIST_KEYS = [
   "resilienceCellEncoding",
   "resilienceDeltaMode",
   "resilienceDeltaBaselineScenarioId",
-  "resilienceAggregateScope",
-  "resilienceReorderBySimilarity",
-  "resilienceShowMarginals",
   "resilienceShowAllScenarios",
   "resilienceShowCellNumbers",
   "resiliencePrimaryOutcomeCode",
   "resilienceCompareOutcomeCodes",
-  "resilienceExpandedRegionalOutcomes",
   "resilienceTransposed",
-  "resilienceAggregateOver",
 ] as const satisfies readonly (keyof ResilienceState)[]
 
 /** Data-in-Depth explorer settings restored after reload (all persisted) */
@@ -147,7 +142,6 @@ export const DATA_PERSIST_KEYS = [
   "distKind",
   "compareBy",
   "pinnedScenario",
-  "pinnedClimate",
   "pinnedLocationByGroup",
   "selectedClimates",
   "selectedLocationsByGroup",
@@ -257,17 +251,12 @@ const RESILIENCE_ACTION_KEYS = [
   "setResilienceCellEncoding",
   "setResilienceDeltaMode",
   "setResilienceDeltaBaselineScenarioId",
-  "setResilienceAggregateScope",
-  "setResilienceReorderBySimilarity",
-  "setResilienceShowMarginals",
   "setResilienceShowAllScenarios",
   "setResilienceSelectedHydroclimates",
   "setResilienceShowCellNumbers",
   "setResiliencePrimaryOutcomeCode",
   "setResilienceCompareOutcomeCodes",
-  "setResilienceExpandedRegionalOutcomes",
   "setResilienceTransposed",
-  "setResilienceAggregateOver",
 ] as const satisfies readonly (keyof ResilienceSlice)[]
 
 const DATA_ACTION_KEYS = [
@@ -276,7 +265,6 @@ const DATA_ACTION_KEYS = [
   "setDistKind",
   "setCompareBy",
   "setPinnedScenario",
-  "setPinnedClimate",
   "setPinnedLocation",
   "setSelectedClimates",
   "setSelectedLocations",

@@ -31,8 +31,8 @@ const THEME_ORDER: Record<ScenarioTheme, number> = {
   baseline: 0,
   ag_gw: 1,
   eco: 2,
-  delta: 3,
-  cws: 4,
+  cws: 3,
+  delta: 4,
   unthemed: 5,
 }
 

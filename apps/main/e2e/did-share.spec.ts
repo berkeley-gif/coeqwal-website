@@ -37,6 +37,20 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   await expect(addToStory).toBeVisible()
   await addToStory.click()
 
+  // The share-URL and PDF exports were retired: both buttons rendered but
+  // neither did anything. The two image and data exports beside them work
+  // and stay. These assert on the visible labels: the export bar wraps its
+  // buttons in a tooltip, which injects its own text as the accessible
+  // name, so a name-based role query would pass here for the wrong reason.
+  await expect(page.getByText("Copy link", { exact: true })).toHaveCount(0)
+  await expect(page.getByText("Download PDF", { exact: true })).toHaveCount(0)
+  await expect(
+    page.getByText("Download all images", { exact: true }),
+  ).toBeVisible()
+  await expect(
+    page.getByText("Download all data", { exact: true }),
+  ).toBeVisible()
+
   // Download the CSV from the story card and check its body.
   const downloadPromise = page.waitForEvent("download")
   await page.getByRole("button", { name: "Download data" }).click()
@@ -55,11 +69,47 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   expect(csv).toContain("Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max,Source")
   expect(csv).toContain("Year index")
 
-  // Download the PNG (html-to-image path renders the live card).
+  // The figure footer is part of the card, so it travels with every export:
+  // source, data provenance, capture date.
+  await expect(
+    page
+      .getByText(
+        /COEQWAL, coeqwal\.org\. CalSim3 model results\. Sample data, not model results\. Captured \w+ \d+, \d{4}\./,
+      )
+      .first(),
+  ).toBeVisible()
+
+  // Download the PNG (html-to-image path renders the live card). The raster
+  // is wide enough to read as a figure, not a thumbnail.
   const pngPromise = page.waitForEvent("download")
   await page.getByRole("button", { name: "Download as PNG" }).click()
   const png = await pngPromise
   expect(png.suggestedFilename()).toMatch(/^coeqwal-data-.+\.png$/)
+  const pngChunks: Buffer[] = []
+  for await (const chunk of await png.createReadStream()) {
+    pngChunks.push(chunk as Buffer)
+  }
+  const pngBytes = Buffer.concat(pngChunks)
+  // PNG IHDR: width at bytes 16..19, height at 20..23 (big-endian).
+  const pngWidth = pngBytes.readUInt32BE(16)
+  const pngHeight = pngBytes.readUInt32BE(20)
+  expect(pngWidth).toBeGreaterThanOrEqual(1000)
+  // The chart box follows the chart's 900 x 520 shape, so the card is not
+  // taller than it is wide by much: no blank bands around the chart.
+  expect(pngHeight / pngWidth).toBeLessThan(1.15)
+
+  // The SVG export carries the long axis label and the footer as text.
+  const svgPromise = page.waitForEvent("download")
+  await page.getByRole("button", { name: "Download as SVG" }).click()
+  const svgDownload = await svgPromise
+  const svgChunks: Buffer[] = []
+  for await (const chunk of await svgDownload.createReadStream()) {
+    svgChunks.push(chunk as Buffer)
+  }
+  const svg = Buffer.concat(svgChunks).toString("utf8")
+  expect(svg).toContain("thousand acre feet (TAF)")
+  expect(svg).toContain("Sample data, not model results.")
+  expect(svg).toContain("April Reservoir Storage (Shasta Reservoir)")
 
   expect(errors).toEqual([])
 })

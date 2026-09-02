@@ -1,29 +1,27 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo } from "react"
 import { Layer, Marker, Source, useMap } from "@repo/map"
-import { motion } from "@repo/motion"
 import { mcCloudRiver, salmonMigrationPath } from "@repo/data"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box } from "@repo/ui/mui"
 import {
   InfrastructureColor,
   FreshWaterColor,
 } from "../../helpers/colorPalette"
-import TreeIcon from "../markers/TreeIcon"
+import { useLazyMount } from "../hooks/useLazyMount"
 
 const MCCLOUD_RIVER_SOURCE_ID = "mccloud-river-source"
-const MCCLOUD_MARKER_PROGRESS = 0.5
-const MOVING_POINT_RANGE: [number, number] = [0.12, 0.38]
-const TREE_REVEAL_RANGE: [number, number] = [0.46, 0.82]
-const TREE_EXIT_RANGE: [number, number] = [0.82, 0.9]
-const TREE_BASE_ZOOM = 9.7
-const TREE_MAX_ZOOM_SCALE = 1.55
-const SHASTA_DAM_COORDINATE: Coordinate = [-122.42, 40.718]
-const TREE_MARKERS = [
-  { id: "center", x: 0, y: 0, size: 1, delay: 0 },
-  { id: "left", x: -25, y: 5, size: 0.82, delay: 0.32 },
-  { id: "right", x: 29, y: 3, size: 0.9, delay: 0.54 },
+const MCCLOUD_HEADWATER_SOURCE_ID = "mccloud-headwater-source"
+const MCCLOUD_HEADWATER_SOURCE_LAYER = "McCloud_headwater.zip-hypvk0"
+const MCCLOUD_SPRINGS_SOURCE_ID = "mccloud-springs-source"
+const MCCLOUD_SPRINGS_SOURCE_LAYER = "McCloud_springs.zip-phame5"
+const SPRING_RIPPLE_LAYER_IDS = [
+  "mccloud-springs-ripple-1",
+  "mccloud-springs-ripple-2",
 ] as const
+const MOVING_POINT_RANGE: [number, number] = [0.12, 0.38]
+const MOVING_POINT_EXIT_PROGRESS = 0.9
+const SHASTA_DAM_COORDINATE: Coordinate = [-122.42, 40.718]
 
 type Coordinate = [number, number]
 type LineGeometry = {
@@ -144,9 +142,6 @@ function splitLineAtClosestPoint(line: Coordinate[], target: Coordinate) {
   }
 }
 
-const MCCLOUD_RIVER_PATH = getLongestLine(
-  mcCloudRiver as unknown as LineFeatureCollection,
-)
 const SALMON_MIGRATION_FULL_PATH = [
   ...getLongestLine(salmonMigrationPath as unknown as LineFeatureCollection),
 ].reverse()
@@ -154,11 +149,6 @@ const {
   before: SALMON_MIGRATION_TO_SHASTA_PATH,
   after: SALMON_MIGRATION_AFTER_SHASTA_PATH,
 } = splitLineAtClosestPoint(SALMON_MIGRATION_FULL_PATH, SHASTA_DAM_COORDINATE)
-const MCCLOUD_RIVER_MIDPOINT = getPointAlongLine(
-  MCCLOUD_RIVER_PATH,
-  MCCLOUD_MARKER_PROGRESS,
-)
-
 export default function ShastaMcCloudLayer({
   visible,
   progress,
@@ -178,20 +168,14 @@ export default function ShastaMcCloudLayer({
 }) {
   const clampedProgress = Math.max(0, Math.min(1, progress))
   const { mapRef } = useMap()
-  const [mapZoom, setMapZoom] = useState(TREE_BASE_ZOOM)
-  const treeExitProgress = getRangeProgress(sectionProgress, TREE_EXIT_RANGE)
-  const treeOpacity = 1 - treeExitProgress
-  const showTrees =
-    visible &&
-    sectionProgress >= TREE_REVEAL_RANGE[0] &&
-    sectionProgress < TREE_EXIT_RANGE[1]
+  const shouldMount = useLazyMount(visible)
   const movingPointProgress = getRangeProgress(
     sectionProgress,
     MOVING_POINT_RANGE,
   )
   const postShastaProgress = getRangeProgress(sectionProgress, [
     MOVING_POINT_RANGE[1],
-    TREE_EXIT_RANGE[1],
+    MOVING_POINT_EXIT_PROGRESS,
   ])
   const movingPointCoordinate = useMemo(() => {
     if (movingPointProgress < 1) {
@@ -210,11 +194,7 @@ export default function ShastaMcCloudLayer({
     visible &&
     showMigration &&
     sectionProgress >= MOVING_POINT_RANGE[0] &&
-    sectionProgress < TREE_EXIT_RANGE[1]
-  const treeZoomScale = Math.min(
-    TREE_MAX_ZOOM_SCALE,
-    Math.max(1, 1 + (mapZoom - TREE_BASE_ZOOM) * 0.22),
-  )
+    sectionProgress < MOVING_POINT_EXIT_PROGRESS
   const trimOffset = useMemo<[number, number]>(
     () => [clampedProgress, 1],
     [clampedProgress],
@@ -223,57 +203,152 @@ export default function ShastaMcCloudLayer({
 
   useEffect(() => {
     const map = mapRef?.current?.getMap()
-    if (!map) return
+    if (!map || !visible || !shouldMount) return
 
-    const updateZoom = () => setMapZoom(map.getZoom())
-    updateZoom()
-    map.on("zoom", updateZoom)
+    let animationFrame = 0
+    const animateRipples = (time: number) => {
+      SPRING_RIPPLE_LAYER_IDS.forEach((layerId, index) => {
+        if (!map.getLayer(layerId)) return
 
-    return () => {
-      map.off("zoom", updateZoom)
+        const phase = (time / 4000 + index / SPRING_RIPPLE_LAYER_IDS.length) % 1
+        map.setPaintProperty(layerId, "circle-radius", 5 + phase * 17)
+        map.setPaintProperty(
+          layerId,
+          "circle-opacity",
+          0.48 * Math.pow(1 - phase, 1.35),
+        )
+        map.setPaintProperty(
+          layerId,
+          "circle-stroke-opacity",
+          0.9 * Math.pow(1 - phase, 1.25),
+        )
+      })
+
+      animationFrame = requestAnimationFrame(animateRipples)
     }
-  }, [mapRef])
+
+    animationFrame = requestAnimationFrame(animateRipples)
+    return () => cancelAnimationFrame(animationFrame)
+  }, [mapRef, shouldMount, visible])
+
+  if (!shouldMount) return null
 
   return (
     <>
       {showRiver ? (
-        <Source
-          id={MCCLOUD_RIVER_SOURCE_ID}
-          type="geojson"
-          data={mcCloudRiver}
-          lineMetrics={true}
-        >
-          <Layer
-            id="mccloud-river-halo"
-            type="line"
-            paint={{
-              "line-color": "#07142c",
-              "line-width": 9,
-              "line-opacity": 0.75,
-              "line-trim-offset": trimOffset,
-            }}
-            layout={{
-              "line-cap": "round",
-              "line-join": "round",
-              visibility: visibilityValue,
-            }}
-          />
-          <Layer
-            id="mccloud-river-body"
-            type="line"
-            paint={{
-              "line-color": FreshWaterColor,
-              "line-width": 5,
-              "line-opacity": 1,
-              "line-trim-offset": trimOffset,
-            }}
-            layout={{
-              "line-cap": "round",
-              "line-join": "round",
-              visibility: visibilityValue,
-            }}
-          />
-        </Source>
+        <>
+          <Source
+            id={MCCLOUD_HEADWATER_SOURCE_ID}
+            type="vector"
+            url="mapbox://coeqwal.4ymc2w"
+          >
+            <Layer
+              id="mccloud-headwater-halo"
+              type="line"
+              source-layer={MCCLOUD_HEADWATER_SOURCE_LAYER}
+              paint={{
+                "line-color": "#07142c",
+                "line-width": 4,
+                "line-opacity": 0.55,
+              }}
+              layout={{
+                "line-cap": "round",
+                "line-join": "round",
+                visibility: visibilityValue,
+              }}
+            />
+            <Layer
+              id="mccloud-headwater-body"
+              type="line"
+              source-layer={MCCLOUD_HEADWATER_SOURCE_LAYER}
+              paint={{
+                "line-color": FreshWaterColor,
+                "line-width": 2.5,
+                "line-opacity": 0.9,
+              }}
+              layout={{
+                "line-cap": "round",
+                "line-join": "round",
+                visibility: visibilityValue,
+              }}
+            />
+          </Source>
+
+          <Source
+            id={MCCLOUD_RIVER_SOURCE_ID}
+            type="geojson"
+            data={mcCloudRiver}
+            lineMetrics={true}
+          >
+            <Layer
+              id="mccloud-river-halo"
+              type="line"
+              paint={{
+                "line-color": "#07142c",
+                "line-width": 9,
+                "line-opacity": 0.75,
+                "line-trim-offset": trimOffset,
+              }}
+              layout={{
+                "line-cap": "round",
+                "line-join": "round",
+                visibility: visibilityValue,
+              }}
+            />
+            <Layer
+              id="mccloud-river-body"
+              type="line"
+              paint={{
+                "line-color": FreshWaterColor,
+                "line-width": 5,
+                "line-opacity": 1,
+                "line-trim-offset": trimOffset,
+              }}
+              layout={{
+                "line-cap": "round",
+                "line-join": "round",
+                visibility: visibilityValue,
+              }}
+            />
+          </Source>
+
+          <Source
+            id={MCCLOUD_SPRINGS_SOURCE_ID}
+            type="vector"
+            url="mapbox://coeqwal.zct2ss"
+          >
+            {SPRING_RIPPLE_LAYER_IDS.map((layerId) => (
+              <Layer
+                key={layerId}
+                id={layerId}
+                type="circle"
+                source-layer={MCCLOUD_SPRINGS_SOURCE_LAYER}
+                paint={{
+                  "circle-color": "rgba(0, 0, 0, 0)",
+                  "circle-radius": 7,
+                  "circle-opacity": 0.48,
+                  "circle-stroke-color": FreshWaterColor,
+                  "circle-stroke-opacity": 0.9,
+                  "circle-stroke-width": 2.25,
+                }}
+                layout={{ visibility: visibilityValue }}
+              />
+            ))}
+            <Layer
+              id="mccloud-springs-center"
+              type="circle"
+              source-layer={MCCLOUD_SPRINGS_SOURCE_LAYER}
+              paint={{
+                "circle-color": FreshWaterColor,
+                "circle-radius": 6,
+                "circle-opacity": 1,
+                "circle-stroke-color": "#fcfbfa",
+                "circle-stroke-width": 1.5,
+              }}
+              layout={{ visibility: visibilityValue }}
+            />
+          </Source>
+        </>
       ) : null}
 
       {visible ? (
@@ -313,98 +388,6 @@ export default function ShastaMcCloudLayer({
                 />
               )}
             </Marker>
-          ) : null}
-          {!migrationOnly ? (
-            <>
-              <Marker longitude={-122.42} latitude={40.718}>
-                <Box
-                  sx={{
-                    position: "absolute",
-                    width: 10,
-                    height: 10,
-                    borderRadius: "50%",
-                    transform: "translate(-50%, -50%)",
-                    backgroundColor: "#fcfbfa",
-                    border: `2px solid ${InfrastructureColor}`,
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.35)",
-                  }}
-                />
-              </Marker>
-              <Marker longitude={-122.42} latitude={40.718}>
-                <Typography
-                  component="span"
-                  sx={{
-                    position: "absolute",
-                    left: 14,
-                    top: -8,
-                    whiteSpace: "nowrap",
-                    color: "#fcfbfa",
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    textShadow: "0 1px 6px rgba(0, 0, 0, 0.75)",
-                  }}
-                >
-                  Shasta Dam
-                </Typography>
-              </Marker>
-              {showTrees && MCCLOUD_RIVER_MIDPOINT ? (
-                <Marker
-                  longitude={MCCLOUD_RIVER_MIDPOINT[0]}
-                  latitude={MCCLOUD_RIVER_MIDPOINT[1]}
-                >
-                  <Box
-                    aria-hidden="true"
-                    sx={{
-                      position: "absolute",
-                      width: 70,
-                      height: 68,
-                      transform: `translate(-50%, -100%) scale(${treeZoomScale})`,
-                      transformOrigin: "50% 100%",
-                      opacity: treeOpacity,
-                      color: "#269d2c",
-                      pointerEvents: "none",
-                    }}
-                  >
-                    {TREE_MARKERS.map((tree) => (
-                      <Box
-                        key={tree.id}
-                        sx={{
-                          position: "absolute",
-                          left: `calc(50% + ${tree.x}px)`,
-                          bottom: -tree.y,
-                          width: 30,
-                          height: 58,
-                          transform: "translateX(-50%)",
-                        }}
-                      >
-                        <motion.div
-                          initial={{
-                            opacity: 0,
-                            y: 16,
-                            scale: tree.size * 0.72,
-                          }}
-                          animate={{ opacity: 1, y: 0, scale: tree.size }}
-                          transition={{
-                            duration: 0.36,
-                            delay: tree.delay,
-                            ease: [0.22, 1, 0.36, 1],
-                          }}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            filter:
-                              "drop-shadow(0 8px 12px rgba(0, 0, 0, 0.35))",
-                            transformOrigin: "50% 100%",
-                          }}
-                        >
-                          <TreeIcon width="100%" height="100%" />
-                        </motion.div>
-                      </Box>
-                    ))}
-                  </Box>
-                </Marker>
-              ) : null}
-            </>
           ) : null}
         </>
       ) : null}

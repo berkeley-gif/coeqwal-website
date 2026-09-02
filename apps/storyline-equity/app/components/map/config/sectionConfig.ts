@@ -48,7 +48,6 @@ export const getSectionLayerConfig = (
       config.majorRivers = true
       break
     case "HistoricalContext":
-      config.majorRivers = true
       config.locationLabels = SHASTA_MCCLOUD_RIVER_LABELS
       break
     case "GoldRush":
@@ -57,10 +56,6 @@ export const getSectionLayerConfig = (
       break
     default:
       break
-  }
-
-  if (sectionId === "HistoricalContext") {
-    config.shastaMcCloud = true
   }
 
   if (sectionId === "GoldRush") {
