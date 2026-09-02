@@ -12,6 +12,7 @@ export default function MapCircleAnnotationLayer({
   iconColorOverrides = {},
   scaleOverrides = {},
   opacityOverrides = {},
+  iconScaleOverrides = {},
   showStrokes = true,
   showLabels = true,
 }: {
@@ -21,6 +22,7 @@ export default function MapCircleAnnotationLayer({
   iconColorOverrides?: Partial<Record<string, string>>
   scaleOverrides?: Partial<Record<string, number>>
   opacityOverrides?: Partial<Record<string, number>>
+  iconScaleOverrides?: Partial<Record<string, number>>
   showStrokes?: boolean
   showLabels?: boolean
 }) {
@@ -87,7 +89,13 @@ export default function MapCircleAnnotationLayer({
                 ) : null}
                 {(iconOverrides[annotation.id] ?? annotation.iconSrc) &&
                 iconColorOverrides[annotation.id] ? (
-                  <foreignObject x="3" y="3" width="164" height="164">
+                  <foreignObject
+                    x="7"
+                    y="9"
+                    width="156"
+                    height="156"
+                    transform={`translate(85 85) scale(${iconScaleOverrides[annotation.id] ?? 1}) translate(-85 -85)`}
+                  >
                     <motion.div
                       initial={{ opacity: 0, scale: 0.7 }}
                       animate={{ opacity: 1, scale: 1 }}

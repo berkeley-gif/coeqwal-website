@@ -27,7 +27,6 @@ export default function InfrastructureCanalNetworkLayer({
       id={SOURCE_ID}
       type="geojson"
       data={canalNetwork as unknown as GeoJSON.FeatureCollection}
-      lineMetrics
     >
       <Layer
         id="infrastructure-canal-network-outline"
@@ -37,7 +36,6 @@ export default function InfrastructureCanalNetworkLayer({
           "line-opacity":
             InfrastructureOutlineOpacity * revealProgress * opacityMultiplier,
           "line-width": 7,
-          "line-trim-offset": [0, revealProgress],
         }}
         layout={{
           "line-cap": "round",
@@ -52,7 +50,6 @@ export default function InfrastructureCanalNetworkLayer({
           "line-color": InfrastructureColor,
           "line-opacity": revealProgress * opacityMultiplier,
           "line-width": 5,
-          "line-trim-offset": [0, revealProgress],
         }}
         layout={{
           "line-cap": "round",

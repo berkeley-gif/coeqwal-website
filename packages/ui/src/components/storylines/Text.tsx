@@ -108,7 +108,7 @@ function InlineLegendText({
       component="span"
       aria-hidden
       sx={{
-        width: shape === "line" ? "1.7em" : "0.75em",
+        width: shape === "line" ? "1.36em" : "0.75em",
         height: shape === "line" ? 2 : "0.75em",
         borderRadius: shape === "circle" ? "50%" : 0,
         backgroundColor: shape === "triangle" ? "transparent" : legend.color,

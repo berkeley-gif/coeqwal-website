@@ -1,15 +1,16 @@
 "use client"
 
-import {
-  ScrollElement,
-  StickyScrollSection,
-  useScrollProgress,
-} from "@repo/scrollytelling"
-import { motion, useTransform } from "@repo/motion"
+import { ScrollElement, StickyScrollSection } from "@repo/scrollytelling"
+import { motion } from "@repo/motion"
 import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
 import { themeValues } from "@repo/ui/themes/theme"
 import { FloatingBubbles } from "./helpers/FloatingBubbles"
+import {
+  CONCLUSION_HANDOFF_END_PROGRESS,
+  CONCLUSION_HANDOFF_START_PROGRESS,
+  useConclusionProgress,
+} from "../store"
 
 const conclusionText = {
   en: {
@@ -117,11 +118,28 @@ export default function Conclusion() {
   )
 }
 
+function clamp01(value: number) {
+  return Math.min(1, Math.max(0, value))
+}
+
 function ConclusionVisual() {
-  const progress = useScrollProgress()
-  const openerVisualOpacity = useTransform(progress, [0.64, 0.76], [0, 1])
-  const openerVisualScale = useTransform(progress, [0.64, 0.78], [0.82, 1])
-  const openerVisualX = useTransform(progress, [0.64, 0.78], [42, 0])
+  const conclusionProgress = useConclusionProgress()
+  // Crossfades in as ConclusionCircleMorphOverlay (the map-side circle
+  // morph) finishes blooming and fades itself out — see the shared
+  // CONCLUSION_* thresholds in store.ts. Positions already match exactly
+  // (both read the same FloatingBubbles cluster geometry), so this is a
+  // plain opacity handoff rather than a slide/scale entrance.
+  const revealOpacity = clamp01(
+    (conclusionProgress - CONCLUSION_HANDOFF_START_PROGRESS) /
+      (CONCLUSION_HANDOFF_END_PROGRESS - CONCLUSION_HANDOFF_START_PROGRESS),
+  )
+  // After the handoff, bubbles start as the tier-colored icons they morphed
+  // in as, then fade into their photos — closing the loop with the opener's
+  // photo -> icon fade.
+  const photoRevealProgress = clamp01(
+    (conclusionProgress - CONCLUSION_HANDOFF_END_PROGRESS) /
+      (1 - CONCLUSION_HANDOFF_END_PROGRESS),
+  )
 
   if (!LOAD_CONCLUSION_VISUAL) return null
 
@@ -134,10 +152,7 @@ function ConclusionVisual() {
         right: "-1dvw",
         width: "45dvw",
         height: "85dvh",
-        opacity: openerVisualOpacity,
-        scale: openerVisualScale,
-        x: openerVisualX,
-        transformOrigin: "78% 50%",
+        opacity: revealOpacity,
         pointerEvents: "none",
         display: "flex",
         alignItems: "center",
@@ -147,6 +162,8 @@ function ConclusionVisual() {
       <Box sx={{ width: "min(45dvw, 72dvh)", aspectRatio: "1 / 1" }}>
         <FloatingBubbles
           align="center"
+          showPhotos
+          iconProgress={1 - photoRevealProgress}
           iconColorsBySrc={{
             "/map-icons/urban.svg": themeValues.palette.tiers.tier1,
             "/map-icons/agriculture.svg": themeValues.palette.tiers.tier2,

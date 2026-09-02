@@ -17,43 +17,52 @@ export function useScrollamaSection() {
    * Called when a step enters the viewport.
    * Updates the active section in the store.
    */
-  const onStepEnter = useCallback(({ data }: StepEvent<SectionId>) => {
-    if (data === "Background") {
-      appActions.setRiverProgress(0)
-      appActions.setBackgroundProgress(0)
-    } else if (data === "HistoricalContext") {
-      appActions.setRiverProgress(1)
-      appActions.setBackgroundProgress(0)
-    } else if (data === "GoldRush") {
-      appActions.setRiverProgress(1)
-      appActions.setGoldRushProgress(0)
-      appActions.setYubaRiverProgress(0)
-      appActions.setBackgroundProgress(0)
-    } else if (data === "Infrastructure") {
-      appActions.setRiverProgress(1)
-      appActions.setYubaRiverProgress(1)
-      appActions.setInfrastructureProgress(0)
-      appActions.setBackgroundProgress(0)
-      appActions.setGoldRushProgress(0)
-    } else {
-      appActions.setRiverProgress(
-        isAtOrAfterSection(data, "HistoricalContext") ? 1 : 0,
-      )
-      appActions.setYubaRiverProgress(
-        isAtOrAfterSection(data, "Infrastructure") ? 1 : 0,
-      )
-      appActions.setBackgroundProgress(0)
-      appActions.setGoldRushProgress(0)
-      appActions.setInfrastructureProgress(0)
-    }
+  const onStepEnter = useCallback(
+    ({ data, direction }: StepEvent<SectionId>) => {
+      if (data === "Background") {
+        appActions.setRiverProgress(0)
+        appActions.setBackgroundProgress(0)
+      } else if (data === "HistoricalContext") {
+        appActions.setRiverProgress(1)
+        appActions.setBackgroundProgress(0)
+        // When returning from Gold Rush, enter Historical Context at its lower
+        // boundary so the camera travels directly from Yuba back to McCloud.
+        // Resetting this to zero first creates an unwanted statewide waypoint.
+        appActions.setHistoricalContextProgress(direction === "up" ? 1 : 0)
+      } else if (data === "GoldRush") {
+        appActions.setRiverProgress(1)
+        appActions.setGoldRushProgress(0)
+        appActions.setYubaRiverProgress(0)
+        appActions.setBackgroundProgress(0)
+      } else if (data === "Infrastructure") {
+        appActions.setRiverProgress(1)
+        appActions.setYubaRiverProgress(1)
+        appActions.setInfrastructureProgress(0)
+        appActions.setBackgroundProgress(0)
+        appActions.setGoldRushProgress(0)
+      } else {
+        appActions.setRiverProgress(
+          isAtOrAfterSection(data, "HistoricalContext") ? 1 : 0,
+        )
+        appActions.setYubaRiverProgress(
+          isAtOrAfterSection(data, "Infrastructure") ? 1 : 0,
+        )
+        appActions.setBackgroundProgress(0)
+        appActions.setGoldRushProgress(0)
+        appActions.setInfrastructureProgress(0)
+      }
 
-    appActions.setMcCloudRiverProgress(0)
-    appActions.setHistoricalContextProgress(0)
-    appActions.setClimateResilienceProgress(0)
-    appActions.setTransparencyProgress(0)
-    appActions.setConclusionProgress(0)
-    appActions.setActiveSection(data)
-  }, [])
+      appActions.setMcCloudRiverProgress(0)
+      appActions.setClimateResilienceProgress(0)
+      appActions.setTransparencyProgress(0)
+      appActions.setConclusionProgress(0)
+      appActions.setActiveSection(data)
+      if (data !== "HistoricalContext") {
+        appActions.setHistoricalContextProgress(0)
+      }
+    },
+    [],
+  )
 
   /**
    * Called when a step exits the viewport.

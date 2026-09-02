@@ -80,7 +80,7 @@ const bubbles = [
   { radius: 15, photoSrc: "/photos/delta_cranes.png", ...wetlandIcon },
 ] as const
 
-const packedBubbles = (() => {
+export const packedBubbles = (() => {
   // Reserve enough space for each circle's small independent drift.
   const gap = 1.5
   const circles = bubbles.map((bubble) => ({
@@ -104,6 +104,39 @@ const packedBubbles = (() => {
     iconContentFill: circle.bubble.iconContentFill,
   }))
 })()
+
+// The fixed on-screen box the cluster is centered in when `align="center"`
+// (see ConclusionVisual/OpenerVisual): `top: 15dvh, right: -1dvw, width:
+// 45dvw, height: 85dvh`, expressed as fractions of viewport size. Kept here
+// so map-side code (which draws in real screen pixels, not this component's
+// own CSS) can compute the exact same on-screen target rect without a DOM
+// measurement — single source of truth for both.
+const BUBBLES_OUTER_BOX = { top: 0.15, right: -0.01, width: 0.45, height: 0.85 }
+const BUBBLES_SIZE_MAX_PX = 52 * 16 // 52rem, assuming a 16px root font size
+
+export function getBubblesClusterRect(
+  viewportWidth: number,
+  viewportHeight: number,
+) {
+  const outerWidth = BUBBLES_OUTER_BOX.width * viewportWidth
+  const outerHeight = BUBBLES_OUTER_BOX.height * viewportHeight
+  const outerRight = viewportWidth - BUBBLES_OUTER_BOX.right * viewportWidth
+  const outerLeft = outerRight - outerWidth
+  const outerTop = BUBBLES_OUTER_BOX.top * viewportHeight
+  const size = Math.min(
+    Math.min(0.45 * viewportWidth, 0.72 * viewportHeight),
+    BUBBLES_SIZE_MAX_PX,
+  )
+  const centerX = outerLeft + outerWidth / 2
+  const centerY = outerTop + outerHeight / 2
+
+  return {
+    x: centerX - size / 2,
+    y: centerY - size / 2,
+    width: size,
+    height: size,
+  }
+}
 
 // How much of the circle's diameter the icon's visible artwork should span
 // along its longer axis. `contentFill` compensates for built-in padding in
@@ -162,22 +195,30 @@ export function FloatingBubbles({
   iconColorsBySrc = {},
   showPhotos = false,
   align = "right",
+  iconProgress,
 }: {
   iconColorsBySrc?: Partial<Record<string, string>>
   showPhotos?: boolean
   align?: "right" | "center"
+  // Externally-driven photo/icon crossfade (0 = full photo, 1 = full icon),
+  // for callers whose own scroll timeline should control the fade instead of
+  // this component's built-in opener-scroll behavior. Omit to keep the
+  // default (page-top scroll-driven, photo -> icon) used by the opener.
+  iconProgress?: number
 } = {}) {
   const prefersReducedMotion = useReducedMotion()
   const clipIdPrefix = useId().replace(/:/g, "")
   const scrollProgress = useOpenerScrollProgress()
-  const fadeT = Math.min(
-    1,
-    Math.max(
-      0,
-      (scrollProgress - PHOTO_TO_ICON_RANGE[0]) /
-        (PHOTO_TO_ICON_RANGE[1] - PHOTO_TO_ICON_RANGE[0]),
-    ),
-  )
+  const fadeT =
+    iconProgress ??
+    Math.min(
+      1,
+      Math.max(
+        0,
+        (scrollProgress - PHOTO_TO_ICON_RANGE[0]) /
+          (PHOTO_TO_ICON_RANGE[1] - PHOTO_TO_ICON_RANGE[0]),
+      ),
+    )
   const photoOpacity = 1 - fadeT
   const iconOpacity = fadeT
 

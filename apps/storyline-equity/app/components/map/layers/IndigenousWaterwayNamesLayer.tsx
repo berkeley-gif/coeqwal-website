@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect } from "react"
+import { indigenousWaterwayLabels } from "@repo/data"
 import { Layer, Source, useMap } from "@repo/map"
 import { OceanWaterColor } from "../../helpers/colorPalette"
 
 const SOURCE_ID = "indigenous-waterway-names-source"
-const SOURCE_LAYER = "indigenous_waterway_names.zip-bz7t28"
 const LABEL_LAYER_ID = "indigenous-waterway-names-labels"
 
 export default function IndigenousWaterwayNamesLayer({
@@ -48,19 +48,24 @@ export default function IndigenousWaterwayNamesLayer({
   }, [mapRef, visible])
 
   return (
-    <Source id={SOURCE_ID} type="vector" url="mapbox://coeqwal.dpvfu6">
+    <Source
+      id={SOURCE_ID}
+      type="geojson"
+      data={indigenousWaterwayLabels as GeoJSON.FeatureCollection}
+    >
       <Layer
         id={LABEL_LAYER_ID}
         type="symbol"
-        source-layer={SOURCE_LAYER}
         layout={{
-          "text-field": ["get", "name"],
+          "text-field": ["get", "Indigenous Name"],
           "text-font": ["Neue Haas Grotesk", "Arial Unicode MS Bold"],
           "text-size": ["interpolate", ["linear"], ["zoom"], 5, 11, 7, 14],
           "text-padding": 8,
           "text-max-width": 14,
           "text-allow-overlap": false,
           "text-ignore-placement": false,
+          "text-optional": false,
+          "symbol-avoid-edges": true,
           visibility: visible ? "visible" : "none",
         }}
         paint={{

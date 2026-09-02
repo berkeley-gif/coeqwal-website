@@ -51,7 +51,17 @@ const backgroundText = {
     ],
     [
       {
-        text: "Yet the benefits and burdens of California's water system are not shared equally. To understand why, we need to look at how today's water system came to be.",
+        text: "Yet the benefits and burdens of California's water system are not shared equally. ",
+      },
+      {
+        segments: [
+          { text: "To understand why, we need to look at " },
+          {
+            text: " how today's water system came to be",
+            mark: "strong",
+          },
+          { text: "." },
+        ],
       },
     ],
   ],
@@ -62,13 +72,13 @@ export default function Background() {
 }
 
 function BackgroundNarrative() {
-  const revealStarts = [0.18, 0.32, 0.46, 0.6] as const
+  const revealStarts = [0.1, 0.27, 0.44, 0.6] as const
 
   return (
     <StickyScrollSection
       id="frame-1"
       ariaLabel="California water system introduction"
-      height="500vh"
+      height="350vh"
       stickyTop="15vh"
       stickyHeight="70vh"
       offset={["start start", "end center"]}
@@ -83,8 +93,8 @@ function BackgroundNarrative() {
         }}
       >
         <ScrollElement
-          enter={[0, 0.04]}
-          hold={[0.04, 1]}
+          enter={[0, 0.01]}
+          hold={[0.01, 1]}
           animation="slideUp"
           style={{ gridArea: "1 / 1" }}
         >

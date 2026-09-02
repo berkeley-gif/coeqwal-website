@@ -30,15 +30,6 @@ const CANAL_LINE_WIDTH: typeof LINE_WIDTH = [
   2.1,
 ]
 
-const HISTORICAL_REVEAL_RANGE: [number, number] = [0.66, 0.7]
-const WATERWAY_CROSSFADE_RANGE: [number, number] = [0.72, 0.78]
-const CANAL_REVEAL_RANGE: [number, number] = [0.82, 0.88]
-
-function normalizeProgress(progress: number, [start, end]: [number, number]) {
-  if (end === start) return progress >= start ? 1 : 0
-  return Math.max(0, Math.min(1, (progress - start) / (end - start)))
-}
-
 export default function DeltaCanalLayer({
   visible,
   progress,
@@ -46,15 +37,13 @@ export default function DeltaCanalLayer({
   visible: boolean
   progress: number
 }) {
-  const historicalReveal = normalizeProgress(progress, HISTORICAL_REVEAL_RANGE)
-  const waterwayCrossfade = normalizeProgress(
-    progress,
-    WATERWAY_CROSSFADE_RANGE,
-  )
-  const canalReveal = normalizeProgress(progress, CANAL_REVEAL_RANGE)
-  const historicalOpacity = visible
-    ? historicalReveal * (1 - waterwayCrossfade)
-    : 0
+  // 0.50–0.60: historical waterways only
+  // 0.60–0.65: historical waterways crossfade to current waterways
+  // 0.65–0.70: current downstream waterways only
+  // 0.70–0.75: canals fade in, then hold through 1.00
+  const waterwayCrossfade = Math.min(1, Math.max(0, (progress - 0.6) / 0.05))
+  const canalReveal = Math.min(1, Math.max(0, (progress - 0.7) / 0.05))
+  const historicalOpacity = visible ? 1 - waterwayCrossfade : 0
   const modernOpacity = visible ? waterwayCrossfade : 0
   const canalOpacity = visible ? canalReveal * 0.95 : 0
   const visibilityValue = visible ? "visible" : "none"

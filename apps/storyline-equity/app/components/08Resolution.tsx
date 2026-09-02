@@ -83,7 +83,6 @@ const visualizationCopy = {
   },
 } as const
 const LOAD_RESOLUTION_VISUALS = true
-const titleBandColor = "#6b4f8a"
 const narrativeMarkSx = {
   strong: { fontWeight: 700 },
   optimalName: { color: optimalTierColor, fontWeight: 700 },
@@ -95,6 +94,12 @@ const narrativeMarkSx = {
   tier3Name: { color: tierColors[3], fontWeight: 700 },
   tier4Name: { color: tierColors[4], fontWeight: 700 },
 }
+
+const resolutionFocusPrompt = [
+  {
+    text: "To see how COEQWAL works, let's focus on community water system.",
+  },
+] as const
 
 const storyFrames = [
   {
@@ -114,9 +119,6 @@ const storyFrames = [
         },
         {
           text: "It tests these strategies across a range of hydroclimates, revealing who benefits and who bears the burden of more intense droughts, floods, and snowpack loss.",
-        },
-        {
-          text: "To see how this works, let's focus on community water systems.",
         },
       ],
     ],
@@ -447,15 +449,30 @@ export default function Resolution() {
             maxWidth: "min(75ch, 55dvw)",
           }}
         >
+          <ScrollElement
+            enter={[-0.01, 0]}
+            hold={[0, 0.025]}
+            exit={[0.025, 0.04]}
+            animation="slideUp"
+            style={{ gridArea: "1 / 1" }}
+          >
+            <Box component="article">
+              <Paragraph blocks={resolutionFocusPrompt} />
+            </Box>
+          </ScrollElement>
+
           {storyFrames.map((frame, index) => {
             const start = index / frameCount
             const end = (index + 1) / frameCount
+            const enter: [number, number] =
+              index === 0 ? [0.04, 0.055] : [start, start + 0.025]
+            const holdStart = index === 0 ? 0.055 : start + 0.025
 
             return (
               <ScrollElement
                 key={index}
-                enter={[start, start + 0.025]}
-                hold={[start + 0.025, end - 0.025]}
+                enter={enter}
+                hold={[holdStart, end - 0.025]}
                 exit={index === frameCount - 1 ? undefined : [end - 0.025, end]}
                 animation="slideUp"
                 style={{ gridArea: "1 / 1" }}
@@ -948,7 +965,6 @@ function UnitVisualization() {
           px: { xs: 1.5, md: 2, lg: 4.5, xl: 5 },
           pb: 2,
           overflow: "hidden",
-          backgroundColor: titleBandColor,
         }}
       >
         <VisualizationTitle
@@ -994,7 +1010,7 @@ function UnitVisualization() {
       </Box>
       <Box
         component="svg"
-        viewBox="0 0 720 780"
+        viewBox="0 60 720 780"
         role="img"
         aria-labelledby="unit-vis-title unit-vis-description"
         preserveAspectRatio="xMidYMid meet"
@@ -1021,245 +1037,248 @@ function UnitVisualization() {
           water years as dots.
         </desc>
 
-        <motion.g
-          style={{
-            opacity: combinedTreemapOpacity,
-            scale: tierTreemapScale,
-            transformOrigin: "360px 450px",
-          }}
-          aria-label="Community water system delivery treemap"
-        >
-          <defs>
-            {tiles.map((tile) => (
-              <clipPath
-                key={tile.data.locationId}
-                id={`cws-tile-${tile.data.locationId}`}
-              >
-                <rect
-                  x={treemapBounds.x + tile.x0}
-                  y={treemapBounds.y + tile.y0}
-                  width={tile.x1 - tile.x0}
-                  height={tile.y1 - tile.y0}
-                />
-              </clipPath>
-            ))}
-          </defs>
-          {tiles.map((tile, tileIndex) => {
-            const tierLevel = tierByLocation.get(tile.data.locationId)
-            const tierColor = tierLevel
-              ? (tierColors[tierLevel] ?? "#fcfbfa")
-              : "#fcfbfa"
-            const equalLayout = equalTileLayouts.get(tile.data.locationId)
-            const continuousLayout = cwsContinuousLayouts.get(
-              tile.data.locationId,
-            )
-
-            return equalLayout && continuousLayout ? (
-              <TierTreemapTile
-                key={tile.data.locationId}
-                locationId={tile.data.locationId}
-                sourceX={treemapBounds.x + tile.x0}
-                sourceY={treemapBounds.y + tile.y0}
-                sourceWidth={tile.x1 - tile.x0}
-                sourceHeight={tile.y1 - tile.y0}
-                target={equalLayout}
-                continuousTarget={continuousLayout}
-                tierColor={tierColor}
-                sectionProgress={progress}
-                revealOrder={tileIndex}
-                tileCount={tiles.length}
-                layoutProgress={equalTileProgress}
-                continuousProgress={continuousTierProgress}
-                scenarioOpacity={baselineTileOpacity}
-              />
-            ) : null
-          })}
-          <motion.g style={{ opacity: equalTileProgress }}>
-            <motion.g style={{ opacity: discreteTierGuideOpacity }}>
-              {[1, 2, 3, 4].map((tierLevel) => (
-                <g key={`tier-row-${tierLevel}`}>
-                  <text
-                    x="92"
-                    y={119 + (tierLevel - 1) * 130}
-                    textAnchor="end"
-                    fill={tierColors[tierLevel]}
-                    fontSize="14"
-                    fontWeight="700"
-                  >
-                    {tierNames[tierLevel]}
-                  </text>
-                  {tierLevel < 4 ? (
-                    <line
-                      x1="92"
-                      x2="690"
-                      y1={235 + (tierLevel - 1) * 130}
-                      y2={235 + (tierLevel - 1) * 130}
-                      stroke="rgba(252, 251, 250, 0.2)"
-                      strokeWidth="1"
-                    />
-                  ) : null}
-                </g>
+        <g transform="translate(-30 0)">
+          <motion.g
+            style={{
+              opacity: combinedTreemapOpacity,
+              scale: tierTreemapScale,
+              transformOrigin: "360px 450px",
+            }}
+            aria-label="Community water system delivery treemap"
+          >
+            <defs>
+              {tiles.map((tile) => (
+                <clipPath
+                  key={tile.data.locationId}
+                  id={`cws-tile-${tile.data.locationId}`}
+                >
+                  <rect
+                    x={treemapBounds.x + tile.x0}
+                    y={treemapBounds.y + tile.y0}
+                    width={tile.x1 - tile.x0}
+                    height={tile.y1 - tile.y0}
+                  />
+                </clipPath>
               ))}
-            </motion.g>
-            <motion.g style={{ opacity: continuousTierProgress }}>
-              {[1, 2, 3, 4].map((tierLevel) => (
-                <rect
-                  key={`continuous-tier-band-${tierLevel}`}
-                  x="98"
-                  y={105 + (tierLevel - 1) * 130}
-                  width="592"
-                  height="130"
-                  fill={tierColors[tierLevel]}
-                  fillOpacity="0.075"
-                />
-              ))}
-              <line
-                x1="98"
-                x2="98"
-                y1="105"
-                y2="625"
-                stroke="rgba(252, 251, 250, 0.65)"
-                strokeWidth="1"
-              />
-              {occupiedContinuousTicks.map((tick) => {
-                const tickY = 105 + (tick - 1) * 130
-                const isTierBoundary = Number.isInteger(tick)
+            </defs>
+            {tiles.map((tile, tileIndex) => {
+              const tierLevel = tierByLocation.get(tile.data.locationId)
+              const tierColor = tierLevel
+                ? (tierColors[tierLevel] ?? "#fcfbfa")
+                : "#fcfbfa"
+              const equalLayout = equalTileLayouts.get(tile.data.locationId)
+              const continuousLayout = cwsContinuousLayouts.get(
+                tile.data.locationId,
+              )
 
-                return (
-                  <g key={`continuous-tier-${tick}`}>
-                    <line
-                      x1="92"
-                      x2="98"
-                      y1={tickY}
-                      y2={tickY}
-                      stroke="rgba(252, 251, 250, 0.65)"
-                      strokeWidth="1"
-                    />
-                    <line
-                      x1="98"
-                      x2="690"
-                      y1={tickY}
-                      y2={tickY}
-                      stroke={
-                        isTierBoundary
-                          ? tierColors[Math.min(tick, 4)]
-                          : "rgba(252, 251, 250, 0.12)"
-                      }
-                      strokeOpacity={isTierBoundary ? 0.7 : 1}
-                      strokeWidth="1"
-                    />
-                    <text
-                      x="86"
-                      y={tickY + 4}
-                      textAnchor="end"
-                      fill={
-                        isTierBoundary
-                          ? tierColors[Math.min(tick, 4)]
-                          : "rgba(252, 251, 250, 0.78)"
-                      }
-                      fontSize={isTierBoundary ? "13" : "11"}
-                      fontWeight={isTierBoundary ? "700" : "400"}
-                    >
-                      {isTierBoundary ? tierNames[tick] : tick.toFixed(1)}
-                    </text>
-                  </g>
-                )
-              })}
-              <text
-                x="24"
-                y="365"
-                textAnchor="middle"
-                fill="rgba(252, 251, 250, 0.78)"
-                fontSize="12"
-                transform="rotate(-90 24 365)"
-              >
-                Continuous performance
-              </text>
-            </motion.g>
-            <text
-              x="226"
-              y="730"
-              textAnchor="middle"
-              fill="#fcfbfa"
-              fontSize="14"
-              fontWeight="700"
-            >
-              Community water systems
-            </text>
-          </motion.g>
-          <motion.g style={{ opacity: agricultureLayoutProgress }}>
-            <motion.line
-              x1="382"
-              x2="382"
-              y1="82"
-              y2="752"
-              stroke="rgba(252, 251, 250, 0.5)"
-              strokeWidth="1"
-              style={{ pathLength: agricultureLayoutProgress }}
-            />
-            {agricultureTiles.map((tile) =>
-              tile.continuous ? (
-                <AgricultureTierTile
-                  key={tile.id}
-                  discrete={tile.discrete}
-                  continuous={tile.continuous}
-                  color={tierColors[tile.tierLevel] ?? "#fcfbfa"}
+              return equalLayout && continuousLayout ? (
+                <TierTreemapTile
+                  key={tile.data.locationId}
+                  locationId={tile.data.locationId}
+                  sourceX={treemapBounds.x + tile.x0}
+                  sourceY={treemapBounds.y + tile.y0}
+                  sourceWidth={tile.x1 - tile.x0}
+                  sourceHeight={tile.y1 - tile.y0}
+                  target={equalLayout}
+                  continuousTarget={continuousLayout}
+                  tierColor={tierColor}
+                  sectionProgress={progress}
+                  revealOrder={tileIndex}
+                  tileCount={tiles.length}
+                  layoutProgress={equalTileProgress}
                   continuousProgress={continuousTierProgress}
                   scenarioOpacity={baselineTileOpacity}
                 />
-              ) : null,
-            )}
-            <text
-              x="531"
-              y="730"
-              textAnchor="middle"
-              fill="#fcfbfa"
-              fontSize="14"
-              fontWeight="700"
-            >
-              Agriculture
-            </text>
+              ) : null
+            })}
+            <motion.g style={{ opacity: equalTileProgress }}>
+              <motion.g style={{ opacity: discreteTierGuideOpacity }}>
+                {[1, 2, 3, 4].map((tierLevel) => (
+                  <g key={`tier-row-${tierLevel}`}>
+                    <text
+                      x="92"
+                      y={119 + (tierLevel - 1) * 130}
+                      textAnchor="end"
+                      fill={tierColors[tierLevel]}
+                      fontSize="14"
+                      fontWeight="700"
+                    >
+                      {tierNames[tierLevel]}
+                    </text>
+                    {tierLevel < 4 ? (
+                      <line
+                        x1="92"
+                        x2="690"
+                        y1={235 + (tierLevel - 1) * 130}
+                        y2={235 + (tierLevel - 1) * 130}
+                        stroke="rgba(252, 251, 250, 0.2)"
+                        strokeWidth="1"
+                      />
+                    ) : null}
+                  </g>
+                ))}
+              </motion.g>
+              <motion.g style={{ opacity: continuousTierProgress }}>
+                {[1, 2, 3, 4].map((tierLevel) => (
+                  <rect
+                    key={`continuous-tier-band-${tierLevel}`}
+                    x="98"
+                    y={105 + (tierLevel - 1) * 130}
+                    width="592"
+                    height="130"
+                    fill={tierColors[tierLevel]}
+                    fillOpacity="0.075"
+                  />
+                ))}
+                <line
+                  x1="98"
+                  x2="98"
+                  y1="105"
+                  y2="625"
+                  stroke="rgba(252, 251, 250, 0.65)"
+                  strokeWidth="1"
+                />
+                {occupiedContinuousTicks.map((tick) => {
+                  const tickY = 105 + (tick - 1) * 130
+                  const isTierBoundary = Number.isInteger(tick)
+
+                  return (
+                    <g key={`continuous-tier-${tick}`}>
+                      <line
+                        x1="92"
+                        x2="98"
+                        y1={tickY}
+                        y2={tickY}
+                        stroke="rgba(252, 251, 250, 0.65)"
+                        strokeWidth="1"
+                      />
+                      <line
+                        x1="98"
+                        x2="690"
+                        y1={tickY}
+                        y2={tickY}
+                        stroke={
+                          isTierBoundary
+                            ? tierColors[Math.min(tick, 4)]
+                            : "rgba(252, 251, 250, 0.12)"
+                        }
+                        strokeOpacity={isTierBoundary ? 0.7 : 1}
+                        strokeWidth="1"
+                      />
+                      <text
+                        x="86"
+                        y={tickY + 4}
+                        textAnchor="end"
+                        fill={
+                          isTierBoundary
+                            ? tierColors[Math.min(tick, 4)]
+                            : "rgba(252, 251, 250, 0.78)"
+                        }
+                        fontSize={isTierBoundary ? "13" : "11"}
+                        fontWeight={isTierBoundary ? "700" : "400"}
+                      >
+                        {isTierBoundary ? tierNames[tick] : tick.toFixed(1)}
+                      </text>
+                    </g>
+                  )
+                })}
+                <text
+                  x="24"
+                  y="365"
+                  textAnchor="middle"
+                  fill="rgba(252, 251, 250, 0.78)"
+                  fontSize="12"
+                  transform="rotate(-90 24 365)"
+                >
+                  Continuous performance
+                </text>
+              </motion.g>
+              <text
+                x="226"
+                y="730"
+                textAnchor="middle"
+                fill="#fcfbfa"
+                fontSize="14"
+                fontWeight="700"
+              >
+                Community water systems
+              </text>
+            </motion.g>
+            <motion.g style={{ opacity: agricultureLayoutProgress }}>
+              <motion.line
+                x1="382"
+                x2="382"
+                y1="82"
+                y2="752"
+                stroke="rgba(252, 251, 250, 0.5)"
+                strokeWidth="1"
+                style={{ pathLength: agricultureLayoutProgress }}
+              />
+              {agricultureTiles.map((tile) =>
+                tile.continuous ? (
+                  <AgricultureTierTile
+                    key={tile.id}
+                    discrete={tile.discrete}
+                    continuous={tile.continuous}
+                    color={tierColors[tile.tierLevel] ?? "#fcfbfa"}
+                    continuousProgress={continuousTierProgress}
+                    scenarioOpacity={baselineTileOpacity}
+                  />
+                ) : null,
+              )}
+              <text
+                x="531"
+                y="730"
+                textAnchor="middle"
+                fill="#fcfbfa"
+                fontSize="14"
+                fontWeight="700"
+              >
+                Agriculture
+              </text>
+            </motion.g>
           </motion.g>
-        </motion.g>
 
-        <MovingScenarioTiles
-          sourceLayouts={scenarioSourceLayouts}
-          targetLayouts={scenarioTargetLayouts}
-          progress={scenarioMoveProgress}
-          opacity={scenarioOverlayOpacity}
-        />
-
-        <motion.rect
-          x={outlineX}
-          y={outlineY}
-          width={outlineWidth}
-          height={outlineHeight}
-          rx={outlineRadius}
-          fill="rgba(100, 164, 214, 0.08)"
-          stroke="#fcfbfa"
-          strokeWidth="7"
-          style={{ opacity: outlineOpacity }}
-        />
-        <foreignObject
-          x={360 - openingIconSize / 2}
-          y={460 - openingIconSize / 2}
-          width={openingIconSize}
-          height={openingIconSize}
-        >
-          <motion.div
-            style={{
-              width: "100%",
-              height: "100%",
-              opacity: iconOpacity,
-              backgroundColor: tierColors[1],
-              mask: `url(${urbanIcon}) center / contain no-repeat`,
-              WebkitMask: `url(${urbanIcon}) center / contain no-repeat`,
-              filter: "drop-shadow(0 14px 22px rgba(0, 0, 0, 0.35))",
-            }}
+          <MovingScenarioTiles
+            sourceLayouts={scenarioSourceLayouts}
+            targetLayouts={scenarioTargetLayouts}
+            progress={scenarioMoveProgress}
+            opacity={scenarioOverlayOpacity}
           />
-        </foreignObject>
+
+          <motion.rect
+            x={outlineX}
+            y={outlineY}
+            width={outlineWidth}
+            height={outlineHeight}
+            rx={outlineRadius}
+            fill="rgba(100, 164, 214, 0.08)"
+            stroke="#fcfbfa"
+            strokeWidth="7"
+            style={{ opacity: outlineOpacity }}
+          />
+          <foreignObject
+            x={360 - openingIconSize / 2}
+            y={460 - openingIconSize / 2}
+            width={openingIconSize}
+            height={openingIconSize}
+          >
+            <motion.div
+              style={{
+                width: "100%",
+                height: "100%",
+                opacity: iconOpacity,
+                backgroundColor: "#fcfbfa",
+                mask: `url(${urbanIcon}) center / contain no-repeat`,
+                WebkitMask: `url(${urbanIcon}) center / contain no-repeat`,
+                filter: "drop-shadow(0 14px 22px rgba(0, 0, 0, 0.35))",
+              }}
+            />
+          </foreignObject>
+        </g>
 
         <motion.g
+          transform="translate(-12 -40)"
           style={{ opacity: demandChartOpacity }}
           aria-label="Annual delivery bars and a constant annual demand line across 100 simulated water years"
         >
@@ -2042,6 +2061,7 @@ function TierTreemapTile({
     [revealStart, revealEnd],
     [0, 1],
   )
+  const focusOutlineOpacity = useTransform(sectionProgress, [0.7, 0.76], [1, 0])
 
   return (
     <motion.g style={{ opacity: scenarioOpacity }}>
@@ -2060,8 +2080,20 @@ function TierTreemapTile({
         height={height}
         fill="none"
         stroke="rgba(252, 251, 250, 0.42)"
-        strokeWidth="1.5"
+        strokeWidth={1.5}
       />
+      {isFocus ? (
+        <motion.rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          fill="none"
+          stroke="#fcfbfa"
+          strokeWidth={5}
+          style={{ opacity: focusOutlineOpacity }}
+        />
+      ) : null}
     </motion.g>
   )
 }

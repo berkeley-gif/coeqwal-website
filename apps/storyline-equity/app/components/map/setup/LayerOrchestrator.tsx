@@ -17,7 +17,6 @@ import IndigenousRiverNetworkLayer from "../layers/IndigenousRiverNetworkLayer"
 import IndigenousWaterwayNamesLayer from "../layers/IndigenousWaterwayNamesLayer"
 import UserGroupAreaLayer from "../layers/UserGroupAreaLayer"
 import { BACKGROUND_CIRCLE_ANNOTATIONS } from "../config/locationPresets"
-import { themeValues } from "@repo/ui/themes/theme"
 import {
   INFRASTRUCTURE_DELTA_PROGRESS,
   HISTORICAL_CONTEXT_MCCLOUD_PROGRESS,
@@ -27,7 +26,6 @@ import {
   useBackgroundProgress,
   useCentralValleyIcon,
   useClimateResilienceProgress,
-  useConclusionProgress,
   useCircleAnnotations,
   useHistoricalContextProgress,
   useGoldRushProgress,
@@ -45,6 +43,10 @@ import {
   useTransparencyProgress,
 } from "../../../store"
 
+const CLIMATE_USER_GROUP_ANNOTATIONS = BACKGROUND_CIRCLE_ANNOTATIONS.filter(
+  (annotation) => annotation.id !== "small-community",
+)
+
 export default function LayerOrchestrator() {
   const riverProgress = useRiversProgress()
   const showRivers = useShowRivers()
@@ -54,7 +56,6 @@ export default function LayerOrchestrator() {
   const circleAnnotations = useCircleAnnotations()
   const backgroundProgress = useBackgroundProgress()
   const climateResilienceProgress = useClimateResilienceProgress()
-  const conclusionProgress = useConclusionProgress()
   const centralValleyIcon = useCentralValleyIcon()
   const urbanIcon = useUrbanIcon()
   const wetlandIcon = useWetlandIcon()
@@ -76,6 +77,7 @@ export default function LayerOrchestrator() {
     "central-valley-agriculture": backgroundGroupOpacities.agriculture,
     "bay-area-city": backgroundGroupOpacities.drinking,
     "los-angeles-city": backgroundGroupOpacities.drinking,
+    "small-community": backgroundGroupOpacities.drinking,
     delta: backgroundGroupOpacities.ecosystem,
     "shasta-salmon": backgroundGroupOpacities.ecosystem,
   }
@@ -164,13 +166,12 @@ export default function LayerOrchestrator() {
     : activeSection === "Transparency"
       ? Math.min(1, Math.max(0, (transparencyProgress - 0.72) / 0.08))
       : 0
-  const showTransparencyUserGroups =
-    activeSection === "Transparency" && transparencyProgress >= 0.25
   const showClimateUserGroups = activeSection === "ClimateResilience"
   const userGroupIconScaleOverrides = {
     "central-valley-agriculture": 0.8,
     "bay-area-city": 0.8,
     "los-angeles-city": 0.8,
+    "small-community": 0.8,
     delta: 0.8,
     "shasta-salmon": 0.8,
   }
@@ -185,41 +186,17 @@ export default function LayerOrchestrator() {
     delta: 1 - climateIconFadeProgress * 0.5,
     "shasta-salmon": 1 - climateIconFadeProgress * 0.5,
   }
-  const transparencyUserFadeProgress =
-    activeSection === "Transparency"
-      ? Math.min(1, Math.max(0, (transparencyProgress - 0.76) / 0.12))
-      : 0
-  const transparencyOpacityOverrides = {
-    "central-valley-agriculture": 1 - transparencyUserFadeProgress,
-    "bay-area-city": 1 - transparencyUserFadeProgress,
-    "los-angeles-city": 1,
-    delta: 1 - transparencyUserFadeProgress,
-    "shasta-salmon": 1 - transparencyUserFadeProgress,
-  }
-  const conclusionColorProgress = Math.min(
-    1,
-    Math.max(0, (conclusionProgress - 0.08) / 0.24),
-  )
-  const tierIconColor = (tierColor: string) =>
-    `color-mix(in srgb, #ffffff ${(1 - conclusionColorProgress) * 100}%, ${tierColor})`
-  const conclusionTierIconColors = showConclusionMetroMap
-    ? {
-        "central-valley-agriculture": tierIconColor(
-          themeValues.palette.tiers.tier2,
-        ),
-        "bay-area-city": tierIconColor(themeValues.palette.tiers.tier1),
-        "los-angeles-city": tierIconColor(themeValues.palette.tiers.tier1),
-        delta: tierIconColor(themeValues.palette.tiers.tier3),
-        "shasta-salmon": tierIconColor(themeValues.palette.tiers.tier4),
-      }
-    : undefined
   const showDeltaWaterwayTransition =
     activeSection === "Infrastructure" &&
     infrastructureProgress >= INFRASTRUCTURE_DELTA_PROGRESS
-  const infrastructurePhaseProgress = (start: number, end: number) =>
-    Math.min(1, Math.max(0, (infrastructureProgress - start) / (end - start)))
-  const pumpingPlantsProgress = infrastructurePhaseProgress(0.4, 0.5)
-  const canalNetworkProgress = infrastructurePhaseProgress(0.52, 0.64)
+  const damChronologyProgress = Math.min(
+    1,
+    Math.max(0, infrastructureProgress / 0.2),
+  )
+  const statewideInfrastructureProgress = Math.min(
+    1,
+    Math.max(0, (infrastructureProgress - 0.2) / 0.2),
+  )
 
   return (
     <>
@@ -280,55 +257,51 @@ export default function LayerOrchestrator() {
       />
       <MapCircleAnnotationLayer
         annotations={
-          showTransparencyUserGroups ||
-          showClimateUserGroups ||
+          // Conclusion's 5 circles are owned end-to-end by
+          // ConclusionCircleMorphOverlay (rendered from MapInstance, outside
+          // the map's own fade) so they aren't drawn twice.
           showConclusionMetroMap
-            ? BACKGROUND_CIRCLE_ANNOTATIONS
-            : circleAnnotations
+            ? []
+            : showClimateUserGroups
+              ? CLIMATE_USER_GROUP_ANNOTATIONS
+              : circleAnnotations
         }
         progress={
-          showTransparencyUserGroups ||
-          showClimateUserGroups ||
-          showConclusionMetroMap ||
-          activeSection === "Background"
+          showClimateUserGroups || activeSection === "Background"
             ? 1
             : backgroundProgress
         }
         showStrokes={showMapIconStrokes}
         scaleOverrides={
-          showTransparencyUserGroups ||
-          showClimateUserGroups ||
-          showConclusionMetroMap ||
-          activeSection === "Background"
+          showClimateUserGroups || activeSection === "Background"
             ? userGroupIconScaleOverrides
             : undefined
         }
         showLabels={
           activeSection !== "Background" &&
           !showClimateUserGroups &&
-          activeSection !== "Transparency" &&
-          !showConclusionMetroMap
+          activeSection !== "Transparency"
         }
         opacityOverrides={
-          showTransparencyUserGroups
-            ? transparencyOpacityOverrides
-            : showClimateUserGroups
-              ? climateIconOpacityOverrides
-              : activeSection === "Background"
-                ? backgroundIconOpacityOverrides
-                : undefined
+          showClimateUserGroups
+            ? climateIconOpacityOverrides
+            : activeSection === "Background"
+              ? backgroundIconOpacityOverrides
+              : undefined
         }
         iconOverrides={{
           "central-valley-agriculture": centralValleyIcon,
           "bay-area-city": urbanIcon,
           "los-angeles-city": urbanIcon,
+          "small-community": "/map-icons/urban_small.svg",
           delta: wetlandIcon,
           "shasta-salmon":
             activeSection === "Background"
               ? "/map-icons/salmon.svg"
               : salmonIcon,
         }}
-        iconColorOverrides={conclusionTierIconColors}
+        iconColorOverrides={{ "small-community": "#f2f0ef" }}
+        iconScaleOverrides={{ "small-community": 1.1 }}
       />
       <ShastaMcCloudLayer
         visible={
@@ -355,14 +328,19 @@ export default function LayerOrchestrator() {
         }
         progress={goldRushProgress}
       />
-      <DamChronologyLayer progress={infrastructureProgress} />
+      <DamChronologyLayer
+        visible={
+          activeSection === "Infrastructure" && !showDeltaWaterwayTransition
+        }
+        progress={damChronologyProgress}
+      />
       <PumpingPlantsLayer
         visible={
           activeSection === "Infrastructure" &&
-          pumpingPlantsProgress > 0 &&
+          statewideInfrastructureProgress > 0 &&
           !showDeltaWaterwayTransition
         }
-        progress={pumpingPlantsProgress}
+        progress={statewideInfrastructureProgress}
       />
       <InfrastructureCanalNetworkLayer
         visible={
@@ -375,7 +353,7 @@ export default function LayerOrchestrator() {
           activeSection === "ClimateResilience" ||
           showTransparencyRiverCrossfade
             ? 1
-            : canalNetworkProgress
+            : statewideInfrastructureProgress
         }
         opacity={showTransparencyRiverCrossfade ? 1 - metroOverlayEntryFade : 1}
       />

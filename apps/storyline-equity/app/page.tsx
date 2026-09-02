@@ -53,7 +53,10 @@ export default function StoryContainer() {
         onToolsClick={goToMainExplore}
         waterThemesOptions={waterThemesOptions}
       />
-      <OpenerVisual isVisible={activeSection === "Opener"} />
+      <OpenerVisual
+        isVisible={activeSection === "Opener" || activeSection === "Background"}
+        fadeOut={activeSection === "Background"}
+      />
       <DynamicMap isVisible={showDynamicMap} />
       <ContentContainer />
       <SectionIndicator />

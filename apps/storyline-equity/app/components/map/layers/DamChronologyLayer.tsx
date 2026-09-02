@@ -1,14 +1,9 @@
 "use client"
 
-import { useMemo } from "react"
 import { Marker } from "@repo/map"
 import { motion } from "@repo/motion"
 import { dams } from "@repo/data"
-import { Box, Typography } from "@repo/ui/mui"
-import {
-  INFRASTRUCTURE_DELTA_PROGRESS,
-  useActiveSectionStore,
-} from "../../../store"
+import { Box } from "@repo/ui/mui"
 import {
   InfrastructureColor,
   InfrastructureOutlineColor,
@@ -35,13 +30,6 @@ type DamMarker = {
   longitude: number
   latitude: number
   capacity: number
-}
-
-const INFRASTRUCTURE_REVEAL_RANGE: [number, number] = [0.04, 0.38]
-
-function normalizeProgress(progress: number, [start, end]: [number, number]) {
-  if (end === start) return progress >= start ? 1 : 0
-  return Math.max(0, Math.min(1, (progress - start) / (end - start)))
 }
 
 function parseBuiltYear(value?: string) {
@@ -74,52 +62,54 @@ function readDamMarkers(): DamMarker[] {
     .sort((a, b) => a.year - b.year)
 }
 
-export default function DamChronologyLayer({ progress }: { progress: number }) {
-  const activeSection = useActiveSectionStore()
-  const visible =
-    activeSection === "Infrastructure" &&
-    progress < INFRASTRUCTURE_DELTA_PROGRESS
-  const markers = useMemo(() => readDamMarkers(), [])
-  const phases = useMemo(() => {
-    const twentiethCenturyDecades = Array.from({ length: 10 }, (_, index) => {
-      const decade = 1900 + index * 10
-      return { endYear: decade + 9, label: `the ${decade}s` }
-    })
-    const post2000Years = markers
-      .map((marker) => marker.year)
-      .filter((year) => year >= 2000)
-    const post2000Phase =
-      post2000Years.length > 0
-        ? [
-            {
-              endYear: Math.max(...post2000Years),
-              label: "2000 and later",
-            },
-          ]
-        : []
+const damMarkers = readDamMarkers()
+const post2000Years = damMarkers
+  .map((marker) => marker.year)
+  .filter((year) => year >= 2000)
+const damChronologyPhases = [
+  { endYear: 1899, label: "before 1900" },
+  ...Array.from({ length: 10 }, (_, index) => {
+    const decade = 1900 + index * 10
+    return { endYear: decade + 9, label: `the ${decade}s` }
+  }),
+  ...(post2000Years.length > 0
+    ? [
+        {
+          endYear: Math.max(...post2000Years),
+          label: "2000 and later",
+        },
+      ]
+    : []),
+]
 
-    return [
-      { endYear: 1899, label: "before 1900" },
-      ...twentiethCenturyDecades,
-      ...post2000Phase,
-    ]
-  }, [markers])
-
-  if (!visible || markers.length === 0) return null
-
-  const revealProgress = normalizeProgress(
-    progress,
-    INFRASTRUCTURE_REVEAL_RANGE,
-  )
+function getDamChronologyPhase(progress: number) {
   const phaseIndex = Math.min(
-    phases.length - 1,
-    Math.floor(revealProgress * phases.length),
+    damChronologyPhases.length - 1,
+    Math.floor(progress * damChronologyPhases.length),
   )
-  const currentPhase = phases[Math.max(0, phaseIndex)]!
+  return damChronologyPhases[Math.max(0, phaseIndex)]!
+}
+
+export function getDamConstructionLabel(progress: number) {
+  const phase = getDamChronologyPhase(progress)
+  return `Dam construction ${phase.label.startsWith("before") ? "" : "through "}${phase.label}`
+}
+
+export default function DamChronologyLayer({
+  visible,
+  progress,
+}: {
+  visible: boolean
+  progress: number
+}) {
+  if (!visible || damMarkers.length === 0) return null
+
+  const revealProgress = progress
+  const currentPhase = getDamChronologyPhase(revealProgress)
 
   return (
     <>
-      {markers.map((marker) => {
+      {damMarkers.map((marker) => {
         if (marker.year > currentPhase.endYear) return null
 
         const size = Math.max(
@@ -166,28 +156,6 @@ export default function DamChronologyLayer({ progress }: { progress: number }) {
           </Marker>
         )
       })}
-
-      <Typography
-        component="div"
-        sx={{
-          position: "fixed",
-          right: "calc(35% - 1rem)",
-          bottom: "1.5rem",
-          transform: "translateX(100%)",
-          zIndex: 1,
-          color: "#fcfbfa",
-          fontSize: "0.85rem",
-          fontWeight: 700,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          textShadow: "0 2px 8px rgba(0, 0, 0, 0.7)",
-          pointerEvents: "none",
-        }}
-      >
-        Dam construction{" "}
-        {currentPhase.label.startsWith("before") ? "" : "through "}
-        {currentPhase.label}
-      </Typography>
     </>
   )
 }

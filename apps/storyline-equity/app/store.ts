@@ -14,6 +14,7 @@ import {
   INDIGENOUS_RIVER_NETWORK_VIEW,
   SHASTA_MCCLOUD_VIEW,
 } from "./components/map/config/cameraPresets"
+import { themeValues } from "@repo/ui/themes/theme"
 
 export type { SectionId } from "./components/map/config/sectionConfig"
 
@@ -68,7 +69,26 @@ export const GOLD_RUSH_MINES_PROGRESS = 0.32
 export const GOLD_RUSH_DITCHES_PROGRESS = 0.48
 export const GOLD_RUSH_STATEWIDE_PROGRESS = 0.7
 export const GOLD_RUSH_CURRENT_ALLOTMENTS_PROGRESS = 0.82
-export const INFRASTRUCTURE_DELTA_PROGRESS = 0.66
+export const INFRASTRUCTURE_DELTA_PROGRESS = 0.5
+// Conclusion staging, shared by ConclusionCircleMorphOverlay (the map-side
+// circle morph), MapInstance (fades the actual map canvas out — unrelated to
+// the overlay, which lives outside that fade and keeps animating through
+// it), and 10Conclusion.tsx (the FloatingBubbles reveal + photo/icon fade),
+// so everything stays on one clock:
+//   0.08 -> 0.32  the 5 circles recolor white -> tier color
+//   0.34 -> 0.48  circles morph from their map position into the packed
+//                 FloatingBubbles cluster's seed position
+//   0.48 -> 0.64  the map canvas fades away (MapInstance) while the seed's
+//                 sibling bubbles bloom out around it (still map-independent)
+//   0.70 -> 0.82  the settled icon cluster fades out as FloatingBubbles
+//                 fades in at the same positions, then icons -> photos
+export const CONCLUSION_ICON_COLOR_START_PROGRESS = 0.08
+export const CONCLUSION_ICON_COLOR_END_PROGRESS = 0.32
+export const CONCLUSION_MORPH_START_PROGRESS = 0.34
+export const CONCLUSION_MORPH_LANDED_PROGRESS = 0.48
+export const CONCLUSION_MAP_FADE_END_PROGRESS = 0.64
+export const CONCLUSION_HANDOFF_START_PROGRESS = 0.7
+export const CONCLUSION_HANDOFF_END_PROGRESS = 0.82
 
 const SECTION_ORDER: Record<SectionId, number> = {
   Opener: 0,
@@ -176,6 +196,41 @@ export const useTransparencyProgress = () =>
   useStoryStore((state) => state.transparencyProgress)
 export const useConclusionProgress = () =>
   useStoryStore((state) => state.conclusionProgress)
+
+// The 5 Conclusion circles' white -> tier-color recolor. Shared by
+// ConclusionCircleMorphOverlay (which now owns rendering those circles
+// end-to-end) and any other Conclusion-aware consumer, so there's one
+// definition of "what color is this icon right now" rather than two drifting
+// copies.
+export const useConclusionTierIconColors = () => {
+  const activeSection = useActiveSectionStore()
+  const conclusionProgress = useConclusionProgress()
+
+  if (activeSection !== "Conclusion") return undefined
+
+  const colorProgress = Math.min(
+    1,
+    Math.max(
+      0,
+      (conclusionProgress - CONCLUSION_ICON_COLOR_START_PROGRESS) /
+        (CONCLUSION_ICON_COLOR_END_PROGRESS -
+          CONCLUSION_ICON_COLOR_START_PROGRESS),
+    ),
+  )
+  const tierIconColor = (tierColor: string) =>
+    `color-mix(in srgb, #ffffff ${(1 - colorProgress) * 100}%, ${tierColor})`
+
+  return {
+    "central-valley-agriculture": tierIconColor(
+      themeValues.palette.tiers.tier2,
+    ),
+    "bay-area-city": tierIconColor(themeValues.palette.tiers.tier1),
+    "los-angeles-city": tierIconColor(themeValues.palette.tiers.tier1),
+    delta: tierIconColor(themeValues.palette.tiers.tier3),
+    "shasta-salmon": tierIconColor(themeValues.palette.tiers.tier4),
+  }
+}
+
 export const useCentralValleyIcon = () =>
   useStoryStore((state) => state.centralValleyIcon)
 export const useUrbanIcon = () => useStoryStore((state) => state.urbanIcon)

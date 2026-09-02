@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Box } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
-import { canalNetwork, metroMapV1, riverNetwork } from "@repo/data"
+import { canalNetwork, metroMap, riverNetwork } from "@repo/data"
 import {
   FreshWaterColor,
   InfrastructureColor,
@@ -136,7 +136,7 @@ const networksById = new Map(NETWORKS.map((network) => [network.id, network]))
 
 function getPreparedLines(): PreparedLine[] {
   const metroFeatures = (
-    metroMapV1 as unknown as { features: MetroLineFeature[] }
+    metroMap as unknown as { features: MetroLineFeature[] }
   ).features
 
   return metroFeatures.flatMap(({ properties, geometry }) => {
