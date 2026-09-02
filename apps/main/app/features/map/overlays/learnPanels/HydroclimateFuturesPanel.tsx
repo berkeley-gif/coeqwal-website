@@ -60,7 +60,7 @@ export default function HydroclimateFuturesPanel() {
       <Typography variant="body2" color="text.secondary" sx={{ mt: sp.sm }}>
         The historical hydroclimate used in COEQWAL is adjusted for recent
         climate change and does not represent the observed historical record.
-        The flow change reported for the four hydroclimate futures represent the
+        The flow change reported for the four hydroclimates represent the
         average change in flow from California&#39;s major water supply basins
         over a 30-year period, centered on 2043. An assumed level of sea level
         rise is also specified for each hydroclimate future.{" "}
