@@ -42,7 +42,7 @@ const NARRATION_BY_BEAT: readonly (readonly string[])[] = [
     "The radar chart displays the average values of key outcomes on a circular plot and is useful for scenario comparison.",
   ],
   [
-    "The heat map displays how key outcomes change under different hydroclimate futures.",
+    "The heat map displays how key outcomes change under different hydroclimates.",
   ],
 ] as const
 
