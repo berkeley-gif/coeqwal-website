@@ -31,11 +31,6 @@ export const BACKGROUND_BRIEF_DOCUMENTS: BackgroundBriefDocument[] = [
     label: "The COEQWAL project",
     file: "project_background_brief.html",
   },
-  {
-    id: "known-limitations-and-how-coeqwal-handles-them",
-    label: "Known limitations and how COEQWAL handles them",
-    file: "known-limitations-and-how-coeqwal-handles-them.html",
-  },
 ]
 
 /**
