@@ -1451,7 +1451,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "California's rivers begin in the mountains and flow through valleys to the Delta and ocean. Along the way, they sustain ecosystems and provide water for farms and communities. Rivers are deeply interconnected with California's water management system. Dams, reservoir operations, and water diversions have altered the timing and amount of river flows on which native species depend. Decisions about how much water to store, release, and deliver for different purposes therefore create trade-offs that can ripple across the system.",
+              text: (<>California's rivers begin in the mountains and flow through valleys to the <GlossaryTermLink>Delta</GlossaryTermLink> and ocean. Along the way, they sustain ecosystems and provide water for farms and communities. Rivers are deeply interconnected with California's water management system. Dams, reservoir operations, and water diversions have altered the timing and amount of river flows on which native species depend. Decisions about how much water to store, release, and deliver for different purposes therefore create trade-offs that can ripple across the system.</>),
             },
             {
               type: "paragraph",
