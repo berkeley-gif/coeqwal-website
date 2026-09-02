@@ -186,9 +186,9 @@ export const glossaryTerms: GlossaryTerm[] = [
   },
   {
     icon: <SettingsIcon />,
-    term: "Temporary Urgent Change Petitions (TUCPs)",
+    term: "Temporary Urgency Change Petitions (TUCPs)",
     definition:
-      "Temporary Urgent Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
+      "Temporary Urgency Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
   },
   {
     icon: <WaterIcon />,

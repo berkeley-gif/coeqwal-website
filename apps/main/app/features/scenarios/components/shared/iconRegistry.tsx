@@ -155,7 +155,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     path: "/images/icons/tucp.svg",
     label: "TUCPs allowed",
     description:
-      "Temporary Urgent Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
+      "Temporary Urgency Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
   },
   no_tucp: {
     id: "no_tucp",
@@ -163,7 +163,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     path: "/images/icons/no_tucp.svg",
     label: "TUCPs not allowed",
     description:
-      "Operations without Temporary Urgent Change Petitions (TUCPs).",
+      "Operations without Temporary Urgency Change Petitions (TUCPs).",
   },
   land_use_2020: {
     id: "land_use_2020",
