@@ -186,7 +186,7 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   // ALL THREE route subjects in one request and sums them client-side
   // (fixture routes 100 + 800 + 400 -> 1,300).
   await page
-    .getByRole("button", { name: "Southern San Joaquin Valley deliveries" })
+    .getByRole("button", { name: "Southern San Joaquin Valley exports" })
     .click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect(page.getByText(/^Provisional$/)).toHaveCount(0)
@@ -267,7 +267,7 @@ test("ssjv all-routes total fails closed to sample when a route series is missin
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
   await page
-    .getByRole("button", { name: "Southern San Joaquin Valley deliveries" })
+    .getByRole("button", { name: "Southern San Joaquin Valley exports" })
     .click()
   await expect(page.getByText(/^Sample data$/)).toBeVisible()
 })

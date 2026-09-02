@@ -270,7 +270,7 @@ test("the SSJV total sums its routes in the shared request and fails closed when
   const log = await setupRoutes(page)
   await openDataInDepth(page)
   await page
-    .getByRole("button", { name: /Southern San Joaquin Valley deliveries/ })
+    .getByRole("button", { name: /Southern San Joaquin Valley exports/ })
     .first()
     .click()
   await page.getByRole("button", { name: "Locations", exact: true }).click()
@@ -306,7 +306,7 @@ test("a missing route makes the SSJV total sample, labeled, while the route memb
   await setupRoutes(page, { dropSysdelSubject: "SWP_TA_KERNAG" })
   await openDataInDepth(page)
   await page
-    .getByRole("button", { name: /Southern San Joaquin Valley deliveries/ })
+    .getByRole("button", { name: /Southern San Joaquin Valley exports/ })
     .first()
     .click()
   await page.getByRole("button", { name: "Locations", exact: true }).click()

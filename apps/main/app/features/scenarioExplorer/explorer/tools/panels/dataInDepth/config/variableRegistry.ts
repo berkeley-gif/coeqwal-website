@@ -980,8 +980,8 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ssjv_exp: {
     id: "ssjv_exp",
-    proseName: "southern San Joaquin Valley deliveries",
-    name: "Southern San Joaquin Valley deliveries",
+    proseName: "southern San Joaquin Valley exports",
+    name: "Southern San Joaquin Valley exports",
     sectorId: "sysdel",
     locationGroup: "ssjv",
     unit: "TAF",

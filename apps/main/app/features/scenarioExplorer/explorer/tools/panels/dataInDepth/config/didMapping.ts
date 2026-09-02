@@ -179,7 +179,7 @@ const SYSDEL_SUBJECT_BY_VARIABLE: Record<string, Record<string, string>> = {
   swp_exp: {
     DELTA: "C_CAA003_SWP",
   },
-  // Southern San Joaquin Valley deliveries: the three served routes are the
+  // Southern San Joaquin Valley exports: the three served routes are the
   // locations. No combined total is served; the "All routes (total)"
   // location is synthetic, summed client-side from the three route series
   // (fail-closed via sumAlignedSeriesPoints), so it stays out of this
