@@ -10,6 +10,8 @@
  */
 
 import { shareFigureFooter } from "../figureFooter"
+import { toolFigureTitle } from "../figureTitle"
+import { HYDROCLIMATE_SHORT_LABELS } from "../../../../../content/scenarios"
 import React, { useEffect } from "react"
 import type { VerticalParallelLineData } from "@repo/viz"
 import { getOutcomeName } from "../../../../../content/outcomes"
@@ -83,6 +85,14 @@ const radarHandler: VariantHandler<RadarItem> = {
       ? undefined
       : renderRadarLiveChart(item, radarLive, ctx.theme.palette.grey[600])
     return React.createElement(ShareRadarCard, {
+      toolLabel: "Radar",
+      standardTitle: toolFigureTitle({
+        toolName: "Radar chart",
+        memberSummary:
+          names.length === 1 ? (names[0] ?? "") : `${names.length} scenarios`,
+        hydroclimateLabel:
+          HYDROCLIMATE_SHORT_LABELS[item.hydroclimate] ?? item.hydroclimate,
+      }),
       figureFooter: shareFigureFooter(item),
       scenarioNames: names,
       scenarioDefinitions: definitions,

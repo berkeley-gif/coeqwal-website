@@ -15,12 +15,18 @@ import { useExplorerStore, useWorkspaceSlice } from "../../../../store"
 import type { TourEffectsProps } from "../../../tour/types"
 
 const KEY_OPERATIONS_STEP_IDS = [
-  "list.step1.operations",
-  "list.step1.operationsIcons",
+  "list.step9.keyOperations",
+  "list.step10.filterByOperation",
 ]
+
+const DEFINITIONS_STEP_TARGETS: Record<string, boolean> = {
+  "list.step5.definitions": false,
+  "list.step6.baselines": true,
+}
 
 export default function ListTourEffects({ step }: TourEffectsProps) {
   const setShowKeyOperations = useWorkspaceSlice((s) => s.setShowKeyOperations)
+  const setShowDefinitions = useWorkspaceSlice((s) => s.setShowDefinitions)
 
   // ------------------------------------------------------------------
   // list.step1.operations: ensure the key-operations column is visible
@@ -46,6 +52,36 @@ export default function ListTourEffects({ step }: TourEffectsProps) {
       }
     }
   }, [step, setShowKeyOperations])
+
+  // ------------------------------------------------------------------
+  // list.step5.definitions / list.step6.baselines: the spec's Operation
+  // column says "Hide the detailed definition text" entering Step 5 and
+  // "Show the detailed definition text again" entering Step 6 — a
+  // two-step before/after demo of the same toggle, each with its own
+  // target value (unlike the key-operations effect above, which forces
+  // the same value across both of its steps).
+  // ------------------------------------------------------------------
+
+  const defsDemoRef = useRef<{ prevShowDefinitions: boolean } | null>(null)
+
+  useEffect(() => {
+    if (!step) return
+    const target = DEFINITIONS_STEP_TARGETS[step.id]
+    if (target === undefined) return
+    const prevShowDefinitions = useExplorerStore.getState().showDefinitions
+    defsDemoRef.current = { prevShowDefinitions }
+    if (prevShowDefinitions !== target) {
+      setShowDefinitions(target)
+    }
+    return () => {
+      const snap = defsDemoRef.current
+      defsDemoRef.current = null
+      if (!snap) return
+      if (snap.prevShowDefinitions !== target) {
+        setShowDefinitions(snap.prevShowDefinitions)
+      }
+    }
+  }, [step, setShowDefinitions])
 
   return null
 }

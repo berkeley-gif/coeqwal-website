@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "data:cws": "node ./data-scripts/transform-cws-data.mjs",
-    "dev": "node ./scripts/clean-next-dev-cache.cjs && next dev --turbo",
-    "dev:webpack": "node ./scripts/clean-next-dev-cache.cjs && next dev",
+    "dev": "next dev --turbo",
+    "dev:webpack": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0"

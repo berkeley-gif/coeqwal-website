@@ -59,6 +59,19 @@ export function Header() {
     pathname === "/share" ||
     isNavigatingToTabs
 
+  // Warm the tab routes' JS (map/viz bundle included) as soon as the
+  // homepage lands, so a user clicking "Explore Tools" or "Get Started"
+  // is likely hitting a cache instead of a cold ~4MB fetch. Fired at
+  // mount rather than on scroll/idle so even a near-immediate click
+  // gets the largest possible head start - this narrows the cold-load
+  // window, it doesn't eliminate it for someone who clicks instantly.
+  useEffect(() => {
+    if (!isHomePage) return
+    router.prefetch("/learn")
+    router.prefetch("/explore")
+    router.prefetch("/share")
+  }, [isHomePage, router])
+
   // Defer isPastHero until after hydration so server and client render
   // the same initial markup (variant="light"). Once mounted, the real
   // scroll-based value takes over.

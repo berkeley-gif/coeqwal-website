@@ -49,7 +49,7 @@ const SECTION_LABELS: Record<string, { long: string; short: string }> = {
     short: "Importance",
   },
   "what-this-theme-focuses-on": {
-    long: "What this theme focuses on",
+    long: "What this water issue focuses on",
     short: "Focus",
   },
   "what-to-keep-in-mind": {

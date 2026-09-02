@@ -23,7 +23,7 @@ export const BACKGROUND_RIVER_LABELS: LocationLabel[] = [
   {
     id: "san-joaquin-river",
     name: "San Joaquin River",
-    latitude: 37.25,
+    latitude: 37.85,
     longitude: -119.32,
   },
 ]
@@ -34,6 +34,12 @@ export const SHASTA_MCCLOUD_RIVER_LABELS: LocationLabel[] = [
     name: "McCloud River",
     latitude: 40.92,
     longitude: -122.22,
+  },
+  {
+    id: "mount-shasta",
+    name: "Mount Shasta",
+    latitude: 41.6,
+    longitude: -121.9,
   },
 ]
 

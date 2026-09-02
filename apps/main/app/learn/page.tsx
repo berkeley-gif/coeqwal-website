@@ -14,6 +14,7 @@ import { FloatingGlossary } from "../features/glossary"
 import SmoothTabs from "../components/tabs/SmoothTabs"
 import TabPanels from "../components/tabs/TabPanels"
 import TabsShell from "../components/tabs/TabsShell"
+import { TourAnchorProvider } from "../features/scenarioExplorer/explorer/tools/tour"
 
 import { useMediaQuery, useTheme } from "@repo/ui/mui"
 import { MobileNotSupported } from "@repo/ui"
@@ -43,12 +44,14 @@ export default function LearnPage() {
       <FloatingGlossary />
       <MainContent>
         <TabsShell>
-          <SmoothTabs />
-          <ErrorBoundary fallback={<TabPanelsErrorFallback />}>
-            <Suspense fallback={null}>
-              <TabPanels />
-            </Suspense>
-          </ErrorBoundary>
+          <TourAnchorProvider>
+            <SmoothTabs />
+            <ErrorBoundary fallback={<TabPanelsErrorFallback />}>
+              <Suspense fallback={null}>
+                <TabPanels />
+              </Suspense>
+            </ErrorBoundary>
+          </TourAnchorProvider>
         </TabsShell>
       </MainContent>
     </MapProvider>

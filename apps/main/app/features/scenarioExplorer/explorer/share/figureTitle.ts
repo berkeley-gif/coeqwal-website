@@ -97,3 +97,29 @@ export function buildFigureTitle(parts: FigureTitleParts): string {
   ].filter((s): s is string => Boolean(s))
   return segments.join(", ")
 }
+
+export interface ToolFigureTitleParts {
+  /** Tool display name, e.g. "Radar chart", "Key outcomes". */
+  toolName: string
+  /** The single member's label, or a count summary such as "3 scenarios". */
+  memberSummary: string
+  /** Hydroclimate label as it should read in the title. Omit for figures
+   *  that span several climates (the resilience heatmap). */
+  hydroclimateLabel?: string
+}
+
+/**
+ * Standardized figure-title line for the tools other than Data in Depth,
+ * matching its pattern: "<Head>, <Members>, <Hydroclimate> Hydroclimate".
+ * Content-free on purpose: callers resolve their own labels. Pure.
+ */
+export function toolFigureTitle(parts: ToolFigureTitleParts): string {
+  return buildFigureTitle({
+    variableName: parts.toolName,
+    memberSummary: parts.memberSummary,
+    hydroclimateName: parts.hydroclimateLabel
+      ? `${parts.hydroclimateLabel} hydroclimate`
+      : undefined,
+    waterYearTypeLabels: null,
+  })
+}

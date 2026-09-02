@@ -51,7 +51,6 @@ export const getSectionLayerConfig = (
       config.locationLabels = SHASTA_MCCLOUD_RIVER_LABELS
       break
     case "GoldRush":
-      config.majorRivers = true
       config.yubaRiver = true
       break
     default:

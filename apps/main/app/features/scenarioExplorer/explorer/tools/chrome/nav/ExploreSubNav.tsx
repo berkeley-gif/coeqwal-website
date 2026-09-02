@@ -27,6 +27,7 @@ import { useWorkspaceSlice, type ExploreMode } from "../../../store"
 import { useTabs } from "../../../../../../context/Tabs"
 import { useTabNavigation } from "../../../../../../hooks/useTabNavigation"
 import { motion, useReducedMotion } from "@repo/motion"
+import { useTourAnchor } from "../../tour"
 
 /**
  * Flow map steps for the curation loop (List -> Radar -> Distribution ->
@@ -93,6 +94,13 @@ export default function ExploreSubNav() {
   const { exploreMode, setExploreMode, selectedScenarios } = useWorkspaceSlice()
   const prefersReducedMotion = useReducedMotion()
 
+  // List tour Step 1 highlights this specific tab, not the whole sub-nav.
+  const homeTabAnchorRef = useTourAnchor("list.homeTab")
+  // Bar tour Step 1 highlights the Bar tab
+  const barTabAnchorRef = useTourAnchor("bar.tab")
+  // Radar tour Step 1 highlights the Radar tab
+  const radarTabAnchorRef = useTourAnchor("radar.tab")
+
   // Research-only tools hidden by default, toggled with "A" key
   const [showResearchTools, setShowResearchTools] = useState(false)
   useEffect(() => {
@@ -153,6 +161,15 @@ export default function ExploreSubNav() {
           return (
             <React.Fragment key={step.label}>
               <Box
+                ref={
+                  step.mode === "list"
+                    ? homeTabAnchorRef
+                    : step.mode === "bar"
+                      ? barTabAnchorRef
+                      : step.mode === "radar"
+                        ? radarTabAnchorRef
+                        : undefined
+                }
                 component="button"
                 type="button"
                 role="tab"

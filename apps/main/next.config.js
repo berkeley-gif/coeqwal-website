@@ -41,7 +41,13 @@ const nextConfig = {
   },
 
   experimental: {
-    optimizePackageImports: ["@mui/icons-material", "@mui/material", "d3"],
+    optimizePackageImports: [
+      "@mui/icons-material",
+      "@mui/material",
+      "d3",
+      "@repo/map",
+      "@repo/viz",
+    ],
   },
 
   // Webpack rule (used when you run with --webpack, and for non-turbo tooling paths)

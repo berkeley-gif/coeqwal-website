@@ -1,10 +1,12 @@
 "use client"
 
-import { Layer, Source } from "@repo/map"
+import { useEffect } from "react"
+import { Layer, Source, useMap } from "@repo/map"
 import { OceanWaterColor } from "../../helpers/colorPalette"
 
 const SOURCE_ID = "indigenous-waterway-names-source"
 const SOURCE_LAYER = "indigenous_waterway_names.zip-bz7t28"
+const LABEL_LAYER_ID = "indigenous-waterway-names-labels"
 
 export default function IndigenousWaterwayNamesLayer({
   visible,
@@ -13,12 +15,42 @@ export default function IndigenousWaterwayNamesLayer({
   visible: boolean
   opacity: number
 }) {
+  const { mapRef } = useMap()
   const layerOpacity = Math.max(0, Math.min(1, opacity))
+
+  useEffect(() => {
+    if (!visible) return
+
+    const map = mapRef?.current?.getMap()
+    if (!map) return
+
+    const keepLabelsAboveRivers = () => {
+      if (!map.isStyleLoaded() || !map.getLayer(LABEL_LAYER_ID)) return
+
+      const layers = map.getStyle().layers
+      if (layers[layers.length - 1]?.id === LABEL_LAYER_ID) return
+
+      try {
+        map.moveLayer(LABEL_LAYER_ID)
+      } catch {
+        // Layer order is best-effort while the Mapbox style settles.
+      }
+    }
+
+    keepLabelsAboveRivers()
+    map.on("styledata", keepLabelsAboveRivers)
+    map.on("idle", keepLabelsAboveRivers)
+
+    return () => {
+      map.off("styledata", keepLabelsAboveRivers)
+      map.off("idle", keepLabelsAboveRivers)
+    }
+  }, [mapRef, visible])
 
   return (
     <Source id={SOURCE_ID} type="vector" url="mapbox://coeqwal.dpvfu6">
       <Layer
-        id="indigenous-waterway-names-labels"
+        id={LABEL_LAYER_ID}
         type="symbol"
         source-layer={SOURCE_LAYER}
         layout={{

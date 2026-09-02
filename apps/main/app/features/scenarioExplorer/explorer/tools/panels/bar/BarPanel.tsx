@@ -218,6 +218,8 @@ export default function BarPanel() {
   const { orderedScenarios } = useOrderedScenarios(allScoreData)
 
   const barGlyphTourRef = useTourAnchor("bar.outcome.glyph")
+  const barPinTourRef = useTourAnchor("bar.row.pin")
+  const barShareTourRef = useTourAnchor("bar.row.share")
 
   const {
     openTooltip: activeTooltip,
@@ -371,6 +373,8 @@ export default function BarPanel() {
               accentColor={theme.palette.blue.bright}
               onShare={handleShare(scenario)}
               togglePinnedScenario={togglePinnedScenario}
+              pinTourRef={isFirstCard ? barPinTourRef : undefined}
+              shareTourRef={isFirstCard ? barShareTourRef : undefined}
             />
           }
         />

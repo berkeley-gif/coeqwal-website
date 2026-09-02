@@ -20,10 +20,10 @@ import { BACKGROUND_CIRCLE_ANNOTATIONS } from "../config/locationPresets"
 import { themeValues } from "@repo/ui/themes/theme"
 import {
   INFRASTRUCTURE_DELTA_PROGRESS,
-  HISTORICAL_CONTEXT_CLOSING_PROGRESS,
-  HISTORICAL_CONTEXT_CURRENT_TERRITORIES_PROGRESS,
   HISTORICAL_CONTEXT_MCCLOUD_PROGRESS,
   HISTORICAL_CONTEXT_RIVERS_PROGRESS,
+  GOLD_RUSH_CURRENT_ALLOTMENTS_PROGRESS,
+  GOLD_RUSH_STATEWIDE_PROGRESS,
   useBackgroundProgress,
   useCentralValleyIcon,
   useClimateResilienceProgress,
@@ -87,15 +87,11 @@ export default function LayerOrchestrator() {
       (historicalContextProgress - HISTORICAL_CONTEXT_RIVERS_PROGRESS) / 0.06,
     ),
   )
-  const isHistoricalClosing =
-    isHistoricalContext &&
-    historicalContextProgress >= HISTORICAL_CONTEXT_CLOSING_PROGRESS
   const showOpeningIndigenousTerritories =
     isHistoricalContext && historicalContextProgress < 0.36
   const showHistoricalRiverNetwork =
     isHistoricalContext &&
-    historicalContextProgress >= HISTORICAL_CONTEXT_RIVERS_PROGRESS &&
-    historicalContextProgress < HISTORICAL_CONTEXT_CLOSING_PROGRESS
+    historicalContextProgress >= HISTORICAL_CONTEXT_RIVERS_PROGRESS
   const showIndigenousWaterwayNames =
     isHistoricalContext &&
     historicalContextProgress >= HISTORICAL_CONTEXT_RIVERS_PROGRESS &&
@@ -107,37 +103,60 @@ export default function LayerOrchestrator() {
       (HISTORICAL_CONTEXT_MCCLOUD_PROGRESS - historicalContextProgress) / 0.04,
     ),
   )
-  const showCurrentIndigenousTerritories =
-    isHistoricalContext &&
-    historicalContextProgress >= HISTORICAL_CONTEXT_CURRENT_TERRITORIES_PROGRESS
-  const currentIndigenousTerritoriesOpacity = Math.min(
+  const showGoldRushHistoricalTerritories =
+    activeSection === "GoldRush" &&
+    goldRushProgress >= GOLD_RUSH_STATEWIDE_PROGRESS
+  const showGoldRushCurrentAllotments =
+    activeSection === "GoldRush" &&
+    goldRushProgress >= GOLD_RUSH_CURRENT_ALLOTMENTS_PROGRESS
+  const goldRushAllotmentFade = Math.min(
     1,
     Math.max(
       0,
-      (historicalContextProgress -
-        HISTORICAL_CONTEXT_CURRENT_TERRITORIES_PROGRESS) /
-        0.06,
+      (goldRushProgress - GOLD_RUSH_CURRENT_ALLOTMENTS_PROGRESS) / 0.08,
     ),
   )
-  const showClosingHistoricalTerritories =
-    isHistoricalClosing && currentIndigenousTerritoriesOpacity < 1
   const showIndigenousTerritories =
-    showOpeningIndigenousTerritories || showClosingHistoricalTerritories
+    showOpeningIndigenousTerritories || showGoldRushHistoricalTerritories
+  const showGoldRushRiverNetwork =
+    activeSection === "GoldRush" &&
+    (goldRushProgress < GOLD_RUSH_STATEWIDE_PROGRESS ||
+      showGoldRushCurrentAllotments)
+  const showConclusionMetroMap = activeSection === "Conclusion"
+  // The overlay is an SVG diagram, not a Mapbox layer, so its anti-aliasing
+  // never matches the WebGL river/canal layers pixel-for-pixel — cross-fade
+  // the two over a short window instead of cutting between them instantly.
+  const metroOverlayEntryFade = showConclusionMetroMap
+    ? 1
+    : activeSection === "Transparency"
+      ? Math.min(1, transparencyProgress / 0.03)
+      : 0
+  const showTransparencyRiverCrossfade =
+    activeSection === "Transparency" && metroOverlayEntryFade < 1
   const showPersistentRiverNetwork =
-    activeSection === "GoldRush" ||
+    showGoldRushRiverNetwork ||
     activeSection === "Infrastructure" ||
-    activeSection === "ClimateResilience"
-  const deemphasizeRivers = activeSection === "GoldRush"
+    activeSection === "ClimateResilience" ||
+    showTransparencyRiverCrossfade
+  const riverNetworkOpacity = showHistoricalRiverNetwork
+    ? historicalTransitionProgress
+    : showGoldRushCurrentAllotments
+      ? goldRushAllotmentFade
+      : showTransparencyRiverCrossfade
+        ? 1 - metroOverlayEntryFade
+        : 1
+  const deemphasizeRivers =
+    activeSection === "GoldRush" &&
+    goldRushProgress < GOLD_RUSH_STATEWIDE_PROGRESS
   const indigenousTerritoriesEntryOpacity = Math.min(
     1,
     Math.max(0, historicalContextProgress / 0.06),
   )
   const indigenousTerritoriesOpacity = showOpeningIndigenousTerritories
     ? indigenousTerritoriesEntryOpacity * (1 - historicalTransitionProgress)
-    : showClosingHistoricalTerritories
-      ? 1 - currentIndigenousTerritoriesOpacity
+    : showGoldRushHistoricalTerritories
+      ? 1 - goldRushAllotmentFade
       : 0
-  const showConclusionMetroMap = activeSection === "Conclusion"
   const showMetroRiverOverlay =
     activeSection === "Transparency" || showConclusionMetroMap
   const metroMorphProgress = showConclusionMetroMap
@@ -197,12 +216,17 @@ export default function LayerOrchestrator() {
   const showDeltaWaterwayTransition =
     activeSection === "Infrastructure" &&
     infrastructureProgress >= INFRASTRUCTURE_DELTA_PROGRESS
+  const infrastructurePhaseProgress = (start: number, end: number) =>
+    Math.min(1, Math.max(0, (infrastructureProgress - start) / (end - start)))
+  const pumpingPlantsProgress = infrastructurePhaseProgress(0.4, 0.5)
+  const canalNetworkProgress = infrastructurePhaseProgress(0.52, 0.64)
 
   return (
     <>
       <MetroRiverMorphOverlay
         visible={showMetroRiverOverlay}
         progress={metroMorphProgress}
+        opacity={metroOverlayEntryFade}
       />
       <UserGroupAreaLayer
         visible={activeSection === "Background"}
@@ -211,17 +235,23 @@ export default function LayerOrchestrator() {
       <MajorRiversLayer
         visible={
           showRivers &&
+          activeSection !== "HistoricalContext" &&
           !showMetroRiverOverlay &&
-          !showIndigenousTerritories &&
-          !showCurrentIndigenousTerritories
+          !showIndigenousTerritories
         }
         progress={riverProgress}
         deemphasized={deemphasizeRivers}
       />
       <IndigenousRiverNetworkLayer
         visible={showHistoricalRiverNetwork || showPersistentRiverNetwork}
-        opacity={showHistoricalRiverNetwork ? historicalTransitionProgress : 1}
+        opacity={riverNetworkOpacity}
         deemphasized={deemphasizeRivers}
+        highlightedRiver={
+          isHistoricalContext &&
+          historicalContextProgress >= HISTORICAL_CONTEXT_MCCLOUD_PROGRESS
+            ? "McCloud River"
+            : undefined
+        }
       />
       <IndigenousWaterwayNamesLayer
         visible={showIndigenousWaterwayNames}
@@ -233,15 +263,16 @@ export default function LayerOrchestrator() {
         visible={showIndigenousTerritories}
         opacity={indigenousTerritoriesOpacity}
       />
-      <CurrentIndigenousTerritoriesLayer
-        visible={showCurrentIndigenousTerritories}
-        opacity={currentIndigenousTerritoriesOpacity}
-      />
+      {showGoldRushCurrentAllotments ? (
+        <CurrentIndigenousTerritoriesLayer
+          visible
+          opacity={goldRushAllotmentFade}
+        />
+      ) : null}
       <LocationLabelLayer
         locationLabels={
           isHistoricalContext &&
-          (historicalContextProgress < HISTORICAL_CONTEXT_MCCLOUD_PROGRESS ||
-            isHistoricalClosing)
+          historicalContextProgress < HISTORICAL_CONTEXT_MCCLOUD_PROGRESS
             ? []
             : locationLabels
         }
@@ -305,36 +336,48 @@ export default function LayerOrchestrator() {
             (isHistoricalContext &&
               historicalContextProgress >=
                 HISTORICAL_CONTEXT_MCCLOUD_PROGRESS)) &&
-          !isHistoricalClosing &&
           !showIndigenousTerritories
         }
-        progress={1}
-        sectionProgress={historicalContextProgress}
-        showMigration={false}
-        migrationOnly={false}
-        showRiver
-        salmonIconSrc={salmonIcon}
       />
       <YubaRiverLayer
-        visible={showYubaRiver && !showMetroRiverOverlay}
+        visible={
+          activeSection === "GoldRush" &&
+          goldRushProgress < GOLD_RUSH_STATEWIDE_PROGRESS &&
+          showYubaRiver &&
+          !showMetroRiverOverlay
+        }
         showLabel={activeSection === "GoldRush"}
       />
       <GoldRushMiningLayer
-        visible={activeSection === "GoldRush"}
+        visible={
+          activeSection === "GoldRush" &&
+          goldRushProgress < GOLD_RUSH_STATEWIDE_PROGRESS
+        }
         progress={goldRushProgress}
       />
       <DamChronologyLayer progress={infrastructureProgress} />
       <PumpingPlantsLayer
         visible={
-          activeSection === "Infrastructure" && !showDeltaWaterwayTransition
+          activeSection === "Infrastructure" &&
+          pumpingPlantsProgress > 0 &&
+          !showDeltaWaterwayTransition
         }
+        progress={pumpingPlantsProgress}
       />
       <InfrastructureCanalNetworkLayer
         visible={
           (activeSection === "Infrastructure" &&
             !showDeltaWaterwayTransition) ||
-          activeSection === "ClimateResilience"
+          activeSection === "ClimateResilience" ||
+          showTransparencyRiverCrossfade
         }
+        progress={
+          activeSection === "ClimateResilience" ||
+          showTransparencyRiverCrossfade
+            ? 1
+            : canalNetworkProgress
+        }
+        opacity={showTransparencyRiverCrossfade ? 1 - metroOverlayEntryFade : 1}
       />
       <DeltaCanalLayer
         visible={showDeltaWaterwayTransition}

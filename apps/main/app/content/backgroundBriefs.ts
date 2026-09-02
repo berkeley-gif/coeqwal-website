@@ -32,56 +32,30 @@ export const BACKGROUND_BRIEF_DOCUMENTS: BackgroundBriefDocument[] = [
     file: "project_background_brief.html",
   },
   {
-    id: "scenario-library-brief",
-    label: "The COEQWAL scenario library",
-    file: "scenario_library_brief.html",
-  },
-  {
-    id: "hydroclimates-brief",
-    label: "The five COEQWAL hydroclimates",
-    file: "hydroclimates_brief.html",
-  },
-  {
-    id: "what-is-calsim-3",
-    label: "What is CalSim 3",
-    file: "what-is-calsim-3.html",
-  },
-  {
-    id: "known-limitations-and-how-coeqwal-handles-them",
-    label: "Known limitations and how COEQWAL handles them",
-    file: "known-limitations-and-how-coeqwal-handles-them.html",
-  },
-  {
     id: "strategy-hydroclimate-decomposition-brief",
     label: "Separating strategy and hydroclimate in COEQWAL results",
     file: "strategy_hydroclimate_decomposition_brief.html",
   },
-  {
-    id: "understanding-todays-water-system",
-    label: "Understanding today's water system",
-    file: "understanding-todays-water-system.html",
-  },
-  {
-    id: "securing-community-water-supplies",
-    label: "Securing community water supplies",
-    file: "securing-community-water-supplies.html",
-  },
-  {
-    id: "sustaining-farms-and-groundwater",
-    label: "Sustaining farms and groundwater",
-    file: "sustaining-farms-and-groundwater.html",
-  },
-  {
-    id: "protecting-rivers-and-salmon",
-    label: "Protecting rivers and salmon",
-    file: "protecting-rivers-and-salmon.html",
-  },
-  {
-    id: "balancing-needs-in-the-delta",
-    label: "Balancing needs in the Delta",
-    file: "balancing-needs-in-the-delta.html",
-  },
 ]
+
+/**
+ * Background briefs shown as standalone "View" buttons — above the water
+ * management strategies dropdown, in that section — rather than as options
+ * in the dropdown above.
+ */
+export const BACKGROUND_BRIEF_STANDALONE_DOCUMENTS: BackgroundBriefDocument[] =
+  [
+    {
+      id: "scenario-library-brief",
+      label: "The COEQWAL scenario library",
+      file: "scenario_library_brief.html",
+    },
+    {
+      id: "hydroclimates-brief",
+      label: "The five COEQWAL hydroclimates",
+      file: "hydroclimates_brief.html",
+    },
+  ]
 
 /** Resolve a background brief document's public URL from its filename. */
 export function getBackgroundBriefDocumentUrl(file: string): string {
