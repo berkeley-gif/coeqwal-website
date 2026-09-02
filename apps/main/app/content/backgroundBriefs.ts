@@ -32,9 +32,9 @@ export const BACKGROUND_BRIEF_DOCUMENTS: BackgroundBriefDocument[] = [
     file: "project_background_brief.html",
   },
   {
-    id: "strategy-hydroclimate-decomposition-brief",
-    label: "Separating strategy and hydroclimate in COEQWAL results",
-    file: "strategy_hydroclimate_decomposition_brief.html",
+    id: "known-limitations-and-how-coeqwal-handles-them",
+    label: "Known limitations and how COEQWAL handles them",
+    file: "known-limitations-and-how-coeqwal-handles-them.html",
   },
 ]
 
