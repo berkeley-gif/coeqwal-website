@@ -1922,7 +1922,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "The Sacramento–San Joaquin Delta sits at the heart of California's water system. Pumping facilities in and around the Delta convey water to cities and farms throughout the San Francisco Bay Area, San Joaquin Valley, Southern California, and other parts of the state. The Delta is also a highly altered ecosystem of wetlands, waterways, and important fish species. Families, farmers, fishing communities, and Tribal nations have deep ties to this landscape.",
+              text: (<>The Sacramento–San Joaquin <GlossaryTermLink>Delta</GlossaryTermLink> sits at the heart of California's water system. Pumping facilities in and around the Delta convey water to cities and farms throughout the San Francisco Bay Area, San Joaquin Valley, Southern California, and other parts of the state. The Delta is also a highly altered ecosystem of wetlands, waterways, and important fish species. Families, farmers, fishing communities, and Tribal nations have deep ties to this landscape.</>),
             },
             {
               type: "paragraph",
@@ -2013,7 +2013,7 @@ export const WATER_THEMES: Theme[] = [
               items: [
                 "In-Delta water quality and salinity are sensitive to freshwater inflows, reservoir operations, exports, sea-level rise, tides, and climate conditions. Changes in these factors can affect freshwater for in-Delta uses and exports, as well as ecosystem conditions.",
                 (<>Freshwater flow is important to Delta ecology, but Delta outflows alone do not address all factors limiting ecosystem health. Habitat, invasive species, water temperature, food-web conditions, and other factors not fully represented by <GlossaryTermLink>COEQWAL</GlossaryTermLink> also influence ecological outcomes.</>),
-                "A Delta Conveyance Project scenario evaluates how the proposed project could affect modeled water-system outcomes, but does not capture the full range of potential social, cultural, economic, and environmental benefits and impacts associated with the project.",
+                (<>A <GlossaryTermLink>Delta Conveyance Project</GlossaryTermLink> scenario evaluates how the proposed project could affect modeled water-system outcomes, but does not capture the full range of potential social, cultural, economic, and environmental benefits and impacts associated with the project.</>),
                 "Changes in operational rules do not always produce simple or direct responses. Even when operational rules change under a scenario, other requirements, such as water quality standards, may remain in place. As a result, management changes do not always translate directly into expected changes in Delta outflows, salinity, or ecosystem conditions.",
                 "Delta conditions are influenced by both management and climate. The hydroclimates include changes in freshwater conditions and sea-level rise, which together can affect salinity, ecosystem conditions, in-Delta uses, and water exports.",
               ],
