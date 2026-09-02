@@ -307,7 +307,7 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: (
                 <>
-                  This water issue compares alternative representations of current operations and provides a foundation for understanding the broader range of management strategies explored by COEQWAL. The scenarios vary assumptions about operating rules, agricultural land use, and Temporary Urgency Change Petitions (TUCPs), which can temporarily modify certain water-right requirements during drought or other urgent conditions.
+                  This water issue compares alternative representations of current operations and provides a foundation for understanding the broader range of management strategies explored by COEQWAL. The scenarios vary assumptions about operating rules, agricultural land use, and <GlossaryTermLink>Temporary Urgency Change Petitions (TUCPs)</GlossaryTermLink>, which can temporarily modify certain water-right requirements during drought or other urgent conditions.
                 </>
               ),
             },
