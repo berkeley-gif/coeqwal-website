@@ -86,6 +86,15 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   // checked. One member is staged in this flow, so one swatch.
   const storyCard = page.locator('[data-share-region="canvas"]')
   await expect(storyCard.locator("[data-share-legend-swatch]")).toHaveCount(1)
+  // The swatch carries an accessible name so screen readers get the color
+  // key, and it always paints: a row without a color falls back to grey.
+  const swatch = storyCard.getByRole("img", {
+    name: "Legend: Current operations",
+  })
+  await expect(swatch).toBeVisible()
+  expect(
+    await swatch.evaluate((el) => getComputedStyle(el).backgroundColor),
+  ).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/)
   await expect(storyCard.getByText("Variable", { exact: true })).toBeVisible()
   await expect(storyCard.getByText("View", { exact: true })).toBeVisible()
   await expect(

@@ -227,11 +227,15 @@ export default function ShareSnapshotCard({
             >
               <Box
                 data-share-legend-swatch=""
+                role="img"
+                aria-label={`Legend: ${row.label}`}
                 sx={{
-                  width: 8,
-                  height: 8,
+                  width: 10,
+                  height: 10,
                   borderRadius: theme.borderRadius.circle,
-                  backgroundColor: row.color,
+                  // A row without a color (an unknown compare scope) still
+                  // paints a neutral swatch instead of an invisible one.
+                  backgroundColor: row.color || theme.palette.grey[400],
                   flexShrink: 0,
                 }}
               />
