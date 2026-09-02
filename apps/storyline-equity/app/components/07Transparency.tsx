@@ -11,15 +11,17 @@ const transparencyText = {
       [
         [
           {
-            text: "Today, California relies on complex models such as CalSim3 to evaluate water-management strategies and inform decisions about water storage, flows, and deliveries.",
-          },
-          {
-            text: "These models are powerful, but their simplified structure can hide the assumptions and priorities that shape how water is allocated, and reproduce existing inequities.",
+            text: "Today, California relies on complex models such as CalSim3 to inform decisions about water storage, flows, and deliveries.",
           },
         ],
         [
           {
-            text: "Because few people can run and interpret these models, communities often cannot see how decisions are represented, whose needs are prioritized, or how alternative management strategies could produce different outcomes.",
+            text: "These models simplify an extraordinarily complex water system. But that simplification can hide the assumptions, priorities, and operating rules that shape how water is allocated, and can reproduce existing inequities.",
+          },
+        ],
+        [
+          {
+            text: "Because few people can run and interpret these models, communities often cannot see how water-management choices are represented, whose needs are prioritized, or how different choices can produce different outcomes.",
           },
         ],
       ],
@@ -31,10 +33,12 @@ const transparencyText = {
         ],
         [
           {
-            text: "If knowledge is power, everyone needs insight into water management decisions.",
+            text: "The water system we model today is not simply a physical system. It reflects generations of choices embedded in water rights, infrastructure, contracts, and operating rules.",
           },
+        ],
+        [
           {
-            text: "COEQWAL makes these decisions, assumptions, and consequences more visible and accessible.",
+            text: "COEQWAL makes these assumptions, choices, and consequences visible, comparable, and accessible.",
             mark: "strong",
           },
         ],
@@ -56,8 +60,8 @@ export default function Transparency() {
       <Box
         className="container text-section"
         sx={{
-          width: "min(75ch, calc(100vw - 6rem))",
-          maxWidth: "75ch",
+          width: "min(75ch, calc(100vw - 6rem), calc(55dvw - 5rem))",
+          maxWidth: "calc(55dvw - 5rem)",
           minHeight: "70vh",
           display: "grid",
           alignItems: "center",
@@ -83,9 +87,9 @@ export default function Transparency() {
               <Stack component="section" spacing={3.5}>
                 {groups.map((sentences, paragraphIndex) => {
                   let revealRange: [number, number] | null = null
-                  if (index === 0 && paragraphIndex === 1) {
+                  if (index === 0 && paragraphIndex === 2) {
                     revealRange = [0.18, 0.22]
-                  } else if (index === 1 && paragraphIndex === 1) {
+                  } else if (index === 1 && paragraphIndex === 3) {
                     revealRange = [0.72, 0.76]
                   }
 

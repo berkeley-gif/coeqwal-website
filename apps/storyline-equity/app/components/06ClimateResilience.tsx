@@ -1,17 +1,17 @@
 "use client"
 
 import { ScrollElement, StickyScrollSection } from "@repo/scrollytelling"
-import { Paragraph, SectionTitle } from "@repo/ui"
-import { Box, Stack } from "@repo/ui/mui"
+import { getWaterStoryUrl, Paragraph, SectionTitle } from "@repo/ui"
+import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
 
 const climateResilienceText = {
   en: {
-    title: { text: "How Inequity Persists" },
+    title: { text: "Addressing persistent inequities" },
     sections: [
       [
         [
           {
-            text: "California has taken important steps to address some of the inequities and environmental impacts of past water decisions.",
+            text: "Over recent decades, California has taken steps to address some of the inequities and environmental harms embedded in its water system.",
           },
         ],
         [
@@ -23,23 +23,23 @@ const climateResilienceText = {
       [
         [
           {
-            text: "Yet inequities remain embedded in the water system. Water rights, contracts, infrastructure, and operating rules continue to protect some water users more than others.",
-          },
-          {
-            text: "Some communities and sectors are better protected from shortages, while many Tribes, rural communities, disadvantaged areas, and ecosystems remain particularly vulnerable.",
+            text: "Yet significant inequities and environmental challenges remain.",
           },
         ],
         [
           {
-            text: "Climate change adds further pressure. As droughts and floods intensify and conditions upstream become more variable, water is increasingly difficult to manage for all needs at once.",
+            climateStoryLink: "Climate change",
+            text: " adds further pressure. As droughts and floods intensify and water availability becomes more variable, meeting all needs becomes increasingly difficult.",
           },
         ],
         [
           {
-            text: "These pressures can deepen existing inequities, with the most vulnerable often bearing the greatest burden.",
+            text: "Some communities and sectors are better protected from shortages, while many Tribes, rural and disadvantaged communities, and ecosystems remain particularly vulnerable.",
           },
+        ],
+        [
           {
-            text: "The central question is not whether trade-offs exist, but why the same groups so often bear the costs.",
+            text: "Facing rising pressures and deepening inequities, water managers seek new strategies.",
           },
         ],
       ],
@@ -60,8 +60,8 @@ export default function ClimateResilience() {
       <Box
         className="container text-section"
         sx={{
-          width: "min(75ch, calc(100vw - 6rem))",
-          maxWidth: "75ch",
+          width: "min(75ch, calc(100vw - 6rem), calc(55dvw - 5rem))",
+          maxWidth: "calc(55dvw - 5rem)",
           minHeight: "70vh",
           display: "grid",
           alignItems: "center",
@@ -85,11 +85,46 @@ export default function ClimateResilience() {
                 </Box>
               ) : null}
               <Stack component="section" spacing={3.5}>
-                {groups.map((sentences, paragraphIndex) => (
-                  <Box key={paragraphIndex} component="article">
-                    <Paragraph blocks={sentences} />
-                  </Box>
-                ))}
+                {groups.map((sentences, paragraphIndex) => {
+                  const [block] = sentences
+                  const linkLabel =
+                    block && "climateStoryLink" in block
+                      ? block.climateStoryLink
+                      : undefined
+
+                  return (
+                    <Box key={paragraphIndex} component="article">
+                      {linkLabel ? (
+                        <Typography variant="body1">
+                          <a
+                            href={getWaterStoryUrl("climate")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color: "inherit",
+                              textDecoration: "underline",
+                              pointerEvents: "auto",
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.25rem",
+                              position: "relative",
+                              zIndex: 1,
+                            }}
+                          >
+                            <span>{linkLabel}</span>
+                            <LibraryBooksIcon
+                              sx={{ fontSize: "1.5rem", flexShrink: 0 }}
+                            />
+                          </a>{" "}
+                          {block.text}
+                        </Typography>
+                      ) : (
+                        <Paragraph blocks={sentences} />
+                      )}
+                    </Box>
+                  )
+                })}
               </Stack>
             </ScrollElement>
           )

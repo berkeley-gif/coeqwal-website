@@ -1,0 +1,792 @@
+{
+  "type": "FeatureCollection",
+  "name": "geometro_editor_edited",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 0,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.03102912412817, 38.810525006424996],
+          [-121.01886370438582, 38.810525006424996],
+          [-121.1457639890645, 38.711591806578554]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 1,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.27390729770946, 39.216709866211204],
+          [-120.78211416419425, 39.216709866211204],
+          [-120.915665204005, 39.11259164658111],
+          [-120.915665204005, 38.8955648776906],
+          [-121.15656272238107, 38.70775787325118]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 2,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.15844533591985, 38.706647453461244],
+          [-121.36724234710756, 38.706647453461244],
+          [-121.50846132183489, 38.59655120675711]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 3,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.28287972373721, 39.191930072499645],
+          [-120.68289964957633, 39.191930072499645],
+          [-121.03735548089946, 38.91559145209527]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 4,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.99763912107557, 40.42279520392242],
+          [-122.0884019267023, 40.42279520392242],
+          [-122.17601018746535, 40.354494604028446]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 5,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.66594532159041, 40.63544160359237],
+          [-121.72488044455548, 40.63544160359237],
+          [-121.99763912107557, 40.42279520392242]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 6,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.57151898840368, 40.353663270696416],
+          [-121.9089645202299, 40.353663270696416],
+          [-121.99763912107557, 40.42279520392242]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 7,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.84721778952792, 38.55378560682351],
+          [-121.05653344223836, 38.55378560682351],
+          [-121.43945405215032, 38.25525545520355]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 8,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.23269219048177, 38.607500206740156],
+          [-120.77831879473746, 38.607500206740156],
+          [-120.84721778952792, 38.55378560682351]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 9,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.38011119025299, 39.81308687153552],
+          [-120.90154735396365, 39.81308687153552],
+          [-120.95332598936324, 39.853454204806155],
+          [-121.0889363459586, 39.853454204806155],
+          [-121.46335998857154, 39.56154840525926]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 10,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.50137212184586, 39.53594660529899],
+          [-121.50137212184586, 38.8779434716492],
+          [-121.62098058832686, 38.784695073131786]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 11,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.22579938894029, 40.01401540455697],
+          [-121.22579938894029, 39.75078688186582],
+          [-121.50137212184586, 39.53594660529899]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 11,
+        "metro_line_index": 1,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.4216073219697, 40.35494507069444],
+          [-121.29606119461072, 40.35494507069444],
+          [-121.08746472248833, 40.19232040428017],
+          [-121.08746472248833, 40.12186300502876],
+          [-121.22579938894029, 40.01401540455697]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 11,
+        "metro_line_index": 2,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.98296632265055, 40.038512471185584],
+          [-121.19437733108924, 40.038512471185584],
+          [-121.22579938894029, 40.01401540455697]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 12,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.77437618808881, 41.21819500268782],
+          [-121.78943661282963, 41.21819500268782],
+          [-122.37011958716408, 40.765486603390514]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 13,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-119.34748632518915, 37.70091860814733],
+          [-120.52383399345467, 37.70091860814733],
+          [-120.97531413516242, 37.34893850661035]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 14,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-119.27070399197498, 37.729485008102984],
+          [-119.3108445882167, 37.729485008102984],
+          [-119.34748632518915, 37.70091860814733]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 15,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.4923537676932, 38.22730646358025],
+          [-121.4923537676932, 38.192680934888315],
+          [-121.56888974778275, 38.1330124366433]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 16,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-119.81343952446588, 38.49392280691643],
+          [-120.45402334905064, 38.49392280691643],
+          [-120.61069418989507, 38.3717800737727]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 17,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.56888974778275, 38.1330124366433],
+          [-121.56888974778275, 38.101826417779755],
+          [-121.57664898839568, 38.09577720753441]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 17,
+        "metro_line_index": 1,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.61069418989507, 38.3717800737727],
+          [-121.30703941123416, 38.3717800737727],
+          [-121.4923537676932, 38.22730646358025]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 18,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.4923537676932, 38.22730646358025],
+          [-121.4923537676932, 38.192680934888315],
+          [-121.56888974778275, 38.1330124366433]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 19,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.46658472345206, 41.65756606867251],
+          [-120.46658472345206, 41.54490104653328],
+          [-120.55826958997642, 41.4734222689583]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 20,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.28016879040808, 41.18741566940224],
+          [-120.28016879040808, 41.25661107699907],
+          [-120.55826958997642, 41.4734222689583]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 21,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.55826958997642, 41.4734222689583],
+          [-120.97524876384267, 41.4734222689583],
+          [-121.13185358908612, 41.351331002481174],
+          [-121.13185358908612, 40.98861853553638],
+          [-121.19849052231604, 40.93666746979147],
+          [-121.81338242064406, 40.93666746979147],
+          [-121.93044338784654, 41.027929802983124],
+          [-121.97158705000254, 41.027929802983124],
+          [-122.30563958726418, 40.76749787005406]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 22,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.38069538714768, 41.284673669251276],
+          [-122.38069538714768, 39.505205585730835],
+          [-122.01181640542859, 39.21762247975141],
+          [-122.01181640542859, 38.98367737710047],
+          [-121.50649138850457, 38.58971907343442],
+          [-121.50649138850457, 38.32217426946022],
+          [-121.83659708695052, 38.06481934612418]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 23,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-118.72018930949616, 37.093871865339565],
+          [-118.80366830014444, 37.093871865339565],
+          [-119.24363279201702, 37.436874208557185]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 24,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-119.20897879207081, 37.70759767480365],
+          [-119.20897879207081, 37.55260422728404],
+          [-119.1830171921111, 37.53236420840898]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 25,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-119.1830171921111, 37.53236420840898],
+          [-119.1830171921111, 37.343315913512896],
+          [-119.81506143383837, 36.85056556675892],
+          [-120.17858669449272, 36.85056556675892],
+          [-120.29093399039141, 36.76297807626986],
+          [-120.29093399039141, 37.13777952702734],
+          [-121.33533698877028, 37.9520104077576],
+          [-121.7046114757481, 37.9520104077576],
+          [-121.8450272254791, 38.06148044925436]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 26,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-119.73043199126141, 38.29418240722646],
+          [-120.1781105089088, 38.29418240722646],
+          [-120.35758452362126, 38.15426200744366]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 27,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.35758452362126, 38.15426200744366],
+          [-120.61391143456972, 38.15426200744366],
+          [-121.24166378891567, 37.66485767486995]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 28,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-119.3532077918469, 37.8755406078763],
+          [-120.82870450570599, 37.8755406078763],
+          [-121.17385518902091, 37.60645640829398]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 29,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.48485199009036, 39.4233980054737],
+          [-121.06638276587188, 39.4233980054737],
+          [-121.13663345574537, 39.36862960555874]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 30,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.4957659234068, 39.622390471831466],
+          [-120.81113780595037, 39.622390471831466],
+          [-121.13663345574537, 39.36862960555874]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 31,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-120.32653852366946, 39.32459047229372],
+          [-121.17287718423461, 39.32459047229372],
+          [-121.20970405563196, 39.29587973900499]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "river",
+        "metro_river_name": "River Network",
+        "metro_feature_index": 32,
+        "metro_line_index": 0,
+        "metro_color": "#36a9e1",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.13663345574537, 39.36862960555874],
+          [-121.29186506449855, 39.36862960555874],
+          [-121.59441618836814, 39.13275660592484],
+          [-121.59441618836814, 38.80540504314148],
+          [-121.62098058832686, 38.784695073131786]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "canal",
+        "metro_river_name": "Canal Network",
+        "metro_feature_index": 0,
+        "metro_line_index": 0,
+        "metro_color": "#f28c28",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.59319398825248, 37.83244667494037],
+          [-121.59319398825248, 37.05927400076602],
+          [-119.66666892537502, 35.55732867781073]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "canal",
+        "metro_river_name": "Canal Network",
+        "metro_feature_index": 1,
+        "metro_line_index": 0,
+        "metro_color": "#f28c28",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-119.9660904665847, 37.87363469475055],
+          [-121.62843544118762, 37.87363469475055],
+          [-122.10775517957498, 37.49995046237633]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "canal",
+        "metro_river_name": "Canal Network",
+        "metro_feature_index": 2,
+        "metro_line_index": 0,
+        "metro_color": "#f28c28",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.55553492181116, 37.81724747447302],
+          [-121.55553492181116, 37.493942461356305],
+          [-121.0398815219353, 37.091932008892854],
+          [-120.76825613113164, 37.091932008892854],
+          [-120.3696339231697, 36.78116067639832]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "metro_river_id": "canal",
+        "metro_river_name": "Canal Network",
+        "metro_feature_index": 3,
+        "metro_line_index": 0,
+        "metro_color": "#f28c28",
+        "metro_stroke_width": 8
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.14709191538641, 37.89210393777359],
+          [-121.29511032533775, 37.89210393777359],
+          [-120.841179939289, 38.245994283355124]
+        ]
+      }
+    }
+  ]
+}

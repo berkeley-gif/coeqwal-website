@@ -9,6 +9,8 @@ export interface InlineLegend {
   shape?: LegendShape
   position?: "before" | "after"
   label?: string
+  outlineColor?: string
+  outlineWidth?: number
 }
 
 export interface UnderlineLegend {

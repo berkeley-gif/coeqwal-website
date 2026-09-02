@@ -7,16 +7,15 @@ import {
 } from "@repo/scrollytelling"
 import { motion, useTransform, type MotionValue } from "@repo/motion"
 import { Paragraph, SectionTitle } from "@repo/ui"
-import { Box, Stack } from "@repo/ui/mui"
+import { Box, Stack, Typography } from "@repo/ui/mui"
 import { themeValues } from "@repo/ui/themes/theme"
 import { hierarchy, scaleBand, scaleLinear, treemap } from "d3"
 import { useMemo } from "react"
-import type { TierLocationAssignment } from "@repo/data/coeqwal"
 import cwsDeliveryMedians from "../../public/data/community-water-systems/node-delivery-medians.json"
 import cwsTiers from "../../public/data/community-water-systems/tiers.json"
 import agricultureTiers from "../../public/data/agriculture/tiers.json"
+import s0035TierAssignments from "../../public/data/s0035-tier-assignments.json"
 import { FreshWaterColor } from "./helpers/colorPalette"
-import { useStorylineTierAssignments } from "./hooks/useStorylineTierAssignments"
 import { useUrbanIcon } from "../store"
 
 const optimalTierColor = themeValues.palette.tiers.tier1
@@ -37,7 +36,7 @@ const visualizationCopy = {
   focusTreemap: {
     title: "Drinking Water Delivery across Communities",
     caption:
-      "Each rectangle is one community within the same community water system; size represents their typical annual surface-water delivery (median). This is s0020 baseline scenario.",
+      "Each rectangle represents a community; its size reflects its typical annual surface-water delivery (median) under a baseline scenario of current operations and climate.",
   },
   annualDelivery: {
     title: "Annual Water Deliveries for a Community",
@@ -47,7 +46,7 @@ const visualizationCopy = {
   demandMet: {
     title: "Annual Drinking Water Demand Met for a Community",
     caption:
-      "Annual delivery is expressed as a percentage of drinking-water demand. This outcome reflects the reliability of surface-water deliveries modeled in CalSim. It does not account for other water sources a community may use, such as groundwater, and therefore does not represent the community’s overall water security.",
+      "Annual surface water delivery is expressed as a percentage of drinking water demand. A shortfall does not necessarily mean a community experiences a drinking water shortage. COEQWAL evaluates surface water deliveries from major water projects. Some communities may also draw from groundwater, local surface water, or stored water for water security.",
   },
   distribution: {
     title: "Distribution of Annual Demand Met",
@@ -56,8 +55,7 @@ const visualizationCopy = {
   },
   optimal: {
     title: "Optimal Water Delivery Conditions",
-    caption:
-      "COEQWAL researchers define thresholds that reflect the risk of water scarcity for communities and ecosystems.",
+    caption: "The outcomes are evaluated against the Optimal thresholds.",
   },
   atRisk: {
     title: "At-risk Water Delivery Conditions",
@@ -66,29 +64,26 @@ const visualizationCopy = {
   tierTreemap: {
     title: "Drinking Water Outcome across Communities",
     caption:
-      "Each community retains its area, scaled by its typical annual surface-water delivery (median), and is shown according to its performance category.",
+      "Each community is assigned a performance category based on the same criteria, allowing comparison across communities with different annual surface water deliveries.",
   },
   cwsTierRows: {
     title: "Community water systems grouped by performance",
     caption:
-      "Equal-size rectangles show how many community water systems fall within each performance category",
+      "Equal-size rectangles show how many community water systems fall within each performance category.",
   },
   crossGroupComparison: {
     title: "Comparing performance across water-user groups",
     caption:
       "Community water systems and agricultural areas are shown as equal-size units using the same performance scale.",
   },
-  continuousComparison: {
-    title: "Position within each performance category",
-    caption:
-      "Each unit moves to its continuous performance value, showing whether its outcome tends toward the better or worse edge of its category.",
-  },
   scenarioComparison: {
-    title: "Comparing system-wide outcomes across management strategies",
+    title: "Comparing performance across management strategies",
     caption:
-      "Comparing this system-wide view across scenarios shows how performance shifts under different management strategies, making it easier to see who benefits, who is at risk, and how those patterns change under different decisions.",
+      "Current operations · Prioritize human health delivery levels to community water systems · Groundwater pumping limits in the Central Valley",
   },
 } as const
+const LOAD_RESOLUTION_VISUALS = true
+const titleBandColor = "#6b4f8a"
 const narrativeMarkSx = {
   strong: { fontWeight: 700 },
   optimalName: { color: optimalTierColor, fontWeight: 700 },
@@ -107,27 +102,21 @@ const storyFrames = [
     paragraphs: [
       [
         {
-          text: "So far, we've looked at how inequity in California water has developed over time.",
+          text: "COEQWAL cannot undo historical inequities. It can, however, make their impacts visible and support more equitable decisions moving forward.",
         },
         {
-          text: "While COEQWAL cannot undo historical inequities, it can make their impacts visible and support more informed and equitable decisions moving forward.",
-        },
-        {
-          text: "COEQWAL is a platform and process designed to make California’s water trade-offs visible, comparable, and accessible.",
-        },
-        {
-          text: "Trade-offs are unavoidable in water management, and balancing the needs of all is not easy. But impacts do not have to fall hardest on the same groups.",
+          text: "Trade-offs are unavoidable in water management. But their impacts do not have to fall hardest on the same groups.",
         },
       ],
       [
         {
-          text: "COEQWAL simulates and evaluates water allocation outcomes across different management strategies, known as scenarios, to show how communities and ecosystems may respond differently to water decisions.",
+          text: "COEQWAL compares different water management strategies, called scenarios, to show how different choices affect communities, water users, and ecosystems.",
         },
         {
-          text: "Models can help us predict how communities and ecosystems will respond to the stress of climate change. To understand how these responses shape water equity, COEQWAL simulates a range of climate scenarios. It then evaluates water allocation outcomes across different strategies, known as scenarios.",
+          text: "It tests these strategies across a range of hydroclimates, revealing who benefits and who bears the burden of more intense droughts, floods, and snowpack loss.",
         },
         {
-          text: "To see how this works, let’s focus on community water systems.",
+          text: "To see how this works, let's focus on community water systems.",
         },
       ],
     ],
@@ -136,22 +125,19 @@ const storyFrames = [
     paragraphs: [
       [
         {
-          text: "Each COEQWAL scenario simulates water deliveries across 100 years of hydrologic variability.",
+          text: "Each COEQWAL scenario simulates water deliveries across 100 years of varying hydrologic conditions.",
         },
         {
           segments: [
             { text: "For each year, COEQWAL compares annual surface water " },
             { text: "delivery", mark: "strong" },
-            { text: " with annual drinking-water " },
+            { text: " to drinking-water " },
             { text: "demand", mark: "strong" },
             { text: "." },
           ],
         },
         {
-          text: "Each comparison becomes the percentage of drinking water demand met, showing how reliably a community’s water needs are met by surface water deliveries.",
-        },
-        {
-          text: "When deliveries fall below demand, this does not necessarily mean a community experiences a drinking water shortage. COEQWAL evaluates surface water deliveries from major water projects, not a community’s complete water supply portfolio, which may include other sources such as groundwater, local surface water, or stored water.",
+          text: "This shows what percentage of drinking water demand is met by modeled surface water deliveries each year.",
         },
       ],
     ],
@@ -161,34 +147,50 @@ const storyFrames = [
     paragraphs: [
       [
         {
+          text: "COEQWAL uses the 100 years of modeled surface water deliveries to measure how well water needs are being met.",
+        },
+        {
           segments: [
             {
-              text: "Looking across the range of annual water allocation outcomes simulated by CalSim, COEQWAL researchers define ",
+              text: "To weigh the reliability of supply versus the severity of water shortfalls, researchers define conditions, or ",
             },
             { text: "thresholds", mark: "strong" },
             {
-              text: " that reflect how water shortages affect communities and ecosystems.",
+              text: ", for what communities and ecosystems need.",
             },
           ],
         },
         {
-          text: "For community water systems, these thresholds consider how reliably modeled surface-water deliveries meet demand and the severity of shortfalls.",
+          text: "For community water systems, these thresholds consider how often modeled surface-water deliveries meet demand and how severe shortfalls become when they do not.",
         },
       ],
       [
         {
           segments: [
-            { text: "For example, a community is considered " },
+            { text: "For example, an " },
             { text: "Optimal", mark: "optimalName" },
-            { text: " if " },
+            { text: " community water outcome means:" },
+          ],
+        },
+        {
+          segments: [
             {
-              text: "more than 90% of demand is met in at least 90 years of the 100 simulated years, and no year falls below 70% of demand",
+              text: "More than 90% of demand is met by surface water deliveries in at least 90 years of the 100 simulated years",
               mark: "optimalDefinition",
             },
+            { text: "; and" },
+          ],
+        },
+        {
+          segments: [
             {
-              text: ". This community does not meet those conditions under this scenario.",
+              text: "Deliveries never fall below 70% of demand.",
+              mark: "optimalDefinition",
             },
           ],
+        },
+        {
+          text: "This community does not meet those conditions under this scenario.",
         },
       ],
     ],
@@ -202,11 +204,11 @@ const storyFrames = [
       [
         {
           segments: [
-            { text: "In this scenario, the community is considered " },
+            { text: "The community does meet conditions for " },
             { text: "At-risk", mark: "atRiskName" },
-            { text: ", meaning that " },
+            { text: " water deliveries. Its " },
             {
-              text: "modeled surface-water deliveries fall short of demand in a significant number of simulated years",
+              text: "surface water deliveries fall short of demand in a significant number of simulated years",
               mark: "atRiskDefinition",
             },
             { text: "." },
@@ -230,25 +232,28 @@ const storyFrames = [
           ],
         },
         {
-          text: "These outcome levels provide a shared scale for comparing conditions across community water system locations under the same scenario.",
+          text: "These outcome levels create a shared scale for interpreting how well needs are being met.",
         },
       ],
     ],
   },
   {
-    title: "A common yardstick for distributional equity",
+    title: "A common yardstick for understanding equity",
     paragraphs: [
       [
         {
           text: "Communities and ecosystems experience water decisions in different ways.",
         },
         {
-          text: "Those outcomes are measured in different ways, such as community water deliveries, agricultural production, river flows, salmon abundance, salinity, and water storage, making them difficult to compare directly.",
+          text: "Outcomes are measured differently. Agricultural production is not the same as salmon abundance or human health.",
+        },
+        {
+          text: "That makes them difficult to compare directly.",
         },
       ],
       [
         {
-          text: "COEQWAL uses a common framework to interpret these diverse outcomes, allowing us to compare conditions across communities, water users, and ecosystems.",
+          text: "COEQWAL uses a common framework to interpret these diverse outcomes, allowing very different needs and conditions to be viewed on the same performance scale.",
         },
       ],
     ],
@@ -257,10 +262,13 @@ const storyFrames = [
     paragraphs: [
       [
         {
-          text: "By placing outcomes for different water users on a shared performance scale, COEQWAL can bring them together into a system-wide view.",
+          text: "The same approach can be applied across water users and ecosystems.",
         },
         {
-          text: "Comparing that view across scenarios shows how the overall water system performs under different water management strategies, making it easier to see who benefits, who is at risk, and how those patterns shift under different decisions.",
+          text: "By placing different outcomes on a shared performance scale, COEQWAL can bring them together into a system-wide view.",
+        },
+        {
+          text: "Comparing this view across management strategies reveals where performance improves or declines, who benefits, who faces greater risk, and how those patterns shift under different choices.",
         },
       ],
     ],
@@ -300,7 +308,7 @@ const comparisonTileGap = 3
 const continuousBinWidth = 0.2
 
 function toScenarioTierData(
-  locations: readonly TierLocationAssignment[] | undefined,
+  locations: readonly { location_id: string; tier_level: number }[] | undefined,
 ): ScenarioTierDatum[] {
   return (
     locations?.map((location) => ({
@@ -425,7 +433,7 @@ export default function Resolution() {
           width: "calc(100vw - 5rem)",
           height: "100dvh",
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "1fr 50dvw" },
+          gridTemplateColumns: { xs: "1fr", md: "1fr 45dvw" },
           alignItems: "center",
           minHeight: 0,
         }}
@@ -436,7 +444,7 @@ export default function Resolution() {
             display: "grid",
             alignItems: "center",
             pointerEvents: "auto",
-            maxWidth: "75ch",
+            maxWidth: "min(75ch, 55dvw)",
           }}
         >
           {storyFrames.map((frame, index) => {
@@ -501,57 +509,31 @@ export default function Resolution() {
 function UnitVisualization() {
   const progress = useScrollProgress()
   const urbanIcon = useUrbanIcon()
-  const { byScenario: tierQueries } = useStorylineTierAssignments()
-  const s0020TierResults = tierQueries.s0020.data?.results
-  const cwsTierLocations = useMemo(
-    () =>
-      s0020TierResults?.CWS_DEL?.locations.map((location) => ({
-        locationId: location.location_id,
-        tierLevel: location.tier_level,
-        tierContinuous:
-          location.tier_continuous === undefined
-            ? location.tier_level
-            : Number(location.tier_continuous),
-      })) ?? cwsTiers.locations,
-    [s0020TierResults],
-  )
+  const cwsTierLocations = useMemo(() => cwsTiers.locations, [])
   const agricultureTierLocations = useMemo(
-    () =>
-      s0020TierResults?.AG_REV?.locations ??
-      agricultureTiers.results.AG_REV.locations,
-    [s0020TierResults],
+    () => agricultureTiers.results.AG_REV.locations,
+    [],
   )
   const scenarioComparisons = useMemo(
     () => ({
       s0020: {
-        cws: s0020TierResults?.CWS_DEL
-          ? toScenarioTierData(s0020TierResults.CWS_DEL.locations)
-          : cwsTierLocations.map((location) => ({
-              id: location.locationId,
-              tierLevel: location.tierLevel,
-            })),
-        agriculture: s0020TierResults?.AG_REV
-          ? toScenarioTierData(s0020TierResults.AG_REV.locations)
-          : agricultureTierLocations.map((location) => ({
-              id: location.location_id,
-              tierLevel: location.tier_level,
-            })),
+        cws: cwsTierLocations.map((location) => ({
+          id: location.locationId,
+          tierLevel: location.tierLevel,
+        })),
+        agriculture: agricultureTierLocations.map((location) => ({
+          id: location.location_id,
+          tierLevel: location.tier_level,
+        })),
       },
       s0035: {
-        cws: toScenarioTierData(
-          tierQueries.s0035.data?.results.CWS_DEL?.locations,
-        ),
+        cws: toScenarioTierData(s0035TierAssignments.results.CWS_DEL.locations),
         agriculture: toScenarioTierData(
-          tierQueries.s0035.data?.results.AG_REV?.locations,
+          s0035TierAssignments.results.AG_REV.locations,
         ),
       },
     }),
-    [
-      agricultureTierLocations,
-      cwsTierLocations,
-      s0020TierResults,
-      tierQueries.s0035.data,
-    ],
+    [agricultureTierLocations, cwsTierLocations],
   )
   const tiles = useMemo(() => {
     const root = hierarchy<CwsTreemapDatum>({
@@ -947,35 +929,72 @@ function UnitVisualization() {
       sx={{
         m: 0,
         width: "100%",
-        height: "100%",
+        height: "100dvh",
         minWidth: 0,
         minHeight: 0,
         boxSizing: "border-box",
-        pt: {
-          xs: "4px",
-          md: "8px",
-          lg: "clamp(10px, 1.5vh, 18px)",
-          xl: "clamp(12px, 1.75vh, 22px)",
-        },
-        pr: {
-          xs: "12px",
-          md: "16px",
-          lg: "clamp(36px, 3vw, 52px)",
-          xl: "clamp(40px, 3.25vw, 64px)",
-        },
-        pb: {
-          xs: "16px",
-          md: "20px",
-          lg: "clamp(40px, 5vh, 58px)",
-          xl: "clamp(44px, 5.5vh, 68px)",
-        },
+        display: "grid",
+        gridTemplateRows: "15dvh 85dvh",
         overflow: "hidden",
         position: "relative",
       }}
     >
       <Box
+        component="figcaption"
+        sx={{
+          display: "grid",
+          alignItems: "end",
+          minHeight: 0,
+          px: { xs: 1.5, md: 2, lg: 4.5, xl: 5 },
+          pb: 2,
+          overflow: "hidden",
+          backgroundColor: titleBandColor,
+        }}
+      >
+        <VisualizationTitle
+          {...visualizationCopy.focusTreemap}
+          opacity={focusTreemapTitleOpacity}
+        />
+        <VisualizationTitle
+          {...visualizationCopy.annualDelivery}
+          opacity={annualDeliveryTitleOpacity}
+        />
+        <VisualizationTitle
+          {...visualizationCopy.demandMet}
+          opacity={demandMetTitleOpacity}
+        />
+        <VisualizationTitle
+          {...visualizationCopy.distribution}
+          opacity={distributionTitleOpacity}
+        />
+        <VisualizationTitle
+          {...visualizationCopy.optimal}
+          opacity={optimalTitleOpacity}
+        />
+        <VisualizationTitle
+          {...visualizationCopy.atRisk}
+          opacity={atRiskTitleOpacity}
+        />
+        <VisualizationTitle
+          {...visualizationCopy.tierTreemap}
+          opacity={tierTreemapTitleOpacity}
+        />
+        <VisualizationTitle
+          {...visualizationCopy.cwsTierRows}
+          opacity={cwsTierRowsTitleOpacity}
+        />
+        <VisualizationTitle
+          {...visualizationCopy.crossGroupComparison}
+          opacity={discreteComparisonTitleOpacity}
+        />
+        <VisualizationTitle
+          {...visualizationCopy.scenarioComparison}
+          opacity={scenarioComparisonTitleOpacity}
+        />
+      </Box>
+      <Box
         component="svg"
-        viewBox="0 0 720 900"
+        viewBox="0 0 720 780"
         role="img"
         aria-labelledby="unit-vis-title unit-vis-description"
         preserveAspectRatio="xMidYMid meet"
@@ -985,6 +1004,10 @@ function UnitVisualization() {
           height: "100%",
           maxWidth: "100%",
           maxHeight: "100%",
+          px: { xs: 1.5, md: 2, lg: 4.5, xl: 5 },
+          pb: { xs: 2, md: 2.5, lg: 4, xl: 5 },
+          boxSizing: "border-box",
+          visibility: LOAD_RESOLUTION_VISUALS ? "visible" : "hidden",
         }}
       >
         <title id="unit-vis-title">
@@ -1710,52 +1733,6 @@ function UnitVisualization() {
             />
           </motion.g>
         </motion.g>
-
-        <VisualizationTitleOverlay
-          {...visualizationCopy.focusTreemap}
-          opacity={focusTreemapTitleOpacity}
-          x={50}
-        />
-        <VisualizationTitleOverlay
-          {...visualizationCopy.annualDelivery}
-          opacity={annualDeliveryTitleOpacity}
-        />
-        <VisualizationTitleOverlay
-          {...visualizationCopy.demandMet}
-          opacity={demandMetTitleOpacity}
-        />
-        <VisualizationTitleOverlay
-          {...visualizationCopy.distribution}
-          opacity={distributionTitleOpacity}
-        />
-        <VisualizationTitleOverlay
-          {...visualizationCopy.optimal}
-          opacity={optimalTitleOpacity}
-        />
-        <VisualizationTitleOverlay
-          {...visualizationCopy.atRisk}
-          opacity={atRiskTitleOpacity}
-        />
-        <VisualizationTitleOverlay
-          {...visualizationCopy.tierTreemap}
-          opacity={tierTreemapTitleOpacity}
-          x={50}
-        />
-        <VisualizationTitleOverlay
-          {...visualizationCopy.cwsTierRows}
-          opacity={cwsTierRowsTitleOpacity}
-          x={98}
-        />
-        <VisualizationTitleOverlay
-          {...visualizationCopy.crossGroupComparison}
-          opacity={discreteComparisonTitleOpacity}
-          x={98}
-        />
-        <VisualizationTitleOverlay
-          {...visualizationCopy.scenarioComparison}
-          opacity={scenarioComparisonTitleOpacity}
-          x={98}
-        />
       </Box>
     </Box>
   )
@@ -1865,51 +1842,38 @@ function MovingScenarioTile({
   )
 }
 
-function VisualizationTitleOverlay({
+function VisualizationTitle({
   title,
   caption,
   opacity,
-  x = 60,
-  y = 792,
 }: {
   title: string
   caption: string
   opacity: MotionValue<number>
-  x?: number
-  y?: number
 }) {
   return (
-    <motion.foreignObject
-      x={x}
-      y={y}
-      width={720 - x - 16}
-      height={96}
-      style={{ opacity, pointerEvents: "none" }}
+    <motion.div
+      style={{
+        gridArea: "1 / 1",
+        opacity,
+        pointerEvents: "none",
+        color: "#fcfbfa",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+      }}
     >
-      <div style={{ width: "100%", color: "#fcfbfa" }}>
-        <div
-          style={{
-            fontSize: 18,
-            fontWeight: 600,
-            lineHeight: 1.2,
-            letterSpacing: "-0.015em",
-          }}
-        >
-          {title}
-        </div>
-        <div
-          style={{
-            marginTop: 3,
-            color: "rgba(242, 240, 239, 0.7)",
-            fontSize: 14,
-            fontWeight: 400,
-            lineHeight: 1.2,
-          }}
-        >
-          {caption}
-        </div>
-      </div>
-    </motion.foreignObject>
+      <Typography component="h2" variant="h6">
+        {title}
+      </Typography>
+      <Typography
+        component="p"
+        variant="caption"
+        sx={{ mt: 0.5, color: "rgba(242, 240, 239, 0.7)" }}
+      >
+        {caption}
+      </Typography>
+    </motion.div>
   )
 }
 

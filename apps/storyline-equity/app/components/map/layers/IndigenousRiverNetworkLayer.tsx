@@ -6,31 +6,38 @@ import { FreshWaterColor } from "../../helpers/colorPalette"
 import type { LineFeatureCollection } from "../helpers/octilinearizeGeojson"
 import { useLazyMount } from "../hooks/useLazyMount"
 
-const EXCLUDED_MAJOR_RIVERS = /Sacramento River|San Joaquin River/i
 const RIVER_TROUGH_COLOR = "#080c46"
+export const INDIGENOUS_RIVER_NETWORK_TROUGH_LAYER_ID =
+  "indigenous-context-river-network-trough"
 
 const indigenousContextRivers = {
   ...(riverNetwork as unknown as LineFeatureCollection),
-  features: (riverNetwork as unknown as LineFeatureCollection).features.filter(
-    (feature) => {
-      const name = String(feature.properties?.GNIS_Name ?? "")
-      return !EXCLUDED_MAJOR_RIVERS.test(name)
-    },
-  ),
+  features: (riverNetwork as unknown as LineFeatureCollection).features,
 }
 
 export default function IndigenousRiverNetworkLayer({
   visible,
   opacity,
   deemphasized = false,
+  highlightedRiver,
 }: {
   visible: boolean
   opacity: number
   deemphasized?: boolean
+  highlightedRiver?: string
 }) {
   const shouldMount = useLazyMount(visible)
   const visibility = visible ? "visible" : "none"
   const layerOpacity = Math.max(0, Math.min(1, opacity))
+  const getOpacity = (primary: number, subdued: number) =>
+    highlightedRiver
+      ? [
+          "case",
+          ["==", ["get", "GNIS_Name"], highlightedRiver],
+          primary * layerOpacity,
+          subdued * layerOpacity,
+        ]
+      : primary * layerOpacity
 
   if (!shouldMount) return null
 
@@ -41,12 +48,12 @@ export default function IndigenousRiverNetworkLayer({
       data={indigenousContextRivers as unknown as GeoJSON.FeatureCollection}
     >
       <Layer
-        id="indigenous-context-river-network-trough"
+        id={INDIGENOUS_RIVER_NETWORK_TROUGH_LAYER_ID}
         type="line"
         paint={{
           "line-color": RIVER_TROUGH_COLOR,
           "line-width": 7,
-          "line-opacity": (deemphasized ? 0.18 : 0.6) * layerOpacity,
+          "line-opacity": getOpacity(deemphasized ? 0.18 : 0.6, 0.12) as never,
         }}
         layout={{
           "line-join": "round",
@@ -60,7 +67,7 @@ export default function IndigenousRiverNetworkLayer({
         paint={{
           "line-color": FreshWaterColor,
           "line-width": 5,
-          "line-opacity": (deemphasized ? 0.24 : 1) * layerOpacity,
+          "line-opacity": getOpacity(deemphasized ? 0.24 : 1, 0.2) as never,
         }}
         layout={{
           "line-join": "round",

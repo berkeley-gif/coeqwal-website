@@ -2,16 +2,24 @@
 
 import { useEffect } from "react"
 import { Layer, Marker, Source, useMap } from "@repo/map"
-import { yubaRiver } from "@repo/data"
 import { Box, Typography } from "@repo/ui/mui"
 import { FreshWaterColor, OceanWaterColor } from "../../helpers/colorPalette"
 import { YUBA_RIVER_LABEL } from "../config/locationPresets"
 import { useLazyMount } from "../hooks/useLazyMount"
+import { selectRivers } from "../helpers/equityRiverNetwork"
 
-const YUBA_RIVER_LAYER_IDS = ["yuba-river-halo", "yuba-river-body"] as const
+const YUBA_RIVER_LAYER_IDS = [
+  "yuba-headwater-halo",
+  "yuba-headwater-body",
+  "yuba-river-halo",
+  "yuba-river-body",
+] as const
 
 const YUBA_RIVER_SOURCE_ID = "yuba-river-source"
+const YUBA_HEADWATER_SOURCE_ID = "yuba-headwater-source"
+const YUBA_HEADWATER_SOURCE_LAYER = "Yuba_headwater.zip-z0o4c7"
 const RIVER_HALO_COLOR = "#07142c"
+const yubaRivers = selectRivers((name) => /Yuba River$/i.test(name))
 export default function YubaRiverLayer({
   visible,
   showLabel = true,
@@ -52,7 +60,44 @@ export default function YubaRiverLayer({
 
   return (
     <>
-      <Source id={YUBA_RIVER_SOURCE_ID} type="geojson" data={yubaRiver}>
+      <Source
+        id={YUBA_HEADWATER_SOURCE_ID}
+        type="vector"
+        url="mapbox://coeqwal.6t1b1o"
+      >
+        <Layer
+          id="yuba-headwater-halo"
+          type="line"
+          source-layer={YUBA_HEADWATER_SOURCE_LAYER}
+          paint={{
+            "line-color": RIVER_HALO_COLOR,
+            "line-width": 4,
+            "line-opacity": 0.55,
+          }}
+          layout={{
+            "line-cap": "round",
+            "line-join": "round",
+            visibility: visibilityValue,
+          }}
+        />
+        <Layer
+          id="yuba-headwater-body"
+          type="line"
+          source-layer={YUBA_HEADWATER_SOURCE_LAYER}
+          paint={{
+            "line-color": FreshWaterColor,
+            "line-width": 2.5,
+            "line-opacity": 0.9,
+          }}
+          layout={{
+            "line-cap": "round",
+            "line-join": "round",
+            visibility: visibilityValue,
+          }}
+        />
+      </Source>
+
+      <Source id={YUBA_RIVER_SOURCE_ID} type="geojson" data={yubaRivers}>
         <Layer
           id="yuba-river-halo"
           type="line"

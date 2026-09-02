@@ -4,7 +4,7 @@ import { Box } from "@repo/ui/mui"
 import "./main.css"
 import { Scrollama, Step } from "react-scrollama"
 
-import Opener from "./components/01Opener"
+import Opener, { OpenerVisual } from "./components/01Opener"
 import DynamicMap from "./components/map/DynamicMap"
 import Background from "./components/02Background"
 import HistoricalContext from "./components/03HistoricalContext"
@@ -53,6 +53,7 @@ export default function StoryContainer() {
         onToolsClick={goToMainExplore}
         waterThemesOptions={waterThemesOptions}
       />
+      <OpenerVisual isVisible={activeSection === "Opener"} />
       <DynamicMap isVisible={showDynamicMap} />
       <ContentContainer />
       <SectionIndicator />

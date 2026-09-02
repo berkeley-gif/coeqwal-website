@@ -11,6 +11,7 @@ import type {
 import {
   CALIFORNIA_TRIBES_VIEW,
   DELTA_INFRASTRUCTURE_VIEW,
+  INDIGENOUS_RIVER_NETWORK_VIEW,
   SHASTA_MCCLOUD_VIEW,
 } from "./components/map/config/cameraPresets"
 
@@ -61,12 +62,12 @@ const initialState: AppState = {
 
 const EMPTY_LOCATION_LABELS: LocationLabel[] = []
 const EMPTY_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = []
-export const HISTORICAL_CONTEXT_RIVERS_PROGRESS = 0.3
-export const HISTORICAL_CONTEXT_MCCLOUD_PROGRESS = 0.44
-export const HISTORICAL_CONTEXT_CLOSING_PROGRESS = 0.72
-export const HISTORICAL_CONTEXT_CURRENT_TERRITORIES_PROGRESS =
-  HISTORICAL_CONTEXT_CLOSING_PROGRESS +
-  (1 - HISTORICAL_CONTEXT_CLOSING_PROGRESS) * 0.4
+export const HISTORICAL_CONTEXT_RIVERS_PROGRESS = 0.22
+export const HISTORICAL_CONTEXT_MCCLOUD_PROGRESS = 0.52
+export const GOLD_RUSH_MINES_PROGRESS = 0.32
+export const GOLD_RUSH_DITCHES_PROGRESS = 0.48
+export const GOLD_RUSH_STATEWIDE_PROGRESS = 0.7
+export const GOLD_RUSH_CURRENT_ALLOTMENTS_PROGRESS = 0.82
 export const INFRASTRUCTURE_DELTA_PROGRESS = 0.66
 
 const SECTION_ORDER: Record<SectionId, number> = {
@@ -211,14 +212,15 @@ export const useCameraView = () =>
   useStoryStore((state) => {
     if (
       state.activeSection === "HistoricalContext" &&
-      state.historicalContextProgress >= HISTORICAL_CONTEXT_CLOSING_PROGRESS
+      state.historicalContextProgress >= HISTORICAL_CONTEXT_RIVERS_PROGRESS &&
+      state.historicalContextProgress < HISTORICAL_CONTEXT_MCCLOUD_PROGRESS
     ) {
-      return CALIFORNIA_TRIBES_VIEW
+      return INDIGENOUS_RIVER_NETWORK_VIEW
     }
 
     if (
       state.activeSection === "HistoricalContext" &&
-      state.historicalContextProgress < HISTORICAL_CONTEXT_MCCLOUD_PROGRESS
+      state.historicalContextProgress < HISTORICAL_CONTEXT_RIVERS_PROGRESS
     ) {
       return CALIFORNIA_TRIBES_VIEW
     }
@@ -228,6 +230,13 @@ export const useCameraView = () =>
       state.historicalContextProgress >= HISTORICAL_CONTEXT_MCCLOUD_PROGRESS
     ) {
       return SHASTA_MCCLOUD_VIEW
+    }
+
+    if (
+      state.activeSection === "GoldRush" &&
+      state.goldRushProgress >= GOLD_RUSH_STATEWIDE_PROGRESS
+    ) {
+      return CALIFORNIA_TRIBES_VIEW
     }
 
     if (

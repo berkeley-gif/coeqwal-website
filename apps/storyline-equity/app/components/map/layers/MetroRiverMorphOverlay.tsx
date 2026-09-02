@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Box } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
-import { canalNetwork, metroMapV0, riverNetwork } from "@repo/data"
+import { canalNetwork, metroMapV1, riverNetwork } from "@repo/data"
 import {
   FreshWaterColor,
   InfrastructureColor,
@@ -13,9 +13,13 @@ import {
 import type { LineFeatureCollection } from "../helpers/octilinearizeGeojson"
 
 type Coordinate = [number, number]
-type MetroProject = {
-  hiddenLineKeys?: Record<string, boolean>
-  manualMetroEdits: Record<string, Coordinate[]>
+type MetroLineFeature = {
+  properties: {
+    metro_river_id: "river" | "canal"
+    metro_feature_index: number
+    metro_line_index: number
+  }
+  geometry: { coordinates: Coordinate[] }
 }
 type NetworkLine = {
   key: string
@@ -130,28 +134,27 @@ function resampleLineAtFractions(
 
 const networksById = new Map(NETWORKS.map((network) => [network.id, network]))
 
-// Manual edits only ever cover a small, fixed handful of lines, so we index
-// straight into the relevant feature/line instead of walking the entire
-// (multi-megabyte) river and canal networks looking for matches.
 function getPreparedLines(): PreparedLine[] {
-  const project = metroMapV0 as unknown as MetroProject
+  const metroFeatures = (
+    metroMapV1 as unknown as { features: MetroLineFeature[] }
+  ).features
 
-  return Object.entries(project.manualMetroEdits).flatMap(([key, metro]) => {
-    if (!metro || metro.length < 2 || project.hiddenLineKeys?.[key] === true) {
-      return []
-    }
-
-    const [networkId, featureIndexRaw, lineIndexRaw] = key.split(":")
-    const network = networksById.get(
-      networkId as (typeof NETWORKS)[number]["id"],
-    )
-    const feature = network?.data.features?.[Number(featureIndexRaw)]
+  return metroFeatures.flatMap(({ properties, geometry }) => {
+    const {
+      metro_river_id: networkId,
+      metro_feature_index: featureIndex,
+      metro_line_index: lineIndex,
+    } = properties
+    const metro = geometry.coordinates
+    const network = networksById.get(networkId)
+    const feature = network?.data.features?.[featureIndex]
     const original = feature
-      ? getGeometryLines(feature.geometry)[Number(lineIndexRaw)]
+      ? getGeometryLines(feature.geometry)[lineIndex]
       : undefined
 
-    if (!network || !original) return []
+    if (!network || !original || !metro || metro.length < 2) return []
 
+    const key = `${networkId}:${featureIndex}:${lineIndex}`
     const uniformCount = Math.max(
       12,
       Math.min(original.length, UNIFORM_SAMPLE_LIMIT),
@@ -205,14 +208,17 @@ function interpolatePreparedPath(
 export default function MetroRiverMorphOverlay({
   visible,
   progress,
+  opacity = 1,
 }: {
   visible: boolean
   progress: number
+  opacity?: number
 }) {
   const { mapRef } = useMap()
   const preparedLines = useMemo(() => getPreparedLines(), [])
   const [mapVersion, setMapVersion] = useState(0)
   const morphProgress = Math.max(0, Math.min(1, progress))
+  const overlayOpacity = Math.max(0, Math.min(1, opacity))
 
   useEffect(() => {
     // Skip subscribing while hidden — camera easeTo/fitBounds transitions
@@ -263,7 +269,13 @@ export default function MetroRiverMorphOverlay({
   return (
     <Box
       aria-hidden="true"
-      sx={{ position: "absolute", inset: 0, zIndex: 10, pointerEvents: "none" }}
+      sx={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 10,
+        pointerEvents: "none",
+        opacity: overlayOpacity,
+      }}
     >
       <svg width="100%" height="100%">
         {projectedLines.map((line) => {

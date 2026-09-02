@@ -12,18 +12,19 @@ const infrastructureText = {
       [
         [
           {
-            text: "In the 20th century, California's massive investments in water infrastructure reinforced inequities.",
+            text: "In the 20th century, California's massive investments in water infrastructure reinforced existing inequities.",
           },
+        ],
+        [
           {
-            text: "Large-scale projects such as the Central Valley Project and the State Water Project transformed rivers into highly engineered systems designed to store and deliver water.",
+            text: "Large-scale projects such as the Central Valley Project and the State Water Project transformed rivers into highly engineered systems for storing and delivering water.",
           },
         ],
         [
           {
             segments: [
-              { text: "These " },
               {
-                text: "dams",
+                text: "Dams",
                 mark: "infrastructure",
                 legend: {
                   color: InfrastructureColor,
@@ -33,7 +34,7 @@ const infrastructureText = {
               },
               { text: ", " },
               {
-                text: "pumps",
+                text: "reservoirs",
                 mark: "infrastructure",
                 legend: {
                   color: InfrastructureColor,
@@ -52,29 +53,26 @@ const infrastructureText = {
                 },
               },
               {
-                text: " expanded water supplies for agricultural water districts and growing cities, fueling economic growth and population expansion.",
+                text: " expanded water supplies for agricultural water districts and growing cities, fueling economic growth and population expansion. But their benefits and costs were not shared equally.",
               },
             ],
-          },
-          {
-            text: "But the benefits of this infrastructure were not shared equally. Over time, these systems reshaped how water flows through the landscape, redirecting rivers and interrupting natural pathways.",
           },
         ],
       ],
       [
         [
           {
-            text: "The environmental costs of this transformation were also substantial.",
+            text: "Nowhere is this more visible than in the Delta. Once a vast landscape of tidal wetlands, floodplains, and meandering waterways, much of the Delta was diked and drained to support agriculture and urbanization. Levees and canals cemented the separation between land and water.",
           },
         ],
         [
           {
-            text: "Nowhere is this change more visible than in the Delta. The Delta was once a vast landscape of tidal wetlands, floodplains, and branching waterways. Much of it was diked and drained, while levees and canals reshaped how water moves through the landscape.",
+            text: "Wetlands and their inhabitants were erased. Water was pumped to distant cities.",
           },
         ],
         [
           {
-            text: "Today, the Delta is both a living ecosystem and a critical hub in California’s engineered water system.",
+            text: "The result is the Delta we know today: a living but at-risk ecosystem and a critical, contested hub in California’s engineered water system.",
           },
         ],
       ],
@@ -95,8 +93,8 @@ export default function Infrastructure() {
       <Box
         className="container text-section"
         sx={{
-          width: "min(75ch, calc(100vw - 6rem))",
-          maxWidth: "75ch",
+          width: "min(75ch, calc(100vw - 6rem), calc(55dvw - 5rem))",
+          maxWidth: "calc(55dvw - 5rem)",
           minHeight: "70vh",
           display: "grid",
           alignItems: "center",

@@ -9,8 +9,8 @@
 
 import { useMemo, useEffect } from "react"
 import { Source, Layer, useMap } from "@repo/map"
-import { sacramentoRiver, sanJoaquinRiverMainstem } from "@repo/data"
 import { FreshWaterColor } from "../../helpers/colorPalette"
+import { selectRiversByName } from "../helpers/equityRiverNetwork"
 
 export const RIVER_LAYER_IDS = [
   "sacramento-river-trough",
@@ -22,7 +22,8 @@ export const RIVER_LAYER_IDS = [
 
 const RIVER_BODY_COLOR = FreshWaterColor // rgb(4, 47, 103)
 const RIVER_TROUGH_COLOR = "#080c46"
-const HEADWATERS_PHASE_END = 0.45
+const sacramentoRiver = selectRiversByName("Sacramento River")
+const sanJoaquinRiver = selectRiversByName("San Joaquin River")
 
 type Coordinate = [number, number]
 type LineGeometry = {
@@ -35,7 +36,7 @@ type LineGeometry = {
 type SacramentoRiverFeature = {
   type: "Feature"
   properties?: {
-    flow_order?: number
+    GNIS_Name?: string | null
   } | null
   geometry?: LineGeometry | null
 }
@@ -113,10 +114,7 @@ function clipGeometry(
   return coordinates.length > 0 ? { ...geometry, coordinates } : null
 }
 
-function getAnimatedSacramentoRiver(
-  headwatersProgress: number,
-  mainstemProgress: number,
-) {
+function getAnimatedSacramentoRiver(progress: number) {
   const data = sacramentoRiver as SacramentoRiverFeatureCollection
 
   return {
@@ -124,14 +122,7 @@ function getAnimatedSacramentoRiver(
     features: data.features.flatMap((feature) => {
       if (!feature.geometry) return []
 
-      const flowOrder = feature.properties?.flow_order
-      const featureProgress =
-        flowOrder === 1
-          ? headwatersProgress
-          : flowOrder === 2
-            ? mainstemProgress
-            : 0
-      const geometry = clipGeometry(feature.geometry, featureProgress)
+      const geometry = clipGeometry(feature.geometry, progress)
 
       return geometry ? [{ ...feature, geometry }] : []
     }),
@@ -154,18 +145,14 @@ export default function MajorRiversLayer({
   const { mapRef } = useMap()
 
   const clampedProgress = Math.max(0, Math.min(1, progress))
-  const headwatersProgress = Math.min(clampedProgress / HEADWATERS_PHASE_END, 1)
-  const mainstemProgress = Math.max(
-    0,
-    (clampedProgress - HEADWATERS_PHASE_END) / (1 - HEADWATERS_PHASE_END),
-  )
+  const mainstemProgress = clampedProgress
   const mainstemTrimOffset = useMemo<[number, number]>(
     () => [mainstemProgress, 1],
     [mainstemProgress],
   )
   const animatedSacramentoRiver = useMemo(
-    () => getAnimatedSacramentoRiver(headwatersProgress, mainstemProgress),
-    [headwatersProgress, mainstemProgress],
+    () => getAnimatedSacramentoRiver(clampedProgress),
+    [clampedProgress],
   )
   const visibilityValue = visible ? "visible" : "none"
 
@@ -271,7 +258,7 @@ export default function MajorRiversLayer({
       <Source
         id="san-joaquin-river-source"
         type="geojson"
-        data={sanJoaquinRiverMainstem}
+        data={sanJoaquinRiver}
         lineMetrics={true}
       >
         <Layer
