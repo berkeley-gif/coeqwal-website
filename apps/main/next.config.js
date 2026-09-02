@@ -46,7 +46,7 @@ const nextConfig = {
       "@mui/material",
       "d3",
       "@repo/map",
-      "@repo/viz"
+      "@repo/viz",
     ],
   },
 

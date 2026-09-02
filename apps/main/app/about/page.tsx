@@ -97,10 +97,15 @@ export default function AboutPage() {
               sx={{ color: "inherit", textDecoration: "underline" }}
             >
               California Climate Action Seed
-            </Typography>
-            {" "}and Matching Grants of the University of California, Grant Number R02CM7222. This funding is part of the California Climate Action Initiative, a $100 million investment in climate action research and innovation projects in the California State Budget Act of 2022-23."
+            </Typography>{" "}
+            and Matching Grants of the University of California, Grant Number
+            R02CM7222. This funding is part of the California Climate Action
+            Initiative, a $100 million investment in climate action research and
+            innovation projects in the California State Budget Act of
+            2022-23.&rdquo;
           </>
-        } />
+        }
+      />
       <ScrollImageTextBlocks
         id="ourApproach"
         ariaLabel="our approach"
