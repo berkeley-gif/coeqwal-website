@@ -10,6 +10,7 @@ import type { ReactNode } from "react"
 import { Typography } from "@repo/ui/mui"
 import { WATER_THEME_REGISTRY } from "@repo/ui/themes/theme"
 import { InlineNavLink } from "../components/InlineNavLink"
+import { GlossaryTermLink } from "../features/glossary/GlossaryTermLink"
 
 // Looks up a theme's canonical display name from the shared registry in
 // @repo/ui (the actual source of truth — packages/ui can't import from
@@ -32,7 +33,7 @@ export type ParagraphBlock = {
 
 export type ListBlock = {
   type: "list"
-  items: string[]
+  items: ReactNode[]
 }
 
 export type ImageBlock = {
@@ -177,7 +178,20 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This water issue provides a foundation for understanding the strengths, vulnerabilities, trade-offs, and inequities in California's current water system, with a focus on the Central Valley Project and State Water Project, and how those conditions may change under future climates. It also examines different representations of current operations used by state and federal agencies in their models, and how those differences can influence our understanding of impacts on communities, agriculture, and the environment.",
+              text: (
+                <>
+                  This water issue provides a foundation for understanding the
+                  strengths, vulnerabilities, trade-offs, and inequities in
+                  California&apos;s current water system, with a focus on the{" "}
+                  <GlossaryTermLink>Central Valley Project</GlossaryTermLink>{" "}
+                  and <GlossaryTermLink>State Water Project</GlossaryTermLink>,
+                  and how those conditions may change under future climates. It
+                  also examines different representations of current operations
+                  used by state and federal agencies in their models, and how
+                  those differences can influence our understanding of impacts
+                  on communities, agriculture, and the environment.
+                </>
+              ),
             },
           ],
         },
@@ -190,7 +204,19 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "California's Central Valley water system reflects more than a century of investments in reservoirs, canals, levees, groundwater development, environmental regulations, water rights, contracts, and operating agreements. Together, this infrastructure and these management decisions shape how water is stored, moved, allocated, and managed across the state.",
+              text: (
+                <>
+                  California&apos;s{" "}
+                  <GlossaryTermLink>Central Valley</GlossaryTermLink> water
+                  system reflects more than a century of investments in
+                  reservoirs, canals, levees,{" "}
+                  <GlossaryTermLink>groundwater</GlossaryTermLink> development,
+                  environmental regulations, water rights, contracts, and
+                  operating agreements. Together, this infrastructure and these
+                  management decisions shape how water is stored, moved,
+                  allocated, and managed across the state.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -236,11 +262,37 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "**A reference point for comparison** – The representation of current operations provides a common reference point for comparison. Comparing alternative water management strategies to current operations reveals management-driven changes, while comparing the same operations across hydroclimates reveals climate-driven changes. Together, these comparisons help distinguish the effects of management decisions, climate change, and their interactions.",
+              text: (
+                <>
+                  <strong>A reference point for comparison</strong> – The
+                  representation of current operations provides a common
+                  reference point for comparison. Comparing alternative water{" "}
+                  <GlossaryTermLink>management strategies</GlossaryTermLink> to
+                  current operations reveals management-driven changes, while
+                  comparing the same operations across hydroclimates reveals
+                  climate-driven changes. Together, these comparisons help
+                  distinguish the effects of management decisions, climate
+                  change, and their interactions.
+                </>
+              ),
             },
             {
               type: "paragraph",
-              text: '**Alternative representations of current operations** – Policies governing Central Valley water management are continually evolving, making the precise definition of "current operations" challenging. State and federal agencies may represent current operations differently based on the regulations, land-use conditions, operational assumptions, and other information incorporated into their models. Comparing these representations helps reveal how those choices influence modeled system performance.',
+              text: (
+                <>
+                  <strong>
+                    Alternative representations of current operations
+                  </strong>{" "}
+                  – Policies governing Central Valley water management are
+                  continually evolving, making the precise definition of
+                  &quot;current operations&quot; challenging. State and federal
+                  agencies may represent current operations differently based on
+                  the regulations, land-use conditions, operational assumptions,
+                  and other information incorporated into their models.
+                  Comparing these representations helps reveal how those choices
+                  influence modeled system performance.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -286,10 +338,30 @@ export const WATER_THEMES: Theme[] = [
               type: "list",
               items: [
                 "Current operations provide a representation of today's water management system. They are not a neutral starting point, but reflect decades of infrastructure investments, policies, regulations, water rights, contracts, and negotiated trade-offs.",
-                "COEQWAL uses CalSim3, the water allocation model used by state and federal agencies to plan and manage the Central Valley Project and State Water Project. Using the same model makes this decision-making space more accessible to a broader range of people and perspectives.",
-                "Models are a simplification of reality. The CalSim3 water allocation model used by COEQWAL focuses on operations of the Central Valley Project and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.",
+                <>
+                  <GlossaryTermLink>COEQWAL</GlossaryTermLink> uses{" "}
+                  <GlossaryTermLink>CalSim3</GlossaryTermLink>, the water{" "}
+                  <GlossaryTermLink>allocation</GlossaryTermLink> model used by
+                  state and federal agencies to plan and manage the Central
+                  Valley Project and State Water Project. Using the same model
+                  makes this decision-making space more accessible to a broader
+                  range of people and perspectives.
+                </>,
+                <>
+                  Models are a simplification of reality. The CalSim3 water
+                  allocation model used by COEQWAL focuses on operations of the
+                  Central Valley Project and State Water Project. Some aspects
+                  of California&apos;s water management system fall outside its
+                  scope or are represented in simplified ways.
+                </>,
                 'There is no single model representation of "current operations". State and federal agencies use different assumptions about land use, system operations, regulations, and other conditions, and these representations change as policies and operations evolve.',
-                "Differences between hydroclimates under the same management strategy help reveal climate-driven changes, while differences between management strategies under the same hydroclimate help reveal management-driven changes.",
+                <>
+                  Differences between hydroclimates under the same management
+                  strategy help reveal climate-driven changes, while differences
+                  between management strategies under the same{" "}
+                  <GlossaryTermLink>hydroclimate</GlossaryTermLink> help reveal
+                  management-driven changes.
+                </>,
                 "Current operations already contain benefits, trade-offs, and inequities. Comparing other scenarios to current operations therefore shows how management changes redistribute benefits relative to current conditions, not to a neutral starting point.",
                 "Future hydroclimates are not predictions. They represent plausible alternative futures that help test how the system responds to different climate conditions. Results describe patterns across many modeled years rather than predicting conditions in any single year.",
               ],
@@ -304,7 +376,20 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This water issue compares alternative representations of current operations and provides a foundation for understanding the broader range of management strategies explored by COEQWAL. The scenarios vary assumptions about operating rules, agricultural land use, and Temporary Urgency Change Petitions (TUCPs), which can temporarily modify certain water-right requirements during drought or other urgent conditions.",
+              text: (
+                <>
+                  This water issue compares alternative representations of
+                  current operations and provides a foundation for understanding
+                  the broader range of management strategies explored by
+                  COEQWAL. The scenarios vary assumptions about operating rules,
+                  agricultural land use, and{" "}
+                  <GlossaryTermLink>
+                    Temporary Urgency Change Petitions (TUCPs)
+                  </GlossaryTermLink>
+                  , which can temporarily modify certain water-right
+                  requirements during drought or other urgent conditions.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -313,10 +398,30 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Current operations, with DWR (2023) operating rules, recent (2020) land use, and allowing for TUCP actions",
-                "Current operations with historical agricultural land use, with DWR (2023) operating rules, historical (2004-2013) land use, and allowing for TUCP actions",
-                "Current operations without TUCPs, with DWR (2023) operating rules and recent (2020) land use, but without TUCP actions",
-                "Current USBR operations, with U.S. Bureau of Reclamation (2024) operating rules, recent (2020) land use, and TUCPs",
+                <>
+                  Current operations, with{" "}
+                  <GlossaryTermLink term="California Department of Water Resources (DWR)">
+                    DWR
+                  </GlossaryTermLink>{" "}
+                  (2023) operating rules, recent (2020) land use, and allowing
+                  for TUCP actions
+                </>,
+                <>
+                  Current operations with historical agricultural land use, with
+                  DWR (2023) operating rules, historical (2004-2013) land use,
+                  and allowing for TUCP actions
+                </>,
+                <>
+                  Current operations without TUCPs, with DWR (2023) operating
+                  rules and recent (2020) land use, but without TUCP actions
+                </>,
+                <>
+                  Current USBR operations, with{" "}
+                  <GlossaryTermLink>
+                    U.S. Bureau of Reclamation
+                  </GlossaryTermLink>{" "}
+                  (2024) operating rules, recent (2020) land use, and TUCPs
+                </>,
                 "Current USBR operations without TUCPs, with U.S. Bureau of Reclamation (2024) operating rules and recent (2020) land use, but without TUCPs",
               ],
             },
@@ -582,7 +687,15 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Community water systems serve cities, towns, and rural communities across California. Some rely on surface water delivered through rivers and canals, while others depend on groundwater wells. Many use a combination of both.",
+              text: (
+                <>
+                  Community water systems serve cities, towns, and rural
+                  communities across California. Some rely on surface water
+                  delivered through rivers and canals, while others depend on{" "}
+                  <GlossaryTermLink>groundwater</GlossaryTermLink> wells. Many
+                  use a combination of both.
+                </>
+              ),
             },
             {
               type: "image",
@@ -615,7 +728,17 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "Surface water deliveries are shaped by a complex combination of water rights, contracts, operating rules, infrastructure, and water availability. These arrangements affect how shortages are distributed, meaning that some community water systems may experience larger reductions in project deliveries than others.",
+              text: (
+                <>
+                  Surface water <GlossaryTermLink>deliveries</GlossaryTermLink>{" "}
+                  are shaped by a complex combination of water rights,
+                  contracts, operating rules, infrastructure, and water
+                  availability. These arrangements affect how shortages are
+                  distributed, meaning that some community water systems may
+                  experience larger reductions in project deliveries than
+                  others.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -681,15 +804,43 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "**Assessing delivery reliability and the distribution of impacts** – Surface water deliveries are not determined by community need alone. Water rights, contracts, operating rules, infrastructure, and patterns of water availability all influence how project water is distributed and how reductions in deliveries are experienced across communities.",
+              text: (
+                <>
+                  <strong>
+                    Assessing delivery reliability and the distribution of
+                    impacts
+                  </strong>{" "}
+                  – Surface water deliveries are not determined by community
+                  need alone. Water rights, contracts, operating rules,
+                  infrastructure, and patterns of water availability all
+                  influence how project water is distributed and how reductions
+                  in deliveries are experienced across communities.
+                </>
+              ),
             },
             {
               type: "paragraph",
-              text: "To evaluate these deliveries in the context of community needs, COEQWAL compares modeled surface water deliveries with recent potable (drinking water) demands. This provides a measure of how reliably the modeled project supplies can contribute to meeting community water needs under different management and climate conditions.",
+              text: (
+                <>
+                  To evaluate these deliveries in the context of community
+                  needs, <GlossaryTermLink>COEQWAL</GlossaryTermLink> compares
+                  modeled surface water deliveries with recent potable (drinking
+                  water) demands. This provides a measure of how reliably the
+                  modeled project supplies can contribute to meeting community
+                  water needs under different management and climate conditions.
+                </>
+              ),
             },
             {
               type: "paragraph",
-              text: "This analysis also shows how reliability varies among locations, revealing which community water systems consistently receive reliable project deliveries and which remain more vulnerable.",
+              text: (
+                <>
+                  This analysis also shows how reliability varies among
+                  locations, revealing which community water systems
+                  consistently receive reliable project deliveries and which
+                  remain more vulnerable.
+                </>
+              ),
             },
           ],
         },
@@ -702,7 +853,15 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Community water systems may rely on surface water, groundwater, stored water, or combinations of different sources. Access to these alternative sources varies considerably among systems. COEQWAL evaluates surface water deliveries from major water projects to select community water systems, not each community's complete water supply portfolio.",
+                <>
+                  Community water systems may rely on surface water,
+                  groundwater, stored water, or combinations of different
+                  sources. Access to these alternative sources varies
+                  considerably among systems. COEQWAL evaluates surface water
+                  deliveries from major water projects to select community water
+                  systems, not each community&apos;s complete water supply
+                  portfolio.
+                </>,
                 "Community surface water deliveries are evaluated relative to recent potable water demands, provided by the State Water Resources Control Board's Division of Drinking Water. Project deliveries are influenced by water availability, contracts, water rights, infrastructure, and operating rules and may not fully meet these demands.",
                 "When modeled project deliveries fall below demand, this does not necessarily mean that a community experiences a drinking water shortage. Systems with access to groundwater, local surface water, or other alternatives may be better able to respond to reduced project deliveries than systems with fewer options.",
                 "Community water systems respond to both the severity and frequency of shortages. Water system stress can result from a significant delivery shortfall in a single year or repeated shortfalls over multiple years.",
@@ -757,12 +916,14 @@ export const WATER_THEMES: Theme[] = [
               text: (
                 <>
                   The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
-                  allows you to explore how scenario outcomes compare under
-                  alternative management strategies and climate conditions.
-                  There are complementary ways to visualize tradeoffs, equity,
-                  and resilience of water management strategies. The examples
-                  below illustrate results from select scenarios for this water
-                  issue.
+                  allows you to explore how{" "}
+                  <GlossaryTermLink>scenario</GlossaryTermLink> outcomes compare
+                  under alternative{" "}
+                  <GlossaryTermLink>management strategies</GlossaryTermLink> and
+                  climate conditions. There are complementary ways to visualize
+                  tradeoffs, equity, and resilience of water management
+                  strategies. The examples below illustrate results from select
+                  scenarios for this water issue.
                 </>
               ),
             },
@@ -964,7 +1125,22 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Farms need water to grow crops and stay economically viable. Agricultural water comes primarily from surface water diverted from rivers and reservoirs, and from groundwater pumped from aquifers. These sources are closely connected. When surface water becomes limited, farmers often rely more heavily on groundwater, particularly during droughts or periods of high demand. Water from rivers and irrigation can percolate through the soil and help recharge aquifers. But if groundwater pumping exceeds recharge over time, groundwater overdraft occurs, putting farms, drinking water supplies, and ecosystems at risk.",
+              text: (
+                <>
+                  Farms need water to grow crops and stay economically viable.
+                  Agricultural water comes primarily from surface water diverted
+                  from rivers and reservoirs, and from groundwater pumped from
+                  aquifers. These sources are closely connected. When surface
+                  water becomes limited, farmers often rely more heavily on
+                  groundwater, particularly during droughts or periods of high
+                  demand. Water from rivers and irrigation can percolate through
+                  the soil and help recharge aquifers. But if groundwater
+                  pumping exceeds recharge over time,{" "}
+                  <GlossaryTermLink>groundwater</GlossaryTermLink> overdraft
+                  occurs, putting farms, drinking water supplies, and ecosystems
+                  at risk.
+                </>
+              ),
             },
           ],
         },
@@ -985,7 +1161,22 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "California's Sustainable Groundwater Management Act (SGMA) requires groundwater basins to achieve long-term balance between pumping and recharge. Meeting SGMA requirements may involve reducing pumping alongside other changes in agricultural water and land management. Understanding how surface water deliveries, groundwater use, and agricultural production change as groundwater restrictions are put in place is essential for planning for a sustainable agricultural future.",
+              text: (
+                <>
+                  California&apos;s{" "}
+                  <GlossaryTermLink>
+                    Sustainable Groundwater Management Act (SGMA)
+                  </GlossaryTermLink>{" "}
+                  requires groundwater basins to achieve long-term balance
+                  between pumping and recharge. Meeting SGMA requirements may
+                  involve reducing pumping alongside other changes in
+                  agricultural water and land management. Understanding how
+                  surface water <GlossaryTermLink>deliveries</GlossaryTermLink>,
+                  groundwater use, and agricultural production change as
+                  groundwater restrictions are put in place is essential for
+                  planning for a sustainable agricultural future.
+                </>
+              ),
             },
             {
               type: "image",
@@ -1098,13 +1289,42 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Across the Central Valley, farms often rely on a combination of surface water and groundwater. When surface water is limited, groundwater can sometimes be used to fill this gap. When groundwater is also constrained, however, additional surface water may not be available to make up the difference, leading to agricultural water shortages.",
+                <>
+                  Across the <GlossaryTermLink>Central Valley</GlossaryTermLink>
+                  , farms often rely on a combination of surface water and
+                  groundwater. When surface water is limited, groundwater can
+                  sometimes be used to fill this gap. When groundwater is also
+                  constrained, however, additional surface water may not be
+                  available to make up the difference, leading to agricultural
+                  water shortages.
+                </>,
                 "Agricultural revenues change year-to-year in response to water availability and the crops planted. Annual crops generally yield lower revenues than perennial crops but offer more flexibility to adjust planting from year to year. Higher-value perennial crops (such as nuts and fruit trees) require water every year and long-term investment, making them difficult to adjust in response to short-term shortages.",
                 "Groundwater systems change slowly. Reversing long-term trends in declining groundwater levels may require concerted management over many years or decades. Severe groundwater depletion and land subsidence can also make recovery more difficult.",
                 "Farmers can adapt to reductions in groundwater access by shifting crops, changing water management practices, or retiring farmland, but many of these decisions require long-term planning.",
                 "Impacts vary by region. The Sacramento Valley and San Joaquin Valley face different groundwater conditions and constraints, so system-wide averages can mask important local impacts.",
-                "The models used by COEQWAL primarily focus on the Sacramento and San Joaquin River basins. The Tulare Basin and other parts of the southern San Joaquin Valley are only partially represented, and changes in groundwater storage and agricultural revenues are not evaluated in these regions.",
-                "COEQWAL explores the broader effects of limiting groundwater pumping. Because SGMA is implemented through individual basin plans that use different strategies to achieve groundwater sustainability, these scenarios do not represent how SGMA will be implemented or predict future conditions in individual basins. For more details about SGMA, visit the California Department of Water Resources.",
+                <>
+                  The models used by{" "}
+                  <GlossaryTermLink>COEQWAL</GlossaryTermLink> primarily focus
+                  on the Sacramento and{" "}
+                  <GlossaryTermLink>San Joaquin River</GlossaryTermLink> basins.
+                  The Tulare Basin and other parts of the southern San Joaquin
+                  Valley are only partially represented, and changes in
+                  groundwater storage and agricultural revenues are not
+                  evaluated in these regions.
+                </>,
+                <>
+                  COEQWAL explores the broader effects of limiting groundwater
+                  pumping. Because{" "}
+                  <GlossaryTermLink term="Sustainable Groundwater Management Act (SGMA)">
+                    SGMA
+                  </GlossaryTermLink>{" "}
+                  is implemented through individual basin plans that use
+                  different strategies to achieve groundwater sustainability,
+                  these scenarios do not represent how SGMA will be implemented
+                  or predict future conditions in individual basins. For more
+                  details about SGMA, visit the California Department of Water
+                  Resources.
+                </>,
                 "Some important management options and system connections are not evaluated here. These include managed aquifer recharge and environmental benefits associated with working agricultural lands, such as habitat provided by flooded rice fields and water delivered throughout agricultural infrastructure to wildlife refuges.",
               ],
             },
@@ -1118,7 +1338,14 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This water issue compares water management strategies that reduce groundwater use through direct pumping limits and/or reductions in irrigated crop acreage, including:",
+              text: (
+                <>
+                  This water issue compares water{" "}
+                  <GlossaryTermLink>management strategies</GlossaryTermLink>{" "}
+                  that reduce groundwater use through direct pumping limits
+                  and/or reductions in irrigated crop acreage, including:
+                </>
+              ),
             },
             {
               type: "list",
@@ -1159,12 +1386,13 @@ export const WATER_THEMES: Theme[] = [
               text: (
                 <>
                   The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
-                  allows you to explore how scenario outcomes compare under
-                  alternative management strategies and climate conditions.
-                  There are complementary ways to visualize tradeoffs, equity,
-                  and resilience of water management strategies. The examples
-                  below illustrate results from select scenarios for this water
-                  issue.
+                  allows you to explore how{" "}
+                  <GlossaryTermLink>scenario</GlossaryTermLink> outcomes compare
+                  under alternative management strategies and climate
+                  conditions. There are complementary ways to visualize
+                  tradeoffs, equity, and resilience of water management
+                  strategies. The examples below illustrate results from select
+                  scenarios for this water issue.
                 </>
               ),
             },
@@ -1446,7 +1674,21 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "California's rivers begin in the mountains and flow through valleys to the Delta and ocean. Along the way, they sustain ecosystems and provide water for farms and communities. Rivers are deeply interconnected with California's water management system. Dams, reservoir operations, and water diversions have altered the timing and amount of river flows on which native species depend. Decisions about how much water to store, release, and deliver for different purposes therefore create trade-offs that can ripple across the system.",
+              text: (
+                <>
+                  California&apos;s rivers begin in the mountains and flow
+                  through valleys to the{" "}
+                  <GlossaryTermLink>Delta</GlossaryTermLink> and ocean. Along
+                  the way, they sustain ecosystems and provide water for farms
+                  and communities. Rivers are deeply interconnected with
+                  California&apos;s water management system. Dams, reservoir
+                  operations, and water diversions have altered the timing and
+                  amount of river flows on which native species depend.
+                  Decisions about how much water to store, release, and deliver
+                  for different purposes therefore create trade-offs that can
+                  ripple across the system.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -1454,11 +1696,35 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "The tension between water operations and salmon conservation is particularly acute in the Sacramento River, where winter-run Chinook salmon are endangered and remain at high risk of extinction. Winter-run salmon historically spawned in cold, spring-fed headwaters and tributaries of the Sacramento River. Today, Shasta Dam blocks access to most of those habitats, and winter-run primarily spawn downstream of Shasta Dam during the warmest part of the year. Their egg survival now depends heavily on cold water stored in Shasta Reservoir and released downstream during summer.",
+              text: (
+                <>
+                  The tension between water operations and salmon conservation
+                  is particularly acute in the Sacramento River, where{" "}
+                  <GlossaryTermLink>winter-run Chinook salmon</GlossaryTermLink>{" "}
+                  are endangered and remain at high risk of extinction.
+                  Winter-run salmon historically spawned in cold, spring-fed
+                  headwaters and tributaries of the{" "}
+                  <GlossaryTermLink>Sacramento River</GlossaryTermLink>. Today,
+                  Shasta Dam blocks access to most of those habitats, and
+                  winter-run primarily spawn downstream of Shasta Dam during the
+                  warmest part of the year. Their egg survival now depends
+                  heavily on cold water stored in Shasta Reservoir and released
+                  downstream during summer.
+                </>
+              ),
             },
             {
               type: "paragraph",
-              text: "Reintroducing winter-run to cold-water habitat above Shasta Dam offers another potential pathway for recovery by giving fish access to habitat that is less dependent on reservoir releases. COEQWAL explores how this could change salmon outcomes alongside alternative flow-management strategies.",
+              text: (
+                <>
+                  Reintroducing winter-run to cold-water habitat above Shasta
+                  Dam offers another potential pathway for recovery by giving
+                  fish access to habitat that is less dependent on reservoir
+                  releases. <GlossaryTermLink>COEQWAL</GlossaryTermLink>{" "}
+                  explores how this could change salmon outcomes alongside
+                  alternative flow-management strategies.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -1540,7 +1806,14 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "Reintroduction above Shasta Dam could reduce this dependence by restoring access to cold, spring-fed habitat. COEQWAL examines how reintroduction could affect winter-run outcomes under different management and climate conditions.",
+              text: (
+                <>
+                  Reintroduction above Shasta Dam could reduce this dependence
+                  by restoring access to cold, spring-fed habitat. COEQWAL
+                  examines how reintroduction could affect winter-run outcomes
+                  under different management and climate conditions.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -1575,7 +1848,20 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This water issue explores strategies designed to improve river ecosystem conditions and winter-run Chinook salmon populations. Some scenarios establish functional environmental flows that preserve key elements of natural seasonal and year-to-year flow variability. Other strategies adjust reservoir operations to protect cold-water storage and flows that provide refuge for multiple life stages of winter-run salmon. Many of these scenarios are also evaluated with groundwater pumping limits and/or reintroduction of winter-run above Shasta Dam.",
+              text: (
+                <>
+                  This water issue explores strategies designed to improve river
+                  ecosystem conditions and winter-run Chinook salmon
+                  populations. Some scenarios establish functional environmental
+                  flows that preserve key elements of natural seasonal and
+                  year-to-year flow variability. Other strategies adjust
+                  reservoir operations to protect cold-water storage and flows
+                  that provide refuge for multiple life stages of winter-run
+                  salmon. Many of these scenarios are also evaluated with{" "}
+                  <GlossaryTermLink>groundwater</GlossaryTermLink> pumping
+                  limits and/or reintroduction of winter-run above Shasta Dam.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -1636,12 +1922,14 @@ export const WATER_THEMES: Theme[] = [
               text: (
                 <>
                   The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
-                  allows you to explore how scenario outcomes compare under
-                  alternative management strategies and climate conditions.
-                  There are complementary ways to visualize tradeoffs, equity,
-                  and resilience of water management strategies. The examples
-                  below illustrate results from select scenarios for this water
-                  issue.
+                  allows you to explore how{" "}
+                  <GlossaryTermLink>scenario</GlossaryTermLink> outcomes compare
+                  under alternative{" "}
+                  <GlossaryTermLink>management strategies</GlossaryTermLink> and
+                  climate conditions. There are complementary ways to visualize
+                  tradeoffs, equity, and resilience of water management
+                  strategies. The examples below illustrate results from select
+                  scenarios for this water issue.
                 </>
               ),
             },
@@ -1917,11 +2205,38 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "The Sacramento–San Joaquin Delta sits at the heart of California's water system. Pumping facilities in and around the Delta convey water to cities and farms throughout the San Francisco Bay Area, San Joaquin Valley, Southern California, and other parts of the state. The Delta is also a highly altered ecosystem of wetlands, waterways, and important fish species. Families, farmers, fishing communities, and Tribal nations have deep ties to this landscape.",
+              text: (
+                <>
+                  The Sacramento–San Joaquin{" "}
+                  <GlossaryTermLink>Delta</GlossaryTermLink> sits at the heart
+                  of California&apos;s water system. Pumping facilities in and
+                  around the Delta convey water to cities and farms throughout
+                  the San Francisco Bay Area, San Joaquin Valley, Southern
+                  California, and other parts of the state. The Delta is also a
+                  highly altered ecosystem of wetlands, waterways, and important
+                  fish species. Families, farmers, fishing communities, and
+                  Tribal nations have deep ties to this landscape.
+                </>
+              ),
             },
             {
               type: "paragraph",
-              text: "Over time, dams, levees, reservoirs, and pumping plants have changed how water moves through the Delta and into the San Francisco Bay estuary. The Delta historically experienced large seasonal shifts in freshwater and salinity conditions. Today, upstream reservoir releases, water quality requirements, and export operations strongly influence these patterns. Wetlands have been converted to farmland, creating islands protected by levees, many of which now lie below sea level. Habitat alterations and invasive species have also contributed to major changes in fish populations and water quality conditions.",
+              text: (
+                <>
+                  Over time, dams, levees, reservoirs, and pumping plants have
+                  changed how water moves through the Delta and into the San
+                  Francisco Bay estuary. The Delta historically experienced
+                  large seasonal shifts in freshwater and{" "}
+                  <GlossaryTermLink>salinity</GlossaryTermLink> conditions.
+                  Today, upstream reservoir releases, water quality
+                  requirements, and export operations strongly influence these
+                  patterns. Wetlands have been converted to farmland, creating
+                  islands protected by levees, many of which now lie below sea
+                  level. Habitat alterations and invasive species have also
+                  contributed to major changes in fish populations and water
+                  quality conditions.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -1977,7 +2292,21 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "**Seasonal flow, salinity, and water use** – The Delta changes with the seasons. In spring, snowmelt and reservoir releases fill rivers with fresh water, making the Delta less salty. In summer and fall, river flows decline, temperatures rise, and the Bay's saline waters can move farther inland. Salinity is shaped by freshwater inflows, sea level, tides, and the movement of water through the Delta's network of channels and wetlands. Reservoir releases help limit salinity intrusion during dry months, maintaining freshwater for in-Delta uses and for water exported from the Delta to farms and cities.",
+              text: (
+                <>
+                  <strong>Seasonal flow, salinity, and water use</strong> – The
+                  Delta changes with the seasons. In spring, snowmelt and
+                  reservoir releases fill rivers with fresh water, making the
+                  Delta less salty. In summer and fall, river flows decline,
+                  temperatures rise, and the Bay&apos;s saline waters can move
+                  farther inland. <GlossaryTermLink>Salinity</GlossaryTermLink>{" "}
+                  is shaped by freshwater inflows, sea level, tides, and the
+                  movement of water through the Delta&apos;s network of channels
+                  and wetlands. Reservoir releases help limit salinity intrusion
+                  during dry months, maintaining freshwater for in-Delta uses
+                  and for water exported from the Delta to farms and cities.
+                </>
+              ),
             },
             {
               type: "paragraph",
@@ -2007,8 +2336,23 @@ export const WATER_THEMES: Theme[] = [
               type: "list",
               items: [
                 "In-Delta water quality and salinity are sensitive to freshwater inflows, reservoir operations, exports, sea-level rise, tides, and climate conditions. Changes in these factors can affect freshwater for in-Delta uses and exports, as well as ecosystem conditions.",
-                "Freshwater flow is important to Delta ecology, but Delta outflows alone do not address all factors limiting ecosystem health. Habitat, invasive species, water temperature, food-web conditions, and other factors not fully represented by COEQWAL also influence ecological outcomes.",
-                "A Delta Conveyance Project scenario evaluates how the proposed project could affect modeled water-system outcomes, but does not capture the full range of potential social, cultural, economic, and environmental benefits and impacts associated with the project.",
+                <>
+                  Freshwater flow is important to Delta ecology, but Delta
+                  outflows alone do not address all factors limiting ecosystem
+                  health. Habitat, invasive species, water temperature, food-web
+                  conditions, and other factors not fully represented by{" "}
+                  <GlossaryTermLink>COEQWAL</GlossaryTermLink> also influence
+                  ecological outcomes.
+                </>,
+                <>
+                  A{" "}
+                  <GlossaryTermLink>Delta Conveyance Project</GlossaryTermLink>{" "}
+                  <GlossaryTermLink>scenario</GlossaryTermLink> evaluates how
+                  the proposed project could affect modeled water-system
+                  outcomes, but does not capture the full range of potential
+                  social, cultural, economic, and environmental benefits and
+                  impacts associated with the project.
+                </>,
                 "Changes in operational rules do not always produce simple or direct responses. Even when operational rules change under a scenario, other requirements, such as water quality standards, may remain in place. As a result, management changes do not always translate directly into expected changes in Delta outflows, salinity, or ecosystem conditions.",
                 "Delta conditions are influenced by both management and climate. The hydroclimates include changes in freshwater conditions and sea-level rise, which together can affect salinity, ecosystem conditions, in-Delta uses, and water exports.",
               ],
@@ -2064,7 +2408,17 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "The Explore Tool allows you to explore how scenario outcomes compare under alternative management strategies and climate conditions. There are complementary ways to visualize tradeoffs, equity, and resilience of water management strategies. The examples below illustrate results from select scenarios for this water issue.",
+              text: (
+                <>
+                  The Explore Tool allows you to explore how scenario outcomes
+                  compare under alternative{" "}
+                  <GlossaryTermLink>management strategies</GlossaryTermLink> and
+                  climate conditions. There are complementary ways to visualize
+                  tradeoffs, equity, and resilience of water management
+                  strategies. The examples below illustrate results from select
+                  scenarios for this water issue.
+                </>
+              ),
             },
             {
               type: "image",
