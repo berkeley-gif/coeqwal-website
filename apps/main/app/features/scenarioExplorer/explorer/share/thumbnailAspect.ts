@@ -6,10 +6,18 @@
  */
 
 import { CAPTURE_DIMENSIONS } from "./capture/dimensions"
+import { svgIntrinsicSize } from "./svgIntrinsicSize"
 import type { ShareItem } from "./types"
 
 /** Width over height of the item's captured chart; 1 when unknown. */
 export function thumbnailAspectRatioFor(item: ShareItem): number {
+  // The captured SVG knows its own shape; trust it first. Content-aware
+  // captures (the resilience small-multiples panel) are taller than the
+  // static capture dimensions, and a fixed-ratio box letterboxes them.
+  if (item.cachedSvg) {
+    const size = svgIntrinsicSize(item.cachedSvg)
+    if (size) return size.width / size.height
+  }
   if (item.type === "data") {
     return CAPTURE_DIMENSIONS.data.width / CAPTURE_DIMENSIONS.data.height
   }

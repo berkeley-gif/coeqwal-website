@@ -607,7 +607,7 @@ export interface DataFigureTitleInput {
 /**
  * Compose the standardized figure title for the data-in-depth card: the
  * compared axis is summarized (single member label, or "<n> scenarios" /
- * "<n> climate futures" / "<n> locations") and the held axes fill the
+ * "<n> hydroclimates" / "<n> locations") and the held axes fill the
  * scenario, hydroclimate, and location slots.
  */
 export function dataFigureTitle(input: DataFigureTitleInput): string {
@@ -623,7 +623,7 @@ export function dataFigureTitle(input: DataFigureTitleInput): string {
     : `${input.climateName} hydroclimate`
   const hydroclimateName =
     input.compareBy === "climates"
-      ? (single ?? `${input.memberCount} climate futures`)
+      ? (single ?? `${input.memberCount} hydroclimates`)
       : heldClimateTitle
   const locationName =
     input.compareBy === "locations"
@@ -654,10 +654,14 @@ export function howToReadText(
     return "A single summary number per comparison member. Hover a bar for the exact value."
   }
   if (distKind === "stats") {
-    return `Each panel is one summary statistic across all ${MOCK_YEARS} simulated years, with one bar per comparison member. Mean is the long-run average. CV (coefficient of variation) is the year-to-year standard deviation divided by the mean: a CV of 0.10 means typical years vary about plus or minus 10% around the average. On the level view, Trend is the least-squares slope of the annual levels in feet per year; negative bars mean declining groundwater levels.`
+    const trend =
+      view === "level"
+        ? " On the Level view, a third panel shows the linear trend of the annual levels in feet per year; negative bars mean declining groundwater levels."
+        : ""
+    return `Each panel displays one summary statistic for variable values of a 100-year CalSim3 simulation period, with one bar per scenario. The mean values are shown on the left and the coefficient of variation (CV) on the right. The CV is the year-to-year standard deviation divided by the mean: a CV of 0.10 means typical years vary about plus or minus 10% around the average.${trend}`
   }
   if (distKind === "box") {
-    return `Each box summarizes all ${MOCK_YEARS} simulated years: the heavy line is the median, the box spans the 25th-75th percentile (half of all years), and the whiskers reach the 10th and 90th percentiles. The short dashed line inside each box marks the mean. Wider boxes = more year-to-year variability.`
+    return `Each box displays the distribution of values over a 100-year CalSim3 simulation period: the heavy line is the median, the box spans the 25th-75th percentile (half of all years), and the whiskers reach the 10th and 90th percentiles. The dashed line is the mean value (average). Wider boxes = more year-to-year variability.`
   }
-  return `An exceedance plot answers: "in what share of years is the value at least this big?" Pick a point on a line: its horizontal position is the percent of years, the vertical position the value. The left side shows wet/abundant years, the right side dry/scarce years. Where one line sits above another, that alternative delivers more in that kind of year. Reading at 50% gives the median year; at 90%, a dry year exceeded 9 years in 10.`
+  return `An exceedance plot helps estimate how likely different outcomes are based on the time series results from one or more scenarios. Specifically, an exceedance plot answers questions like "in what share of years is the value at least this big?" or "how often might I expect to see a value of at least X?". To interpret the plot, pick a point on one of the curves for a scenario of interest. Tracing a line over to the y-axis tells you the value at that point (e.g., a volume in TAF, also shown in a tooltip display) and tracing a line down to the x-axis tells you the percent of years that this value is met or exceeded. Values are the largest on the left side of the plot and decrease to the right. You can think of the left side as representing wetter years, or more abundant water supply conditions, and the right as representing drier years, or water scarce conditions. The reading at 50% on the exceedance (x-) axis gives the median condition; at 90%, a condition that is exceeded 9 years out of 10.`
 }

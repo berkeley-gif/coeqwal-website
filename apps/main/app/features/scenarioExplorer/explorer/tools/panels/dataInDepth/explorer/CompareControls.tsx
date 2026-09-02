@@ -67,7 +67,7 @@ const climateLabel = (id: string) => HYDROCLIMATE_SHORT_LABELS[id] ?? id
 
 const COMPARE_OPTIONS: { value: DataCompareBy; label: string }[] = [
   { value: "scenarios", label: "Scenarios" },
-  { value: "climates", label: "Climate futures" },
+  { value: "climates", label: "Hydroclimates" },
   { value: "locations", label: "Locations" },
 ]
 
@@ -180,25 +180,34 @@ export default function CompareControls() {
   } as const
   const pinSelectSx = { typography: "body2" } as const
 
+  // With no workspace selection the comparison set is the baseline alone; a
+  // dropdown whose menu holds one entry offers no choice, so the held
+  // scenario renders as a plain label until a second scenario exists.
   const scenarioPin = (
     <Box>
       <Typography id="scenario-pin-label" variant="caption" sx={pinCaptionSx}>
         Scenario
       </Typography>
-      <FormControl size="small" sx={controlSx}>
-        <Select
-          labelId="scenario-pin-label"
-          value={heldScenario}
-          onChange={(e) => setPinnedScenario(e.target.value)}
-          sx={pinSelectSx}
-        >
-          {compareScenarios.map((id) => (
-            <MenuItem key={id} value={id}>
-              {scenarioLabel(id)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      {compareScenarios.length > 1 ? (
+        <FormControl size="small" sx={controlSx}>
+          <Select
+            labelId="scenario-pin-label"
+            value={heldScenario}
+            onChange={(e) => setPinnedScenario(e.target.value)}
+            sx={pinSelectSx}
+          >
+            {compareScenarios.map((id) => (
+              <MenuItem key={id} value={id}>
+                {scenarioLabel(id)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      ) : (
+        <Typography variant="body2" sx={{ py: 1 }}>
+          {scenarioLabel(heldScenario)}
+        </Typography>
+      )}
     </Box>
   )
 
@@ -328,15 +337,17 @@ export default function CompareControls() {
               })}
             </Box>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: { xs: "wrap", sm: "nowrap" },
-              gap: 2.5,
-            }}
-          >
-            {locationPin}
-          </Box>
+          <InlineTourAnchor anchorId="data.locationPin">
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: { xs: "wrap", sm: "nowrap" },
+                gap: 2.5,
+              }}
+            >
+              {locationPin}
+            </Box>
+          </InlineTourAnchor>
         </>
       )}
 
@@ -351,7 +362,7 @@ export default function CompareControls() {
                 color: theme.palette.grey[600],
               }}
             >
-              Climate futures
+              Hydroclimates
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
               {HYDROCLIMATES.map((c) => {
@@ -385,50 +396,104 @@ export default function CompareControls() {
               })}
             </Box>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: { xs: "wrap", sm: "nowrap" },
-              gap: 2.5,
-            }}
-          >
-            {scenarioPin}
-            {locationPin}
-          </Box>
+          <InlineTourAnchor anchorId="data.heldPins">
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: { xs: "wrap", sm: "nowrap" },
+                gap: 2.5,
+              }}
+            >
+              {scenarioPin}
+              {locationPin}
+            </Box>
+          </InlineTourAnchor>
         </>
       )}
 
       {compareBy === "locations" && (
         <>
-          <Box>
-            <Typography
-              variant="caption"
-              sx={{
-                display: "block",
-                mb: 0.5,
-                color: theme.palette.grey[600],
-              }}
-            >
-              {group.label}s (up to {MAX_COMPARE_LOCATIONS})
-            </Typography>
-            {picker ? (
-              <>
+          <InlineTourAnchor anchorId="data.locationMembers">
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{
+                  display: "block",
+                  mb: 0.5,
+                  color: theme.palette.grey[600],
+                }}
+              >
+                {group.label}s (up to {MAX_COMPARE_LOCATIONS})
+              </Typography>
+              {picker ? (
+                <>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+                    {effectiveLocations.map((id, i) => {
+                      const l = group.items.find((item) => item.id === id)
+                      if (!l) return null
+                      return (
+                        <Tooltip key={id} title={l.longName ?? ""}>
+                          <Chip
+                            size="small"
+                            label={l.name}
+                            variant="filled"
+                            sx={{ maxWidth: 320 }}
+                            onDelete={
+                              effectiveLocations.length > 1
+                                ? () => toggleLocation(id)
+                                : undefined
+                            }
+                            icon={
+                              <Box
+                                sx={{
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: "50%",
+                                  ml: 1,
+                                  backgroundColor: locationColors[i],
+                                }}
+                              />
+                            }
+                          />
+                        </Tooltip>
+                      )
+                    })}
+                  </Box>
+                  <Box sx={{ mt: 1 }}>
+                    <AddEntityPicker
+                      value={pendingLocation}
+                      onChange={setPendingLocation}
+                      groups={locationOptionGroups(group, {
+                        exclude: effectiveLocations,
+                        disabled: levelBlockedIds,
+                      })}
+                      onAdd={addLocation}
+                      placeholder="add a location"
+                      addLabel="Add"
+                      disabled={
+                        effectiveLocations.length >= MAX_COMPARE_LOCATIONS
+                      }
+                      minWidth={260}
+                      maxMenuHeight={420}
+                      selectAriaLabel="Add location"
+                    />
+                  </Box>
+                </>
+              ) : (
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
-                  {effectiveLocations.map((id, i) => {
-                    const l = group.items.find((item) => item.id === id)
-                    if (!l) return null
+                  {group.items.map((l) => {
+                    const on = effectiveLocations.includes(l.id)
                     return (
-                      <Tooltip key={id} title={l.longName ?? ""}>
+                      <Tooltip
+                        key={l.id}
+                        title={l.aggregate ? "Aggregate rollup" : ""}
+                      >
                         <Chip
                           size="small"
+                          clickable
+                          onClick={() => toggleLocation(l.id)}
                           label={l.name}
-                          variant="filled"
-                          sx={{ maxWidth: 320 }}
-                          onDelete={
-                            effectiveLocations.length > 1
-                              ? () => toggleLocation(id)
-                              : undefined
-                          }
+                          variant={on ? "filled" : "outlined"}
                           icon={
                             <Box
                               sx={{
@@ -436,7 +501,14 @@ export default function CompareControls() {
                                 height: 10,
                                 borderRadius: "50%",
                                 ml: 1,
-                                backgroundColor: locationColors[i],
+                                backgroundColor: on
+                                  ? locationColors[
+                                      effectiveLocations.indexOf(l.id)
+                                    ]
+                                  : "transparent",
+                                border: on
+                                  ? "none"
+                                  : `1px solid ${theme.palette.grey[500]}`,
                               }}
                             />
                           }
@@ -445,66 +517,9 @@ export default function CompareControls() {
                     )
                   })}
                 </Box>
-                <Box sx={{ mt: 1 }}>
-                  <AddEntityPicker
-                    value={pendingLocation}
-                    onChange={setPendingLocation}
-                    groups={locationOptionGroups(group, {
-                      exclude: effectiveLocations,
-                      disabled: levelBlockedIds,
-                    })}
-                    onAdd={addLocation}
-                    placeholder="add a location"
-                    addLabel="Add"
-                    disabled={
-                      effectiveLocations.length >= MAX_COMPARE_LOCATIONS
-                    }
-                    minWidth={260}
-                    maxMenuHeight={420}
-                    selectAriaLabel="Add location"
-                  />
-                </Box>
-              </>
-            ) : (
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
-                {group.items.map((l) => {
-                  const on = effectiveLocations.includes(l.id)
-                  return (
-                    <Tooltip
-                      key={l.id}
-                      title={l.aggregate ? "Aggregate rollup" : ""}
-                    >
-                      <Chip
-                        size="small"
-                        clickable
-                        onClick={() => toggleLocation(l.id)}
-                        label={l.name}
-                        variant={on ? "filled" : "outlined"}
-                        icon={
-                          <Box
-                            sx={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: "50%",
-                              ml: 1,
-                              backgroundColor: on
-                                ? locationColors[
-                                    effectiveLocations.indexOf(l.id)
-                                  ]
-                                : "transparent",
-                              border: on
-                                ? "none"
-                                : `1px solid ${theme.palette.grey[500]}`,
-                            }}
-                          />
-                        }
-                      />
-                    </Tooltip>
-                  )
-                })}
-              </Box>
-            )}
-          </Box>
+              )}
+            </Box>
+          </InlineTourAnchor>
           <Box
             sx={{
               display: "flex",

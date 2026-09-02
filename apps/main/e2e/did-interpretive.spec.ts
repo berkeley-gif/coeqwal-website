@@ -174,7 +174,7 @@ test("salmon sentence marks a sample-backed comparison member as sample", () => 
 // Ted's n128: the box plot draws a dashed tick at the mean inside each box
 // and the "How do I read this chart?" text did not say so.
 test("the box-plot explainer names the dashed mean marker", () => {
-  const sentence = "The short dashed line inside each box marks the mean."
+  const sentence = "The dashed line is the mean value (average)."
   expect(howToReadText("dist", "box")).toContain(sentence)
   expect(howToReadText("dist", "exceedance")).not.toContain(sentence)
   expect(howToReadText("dist", "stats")).not.toContain(sentence)
@@ -571,7 +571,7 @@ test("surface water delivery shortage sentence reports the no-shortage year coun
     view: "dist",
     distKind: "exceedance",
     compareBy: "scenarios",
-    variableName: "Surface water delivery shortage",
+    variableName: "Surface water delivery shortages",
     variableId: "cws_del_short",
     proseName: "surface water delivery shortage",
     unit: "%",

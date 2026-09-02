@@ -378,7 +378,7 @@ test("community water systems list every served delivery system after the aggreg
   expect(del?.views).toEqual(["dist"])
 })
 
-test("the M&I supply shortage uses the shortage-modeled system list, a separate group", () => {
+test("the Municipal supply shortages variable uses the shortage-modeled system list, a separate group", () => {
   // Brian's ruling: the delivery set (74) and the shortage/welfare set (63)
   // overlap but are separate, so each variable binds to its own group and
   // the site never requests a subject the endpoint lacks for that measure.
@@ -405,14 +405,14 @@ test("the M&I supply shortage uses the shortage-modeled system list, a separate 
   // shortage of the CWS economics analysis and is labeled as such; the
   // Community deliveries key outcome scores delivery reliability, so the
   // chip moved to the delivery-family variables.
-  expect(short?.name).toBe("M&I supply shortage")
-  expect(short?.proseName).toBe("M&I supply shortages")
+  expect(short?.name).toBe("Municipal supply shortages")
+  expect(short?.proseName).toBe("municipal supply shortage")
   expect(short?.tierOutcome).toBeUndefined()
 })
 
 test("surface water delivery shortage is a derived live percent on the delivery system list", () => {
   const v = getVariable("cws_del_short")
-  expect(v?.name).toBe("Surface water delivery shortage")
+  expect(v?.name).toBe("Surface water delivery shortages")
   expect(v?.proseName).toBe("surface water delivery shortage")
   expect(v?.sectorId).toBe("cwsS")
   expect(v?.locationGroup).toBe("cws")

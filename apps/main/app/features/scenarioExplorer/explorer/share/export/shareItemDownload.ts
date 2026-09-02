@@ -19,6 +19,7 @@ import JSZip from "jszip"
 import type { ShareItem } from "../types"
 import { handlerForItem, type CsvLookups } from "../variants"
 import { CAPTURE_DIMENSIONS } from "../capture/dimensions"
+import { svgIntrinsicSize } from "../svgIntrinsicSize"
 import { withExt, dedupeLabel } from "../utils/filename"
 import { captureCardPngDataUrl, captureCardSvgString } from "../cardExport"
 import { rasterizeSvgString, embedFontStylesInSvg } from "./svgRasterize"
@@ -45,6 +46,14 @@ export function shareItemFilenameLabel(
  * `rasterDimensionsKey` lookup into {@link CAPTURE_DIMENSIONS}.
  */
 function shareItemRasterSize(item: ShareItem) {
+  // Prefer the dimensions the SVG was actually captured at: content-aware
+  // captures (the resilience small-multiples panel) are taller than the
+  // static dimensions, and rasterizing them into the fixed size squeezes
+  // the figure into letterbox bars.
+  if (item.cachedSvg) {
+    const intrinsic = svgIntrinsicSize(item.cachedSvg)
+    if (intrinsic) return intrinsic
+  }
   const handler = handlerForItem(item)
   return (
     handler.rasterSizeFor?.(item) ??
