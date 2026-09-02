@@ -178,7 +178,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: (<>This water issue provides a foundation for understanding the strengths, vulnerabilities, trade-offs, and inequities in California's current water system, with a focus on the <GlossaryTermLink>Central Valley Project</GlossaryTermLink> and State Water Project, and how those conditions may change under future climates. It also examines different representations of current operations used by state and federal agencies in their models, and how those differences can influence our understanding of impacts on communities, agriculture, and the environment.</>),
+              text: (<>This water issue provides a foundation for understanding the strengths, vulnerabilities, trade-offs, and inequities in California's current water system, with a focus on the <GlossaryTermLink>Central Valley Project</GlossaryTermLink> and <GlossaryTermLink>State Water Project</GlossaryTermLink>, and how those conditions may change under future climates. It also examines different representations of current operations used by state and federal agencies in their models, and how those differences can influence our understanding of impacts on communities, agriculture, and the environment.</>),
             },
           ],
         },
@@ -990,7 +990,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: (<>California's Sustainable Groundwater Management Act (SGMA) requires groundwater basins to achieve long-term balance between pumping and recharge. Meeting SGMA requirements may involve reducing pumping alongside other changes in agricultural water and land management. Understanding how surface water <GlossaryTermLink>deliveries</GlossaryTermLink>, groundwater use, and agricultural production change as groundwater restrictions are put in place is essential for planning for a sustainable agricultural future.</>),
+              text: (<>California's <GlossaryTermLink>Sustainable Groundwater Management Act (SGMA)</GlossaryTermLink> requires groundwater basins to achieve long-term balance between pumping and recharge. Meeting SGMA requirements may involve reducing pumping alongside other changes in agricultural water and land management. Understanding how surface water <GlossaryTermLink>deliveries</GlossaryTermLink>, groundwater use, and agricultural production change as groundwater restrictions are put in place is essential for planning for a sustainable agricultural future.</>),
             },
             {
               type: "image",
@@ -1109,7 +1109,7 @@ export const WATER_THEMES: Theme[] = [
                 "Farmers can adapt to reductions in groundwater access by shifting crops, changing water management practices, or retiring farmland, but many of these decisions require long-term planning.",
                 "Impacts vary by region. The Sacramento Valley and San Joaquin Valley face different groundwater conditions and constraints, so system-wide averages can mask important local impacts.",
                 (<>The models used by <GlossaryTermLink>COEQWAL</GlossaryTermLink> primarily focus on the Sacramento and <GlossaryTermLink>San Joaquin River</GlossaryTermLink> basins. The Tulare Basin and other parts of the southern San Joaquin Valley are only partially represented, and changes in groundwater storage and agricultural revenues are not evaluated in these regions.</>),
-                (<><GlossaryTermLink>COEQWAL</GlossaryTermLink> explores the broader effects of limiting groundwater pumping. Because SGMA is implemented through individual basin plans that use different strategies to achieve groundwater sustainability, these scenarios do not represent how SGMA will be implemented or predict future conditions in individual basins. For more details about SGMA, visit the California Department of Water Resources.</>),
+                (<><GlossaryTermLink>COEQWAL</GlossaryTermLink> explores the broader effects of limiting groundwater pumping. Because <GlossaryTermLink term="Sustainable Groundwater Management Act (SGMA)">SGMA</GlossaryTermLink> is implemented through individual basin plans that use different strategies to achieve groundwater sustainability, these scenarios do not represent how SGMA will be implemented or predict future conditions in individual basins. For more details about SGMA, visit the California Department of Water Resources.</>),
                 "Some important management options and system connections are not evaluated here. These include managed aquifer recharge and environmental benefits associated with working agricultural lands, such as habitat provided by flooded rice fields and water delivered throughout agricultural infrastructure to wildlife refuges.",
               ],
             },
