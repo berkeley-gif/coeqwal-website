@@ -11,7 +11,7 @@ const transparencyText = {
       [
         [
           {
-            text: "Today, California relies on complex models such as CalSim3 to evaluate water-management strategies and inform decisions about water storage, flows, and deliveries.",
+            text: "Today, California relies on complex models such as CalSim3 to inform decisions about water storage, flows, and deliveries.",
           },
         ],
         [
@@ -21,7 +21,7 @@ const transparencyText = {
         ],
         [
           {
-            text: "Because few people can run and interpret these models, communities often cannot see how water-management choices are represented, whose needs are prioritized, or how different choices could produce different outcomes.",
+            text: "Because few people can run and interpret these models, communities often cannot see how water-management choices are represented, whose needs are prioritized, or how different choices can produce different outcomes.",
           },
         ],
       ],
@@ -38,12 +38,7 @@ const transparencyText = {
         ],
         [
           {
-            text: "If knowledge is power, everyone needs insight into water management decisions.",
-          },
-        ],
-        [
-          {
-            text: "COEQWAL makes these assumptions, choices and consequences visible, comparable, and accessible.",
+            text: "COEQWAL makes these assumptions, choices, and consequences visible, comparable, and accessible.",
             mark: "strong",
           },
         ],

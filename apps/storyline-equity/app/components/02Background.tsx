@@ -11,7 +11,7 @@ const backgroundText = {
       { text: "California's water begins in mountain headwaters." },
       { text: "Water flows downstream through rivers toward the ocean." },
       {
-        text: "Along the way, California's dams, reservoirs, canals, and pumps reshape how and where water flows.",
+        text: "Along the way, California's dams, reservoirs, canals and pumps reshape how and where water flows.",
       },
       {
         text: "Together, they form a vast, complex network that distributes water to:",
@@ -41,7 +41,7 @@ const backgroundText = {
           { text: "Rivers", mark: "strong" },
           { text: ", " },
           { text: "wetlands", mark: "strong" },
-          { text: ", and " },
+          { text: ", " },
           { text: "fish", mark: "strong" },
           {
             text: ", and people who depend on healthy rivers for cultural practices, subsistence fishing, recreation, and clean water.",

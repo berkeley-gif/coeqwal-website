@@ -30,10 +30,10 @@ const openerText = {
       ],
       [
         {
-          text: "By exploring water equity across different what-if scenarios, COEQWAL helps us explore a bigger question:",
+          text: "By exploring water equity across what-if scenarios, COEQWAL helps us explore a bigger question:",
         },
         {
-          text: "How can California better meet the needs of communities and ecosystems, fairly and resiliently, for generations to come?",
+          text: "How can California meet the needs of communities and ecosystems, fairly and resiliently, for generations to come?",
         },
       ],
     ],

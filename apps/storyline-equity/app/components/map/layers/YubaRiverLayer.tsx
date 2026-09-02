@@ -2,18 +2,24 @@
 
 import { useEffect } from "react"
 import { Layer, Marker, Source, useMap } from "@repo/map"
-import { yubaRiver } from "@repo/data"
 import { Box, Typography } from "@repo/ui/mui"
 import { FreshWaterColor, OceanWaterColor } from "../../helpers/colorPalette"
 import { YUBA_RIVER_LABEL } from "../config/locationPresets"
 import { useLazyMount } from "../hooks/useLazyMount"
+import { selectRivers } from "../helpers/equityRiverNetwork"
 
-const YUBA_RIVER_LAYER_IDS = ["yuba-river-halo", "yuba-river-body"] as const
+const YUBA_RIVER_LAYER_IDS = [
+  "yuba-headwater-halo",
+  "yuba-headwater-body",
+  "yuba-river-halo",
+  "yuba-river-body",
+] as const
 
 const YUBA_RIVER_SOURCE_ID = "yuba-river-source"
 const YUBA_HEADWATER_SOURCE_ID = "yuba-headwater-source"
 const YUBA_HEADWATER_SOURCE_LAYER = "Yuba_headwater.zip-z0o4c7"
 const RIVER_HALO_COLOR = "#07142c"
+const yubaRivers = selectRivers((name) => /Yuba River$/i.test(name))
 export default function YubaRiverLayer({
   visible,
   showLabel = true,
@@ -91,7 +97,7 @@ export default function YubaRiverLayer({
         />
       </Source>
 
-      <Source id={YUBA_RIVER_SOURCE_ID} type="geojson" data={yubaRiver}>
+      <Source id={YUBA_RIVER_SOURCE_ID} type="geojson" data={yubaRivers}>
         <Layer
           id="yuba-river-halo"
           type="line"

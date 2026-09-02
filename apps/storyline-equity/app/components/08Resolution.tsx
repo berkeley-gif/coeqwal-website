@@ -34,44 +34,52 @@ const tierNames: Record<number, string> = {
 }
 const visualizationCopy = {
   focusTreemap: {
-    title: "Visualization title 1",
-    caption: "Placeholder caption for visualization frame 1.",
+    title: "Drinking Water Delivery across Communities",
+    caption:
+      "Each rectangle represents a community; its size reflects its typical annual surface-water delivery (median) under a baseline scenario of current operations and climate.",
   },
   annualDelivery: {
-    title: "Visualization title 2",
-    caption: "Placeholder caption for visualization frame 2.",
+    title: "Annual Water Deliveries for a Community",
+    caption:
+      "Each bar shows surface-water delivery in one simulated water year; the line marks drinking-water demand.",
   },
   demandMet: {
-    title: "Visualization title 3",
-    caption: "Placeholder caption for visualization frame 3.",
+    title: "Annual Drinking Water Demand Met for a Community",
+    caption:
+      "Annual surface water delivery is expressed as a percentage of drinking water demand. A shortfall does not necessarily mean a community experiences a drinking water shortage. COEQWAL evaluates surface water deliveries from major water projects. Some communities may also draw from groundwater, local surface water, or stored water for water security.",
   },
   distribution: {
-    title: "Visualization title 4",
-    caption: "Placeholder caption for visualization frame 4.",
+    title: "Distribution of Annual Demand Met",
+    caption:
+      "Each dot represents one simulated water year, positioned by the percentage of demand met.",
   },
   optimal: {
-    title: "Visualization title 5",
-    caption: "Placeholder caption for visualization frame 5.",
+    title: "Optimal Water Delivery Conditions",
+    caption: "The outcomes are evaluated against the Optimal thresholds.",
   },
   atRisk: {
-    title: "Visualization title 6",
-    caption: "Placeholder caption for visualization frame 6.",
+    title: "At-risk Water Delivery Conditions",
+    caption: "The same outcomes are evaluated against the At-risk thresholds.",
   },
   tierTreemap: {
-    title: "Visualization title 7",
-    caption: "Placeholder caption for visualization frame 7.",
+    title: "Drinking Water Outcome across Communities",
+    caption:
+      "Each community is assigned a performance category based on the same criteria, allowing comparison across communities with different annual surface water deliveries.",
   },
   cwsTierRows: {
-    title: "Visualization title 8",
-    caption: "Placeholder caption for visualization frame 8.",
+    title: "Community water systems grouped by performance",
+    caption:
+      "Equal-size rectangles show how many community water systems fall within each performance category.",
   },
   crossGroupComparison: {
-    title: "Visualization title 9",
-    caption: "Placeholder caption for visualization frame 9.",
+    title: "Comparing performance across water-user groups",
+    caption:
+      "Community water systems and agricultural areas are shown as equal-size units using the same performance scale.",
   },
   scenarioComparison: {
-    title: "Visualization title 10",
-    caption: "Placeholder caption for visualization frame 10.",
+    title: "Comparing performance across management strategies",
+    caption:
+      "Current operations · Prioritize human health delivery levels to community water systems · Groundwater pumping limits in the Central Valley",
   },
 } as const
 const LOAD_RESOLUTION_VISUALS = true
@@ -94,7 +102,7 @@ const storyFrames = [
     paragraphs: [
       [
         {
-          text: "COEQWAL cannot undo historical inequities. It can, however, make their present-day impacts visible and support more informed and equitable decisions moving forward.",
+          text: "COEQWAL cannot undo historical inequities. It can, however, make their impacts visible and support more equitable decisions moving forward.",
         },
         {
           text: "Trade-offs are unavoidable in water management. But their impacts do not have to fall hardest on the same groups.",
@@ -105,7 +113,7 @@ const storyFrames = [
           text: "COEQWAL compares different water management strategies, called scenarios, to show how different choices affect communities, water users, and ecosystems.",
         },
         {
-          text: "It also tests these strategies across a wide range of hydrologic conditions, helping us understand how outcomes may change as the climate becomes more stressed.",
+          text: "It tests these strategies across a range of hydroclimates, revealing who benefits and who bears the burden of more intense droughts, floods, and snowpack loss.",
         },
         {
           text: "To see how this works, let's focus on community water systems.",
@@ -131,9 +139,6 @@ const storyFrames = [
         {
           text: "This shows what percentage of drinking water demand is met by modeled surface water deliveries each year.",
         },
-        {
-          text: "A shortfall does not necessarily mean a community experiences a drinking water shortage. COEQWAL evaluates surface water deliveries from major water projects, not a community’s complete water supply, which may also include groundwater, local surface water, or stored water.",
-        },
       ],
     ],
   },
@@ -142,14 +147,16 @@ const storyFrames = [
     paragraphs: [
       [
         {
-          text: "COEQWAL turns these modeled outcomes into measures of how well water needs are being met.",
+          text: "COEQWAL uses the 100 years of modeled surface water deliveries to measure how well water needs are being met.",
         },
         {
           segments: [
-            { text: "Researchers define " },
+            {
+              text: "To weigh the reliability of supply versus the severity of water shortfalls, researchers define conditions, or ",
+            },
             { text: "thresholds", mark: "strong" },
             {
-              text: " that reflect both the reliability and severity of water shortfalls for communities and ecosystems.",
+              text: ", for what communities and ecosystems need.",
             },
           ],
         },
@@ -197,11 +204,11 @@ const storyFrames = [
       [
         {
           segments: [
-            { text: "In this scenario, the community is considered " },
+            { text: "The community does meet conditions for " },
             { text: "At-risk", mark: "atRiskName" },
-            { text: ", meaning that " },
+            { text: " water deliveries. Its " },
             {
-              text: "modeled surface-water deliveries fall short of demand in a significant number of simulated years",
+              text: "surface water deliveries fall short of demand in a significant number of simulated years",
               mark: "atRiskDefinition",
             },
             { text: "." },
@@ -225,7 +232,7 @@ const storyFrames = [
           ],
         },
         {
-          text: "Together, these outcome levels create a shared scale for interpreting how well needs are being met.",
+          text: "These outcome levels create a shared scale for interpreting how well needs are being met.",
         },
       ],
     ],
@@ -238,7 +245,7 @@ const storyFrames = [
           text: "Communities and ecosystems experience water decisions in different ways.",
         },
         {
-          text: "Their outcomes are also measured differently, through community surface water deliveries, agricultural production, river flows, salmon abundance, salinity, reservoir storage, and more.",
+          text: "Outcomes are measured differently. Agricultural production is not the same as salmon abundance or human health.",
         },
         {
           text: "That makes them difficult to compare directly.",

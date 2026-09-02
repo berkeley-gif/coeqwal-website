@@ -11,7 +11,7 @@ const climateResilienceText = {
       [
         [
           {
-            text: "California has taken important steps to address inequities and environmental harms created by past water decisions.",
+            text: "Over recent decades, California has taken steps to address some of the inequities and environmental harms embedded in its water system.",
           },
         ],
         [
@@ -23,12 +23,7 @@ const climateResilienceText = {
       [
         [
           {
-            text: "Yet inequities remain embedded in the water system. Water rights, contracts, infrastructure, and operating rules continue to protect some water users more than others.",
-          },
-        ],
-        [
-          {
-            text: "Some communities and sectors are better protected from shortages, while many Tribes, rural and disadvantaged communities, and ecosystems remain particularly vulnerable.",
+            text: "Yet significant inequities and environmental challenges remain.",
           },
         ],
         [
@@ -39,12 +34,12 @@ const climateResilienceText = {
         ],
         [
           {
-            text: "These pressures can deepen existing inequities, with those already most vulnerable often bearing the greatest burden.",
+            text: "Some communities and sectors are better protected from shortages, while many Tribes, rural and disadvantaged communities, and ecosystems remain particularly vulnerable.",
           },
         ],
         [
           {
-            text: "The central question is not whether trade-offs exist, but why the same groups so often bear the costs.",
+            text: "Facing rising pressures and deepening inequities, water managers seek new strategies.",
           },
         ],
       ],

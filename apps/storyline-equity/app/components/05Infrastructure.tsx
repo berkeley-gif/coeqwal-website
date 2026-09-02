@@ -23,9 +23,8 @@ const infrastructureText = {
         [
           {
             segments: [
-              { text: "These " },
               {
-                text: "dams",
+                text: "Dams",
                 mark: "infrastructure",
                 legend: {
                   color: InfrastructureColor,
@@ -35,7 +34,7 @@ const infrastructureText = {
               },
               { text: ", " },
               {
-                text: "pumps",
+                text: "reservoirs",
                 mark: "infrastructure",
                 legend: {
                   color: InfrastructureColor,
@@ -59,21 +58,21 @@ const infrastructureText = {
             ],
           },
         ],
-        [
-          {
-            text: "These systems redirected rivers, interrupted natural pathways, and transformed ecosystems.",
-          },
-        ],
       ],
       [
         [
           {
-            text: "Nowhere is this more visible than in the Delta. Once a vast landscape of tidal wetlands, floodplains, and branching waterways, much of the Delta was diked and drained, while levees and canals transformed how water moves through it.",
+            text: "Nowhere is this more visible than in the Delta. Once a vast landscape of tidal wetlands, floodplains, and meandering waterways, much of the Delta was diked and drained to support agriculture and urbanization. Levees and canals cemented the separation between land and water.",
           },
         ],
         [
           {
-            text: "Today, the Delta is both a living ecosystem and a critical hub in California’s engineered water system.",
+            text: "Wetlands and their inhabitants were erased. Water was pumped to distant cities.",
+          },
+        ],
+        [
+          {
+            text: "The result is the Delta we know today: a living but at-risk ecosystem and a critical, contested hub in California’s engineered water system.",
           },
         ],
       ],
