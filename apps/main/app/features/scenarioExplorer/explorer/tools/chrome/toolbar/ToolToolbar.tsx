@@ -134,7 +134,7 @@ export default function ToolToolbar({
                 flexWrap: "wrap",
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Box sx={{ display: "flex", alignItems: "center", columnGap: 0.5 }}>
                 <InfoIconButton
                   tooltipContent={
                     <>
