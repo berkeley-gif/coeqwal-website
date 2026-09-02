@@ -321,7 +321,7 @@ export const WATER_THEMES: Theme[] = [
                 (<>Current operations, with <GlossaryTermLink term="California Department of Water Resources (DWR)">DWR</GlossaryTermLink> (2023) operating rules, recent (2020) land use, and allowing for TUCP actions"</>),
                 (<>Current operations with historical agricultural land use, with DWR (2023) operating rules, historical (2004-2013) land use, and allowing for TUCP actions</>),
                 (<>Current operations without TUCPs, with DWR (2023) operating rules and recent (2020) land use, but without TUCP actions</>),
-                "Current USBR operations, with U.S. Bureau of Reclamation (2024) operating rules, recent (2020) land use, and TUCPs",
+                (<>Current USBR operations, with <GlossaryTermLink>U.S. Bureau of Reclamation</GlossaryTermLink> (2024) operating rules, recent (2020) land use, and TUCPs</>),
                 "Current USBR operations without TUCPs, with U.S. Bureau of Reclamation (2024) operating rules and recent (2020) land use, but without TUCPs",
               ],
             },
@@ -1459,7 +1459,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: (<>The tension between water operations and salmon conservation is particularly acute in the Sacramento River, where winter-run Chinook salmon are endangered and remain at high risk of extinction. Winter-run salmon historically spawned in cold, spring-fed headwaters and tributaries of the <GlossaryTermLink>Sacramento River</GlossaryTermLink>. Today, Shasta Dam blocks access to most of those habitats, and winter-run primarily spawn downstream of Shasta Dam during the warmest part of the year. Their egg survival now depends heavily on cold water stored in Shasta Reservoir and released downstream during summer.</>),
+              text: (<>The tension between water operations and salmon conservation is particularly acute in the Sacramento River, where <GlossaryTermLink>winter-run Chinook salmon</GlossaryTermLink> are endangered and remain at high risk of extinction. Winter-run salmon historically spawned in cold, spring-fed headwaters and tributaries of the <GlossaryTermLink>Sacramento River</GlossaryTermLink>. Today, Shasta Dam blocks access to most of those habitats, and winter-run primarily spawn downstream of Shasta Dam during the warmest part of the year. Their egg survival now depends heavily on cold water stored in Shasta Reservoir and released downstream during summer.</>),
             },
             {
               type: "paragraph",
