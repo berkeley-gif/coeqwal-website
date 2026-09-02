@@ -91,7 +91,7 @@ export default function VideoHero({
   }
 
   useEffect(() => {
-    if (!mounted || failed) return
+    if (!mounted || prefersReducedMotion !== false) return
 
     const v = videoRef.current
     if (!v) return
@@ -108,14 +108,15 @@ export default function VideoHero({
         await v.play()
         setIsPlaying(true)
       } catch (err) {
-        // if autoplay blocked, fall back to poster
         console.warn("Hero video play() rejected:", err)
-        setFailed(true)
         setIsPlaying(false)
       }
     }
-    if (canPlay && isPlaying) tryPlay()
-  }, [mounted, canPlay, failed, isPlaying, prefersReducedMotion])
+    if (canPlay) {
+tryPlay()
+    } 
+      
+  }, [mounted, canPlay, prefersReducedMotion])
 
   const showStaticImage = failed
 
@@ -127,9 +128,9 @@ export default function VideoHero({
   const heroHeight =
     insetCfg && insetCfg.y !== 0
       ? typeof insetCfg.y === "number"
-        ? `calc(100vh - ${insetCfg.y * 2}px)`
-        : `calc(100vh - (${insetCfg.y} * 2))`
-      : "100vh"
+        ? `calc(100dvh - ${insetCfg.y * 2}px)`
+        : `calc(100dvh - (${insetCfg.y} * 2))`
+      : "100dvh"
 
   const hero = (
     // WCAG 1.3.1: Semantic section element with accessible name
@@ -194,11 +195,7 @@ export default function VideoHero({
             }}
             aria-hidden="true" // WCAG 1.1.1: Decorative video - DO NOT REMOVE
             preload="metadata"
-            onLoadedMetadata={() => {
-              if (!prefersReducedMotion) {
-                videoRef.current?.play().catch(() => setFailed(true))
-              }
-            }}
+
           >
             {sources.map((s, i) => (
               <source key={i} src={s.src} type={s.type} />

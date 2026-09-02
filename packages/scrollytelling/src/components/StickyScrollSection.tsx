@@ -46,6 +46,7 @@ interface StickyScrollSectionProps {
   overlap?: string
   /** Height of the sticky inner container (default: "100vh") */
   stickyHeight?: string
+  mobileBreakpoint?: number
   /** Show debug overlay with progress value */
   debug?: boolean
   /** Section ID for navigation */
@@ -70,6 +71,11 @@ export function StickyScrollSection({
   offset = ["start start", "end end"],
   overlap = "0px",
   stickyHeight = "100vh",
+  // Below this viewport width, the pin is disabled and content flows
+  // normally instead of using `position: sticky`. 900px matches the
+  // theme's `md` breakpoint that AboutCoeqwalPanel/WaterThemesPanel
+  // already use to switch between their mobile/desktop layouts.
+  mobileBreakpoint = 900,
   debug = false,
   id,
   ariaLabel,
@@ -81,6 +87,16 @@ export function StickyScrollSection({
 }: StickyScrollSectionProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const [debugProgress, setDebugProgress] = useState(0)
+  const [isPinned, setIsPinned] = useState(true)
+
+  useEffect(() => {
+    if (!mobileBreakpoint) return
+    const mq = window.matchMedia(`(min-width: ${mobileBreakpoint}px)`)
+    const update = () => setIsPinned(mq.matches)
+    update()
+    mq.addEventListener("change", update)
+    return () => mq.removeEventListener("change", update)
+  }, [mobileBreakpoint])
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -111,7 +127,7 @@ export function StickyScrollSection({
         className={className}
         style={{
           position: "relative",
-          minHeight: height,
+          minHeight: isPinned ? height : "auto",
           marginBottom: overlap !== "0px" ? `-${overlap}` : undefined,
           ...style,
         }}
@@ -119,10 +135,10 @@ export function StickyScrollSection({
         <div
           className={stickyClassName}
           style={{
-            position: "sticky",
-            top: resolvedTop,
-            height: stickyHeight,
-            overflow: "hidden",
+            position: isPinned ? "sticky" : "static",
+            top: isPinned ? resolvedTop : undefined,
+            height: isPinned ? stickyHeight : "auto",
+            overflow: isPinned ? "hidden" : "visible",
             ...stickyStyle,
           }}
         >

@@ -314,10 +314,11 @@ function WaterThemesPanelContent({
       </Box>
       <Box
         sx={{
-          position: "absolute",
-          bottom: 40,
-          left: "50%",
-          transform: "translate(-50%)",
+          position: { xs: "static", md: "absolute" },
+          bottom: { md: 40 },
+          left: { md: "50%" },
+          transform: { md: "translate(-50%)" },
+          mt: { xs: theme.space.section.sm, md: 0 },
         }}
       >
         <ScrollToButton
