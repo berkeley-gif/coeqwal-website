@@ -762,7 +762,7 @@ export const WATER_THEMES: Theme[] = [
               text: (
                 <>
                   The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
-                  allows you to explore how scenario outcomes compare under
+                  allows you to explore how <GlossaryTermLink>scenario</GlossaryTermLink> outcomes compare under
                   alternative <GlossaryTermLink>management strategies</GlossaryTermLink> and climate conditions.
                   There are complementary ways to visualize tradeoffs, equity,
                   and resilience of water management strategies. The examples
@@ -1108,7 +1108,7 @@ export const WATER_THEMES: Theme[] = [
                 "Groundwater systems change slowly. Reversing long-term trends in declining groundwater levels may require concerted management over many years or decades. Severe groundwater depletion and land subsidence can also make recovery more difficult.",
                 "Farmers can adapt to reductions in groundwater access by shifting crops, changing water management practices, or retiring farmland, but many of these decisions require long-term planning.",
                 "Impacts vary by region. The Sacramento Valley and San Joaquin Valley face different groundwater conditions and constraints, so system-wide averages can mask important local impacts.",
-                (<>The models used by <GlossaryTermLink>COEQWAL</GlossaryTermLink> primarily focus on the Sacramento and San Joaquin River basins. The Tulare Basin and other parts of the southern San Joaquin Valley are only partially represented, and changes in groundwater storage and agricultural revenues are not evaluated in these regions.</>),
+                (<>The models used by <GlossaryTermLink>COEQWAL</GlossaryTermLink> primarily focus on the Sacramento and <GlossaryTermLink>San Joaquin River</GlossaryTermLink> basins. The Tulare Basin and other parts of the southern San Joaquin Valley are only partially represented, and changes in groundwater storage and agricultural revenues are not evaluated in these regions.</>),
                 (<><GlossaryTermLink>COEQWAL</GlossaryTermLink> explores the broader effects of limiting groundwater pumping. Because SGMA is implemented through individual basin plans that use different strategies to achieve groundwater sustainability, these scenarios do not represent how SGMA will be implemented or predict future conditions in individual basins. For more details about SGMA, visit the California Department of Water Resources.</>),
                 "Some important management options and system connections are not evaluated here. These include managed aquifer recharge and environmental benefits associated with working agricultural lands, such as habitat provided by flooded rice fields and water delivered throughout agricultural infrastructure to wildlife refuges.",
               ],
@@ -1164,7 +1164,7 @@ export const WATER_THEMES: Theme[] = [
               text: (
                 <>
                   The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
-                  allows you to explore how scenario outcomes compare under
+                  allows you to explore how <GlossaryTermLink>scenario</GlossaryTermLink> outcomes compare under
                   alternative management strategies and climate conditions.
                   There are complementary ways to visualize tradeoffs, equity,
                   and resilience of water management strategies. The examples
@@ -1641,7 +1641,7 @@ export const WATER_THEMES: Theme[] = [
               text: (
                 <>
                   The <InlineNavLink to="explore">Explore Tool</InlineNavLink>{" "}
-                  allows you to explore how scenario outcomes compare under
+                  allows you to explore how <GlossaryTermLink>scenario</GlossaryTermLink> outcomes compare under
                   alternative <GlossaryTermLink>management strategies</GlossaryTermLink> and climate conditions.
                   There are complementary ways to visualize tradeoffs, equity,
                   and resilience of water management strategies. The examples
@@ -1926,7 +1926,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "Over time, dams, levees, reservoirs, and pumping plants have changed how water moves through the Delta and into the San Francisco Bay estuary. The Delta historically experienced large seasonal shifts in freshwater and salinity conditions. Today, upstream reservoir releases, water quality requirements, and export operations strongly influence these patterns. Wetlands have been converted to farmland, creating islands protected by levees, many of which now lie below sea level. Habitat alterations and invasive species have also contributed to major changes in fish populations and water quality conditions.",
+              text: (<>Over time, dams, levees, reservoirs, and pumping plants have changed how water moves through the Delta and into the San Francisco Bay estuary. The Delta historically experienced large seasonal shifts in freshwater and <GlossaryTermLink>salinity</GlossaryTermLink> conditions. Today, upstream reservoir releases, water quality requirements, and export operations strongly influence these patterns. Wetlands have been converted to farmland, creating islands protected by levees, many of which now lie below sea level. Habitat alterations and invasive species have also contributed to major changes in fish populations and water quality conditions.</>),
             },
             {
               type: "paragraph",
@@ -1982,7 +1982,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "**Seasonal flow, salinity, and water use** – The Delta changes with the seasons. In spring, snowmelt and reservoir releases fill rivers with fresh water, making the Delta less salty. In summer and fall, river flows decline, temperatures rise, and the Bay's saline waters can move farther inland. Salinity is shaped by freshwater inflows, sea level, tides, and the movement of water through the Delta's network of channels and wetlands. Reservoir releases help limit salinity intrusion during dry months, maintaining freshwater for in-Delta uses and for water exported from the Delta to farms and cities.",
+              text: (<><strong>Seasonal flow, salinity, and water use</strong> – The Delta changes with the seasons. In spring, snowmelt and reservoir releases fill rivers with fresh water, making the Delta less salty. In summer and fall, river flows decline, temperatures rise, and the Bay's saline waters can move farther inland. <GlossaryTermLink>Salinity</GlossaryTermLink> is shaped by freshwater inflows, sea level, tides, and the movement of water through the Delta's network of channels and wetlands. Reservoir releases help limit salinity intrusion during dry months, maintaining freshwater for in-Delta uses and for water exported from the Delta to farms and cities.</>),
             },
             {
               type: "paragraph",
@@ -2013,7 +2013,7 @@ export const WATER_THEMES: Theme[] = [
               items: [
                 "In-Delta water quality and salinity are sensitive to freshwater inflows, reservoir operations, exports, sea-level rise, tides, and climate conditions. Changes in these factors can affect freshwater for in-Delta uses and exports, as well as ecosystem conditions.",
                 (<>Freshwater flow is important to Delta ecology, but Delta outflows alone do not address all factors limiting ecosystem health. Habitat, invasive species, water temperature, food-web conditions, and other factors not fully represented by <GlossaryTermLink>COEQWAL</GlossaryTermLink> also influence ecological outcomes.</>),
-                (<>A <GlossaryTermLink>Delta Conveyance Project</GlossaryTermLink> scenario evaluates how the proposed project could affect modeled water-system outcomes, but does not capture the full range of potential social, cultural, economic, and environmental benefits and impacts associated with the project.</>),
+                (<>A <GlossaryTermLink>Delta Conveyance Project</GlossaryTermLink> <GlossaryTermLink>scenario</GlossaryTermLink> evaluates how the proposed project could affect modeled water-system outcomes, but does not capture the full range of potential social, cultural, economic, and environmental benefits and impacts associated with the project.</>),
                 "Changes in operational rules do not always produce simple or direct responses. Even when operational rules change under a scenario, other requirements, such as water quality standards, may remain in place. As a result, management changes do not always translate directly into expected changes in Delta outflows, salinity, or ecosystem conditions.",
                 "Delta conditions are influenced by both management and climate. The hydroclimates include changes in freshwater conditions and sea-level rise, which together can affect salinity, ecosystem conditions, in-Delta uses, and water exports.",
               ],
