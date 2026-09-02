@@ -25,6 +25,7 @@ import { ErrorBoundary } from "@repo/utils"
 import { FontLoader } from "./components/FontLoader"
 import { ActiveThemePanel } from "./components/ActiveThemePanel"
 import { Header } from "./components/Header"
+import { NavigationOverlay } from "./components/NavigationOverlay"
 import { TabsProvider } from "./context/Tabs"
 import { Footer } from "./components/Footer"
 
@@ -69,6 +70,14 @@ export default function RootLayout({
                     <Suspense fallback={null}>
                       <Header />
                     </Suspense>
+                  </ErrorBoundary>
+
+                  {/* Full-page indicator shown while a tab navigation's
+                      JS bundle is downloading - see NavigationOverlay.tsx.
+                      Silent null fallback on error: this is a perceived-
+                      performance nicety, not critical path. */}
+                  <ErrorBoundary fallback={null}>
+                    <NavigationOverlay />
                   </ErrorBoundary>
 
                   {children}
