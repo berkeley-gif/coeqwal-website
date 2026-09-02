@@ -7,7 +7,7 @@
  * with StrategyGrid columns. Otherwise uses a flex layout.
  */
 
-import React, { useCallback } from "react"
+import React from "react"
 import { Box, Typography, useTheme, Switch } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
@@ -48,11 +48,11 @@ export default function ToolToolbar({
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
   // Register the climate-chip group as a tour anchor for the radar
-  // tour. Resilience reuses this control too but its tour does not
-  // step through it, so a single id is fine.
+  // tour. Equity reuses this same control for its own tour, and
+  // resilience reuses the control without stepping through it, so a
+  // single shared id covers every tool.
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
-  const listClimateTourRef = useTourAnchor("list.toolbar.climate")
-  const equityClimateTourRef = useTourAnchor("equity.controls.hydroclimate")
+  const showMapAnchorRef = useTourAnchor("toolbar.showMap")
   // High-level orientation anchor for the list tour: the whole strip
   // of view controls (hydroclimate, map, etc.) on the right side of
   // the toolbar. Registered only in list mode so it does not collide
@@ -62,19 +62,6 @@ export default function ToolToolbar({
   // rendered as a plain row (not the list grid), so we anchor the
   // radar orientation popper on that row directly.
   const radarViewAreaTourRef = useTourAnchor("radar.viewArea")
-  const showMapTourRef = useTourAnchor("equity.controls.showMap")
-  // One DOM node serves the Radar climate-chip tour and the List and
-  // Equity hydroclimate tour steps. Merge callback refs so all
-  // registries resolve to the same element without re-wrapping the
-  // chooser.
-  const climateMergedRef = useCallback(
-    (el: HTMLElement | null) => {
-      climateChipsAnchorRef(el)
-      if (exploreMode === "list") listClimateTourRef(el)
-      if (exploreMode === "equity") equityClimateTourRef(el)
-    },
-    [climateChipsAnchorRef, listClimateTourRef, equityClimateTourRef, exploreMode],
-  )
 
   // The list view's "Outcome view" toggle (Average / Bar /
   // Distribution) is intentionally deactivated for the current demo
@@ -108,7 +95,7 @@ export default function ToolToolbar({
         {mapPaired && (
           <>
             <Box
-              ref={showMapTourRef}
+              ref={showMapAnchorRef}
               sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
             >
               <Typography
@@ -136,7 +123,7 @@ export default function ToolToolbar({
             {mapPaired && <VerticalDivider />}
 
             <Box
-              ref={climateMergedRef}
+              ref={climateChipsAnchorRef}
               sx={{
                 display: "flex",
                 alignItems: "center",

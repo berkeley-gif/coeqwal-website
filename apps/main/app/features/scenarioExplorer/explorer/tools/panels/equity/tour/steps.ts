@@ -64,7 +64,7 @@ export const EQUITY_TOUR: TourStep[] = [
   },
   {
     id: "equity.step8.hydroclimate",
-    anchorId: "equity.controls.hydroclimate",
+    anchorId: "radar.climateChips",
     eyebrow: "hydroclimates",
     title: "Scenario outcomes change with climate stress.",
     body: "Click on the hydroclimate icons to see outcomes change with different levels of climate stress.",
@@ -72,7 +72,7 @@ export const EQUITY_TOUR: TourStep[] = [
   },
   {
     id: "equity.step9.showMap",
-    anchorId: "equity.controls.showMap",
+    anchorId: "toolbar.showMap",
     eyebrow: "map view",
     title: "The locations of key outcomes can be viewed on a map.",
     body: "Open the map and click on a key outcome or individual location. Select a single location from the distribution chart or map to determine its identity.",
