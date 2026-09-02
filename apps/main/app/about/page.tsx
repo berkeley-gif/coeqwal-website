@@ -42,49 +42,8 @@ export default function AboutPage() {
     },
   ]
 
-  const logos: GridLogo[] = [
-    {
-      src: "/images/about/logos/agwa.png",
-      alt: "AGWA logo",
-      width: 311,
-    },
-    {
-      src: "/images/about/logos/noaa_fisheries.png",
-      alt: "AGWA logo",
-      width: 201,
-    },
-    {
-      src: "/images/about/logos/ucdavisunofficialseal_blk.png",
-      alt: "UC Davis logo",
-      width: 120,
-    },
+  const logos: GridLogo[] = []
 
-    {
-      src: "/images/about/logos/trout-unlimited.png",
-      alt: "Trout unlimited logo",
-      width: 350,
-    },
-    {
-      src: "/images/about/logos/california-department-of-water-resources.png",
-      alt: "Department of water resources logo",
-      width: 101,
-    },
-    {
-      src: "/images/about/logos/california-water-boards.png",
-      alt: "California Water Boards logo",
-      width: 330,
-    },
-    {
-      src: "/images/about/logos/agwa.png",
-      alt: "AGWA logo",
-      width: 311,
-    },
-    {
-      src: "/images/about/logos/noaa_fisheries.png",
-      alt: "AGWA logo",
-      width: 201,
-    },
-  ]
   useEffect(() => {
     // Guard required: this effect touches browser-only APIs (window.history, window.scrollTo).
     if (typeof window === "undefined") return
@@ -113,7 +72,7 @@ export default function AboutPage() {
         bodyTextBold="COEQWAL – the Collaboratory for Equity in Water Allocation - "
         bodyText="is a collaborative, community-engaged project led by researchers at the University of California aimed at delivering actionable information for water management planning in California. Until now, water planning tools used by the state have been inaccessible to most communities, especially to those historically excluded from decision-making. COEQWAL is working to change that."
         scrollToId="projectGoals"
-        imgSrc="/images/about/collage-intro.png"
+        imgSrc="/images/about/coeqwal-team-collage-hero.jpg"
         imgAlt="A collage showing a person advocating on a podium, birds flying, a river flowing, a farmer holding grapes and a child looking at a salmon inside a fish tank"
         paddingTop={theme.layout.headerHeight}
       />
@@ -123,13 +82,29 @@ export default function AboutPage() {
         title="Project Goals"
         body1="Our overall project goal is to make data used in water planning and decision-making more accessible. Our website invites visitors to learn about California's water system and explore how alternative water management strategies affect outcomes for cities, agriculture, and the environment."
         body2="Tools on the sites are designed to guide visitors to specific scenarios that align with their interests. We aim to help users to better understand the nature of trade-offs among management objectives and to provide data that empower communities to shape our water future."
-        // Link to add below "https://uckeepresearching.org/california-climate-action/"
-        body3="This project is supported by funds from the California Climate Action Seed and Matching Grants of the University of California, Grant Number R02CM7222. This funding is part of the California Climate Action Initiative, a $100 million investment in climate action research and innovation projects in the California State Budget Act of 2022-23."
         imgSrc="/images/about/tiered-image-text-hills.png"
         imgAlt="Photo of hills and farmland in california"
         logoSrc="/images/about/logo-uc-ri.png"
         logoAlt="University of California Research and Innovation"
-        logoText="This project is supported by funds from the California Climate Action Seed and Matching Grants of the University of California, Grant Number R02CM7222. This funding is part of the California Climate Action Initiative, a $100 million investment in climate action research and innovation projects in the California State Budget Act of 2022-23."
+        logoText={
+          <>
+            This project is supported by funds from the{" "}
+            <Typography
+              component="a"
+              href="https://uckeepresearching.org/california-climate-action/"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ color: "inherit", textDecoration: "underline" }}
+            >
+              California Climate Action Seed
+            </Typography>{" "}
+            and Matching Grants of the University of California, Grant Number
+            R02CM7222. This funding is part of the California Climate Action
+            Initiative, a $100 million investment in climate action research and
+            innovation projects in the California State Budget Act of
+            2022-23.&rdquo;
+          </>
+        }
       />
       <ScrollImageTextBlocks
         id="ourApproach"

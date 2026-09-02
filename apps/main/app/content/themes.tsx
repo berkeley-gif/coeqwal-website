@@ -1302,9 +1302,14 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/ag_gw-fig-05.svg",
               alt: "Resilience heatmap across hydroclimate scenarios",
-              title: "Resilience",
-              caption: (
+              captionBefore: (
                 <>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 700, color: "inherit" }}
+                  >
+                    Resilience
+                  </Typography>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     How consistently do management strategies perform under
                     different climate futures?
@@ -1334,6 +1339,10 @@ export const WATER_THEMES: Theme[] = [
                     critical (4.00 - 4.99), with higher numerical values
                     indicating worse performance.
                   </Typography>
+                </>
+              ),
+              caption: (
+                <>
                   <Typography variant="caption" sx={{ color: "inherit" }}>
                     Groundwater pumping limits via reduced crop acreage in the
                     Central Valley lowers agricultural revenues relative to
@@ -1953,6 +1962,11 @@ export const WATER_THEMES: Theme[] = [
                 </>
               ),
             },
+            {
+              type: "image",
+              src: "/images/themes/delta-fig-02.svg",
+              alt: "Delta operations across four quadrants",
+            },
           ],
         },
       },
@@ -2055,7 +2069,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "image",
-              src: "/images/themes/delta-fig-02.svg",
+              src: "/images/themes/delta-fig-03.svg",
               alt: "Trade-offs radar chart",
               captionBefore: (
                 <>
@@ -2142,7 +2156,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "image",
-              src: "/images/themes/delta-fig-03.svg",
+              src: "/images/themes/delta-fig-04.svg",
               alt: "Distribution view map of Delta outcomes",
               captionBefore: (
                 <>
@@ -2186,7 +2200,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "image",
-              src: "/images/themes/delta-fig-04.svg",
+              src: "/images/themes/delta-fig-05.svg",
               alt: "Resilience heatmap across hydroclimate scenarios",
               captionBefore: (
                 <>
