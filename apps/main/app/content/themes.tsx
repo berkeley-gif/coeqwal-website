@@ -178,7 +178,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "This water issue provides a foundation for understanding the strengths, vulnerabilities, trade-offs, and inequities in California's current water system, with a focus on the Central Valley Project and State Water Project, and how those conditions may change under future climates. It also examines different representations of current operations used by state and federal agencies in their models, and how those differences can influence our understanding of impacts on communities, agriculture, and the environment.",
+              text: (<>This water issue provides a foundation for understanding the strengths, vulnerabilities, trade-offs, and inequities in California's current water system, with a focus on the <GlossaryTermLink>Central Valley Project</GlossaryTermLink> and State Water Project, and how those conditions may change under future climates. It also examines different representations of current operations used by state and federal agencies in their models, and how those differences can influence our understanding of impacts on communities, agriculture, and the environment.</>),
             },
           ],
         },
@@ -191,7 +191,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "California's Central Valley water system reflects more than a century of investments in reservoirs, canals, levees, groundwater development, environmental regulations, water rights, contracts, and operating agreements. Together, this infrastructure and these management decisions shape how water is stored, moved, allocated, and managed across the state.",
+              text: "California's <GlossaryTermLink>Central Valley</GlossaryTermLink> water system reflects more than a century of investments in reservoirs, canals, levees, groundwater development, environmental regulations, water rights, contracts, and operating agreements. Together, this infrastructure and these management decisions shape how water is stored, moved, allocated, and managed across the state.",
             },
             {
               type: "paragraph",
@@ -241,7 +241,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: '**Alternative representations of current operations** – Policies governing Central Valley water management are continually evolving, making the precise definition of "current operations" challenging. State and federal agencies may represent current operations differently based on the regulations, land-use conditions, operational assumptions, and other information incorporated into their models. Comparing these representations helps reveal how those choices influence modeled system performance.',
+              text: (<><strong>Alternative representations of current operations</strong> – Policies governing <GlossaryTermLink>Central Valley</GlossaryTermLink> water management are continually evolving, making the precise definition of "current operations" challenging. State and federal agencies may represent current operations differently based on the regulations, land-use conditions, operational assumptions, and other information incorporated into their models. Comparing these representations helps reveal how those choices influence modeled system performance.</>),
             },
             {
               type: "paragraph",
@@ -287,8 +287,8 @@ export const WATER_THEMES: Theme[] = [
               type: "list",
               items: [
                 "Current operations provide a representation of today's water management system. They are not a neutral starting point, but reflect decades of infrastructure investments, policies, regulations, water rights, contracts, and negotiated trade-offs.",
-                ( <><GlossaryTermLink>COEQWAL</GlossaryTermLink> uses <GlossaryTermLink>CalSim3</GlossaryTermLink>, the water <GlossaryTermLink>allocation</GlossaryTermLink> model used by state and federal agencies to plan and manage the Central Valley Project and State Water Project. Using the same model makes this decision-making space more accessible to a broader range of people and perspectives.</>),
-                ( <>Models are a simplification of reality. The CalSim3 water <GlossaryTermLink>allocation</GlossaryTermLink> model used by COEQWAL focuses on operations of the Central Valley Project and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.</>),
+                ( <><GlossaryTermLink>COEQWAL</GlossaryTermLink> uses <GlossaryTermLink>CalSim3</GlossaryTermLink>, the water <GlossaryTermLink>allocation</GlossaryTermLink> model used by state and federal agencies to plan and manage the <GlossaryTermLink>Central Valley Project</GlossaryTermLink> and State Water Project. Using the same model makes this decision-making space more accessible to a broader range of people and perspectives.</>),
+                ( <>Models are a simplification of reality. The <GlossaryTermLink>CalSim3</GlossaryTermLink> water <GlossaryTermLink>allocation</GlossaryTermLink> model used by COEQWAL focuses on operations of the <GlossaryTermLink>Central Valley Project</GlossaryTermLink> and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.</>),
                 'There is no single model representation of "current operations". State and federal agencies use different assumptions about land use, system operations, regulations, and other conditions, and these representations change as policies and operations evolve.',
                 "Differences between hydroclimates under the same management strategy help reveal climate-driven changes, while differences between management strategies under the same hydroclimate help reveal management-driven changes.",
                 "Current operations already contain benefits, trade-offs, and inequities. Comparing other scenarios to current operations therefore shows how management changes redistribute benefits relative to current conditions, not to a neutral starting point.",
@@ -1103,7 +1103,7 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Across the Central Valley, farms often rely on a combination of surface water and groundwater. When surface water is limited, groundwater can sometimes be used to fill this gap. When groundwater is also constrained, however, additional surface water may not be available to make up the difference, leading to agricultural water shortages.",
+                (<>Across the <GlossaryTermLink>Central Valley</GlossaryTermLink>, farms often rely on a combination of surface water and groundwater. When surface water is limited, groundwater can sometimes be used to fill this gap. When groundwater is also constrained, however, additional surface water may not be available to make up the difference, leading to agricultural water shortages.</>),
                 "Agricultural revenues change year-to-year in response to water availability and the crops planted. Annual crops generally yield lower revenues than perennial crops but offer more flexibility to adjust planting from year to year. Higher-value perennial crops (such as nuts and fruit trees) require water every year and long-term investment, making them difficult to adjust in response to short-term shortages.",
                 "Groundwater systems change slowly. Reversing long-term trends in declining groundwater levels may require concerted management over many years or decades. Severe groundwater depletion and land subsidence can also make recovery more difficult.",
                 "Farmers can adapt to reductions in groundwater access by shifting crops, changing water management practices, or retiring farmland, but many of these decisions require long-term planning.",
