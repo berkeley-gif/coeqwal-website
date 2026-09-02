@@ -191,7 +191,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "California's <GlossaryTermLink>Central Valley</GlossaryTermLink> water system reflects more than a century of investments in reservoirs, canals, levees, groundwater development, environmental regulations, water rights, contracts, and operating agreements. Together, this infrastructure and these management decisions shape how water is stored, moved, allocated, and managed across the state.",
+              text: (<>California's <GlossaryTermLink>Central Valley</GlossaryTermLink> water system reflects more than a century of investments in reservoirs, canals, levees, groundwater development, environmental regulations, water rights, contracts, and operating agreements. Together, this infrastructure and these management decisions shape how water is stored, moved, allocated, and managed across the state.</>),
             },
             {
               type: "paragraph",
@@ -241,7 +241,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: (<><strong>Alternative representations of current operations</strong> – Policies governing <GlossaryTermLink>Central Valley</GlossaryTermLink> water management are continually evolving, making the precise definition of "current operations" challenging. State and federal agencies may represent current operations differently based on the regulations, land-use conditions, operational assumptions, and other information incorporated into their models. Comparing these representations helps reveal how those choices influence modeled system performance.</>),
+              text: (<><strong>Alternative representations of current operations</strong> – Policies governing Central Valley water management are continually evolving, making the precise definition of "current operations" challenging. State and federal agencies may represent current operations differently based on the regulations, land-use conditions, operational assumptions, and other information incorporated into their models. Comparing these representations helps reveal how those choices influence modeled system performance.</>),
             },
             {
               type: "paragraph",
@@ -287,8 +287,8 @@ export const WATER_THEMES: Theme[] = [
               type: "list",
               items: [
                 "Current operations provide a representation of today's water management system. They are not a neutral starting point, but reflect decades of infrastructure investments, policies, regulations, water rights, contracts, and negotiated trade-offs.",
-                ( <><GlossaryTermLink>COEQWAL</GlossaryTermLink> uses <GlossaryTermLink>CalSim3</GlossaryTermLink>, the water <GlossaryTermLink>allocation</GlossaryTermLink> model used by state and federal agencies to plan and manage the <GlossaryTermLink>Central Valley Project</GlossaryTermLink> and State Water Project. Using the same model makes this decision-making space more accessible to a broader range of people and perspectives.</>),
-                ( <>Models are a simplification of reality. The <GlossaryTermLink>CalSim3</GlossaryTermLink> water <GlossaryTermLink>allocation</GlossaryTermLink> model used by <GlossaryTermLink>COEQWAL</GlossaryTermLink> focuses on operations of the <GlossaryTermLink>Central Valley Project</GlossaryTermLink> and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.</>),
+                ( <><GlossaryTermLink>COEQWAL</GlossaryTermLink> uses <GlossaryTermLink>CalSim3</GlossaryTermLink>, the water <GlossaryTermLink>allocation</GlossaryTermLink> model used by state and federal agencies to plan and manage the Central Valley Project and State Water Project. Using the same model makes this decision-making space more accessible to a broader range of people and perspectives.</>),
+                ( <>Models are a simplification of reality. The CalSim3 water allocation model used by COEQWAL focuses on operations of the Central Valley Project and State Water Project. Some aspects of California's water management system fall outside its scope or are represented in simplified ways.</>),
                 'There is no single model representation of "current operations". State and federal agencies use different assumptions about land use, system operations, regulations, and other conditions, and these representations change as policies and operations evolve.',
                 "Differences between hydroclimates under the same management strategy help reveal climate-driven changes, while differences between management strategies under the same hydroclimate help reveal management-driven changes.",
                 "Current operations already contain benefits, trade-offs, and inequities. Comparing other scenarios to current operations therefore shows how management changes redistribute benefits relative to current conditions, not to a neutral starting point.",
@@ -307,7 +307,7 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: (
                 <>
-                  This water issue compares alternative representations of current operations and provides a foundation for understanding the broader range of management strategies explored by <GlossaryTermLink>COEQWAL</GlossaryTermLink>. The scenarios vary assumptions about operating rules, agricultural land use, and Temporary Urgency Change Petitions (TUCPs), which can temporarily modify certain water-right requirements during drought or other urgent conditions.
+                  This water issue compares alternative representations of current operations and provides a foundation for understanding the broader range of management strategies explored by COEQWAL. The scenarios vary assumptions about operating rules, agricultural land use, and Temporary Urgency Change Petitions (TUCPs), which can temporarily modify certain water-right requirements during drought or other urgent conditions.
                 </>
               ),
             },
@@ -319,8 +319,8 @@ export const WATER_THEMES: Theme[] = [
               type: "list",
               items: [
                 (<>Current operations, with <GlossaryTermLink term="California Department of Water Resources (DWR)">DWR</GlossaryTermLink> (2023) operating rules, recent (2020) land use, and allowing for TUCP actions"</>),
-                (<>Current operations with historical agricultural land use, with <GlossaryTermLink term="California Department of Water Resources (DWR)">DWR</GlossaryTermLink> (2023) operating rules, historical (2004-2013) land use, and allowing for TUCP actions</>),
-                (<>Current operations without TUCPs, with <GlossaryTermLink term="California Department of Water Resources (DWR)">DWR</GlossaryTermLink> (2023) operating rules and recent (2020) land use, but without TUCP actions</>),
+                (<>Current operations with historical agricultural land use, with DWR (2023) operating rules, historical (2004-2013) land use, and allowing for TUCP actions</>),
+                (<>Current operations without TUCPs, with DWR (2023) operating rules and recent (2020) land use, but without TUCP actions</>),
                 "Current USBR operations, with U.S. Bureau of Reclamation (2024) operating rules, recent (2020) land use, and TUCPs",
                 "Current USBR operations without TUCPs, with U.S. Bureau of Reclamation (2024) operating rules and recent (2020) land use, but without TUCPs",
               ],
@@ -620,7 +620,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "Surface water deliveries are shaped by a complex combination of water rights, contracts, operating rules, infrastructure, and water availability. These arrangements affect how shortages are distributed, meaning that some community water systems may experience larger reductions in project deliveries than others.",
+              text: (<>Surface water <GlossaryTermLink>deliveries</GlossaryTermLink> are shaped by a complex combination of water rights, contracts, operating rules, infrastructure, and water availability. These arrangements affect how shortages are distributed, meaning that some community water systems may experience larger reductions in project deliveries than others.</>),
             },
             {
               type: "paragraph",
@@ -686,15 +686,15 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "**Assessing delivery reliability and the distribution of impacts** – Surface water deliveries are not determined by community need alone. Water rights, contracts, operating rules, infrastructure, and patterns of water availability all influence how project water is distributed and how reductions in deliveries are experienced across communities.",
+              text: (<><strong>Assessing delivery reliability and the distribution of impacts</strong> – Surface water deliveries are not determined by community need alone. Water rights, contracts, operating rules, infrastructure, and patterns of water availability all influence how project water is distributed and how reductions in deliveries are experienced across communities.</>),
             },
             {
               type: "paragraph",
-              text: "To evaluate these deliveries in the context of community needs, COEQWAL compares modeled surface water deliveries with recent potable (drinking water) demands. This provides a measure of how reliably the modeled project supplies can contribute to meeting community water needs under different management and climate conditions.",
+              text: (<>To evaluate these deliveries in the context of community needs, <GlossaryTermLink>COEQWAL</GlossaryTermLink> compares modeled surface water <GlossaryTermLink>deliveries</GlossaryTermLink> with recent potable (drinking water) demands. This provides a measure of how reliably the modeled project supplies can contribute to meeting community water needs under different management and climate conditions.</>),
             },
             {
               type: "paragraph",
-              text: "This analysis also shows how reliability varies among locations, revealing which community water systems consistently receive reliable project deliveries and which remain more vulnerable.",
+              text: (<>This analysis also shows how reliability varies among locations, revealing which community water systems consistently receive reliable project deliveries and which remain more vulnerable.</>),
             },
           ],
         },
@@ -707,7 +707,7 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                (<>Community water systems may rely on surface water, groundwater, stored water, or combinations of different sources. Access to these alternative sources varies considerably among systems. <GlossaryTermLink>COEQWAL</GlossaryTermLink> evaluates surface water deliveries from major water projects to select community water systems, not each community's complete water supply portfolio.</>),
+                (<>Community water systems may rely on surface water, groundwater, stored water, or combinations of different sources. Access to these alternative sources varies considerably among systems. COEQWAL evaluates surface water deliveries from major water projects to select community water systems, not each community's complete water supply portfolio.</>),
                 "Community surface water deliveries are evaluated relative to recent potable water demands, provided by the State Water Resources Control Board's Division of Drinking Water. Project deliveries are influenced by water availability, contracts, water rights, infrastructure, and operating rules and may not fully meet these demands.",
                 "When modeled project deliveries fall below demand, this does not necessarily mean that a community experiences a drinking water shortage. Systems with access to groundwater, local surface water, or other alternatives may be better able to respond to reduced project deliveries than systems with fewer options.",
                 "Community water systems respond to both the severity and frequency of shortages. Water system stress can result from a significant delivery shortfall in a single year or repeated shortfalls over multiple years.",
@@ -990,7 +990,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "California's Sustainable Groundwater Management Act (SGMA) requires groundwater basins to achieve long-term balance between pumping and recharge. Meeting SGMA requirements may involve reducing pumping alongside other changes in agricultural water and land management. Understanding how surface water deliveries, groundwater use, and agricultural production change as groundwater restrictions are put in place is essential for planning for a sustainable agricultural future.",
+              text: (<>California's Sustainable Groundwater Management Act (SGMA) requires groundwater basins to achieve long-term balance between pumping and recharge. Meeting SGMA requirements may involve reducing pumping alongside other changes in agricultural water and land management. Understanding how surface water <GlossaryTermLink>deliveries</GlossaryTermLink>, groundwater use, and agricultural production change as groundwater restrictions are put in place is essential for planning for a sustainable agricultural future.</>),
             },
             {
               type: "image",
