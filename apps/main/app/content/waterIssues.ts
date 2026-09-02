@@ -27,11 +27,6 @@ const WATER_ISSUES_PATH = "/documents/Background"
 
 export const WATER_ISSUE_DOCUMENTS: WaterIssueDocument[] = [
   {
-    id: "strategy-hydroclimate-decomposition-brief",
-    label: "Separating strategy and hydroclimate in COEQWAL results",
-    file: "strategy_hydroclimate_decomposition_brief.html",
-  },
-  {
     id: "understanding-todays-water-system",
     label: "Understanding today's water system",
     file: "understanding-todays-water-system.html",
