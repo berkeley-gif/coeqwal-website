@@ -1,7 +1,13 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Box, CircularProgress, Typography } from "@repo/ui/mui"
+import {
+  Box,
+  CircularProgress,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
@@ -26,11 +32,13 @@ import { WaterDropIcon } from "./components/helpers/WaterIcon"
 import {
   BaseHeader,
   getWaterThemeOptions,
+  getMainHomeUrl,
   goToMainAbout,
   goToMainData,
   goToMainHome,
   goToMainLearn,
   goToMainExplore,
+  MobileNotSupported,
 } from "@repo/ui"
 //import { HeaderStory } from "@repo/motion/components"
 import {
@@ -79,6 +87,8 @@ export default function StoryContainer() {
   const isMapReady = useMapReady()
   const tooltipContent = useTooltip()
   const waterThemesOptions = useMemo(() => getWaterThemeOptions(), [])
+  const theme = useTheme()
+  const isSmallDevice = useMediaQuery(theme.breakpoints.down("lg"))
 
   useEffect(() => {
     appActions.fetchStoryline()
@@ -89,6 +99,15 @@ export default function StoryContainer() {
   }, [tooltipContent])
 
   const closeTooltip = () => appActions.setTooltipContent(null)
+
+  if (isSmallDevice) {
+    return (
+      <MobileNotSupported
+        message="This section of COEQWAL is best experienced on a tablet, desktop, or laptop. Mobile support for our water stories is coming soon."
+        buttonHref={getMainHomeUrl()}
+      />
+    )
+  }
 
   return (
     <>

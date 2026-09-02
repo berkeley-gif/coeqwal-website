@@ -1,6 +1,6 @@
 "use client"
 
-import { Box } from "@repo/ui/mui"
+import { Box, useMediaQuery, useTheme } from "@repo/ui/mui"
 import "./main.css"
 import { Scrollama, Step } from "react-scrollama"
 
@@ -17,11 +17,13 @@ import Conclusion from "./components/10Conclusion"
 import {
   BaseHeader,
   getWaterThemeOptions,
+  getMainHomeUrl,
   goToMainAbout,
   goToMainData,
   goToMainHome,
   goToMainLearn,
   goToMainExplore,
+  MobileNotSupported,
 } from "@repo/ui"
 import {
   SCROLLAMA_CONFIG,
@@ -33,6 +35,8 @@ import { useActiveSectionStore, type SectionId } from "./store"
 export default function StoryContainer() {
   const waterThemesOptions = useMemo(() => getWaterThemeOptions(), [])
   const activeSection = useActiveSectionStore()
+  const theme = useTheme()
+  const isSmallDevice = useMediaQuery(theme.breakpoints.down("lg"))
   const showDynamicMap =
     activeSection === "Background" ||
     activeSection === "HistoricalContext" ||
@@ -41,6 +45,15 @@ export default function StoryContainer() {
     activeSection === "ClimateResilience" ||
     activeSection === "Transparency" ||
     activeSection === "Conclusion"
+
+  if (isSmallDevice) {
+    return (
+      <MobileNotSupported
+        message="This section of COEQWAL is best experienced on a tablet, desktop, or laptop. Mobile support for our water stories is coming soon."
+        buttonHref={getMainHomeUrl()}
+      />
+    )
+  }
 
   return (
     <>

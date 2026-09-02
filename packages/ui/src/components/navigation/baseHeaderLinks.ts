@@ -122,7 +122,7 @@ export function getWaterThemeOptions({
 }
 
 export function goToMainHome() {
-  goToUrl(buildMainUrl("/"))
+  goToUrl(getMainHomeUrl())
 }
 
 export function goToMainAbout() {
@@ -135,6 +135,10 @@ export function goToMainData() {
 
 export function getExploreUrl(): string {
   return buildMainUrl("/explore")
+}
+
+export function getMainHomeUrl(): string {
+  return buildMainUrl("/")
 }
 
 export function getWaterStoryUrl(key: WaterStoryKey): string {
