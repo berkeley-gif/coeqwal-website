@@ -52,6 +52,7 @@ export default function ToolToolbar({
   // step through it, so a single id is fine.
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
   const listClimateTourRef = useTourAnchor("list.toolbar.climate")
+  const equityClimateTourRef = useTourAnchor("equity.controls.hydroclimate")
   // High-level orientation anchor for the list tour: the whole strip
   // of view controls (hydroclimate, map, etc.) on the right side of
   // the toolbar. Registered only in list mode so it does not collide
@@ -61,15 +62,18 @@ export default function ToolToolbar({
   // rendered as a plain row (not the list grid), so we anchor the
   // radar orientation popper on that row directly.
   const radarViewAreaTourRef = useTourAnchor("radar.viewArea")
-  // One DOM node serves both the Radar climate-chip tour and the new
-  // List hydroclimate tour step. Merge callback refs so both registries
-  // resolve to the same element without re-wrapping the chooser.
+  const showMapTourRef = useTourAnchor("equity.controls.showMap")
+  // One DOM node serves the Radar climate-chip tour and the List and
+  // Equity hydroclimate tour steps. Merge callback refs so all
+  // registries resolve to the same element without re-wrapping the
+  // chooser.
   const climateMergedRef = useCallback(
     (el: HTMLElement | null) => {
       climateChipsAnchorRef(el)
       if (exploreMode === "list") listClimateTourRef(el)
+      if (exploreMode === "equity") equityClimateTourRef(el)
     },
-    [climateChipsAnchorRef, listClimateTourRef, exploreMode],
+    [climateChipsAnchorRef, listClimateTourRef, equityClimateTourRef, exploreMode],
   )
 
   // The list view's "Outcome view" toggle (Average / Bar /
@@ -103,7 +107,10 @@ export default function ToolToolbar({
 
         {mapPaired && (
           <>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Box
+              ref={showMapTourRef}
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
               <Typography
                 variant="dashboard"
                 sx={{

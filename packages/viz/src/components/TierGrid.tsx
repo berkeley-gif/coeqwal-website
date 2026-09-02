@@ -76,6 +76,13 @@ export interface TierGridProps {
       tierValue?: number
     } | null,
   ) => void
+  /** Tour-only: category to draw an invisible full-height rect around, so a
+   * tour step can anchor a highlight ring to one outcome column. Columns are
+   * drawn imperatively with D3, so there is no React element to ref otherwise. */
+  tourHighlightCategory?: string
+  /** Tour-only: fired with the highlight rect's node (or null) on every
+   * redraw, so the caller can register/clear it as a tour anchor. */
+  tourHighlightCategoryRef?: (el: SVGRectElement | null) => void
 }
 
 // ============================================================================
@@ -481,7 +488,8 @@ const drawTierGrid = (
     event: MouseEvent,
   ) => void,
   showMapView: boolean = false,
-  yAxisMode: "discrete" | "continuous" = "discrete",
+  tourHighlightCategory?: string,
+  tourHighlightCategoryRef?: (el: SVGRectElement | null) => void,
 ) => {
   const gridWidth = width - MARGIN.left - MARGIN.right
   const gridHeight = height - MARGIN.top - MARGIN.bottom
@@ -565,41 +573,44 @@ const drawTierGrid = (
     .attr("stroke-width", 1)
     .style("pointer-events", "none")
 
-  // Tier labels on the left
-  if (yAxisMode === "continuous") {
-    // In continuous mode, show numeric labels at major tick marks (1.0, 2.0, 3.0, 4.0, 5.0)
-    // Use same positioning as dots: levelIndex * cellHeight where levelIndex = (value - 1.0) / 0.1
-    const cellHeight = gridHeight / 40
-    const majorTicks = [1.0, 2.0, 3.0, 4.0, 5.0]
-    majorTicks.forEach((tickValue) => {
-      const levelIndex = (tickValue - 1.0) / 0.1
-      const yPosition = levelIndex * cellHeight
+  // Tier labels on the left. Continuous mode still uses the same categorical
+  // labels (Optimal/Acceptable/At-Risk/Critical), centered over the same
+  // quadrant each tier occupies within the 40-row continuous grid.
+  tiers.forEach((tier, i) => {
+    gridLayer
+      .append("text")
+      .attr("x", MARGIN.left - 10)
+      .attr("y", MARGIN.top + i * tierHeight + tierHeight / 2)
+      .attr("text-anchor", "end")
+      .attr("dominant-baseline", "middle")
+      .style("font-size", "11px")
+      .style("fill", "#666")
+      .style("pointer-events", "none")
+      .text(getTierAxisLabel(tier))
+  })
 
-      gridLayer
-        .append("text")
-        .attr("x", MARGIN.left - 10)
-        .attr("y", MARGIN.top + yPosition)
-        .attr("text-anchor", "end")
-        .attr("dominant-baseline", "middle")
-        .style("font-size", "11px")
-        .style("fill", "#666")
+  // Tour-only: invisible full-height rect over one category's column,
+  // reported back so the caller can register it as a tour anchor. The
+  // grid layer is rebuilt on every draw, so the ref is refreshed here too.
+  if (tourHighlightCategoryRef) {
+    const layout = categoryLayouts.find(
+      (l) => l.category === tourHighlightCategory,
+    )
+    if (layout) {
+      const node = gridLayer
+        .append("rect")
+        .attr("class", "tour-highlight-category")
+        .attr("x", MARGIN.left + layout.startX)
+        .attr("y", MARGIN.top)
+        .attr("width", layout.width)
+        .attr("height", gridHeight)
+        .attr("fill", "transparent")
         .style("pointer-events", "none")
-        .text(tickValue === 5.0 ? "4.99" : tickValue.toFixed(1))
-    })
-  } else {
-    // Discrete mode: show tier labels
-    tiers.forEach((tier, i) => {
-      gridLayer
-        .append("text")
-        .attr("x", MARGIN.left - 10)
-        .attr("y", MARGIN.top + i * tierHeight + tierHeight / 2)
-        .attr("text-anchor", "end")
-        .attr("dominant-baseline", "middle")
-        .style("font-size", "11px")
-        .style("fill", "#666")
-        .style("pointer-events", "none")
-        .text(getTierAxisLabel(tier))
-    })
+        .node()
+      tourHighlightCategoryRef(node)
+    } else {
+      tourHighlightCategoryRef(null)
+    }
   }
 }
 
@@ -856,6 +867,8 @@ export default function TierGrid({
   onReady,
   focusScenarioId,
   onChartHover,
+  tourHighlightCategory,
+  tourHighlightCategoryRef,
 }: TierGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -954,7 +967,8 @@ export default function TierGrid({
         tiers,
         onTierCategoryClick,
         showMapView,
-        yAxisMode,
+        tourHighlightCategory,
+        tourHighlightCategoryRef,
       )
       drawMeanLines(
         svg,
@@ -975,6 +989,8 @@ export default function TierGrid({
       showMapView,
       yAxisMode,
       showComparison,
+      tourHighlightCategory,
+      tourHighlightCategoryRef,
     ],
   )
 
