@@ -11,7 +11,7 @@ test("home page renders without unexpected console errors", async ({
   // The hero heading is home-specific and confirms the page rendered, not
   // just an empty shell.
   await expect(
-    page.getByRole("heading", { name: /California.s water/ }),
+    page.getByRole("heading", { name: /California.s water/i }),
   ).toBeVisible()
   expect(errors).toEqual([])
 })

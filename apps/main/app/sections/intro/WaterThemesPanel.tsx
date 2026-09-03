@@ -91,7 +91,7 @@ function WaterThemesPanelContent({
   const imageOpacity = useScrollValue(
     progress,
     [0, 1],
-    prefersReducedMotion ? [1, 1] : [0.15, 1],
+    prefersReducedMotion ? [1, 1] : [0.35, 1],
   )
 
   const radius = resolveRadius(borderRadius, theme.borderRadius)
@@ -324,7 +324,7 @@ function WaterThemesPanelContent({
         <ScrollToButton
           color={`${theme.palette.brand.panelLight}`}
           size={52}
-          scrollToId="water-themes"
+          scrollToId="footer"
           // Same offset math as VideoHero's scroll button: land
           // the target panel's rounded card flush below the
           // header by subtracting the header height and adding
