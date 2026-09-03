@@ -931,8 +931,8 @@ export default function DataPage() {
                       mb: (theme) => theme.space.section.sm,
                     }}
                   >
-                    Documentation of COEQWAL&apos;s water management strategies
-                    and CalSim3 model specifications.
+                    Documentation of COEQWAL&apos;s scenario library, water
+                    management strategies and hydroclimates.
                   </Typography>
 
                   {/* Standalone briefs, shown as fixed buttons above the
