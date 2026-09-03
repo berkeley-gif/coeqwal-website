@@ -43,10 +43,6 @@ import {
   useTransparencyProgress,
 } from "../../../store"
 
-const CLIMATE_USER_GROUP_ANNOTATIONS = BACKGROUND_CIRCLE_ANNOTATIONS.filter(
-  (annotation) => annotation.id !== "small-community",
-)
-
 export default function LayerOrchestrator() {
   const riverProgress = useRiversProgress()
   const showRivers = useShowRivers()
@@ -128,11 +124,13 @@ export default function LayerOrchestrator() {
   // The overlay is an SVG diagram, not a Mapbox layer, so its anti-aliasing
   // never matches the WebGL river/canal layers pixel-for-pixel — cross-fade
   // the two over a short window instead of cutting between them instantly.
-  const metroOverlayEntryFade = showConclusionMetroMap
-    ? 1
-    : activeSection === "Transparency"
-      ? Math.min(1, transparencyProgress / 0.03)
-      : 0
+  const showResolutionMetroMap = activeSection === "Resolution"
+  const metroOverlayEntryFade =
+    showConclusionMetroMap || showResolutionMetroMap
+      ? 1
+      : activeSection === "Transparency"
+        ? Math.min(1, transparencyProgress / 0.03)
+        : 0
   const showTransparencyRiverCrossfade =
     activeSection === "Transparency" && metroOverlayEntryFade < 1
   const showPersistentRiverNetwork =
@@ -160,13 +158,19 @@ export default function LayerOrchestrator() {
       ? 1 - goldRushAllotmentFade
       : 0
   const showMetroRiverOverlay =
-    activeSection === "Transparency" || showConclusionMetroMap
-  const metroMorphProgress = showConclusionMetroMap
-    ? 1
-    : activeSection === "Transparency"
-      ? Math.min(1, Math.max(0, (transparencyProgress - 0.72) / 0.08))
-      : 0
+    activeSection === "Transparency" ||
+    showResolutionMetroMap ||
+    showConclusionMetroMap
+  const metroMorphProgress =
+    showConclusionMetroMap || showResolutionMetroMap
+      ? 1
+      : activeSection === "Transparency"
+        ? Math.min(1, Math.max(0, (transparencyProgress - 0.5) / 0.2))
+        : 0
   const showClimateUserGroups = activeSection === "ClimateResilience"
+  const showTransparencyUserGroups = activeSection === "Transparency"
+  const showPersistentUserGroups =
+    showClimateUserGroups || showTransparencyUserGroups
   const userGroupIconScaleOverrides = {
     "central-valley-agriculture": 0.8,
     "bay-area-city": 0.8,
@@ -179,12 +183,35 @@ export default function LayerOrchestrator() {
     1,
     Math.max(0, (climateResilienceProgress - 0.46) / 0.08),
   )
+  const climateEcosystemReveal = Math.min(
+    1,
+    Math.max(0, climateResilienceProgress / 0.06),
+  )
+  const climateCommunityReveal = Math.min(
+    1,
+    Math.max(0, (climateResilienceProgress - 0.12) / 0.06),
+  )
+  const climateAgricultureReveal = Math.min(
+    1,
+    Math.max(0, (climateResilienceProgress - 0.24) / 0.06),
+  )
   const climateIconOpacityOverrides = {
+    "central-valley-agriculture": climateAgricultureReveal,
+    "bay-area-city": climateCommunityReveal,
+    "los-angeles-city": climateCommunityReveal,
+    "small-community":
+      climateCommunityReveal * (1 - climateIconFadeProgress * 0.25),
+    delta: climateEcosystemReveal * (1 - climateIconFadeProgress * 0.5),
+    "shasta-salmon":
+      climateEcosystemReveal * (1 - climateIconFadeProgress * 0.5),
+  }
+  const transparencyIconOpacityOverrides = {
     "central-valley-agriculture": 1,
     "bay-area-city": 1,
     "los-angeles-city": 1,
-    delta: 1 - climateIconFadeProgress * 0.5,
-    "shasta-salmon": 1 - climateIconFadeProgress * 0.5,
+    "small-community": 0.75,
+    delta: 0.5,
+    "shasta-salmon": 0.5,
   }
   const showDeltaWaterwayTransition =
     activeSection === "Infrastructure" &&
@@ -262,32 +289,30 @@ export default function LayerOrchestrator() {
           // the map's own fade) so they aren't drawn twice.
           showConclusionMetroMap
             ? []
-            : showClimateUserGroups
-              ? CLIMATE_USER_GROUP_ANNOTATIONS
+            : showPersistentUserGroups
+              ? BACKGROUND_CIRCLE_ANNOTATIONS
               : circleAnnotations
         }
         progress={
-          showClimateUserGroups || activeSection === "Background"
+          showPersistentUserGroups || activeSection === "Background"
             ? 1
             : backgroundProgress
         }
         showStrokes={showMapIconStrokes}
         scaleOverrides={
-          showClimateUserGroups || activeSection === "Background"
+          showPersistentUserGroups || activeSection === "Background"
             ? userGroupIconScaleOverrides
             : undefined
         }
-        showLabels={
-          activeSection !== "Background" &&
-          !showClimateUserGroups &&
-          activeSection !== "Transparency"
-        }
+        showLabels={activeSection !== "Background" && !showPersistentUserGroups}
         opacityOverrides={
           showClimateUserGroups
             ? climateIconOpacityOverrides
-            : activeSection === "Background"
-              ? backgroundIconOpacityOverrides
-              : undefined
+            : showTransparencyUserGroups
+              ? transparencyIconOpacityOverrides
+              : activeSection === "Background"
+                ? backgroundIconOpacityOverrides
+                : undefined
         }
         iconOverrides={{
           "central-valley-agriculture": centralValleyIcon,

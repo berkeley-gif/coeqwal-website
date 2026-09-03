@@ -1,12 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import {
-  Box,
-  CircularProgress,
-  useMediaQuery,
-  useTheme,
-} from "@repo/ui/mui"
+import { Box, CircularProgress, useMediaQuery, useTheme } from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"

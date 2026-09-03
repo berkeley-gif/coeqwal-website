@@ -13,6 +13,7 @@ import {
   DELTA_INFRASTRUCTURE_VIEW,
   INDIGENOUS_RIVER_NETWORK_VIEW,
   SHASTA_MCCLOUD_VIEW,
+  TRANSPARENCY_METRO_VIEW,
 } from "./components/map/config/cameraPresets"
 import { themeValues } from "@repo/ui/themes/theme"
 
@@ -70,25 +71,19 @@ export const GOLD_RUSH_DITCHES_PROGRESS = 0.48
 export const GOLD_RUSH_STATEWIDE_PROGRESS = 0.7
 export const GOLD_RUSH_CURRENT_ALLOTMENTS_PROGRESS = 0.82
 export const INFRASTRUCTURE_DELTA_PROGRESS = 0.5
-// Conclusion staging, shared by ConclusionCircleMorphOverlay (the map-side
-// circle morph), MapInstance (fades the actual map canvas out — unrelated to
-// the overlay, which lives outside that fade and keeps animating through
-// it), and 10Conclusion.tsx (the FloatingBubbles reveal + photo/icon fade),
-// so everything stays on one clock:
+// Conclusion map staging, shared by ConclusionCircleMorphOverlay and
+// MapInstance. FloatingBubbles has its own explicit timing in 10Conclusion.
 //   0.08 -> 0.32  the 5 circles recolor white -> tier color
-//   0.34 -> 0.48  circles morph from their map position into the packed
-//                 FloatingBubbles cluster's seed position
-//   0.48 -> 0.64  the map canvas fades away (MapInstance) while the seed's
-//                 sibling bubbles bloom out around it (still map-independent)
-//   0.70 -> 0.82  the settled icon cluster fades out as FloatingBubbles
-//                 fades in at the same positions, then icons -> photos
+//   0.34 -> 0.48  circles move straight down and leave the viewport
+//   0.48 -> 0.54  the map canvas quickly fades as FloatingBubbles appears
 export const CONCLUSION_ICON_COLOR_START_PROGRESS = 0.08
 export const CONCLUSION_ICON_COLOR_END_PROGRESS = 0.32
 export const CONCLUSION_MORPH_START_PROGRESS = 0.34
 export const CONCLUSION_MORPH_LANDED_PROGRESS = 0.48
-export const CONCLUSION_MAP_FADE_END_PROGRESS = 0.64
+export const CONCLUSION_MAP_FADE_END_PROGRESS = 0.54
 export const CONCLUSION_HANDOFF_START_PROGRESS = 0.7
 export const CONCLUSION_HANDOFF_END_PROGRESS = 0.82
+export const CONCLUSION_PHOTO_REVEAL_END_PROGRESS = 0.85
 
 const SECTION_ORDER: Record<SectionId, number> = {
   Opener: 0,
@@ -226,6 +221,7 @@ export const useConclusionTierIconColors = () => {
     ),
     "bay-area-city": tierIconColor(themeValues.palette.tiers.tier1),
     "los-angeles-city": tierIconColor(themeValues.palette.tiers.tier1),
+    "small-community": tierIconColor(themeValues.palette.tiers.tier1),
     delta: tierIconColor(themeValues.palette.tiers.tier3),
     "shasta-salmon": tierIconColor(themeValues.palette.tiers.tier4),
   }
@@ -299,6 +295,13 @@ export const useCameraView = () =>
       state.infrastructureProgress >= INFRASTRUCTURE_DELTA_PROGRESS
     ) {
       return DELTA_INFRASTRUCTURE_VIEW
+    }
+
+    if (
+      state.activeSection === "ClimateResilience" ||
+      state.activeSection === "Transparency"
+    ) {
+      return TRANSPARENCY_METRO_VIEW
     }
 
     return getSectionLayerConfig(state.activeSection).camera

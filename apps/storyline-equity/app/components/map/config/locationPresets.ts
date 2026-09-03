@@ -17,8 +17,8 @@ export const BACKGROUND_RIVER_LABELS: LocationLabel[] = [
   {
     id: "sacramento-river",
     name: "Sacramento River",
-    latitude: 39.6,
-    longitude: -121.78,
+    latitude: 40.4,
+    longitude: -121.58,
   },
   {
     id: "san-joaquin-river",
@@ -46,16 +46,16 @@ export const SHASTA_MCCLOUD_RIVER_LABELS: LocationLabel[] = [
 export const YUBA_RIVER_LABEL: LocationLabel = {
   id: "yuba-river",
   name: "Yuba River",
-  latitude: 39.08,
-  longitude: -121.5,
+  latitude: 39.1,
+  longitude: -121.25,
 }
 
 export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   {
     id: "central-valley-agriculture",
     name: "",
-    latitude: 36.72,
-    longitude: -119.58,
+    latitude: 36.797348,
+    longitude: -120.150571,
     color: "#f2f0ef",
     revealAt: 0.2,
     iconSrc: "/map-icons/agriculture.svg",
@@ -64,8 +64,10 @@ export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   {
     id: "bay-area-city",
     name: "Bay Area",
-    latitude: 37.78,
-    longitude: -123.2,
+    // latitude: 37.675499398535585,
+    // longitude: -122.76373765157861,
+    latitude: 37.660033,
+    longitude: -122.73767,
     color: "#f2f0ef",
     revealAt: 0.32,
     iconSrc: "/map-icons/urban.svg",
@@ -75,8 +77,8 @@ export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   {
     id: "los-angeles-city",
     name: "Los Angeles",
-    latitude: 33.3,
-    longitude: -119.2,
+    latitude: 35.381637,
+    longitude: -119.167607,
     color: "#f2f0ef",
     revealAt: 0.32,
     iconSrc: "/map-icons/urban.svg",
@@ -85,8 +87,10 @@ export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   {
     id: "small-community",
     name: "",
-    latitude: 38.5,
-    longitude: -119.8,
+    // latitude: 38.984513458619375,
+    // longitude: -120.89464564260899,
+    latitude: 39.279324,
+    longitude: -120.73118,
     color: "#f2f0ef",
     revealAt: 0.32,
     iconSrc: "/map-icons/urban_small.svg",
@@ -95,8 +99,10 @@ export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   {
     id: "delta",
     name: "Delta",
-    latitude: 38.04,
-    longitude: -121.82,
+    // latitude: 38.112284901423045,
+    // longitude: -122.10922866384978,
+    latitude: 38.185267,
+    longitude: -122.204065,
     color: "#f2f0ef",
     revealAt: 0.46,
     iconSrc: "/map-icons/wetland.svg",
@@ -105,8 +111,8 @@ export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   {
     id: "shasta-salmon",
     name: "Chinook Salmon",
-    latitude: 40.72,
-    longitude: -122.42,
+    latitude: 40.74781,
+    longitude: -122.381819,
     color: "#f2f0ef",
     revealAt: 0.46,
     iconSrc: "/map-icons/salmon.svg",

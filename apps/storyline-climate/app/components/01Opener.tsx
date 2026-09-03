@@ -102,6 +102,16 @@ function Opener() {
             {
               top: "52%",
             },
+          "@media (min-width: 900px) and (max-width: 1535.95px)": {
+            "& > .MuiTypography-h1": {
+              fontSize: "clamp(3.25rem, 5.4vw, 4.75rem)",
+              lineHeight: 0.98,
+            },
+            "& > .MuiTypography-h3": {
+              fontSize: "clamp(2rem, 3.3vw, 3rem)",
+              lineHeight: 1.05,
+            },
+          },
         }}
       >
         <Paragraph

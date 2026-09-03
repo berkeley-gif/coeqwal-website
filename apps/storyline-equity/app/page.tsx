@@ -72,7 +72,6 @@ export default function StoryContainer() {
       />
       <DynamicMap isVisible={showDynamicMap} />
       <ContentContainer />
-      <SectionIndicator />
     </>
   )
 }
@@ -154,56 +153,6 @@ function ContentContainer() {
       </Scrollama>
 
       {/* minimal outro intentionally left blank */}
-    </Box>
-  )
-}
-
-function SectionIndicator() {
-  const activeSection = useActiveSectionStore()
-
-  return (
-    <Box
-      aria-live="polite"
-      sx={{
-        position: "fixed",
-        right: "1.5rem",
-        bottom: "1.5rem",
-        zIndex: 3,
-        pointerEvents: "none",
-        paddingX: 2,
-        paddingY: 1,
-        borderRadius: 999,
-        backgroundColor: "rgba(8, 16, 24, 0.72)",
-        backdropFilter: "blur(12px)",
-        border: "1px solid rgba(255, 255, 255, 0.18)",
-        color: "common.white",
-        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.24)",
-        maxWidth: "calc(100vw - 3rem)",
-      }}
-    >
-      <Box
-        component="span"
-        sx={{
-          display: "block",
-          fontSize: "0.75rem",
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          opacity: 0.75,
-        }}
-      >
-        Section
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          display: "block",
-          fontSize: "1rem",
-          fontWeight: 700,
-          lineHeight: 1.2,
-        }}
-      >
-        {activeSection}
-      </Box>
     </Box>
   )
 }

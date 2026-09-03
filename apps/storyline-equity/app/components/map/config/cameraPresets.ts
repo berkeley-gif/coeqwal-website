@@ -80,3 +80,22 @@ export const DELTA_INFRASTRUCTURE_VIEW: CameraView = {
   bearing: -8,
   pitch: 42,
 }
+
+export const TRANSPARENCY_METRO_VIEW: CameraView = {
+  longitude: -120.58,
+  latitude: 38.52,
+  zoom: 6.4,
+  maxZoom: 6.4,
+  bearing: 0,
+  pitch: 0,
+  bounds: [
+    [-122.44, 35.08],
+    [-118.72, 41.66],
+  ],
+  boundsPadding: {
+    top: 24,
+    right: 24,
+    bottom: 24,
+    left: 24,
+  },
+}

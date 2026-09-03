@@ -7,7 +7,7 @@ import {
 } from "@repo/scrollytelling"
 import { motion, useTransform, type MotionValue } from "@repo/motion"
 import { Paragraph, SectionTitle } from "@repo/ui"
-import { Box, Stack, Typography } from "@repo/ui/mui"
+import { Box, Stack, Typography, useTheme } from "@repo/ui/mui"
 import { themeValues } from "@repo/ui/themes/theme"
 import { hierarchy, scaleBand, scaleLinear, treemap } from "d3"
 import { useMemo } from "react"
@@ -79,12 +79,13 @@ const visualizationCopy = {
   scenarioComparison: {
     title: "Comparing performance across management strategies",
     caption:
-      "Current operations · Prioritize human health delivery levels to community water systems · Groundwater pumping limits in the Central Valley",
+      "Scenario 'Prioritize human health delivery levels to community water systems' compared to 'Current Operations'",
   },
 } as const
 const LOAD_RESOLUTION_VISUALS = true
 const narrativeMarkSx = {
   strong: { fontWeight: 700 },
+  freshwater: { color: FreshWaterColor, fontWeight: 700 },
   optimalName: { color: optimalTierColor, fontWeight: 700 },
   optimalDefinition: { color: optimalTierColor },
   atRiskName: { color: atRiskTierColor, fontWeight: 700 },
@@ -107,10 +108,20 @@ const storyFrames = [
     paragraphs: [
       [
         {
-          text: "COEQWAL cannot undo historical inequities. It can, however, make their impacts visible and support more equitable decisions moving forward.",
+          text: "COEQWAL cannot undo historical inequities.",
         },
         {
-          text: "Trade-offs are unavoidable in water management. But their impacts do not have to fall hardest on the same groups.",
+          segments: [
+            { text: "It can, however, " },
+            { text: "make their impacts visible ", mark: "strong" },
+            { text: "and support more equitable decisions moving forward." },
+          ],
+        },
+        {
+          text: "Trade-offs are unavoidable in water management.",
+        },
+        {
+          text: "But their impacts do not have to fall hardest on the same groups.",
         },
       ],
       [
@@ -118,7 +129,18 @@ const storyFrames = [
           text: "COEQWAL compares different water management strategies, called scenarios, to show how different choices affect communities, water users, and ecosystems.",
         },
         {
-          text: "It tests these strategies across a range of hydroclimates, revealing who benefits and who bears the burden of more intense droughts, floods, and snowpack loss.",
+          segments: [
+            {
+              text: "It tests these strategies across a range of hydroclimates, revealing ",
+            },
+            { text: "who benefits and who bears the burden ", mark: "strong" },
+            { text: "of more intense droughts, floods, and snowpack loss." },
+          ],
+        },
+      ],
+      [
+        {
+          text: "We will now focus on one community to show how COEQWAL works.",
         },
       ],
     ],
@@ -131,8 +153,8 @@ const storyFrames = [
         },
         {
           segments: [
-            { text: "For each year, COEQWAL compares annual surface water " },
-            { text: "delivery", mark: "strong" },
+            { text: "For each year, COEQWAL compares annual " },
+            { text: "surface water delivery", mark: "freshwater" },
             { text: " to drinking-water " },
             { text: "demand", mark: "strong" },
             { text: "." },
@@ -208,7 +230,12 @@ const storyFrames = [
           segments: [
             { text: "The community does meet conditions for " },
             { text: "At-risk", mark: "atRiskName" },
-            { text: " water deliveries. Its " },
+            { text: " water deliveries." },
+          ],
+        },
+        {
+          segments: [
+            { text: "Its " },
             {
               text: "surface water deliveries fall short of demand in a significant number of simulated years",
               mark: "atRiskDefinition",
@@ -247,7 +274,10 @@ const storyFrames = [
           text: "Communities and ecosystems experience water decisions in different ways.",
         },
         {
-          text: "Outcomes are measured differently. Agricultural production is not the same as salmon abundance or human health.",
+          text: "Outcomes are measured differently.",
+        },
+        {
+          text: "Agricultural production is not the same as salmon abundance or human health.",
         },
         {
           text: "That makes them difficult to compare directly.",
@@ -524,6 +554,7 @@ export default function Resolution() {
 }
 
 function UnitVisualization() {
+  const theme = useTheme()
   const progress = useScrollProgress()
   const urbanIcon = useUrbanIcon()
   const cwsTierLocations = useMemo(() => cwsTiers.locations, [])
@@ -951,7 +982,12 @@ function UnitVisualization() {
         minHeight: 0,
         boxSizing: "border-box",
         display: "grid",
-        gridTemplateRows: "15dvh 85dvh",
+        gridTemplateRows: {
+          xs: "30dvh 70dvh",
+          md: "30dvh 70dvh",
+          lg: "24dvh 76dvh",
+          xl: "15dvh 85dvh",
+        },
         overflow: "hidden",
         position: "relative",
       }}
@@ -1024,6 +1060,7 @@ function UnitVisualization() {
           pb: { xs: 2, md: 2.5, lg: 4, xl: 5 },
           boxSizing: "border-box",
           visibility: LOAD_RESOLUTION_VISUALS ? "visible" : "hidden",
+          fontFamily: theme.typography.caption.fontFamily,
         }}
       >
         <title id="unit-vis-title">
@@ -1100,7 +1137,7 @@ function UnitVisualization() {
                       y={119 + (tierLevel - 1) * 130}
                       textAnchor="end"
                       fill={tierColors[tierLevel]}
-                      fontSize="14"
+                      fontSize={theme.typography.caption.fontSize}
                       fontWeight="700"
                     >
                       {tierNames[tierLevel]}
@@ -1174,7 +1211,7 @@ function UnitVisualization() {
                             ? tierColors[Math.min(tick, 4)]
                             : "rgba(252, 251, 250, 0.78)"
                         }
-                        fontSize={isTierBoundary ? "13" : "11"}
+                        fontSize={theme.typography.caption.fontSize}
                         fontWeight={isTierBoundary ? "700" : "400"}
                       >
                         {isTierBoundary ? tierNames[tick] : tick.toFixed(1)}
@@ -1187,7 +1224,7 @@ function UnitVisualization() {
                   y="365"
                   textAnchor="middle"
                   fill="rgba(252, 251, 250, 0.78)"
-                  fontSize="12"
+                  fontSize={theme.typography.caption.fontSize}
                   transform="rotate(-90 24 365)"
                 >
                   Continuous performance
@@ -1198,7 +1235,7 @@ function UnitVisualization() {
                 y="730"
                 textAnchor="middle"
                 fill="#fcfbfa"
-                fontSize="14"
+                fontSize={theme.typography.caption.fontSize}
                 fontWeight="700"
               >
                 Community water systems
@@ -1231,7 +1268,7 @@ function UnitVisualization() {
                 y="730"
                 textAnchor="middle"
                 fill="#fcfbfa"
-                fontSize="14"
+                fontSize={theme.typography.caption.fontSize}
                 fontWeight="700"
               >
                 Agriculture
@@ -1309,7 +1346,7 @@ function UnitVisualization() {
                     y={tickY + 5}
                     textAnchor="end"
                     fill="#fcfbfa"
-                    fontSize="12"
+                    fontSize={theme.typography.caption.fontSize}
                     style={{ opacity: tafLabelOpacity }}
                   >
                     {tick}
@@ -1319,7 +1356,7 @@ function UnitVisualization() {
                     y={tickY + 5}
                     textAnchor="end"
                     fill="#fcfbfa"
-                    fontSize="12"
+                    fontSize={theme.typography.caption.fontSize}
                     style={{ opacity: percentLabelOpacity }}
                   >
                     {tick * 10}%
@@ -1362,7 +1399,7 @@ function UnitVisualization() {
             y={demandLineLabelY}
             textAnchor="end"
             fill="#fcfbfa"
-            fontSize="12"
+            fontSize={theme.typography.caption.fontSize}
             fontWeight="700"
             style={{ opacity: tafDemandReferenceOpacity }}
           >
@@ -1373,7 +1410,7 @@ function UnitVisualization() {
             y={demandLineLabelY}
             textAnchor="end"
             fill="#fcfbfa"
-            fontSize="12"
+            fontSize={theme.typography.caption.fontSize}
             fontWeight="700"
             style={{ opacity: percentBarTitleOpacity }}
           >
@@ -1428,7 +1465,7 @@ function UnitVisualization() {
             x="60"
             y="738"
             fill="#fcfbfa"
-            fontSize="14"
+            fontSize={theme.typography.caption.fontSize}
             style={{ opacity: xAxisContentOpacity }}
           >
             Year 1
@@ -1438,7 +1475,7 @@ function UnitVisualization() {
             y="738"
             textAnchor="end"
             fill="#fcfbfa"
-            fontSize="14"
+            fontSize={theme.typography.caption.fontSize}
             style={{ opacity: xAxisContentOpacity }}
           >
             Year 100
@@ -1461,7 +1498,7 @@ function UnitVisualization() {
                 y="730"
                 textAnchor="middle"
                 fill="#fcfbfa"
-                fontSize="12"
+                fontSize={theme.typography.caption.fontSize}
               >
                 {tick}%
               </text>
@@ -1472,7 +1509,7 @@ function UnitVisualization() {
             y="768"
             textAnchor="middle"
             fill="#fcfbfa"
-            fontSize="13"
+            fontSize={theme.typography.caption.fontSize}
             style={{ opacity: dotPlotLabelOpacity }}
           >
             % of water demand met
@@ -1504,7 +1541,7 @@ function UnitVisualization() {
                     y={countY + 5}
                     textAnchor="end"
                     fill="#fcfbfa"
-                    fontSize="12"
+                    fontSize={theme.typography.caption.fontSize}
                   >
                     {count}
                   </text>
@@ -1537,7 +1574,7 @@ function UnitVisualization() {
                     y={countY + 5}
                     textAnchor="end"
                     fill="#fcfbfa"
-                    fontSize="12"
+                    fontSize={theme.typography.caption.fontSize}
                   >
                     {count}
                   </text>
@@ -1549,7 +1586,7 @@ function UnitVisualization() {
               y="420"
               textAnchor="middle"
               fill="#fcfbfa"
-              fontSize="13"
+              fontSize={theme.typography.caption.fontSize}
               transform="rotate(-90 14 420)"
             >
               Count of years
@@ -1605,7 +1642,7 @@ function UnitVisualization() {
               x="68"
               y={yearCountYScale(90) - 9}
               fill={optimalTierColor}
-              fontSize="12"
+              fontSize={theme.typography.caption.fontSize}
               fontWeight="700"
             >
               90 years
@@ -1615,7 +1652,7 @@ function UnitVisualization() {
               y="730"
               textAnchor="middle"
               fill={optimalTierColor}
-              fontSize="12"
+              fontSize={theme.typography.caption.fontSize}
               fontWeight="700"
             >
               90%
@@ -1625,7 +1662,7 @@ function UnitVisualization() {
               y="730"
               textAnchor="middle"
               fill={optimalTierColor}
-              fontSize="12"
+              fontSize={theme.typography.caption.fontSize}
               fontWeight="700"
               style={{ opacity: optimalCondition2Progress }}
             >
@@ -1634,22 +1671,22 @@ function UnitVisualization() {
             <ConditionAnnotation
               number={1}
               color={optimalTierColor}
-              x={430}
+              x={220}
               y={235}
               lines={[
                 "More than 90% of demand is met",
                 "in at least 90 years.",
               ]}
-              leaderPath={`M 430 280 L 560 280 L ${demandMetXScale(94)} ${yearCountYScale(88)}`}
+              leaderPath={`M 220 280 L 520 280 L ${demandMetXScale(94)} ${yearCountYScale(88)}`}
               progress={optimalCondition1Progress}
             />
             <ConditionAnnotation
               number={2}
               color={optimalTierColor}
-              x={78}
+              x={220}
               y={570}
               lines={["No years fall below", "70% of demand."]}
-              leaderPath={`M 78 615 L 230 615 L ${demandMetXScale(55)} ${yearCountYScale(7)}`}
+              leaderPath={`M 220 615 L 390 615 L ${demandMetXScale(65)} ${yearCountYScale(7)}`}
               progress={optimalCondition2Progress}
             />
           </motion.g>
@@ -1703,7 +1740,7 @@ function UnitVisualization() {
               x="68"
               y={yearCountYScale(50) - 9}
               fill={atRiskTierColor}
-              fontSize="12"
+              fontSize={theme.typography.caption.fontSize}
               fontWeight="700"
             >
               50 years
@@ -1713,7 +1750,7 @@ function UnitVisualization() {
               y="730"
               textAnchor="middle"
               fill={atRiskTierColor}
-              fontSize="12"
+              fontSize={theme.typography.caption.fontSize}
               fontWeight="700"
             >
               90%
@@ -1723,7 +1760,7 @@ function UnitVisualization() {
               y="730"
               textAnchor="middle"
               fill={atRiskTierColor}
-              fontSize="12"
+              fontSize={theme.typography.caption.fontSize}
               fontWeight="700"
               style={{ opacity: atRiskCondition2Progress }}
             >
@@ -1732,10 +1769,10 @@ function UnitVisualization() {
             <ConditionAnnotation
               number={1}
               color={atRiskTierColor}
-              x={455}
+              x={405}
               y={315}
               lines={["At least 50 years meet more", "than 90% of demand."]}
-              leaderPath={`M 455 360 L 590 360 L ${demandMetXScale(92)} ${yearCountYScale(49)}`}
+              leaderPath={`M 405 360 L 590 360 L ${demandMetXScale(92)} ${yearCountYScale(49)}`}
               progress={atRiskCondition1Progress}
             />
             <ConditionAnnotation
@@ -1913,6 +1950,7 @@ function ConditionAnnotation({
   leaderPath: string
   progress: MotionValue<number>
 }) {
+  const theme = useTheme()
   return (
     <motion.g style={{ opacity: progress }}>
       <motion.path
@@ -1922,21 +1960,32 @@ function ConditionAnnotation({
         strokeWidth="1"
         style={{ pathLength: progress }}
       />
-      <text x={x} y={y} fill={color} fontSize="11" fontWeight="700">
+      <text
+        x={x}
+        y={y}
+        fill={color}
+        fontSize={theme.typography.caption.fontSize}
+        fontWeight="700"
+      >
         Condition
       </text>
-      <circle cx={x + 65} cy={y - 4} r="9" fill={color} />
+      <circle cx={x + 90} cy={y - 6} r="11" fill={color} />
       <text
-        x={x + 65}
+        x={x + 90}
         y={y}
         textAnchor="middle"
         fill="#fcfbfa"
-        fontSize="10"
+        fontSize={theme.typography.caption.fontSize}
         fontWeight="700"
       >
         {number}
       </text>
-      <text x={x} y={y + 22} fill={color} fontSize="11">
+      <text
+        x={x}
+        y={y + 22}
+        fill={color}
+        fontSize={theme.typography.caption.fontSize}
+      >
         {lines.map((line, index) => (
           <tspan key={line} x={x} dy={index === 0 ? 0 : 15}>
             {line}
