@@ -161,7 +161,7 @@ export function Footer() {
         <Box
           sx={{
             display: "flex",
-            height: { xs: "120px", md: "80px" },
+            height: { xs: "120px", lg: "80px" },
             gap: 2,
             alignItems: "center",
             py: { xs: 5, lg: 2 },
