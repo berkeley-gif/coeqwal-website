@@ -63,13 +63,13 @@ function footerAccordionSx(theme: Theme, isExpanded: boolean) {
     },
     isExpanded
       ? {
-        "& .MuiAccordion-region": { height: "auto" },
-        "& .MuiAccordionDetails-root": { display: "block" },
-      }
+          "& .MuiAccordion-region": { height: "auto" },
+          "& .MuiAccordionDetails-root": { display: "block" },
+        }
       : {
-        "& .MuiAccordion-region": { height: 0 },
-        "& .MuiAccordionDetails-root": { display: "none" },
-      },
+          "& .MuiAccordion-region": { height: 0 },
+          "& .MuiAccordionDetails-root": { display: "none" },
+        },
   ]
 }
 
@@ -191,9 +191,9 @@ export function Footer() {
             sx={{ display: "block", lineHeight: 1.5 }}
           >
             We thank our partners at DWR, Freshwaters Illustrated and Kike Arnal
-            for the imagery used in this site. All data and graphics retrieved from this website may be freely
-            reproduced and distributed. Any use of the data or content provided
-            should be cited as:
+            for the imagery used in this site. All data and graphics retrieved
+            from this website may be freely reproduced and distributed. Any use
+            of the data or content provided should be cited as:
           </Typography>
           <Typography variant="compactSubtitle" sx={{ display: "block" }}>
             COEQWAL. 2026. COEQWAL data platform, https://coeqwal.org/, accessed
@@ -214,7 +214,6 @@ export function Footer() {
             </Typography>{" "}
             to learn how COEQWAL scenarios were developed.
           </Typography>
-
         </Box>
       </Box>
 

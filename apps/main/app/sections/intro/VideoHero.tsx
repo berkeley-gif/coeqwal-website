@@ -122,7 +122,6 @@ export default function VideoHero({
 
   const showStaticImage = failed
 
-
   const radius = resolveRadius(borderRadius, theme.borderRadius)
   const insetCfg = resolveInset(inset)
 
@@ -200,7 +199,6 @@ export default function VideoHero({
             }}
             aria-hidden="true" // WCAG 1.1.1: Decorative video - DO NOT REMOVE
             preload="metadata"
-
           >
             {sources.map((s, i) => (
               <source key={i} src={s.src} type={s.type} />
@@ -308,7 +306,7 @@ export default function VideoHero({
             What is the future of
           </Typography>
           <Typography variant="h1" component="h1" sx={{ display: "block" }}>
-            California's Water?
+            California&apos;s Water?
           </Typography>
         </Box>
 

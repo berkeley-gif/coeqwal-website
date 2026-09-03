@@ -80,7 +80,6 @@ export function LogoGrid({ id, ariaLabel, title, logos }: LogoGridProps) {
           paddingX: { xs: "24px", md: "0" },
           maxWidth: "1100px", // Max width of the logo block
           margin: "60px auto", // Centers the block horizontally
-
         }}
       >
         {logos.map((logo) => (
