@@ -127,6 +127,7 @@ export function Footer() {
 
   return (
     <Box
+      id="footer"
       component="footer"
       aria-label="Site footer"
       sx={{
@@ -160,6 +161,7 @@ export function Footer() {
         <Box
           sx={{
             display: "flex",
+            height: { xs: "120px", md: "80px" },
             gap: 2,
             alignItems: "center",
             py: { xs: 5, lg: 2 },
@@ -173,7 +175,7 @@ export function Footer() {
               component="img"
               src={logo.src}
               alt={logo.alt}
-              sx={{ width: logo.width, height: "auto" }}
+              sx={{ width: "auto", height: "100%", objectFit: "cover" }}
             />
           ))}
         </Box>
@@ -190,21 +192,15 @@ export function Footer() {
             sx={{ display: "block", lineHeight: 1.5 }}
           >
             We thank our partners at DWR, Freshwaters Illustrated and Kike Arnal
-            for the imagery used in this site
-          </Typography>
-          <Typography variant="compactSubtitle" sx={{ display: "block" }}>
-            © COEQWAL 2026
-          </Typography>
-          <Typography variant="dashboard">
-            All data and graphics retrieved from this website may be freely
-            reproduced and distributed. Any use of the data or content provided
-            should be cited as:
+            for the imagery used in this site. All data and graphics retrieved
+            from this website may be freely reproduced and distributed. Any use
+            of the data or content provided should be cited as:
           </Typography>
           <Typography variant="compactSubtitle" sx={{ display: "block" }}>
             COEQWAL. 2026. COEQWAL data platform, https://coeqwal.org/, accessed
             &lt;date&gt;
           </Typography>
-          <Typography variant="dashboard">
+          <Typography variant="compactSubtitle">
             All content on this website is provided &quot;as is&quot;, without
             warranty of any kind, either express or implied. COEQWAL scenarios
             are exploratory model runs and are not intended for direct use in
@@ -388,7 +384,7 @@ export function Footer() {
           onClick={() => router.push("/about")}
           sx={footerLinkButtonSx}
         >
-          About Us
+          About
         </Typography>
 
         <Typography
@@ -399,6 +395,9 @@ export function Footer() {
         >
           <MailOutlineIcon sx={{ fontSize: "1em", mr: 1 }} />
           Contact Us
+        </Typography>
+        <Typography variant="compactSubtitle" sx={{ display: "block", mt: 4 }}>
+          © COEQWAL 2026
         </Typography>
       </Box>
     </Box>

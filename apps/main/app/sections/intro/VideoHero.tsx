@@ -63,14 +63,11 @@ export default function VideoHero({
   const prefersReducedMotion = useReducedMotion()
   const [isPlaying, setIsPlaying] = useState(false)
 
-  // Set initial playing state after mount (hook returns null on SSR)
+  // Mark mounted so the play-attempt effect below doesn't run during
+  // SSR, before a real <video> element/window exists.
   useEffect(() => {
     setMounted(true)
-    // Start playing only if user doesn't prefer reduced motion
-    if (prefersReducedMotion === false) {
-      setIsPlaying(true)
-    }
-  }, [prefersReducedMotion])
+  }, [])
 
   /**
    * WCAG 2.2.2: Pause, Stop, Hide
@@ -81,41 +78,47 @@ export default function VideoHero({
     const video = videoRef.current
     if (!video) return
 
-    if (isPlaying) {
-      video.pause()
-      setIsPlaying(false)
-    } else {
+    // Check the video element's own `paused` property instead of the
+    // `isPlaying` state — `isPlaying` is now derived purely from the
+    // element's onPlay/onPause events (see <video> below), so this
+    // can't drift from what's actually happening on screen.
+    if (video.paused) {
       video.play().catch(() => setFailed(true))
-      setIsPlaying(true)
+    } else {
+      video.pause()
     }
   }
 
   useEffect(() => {
-    if (!mounted || failed) return
+    if (!mounted || prefersReducedMotion !== false || !canPlay) return
 
     const v = videoRef.current
     if (!v) return
 
-    // WCAG 2.3.3: Respect prefers-reduced-motion - DO NOT REMOVE
-    if (prefersReducedMotion) {
-      v.pause()
-      setIsPlaying(false)
-      return
-    }
+    v.play().catch((err) => {
+      console.warn("Hero video play() rejected:", err)
+    })
+  }, [mounted, canPlay, prefersReducedMotion])
 
-    const tryPlay = async () => {
-      try {
-        await v.play()
-        setIsPlaying(true)
-      } catch (err) {
-        // if autoplay blocked, fall back to poster
-        console.warn("Hero video play() rejected:", err)
-        setFailed(true)
-        setIsPlaying(false)
-      }
-    }
-    if (canPlay && isPlaying) tryPlay()
-  }, [mounted, canPlay, failed, isPlaying, prefersReducedMotion])
+  // Safety net: on some mobile browsers the button's `onPlay`/`onPause`
+  // events don't reliably repaint the icon in sync with when the video
+  // actually starts (autoplay in particular). Rather than depend on
+  // those events firing correctly, poll the video's own `paused`
+  // property every 500ms and self-correct `isPlaying` if it's drifted.
+  // This guarantees the icon catches up to reality within half a
+  // second, regardless of what's causing the event/repaint to lag.
+  useEffect(() => {
+    if (!mounted) return
+
+    const intervalId = window.setInterval(() => {
+      const v = videoRef.current
+      if (!v) return
+      const playing = !v.paused
+      setIsPlaying((prev) => (prev === playing ? prev : playing))
+    }, 500)
+
+    return () => window.clearInterval(intervalId)
+  }, [mounted])
 
   const showStaticImage = failed
 
@@ -127,9 +130,9 @@ export default function VideoHero({
   const heroHeight =
     insetCfg && insetCfg.y !== 0
       ? typeof insetCfg.y === "number"
-        ? `calc(100vh - ${insetCfg.y * 2}px)`
-        : `calc(100vh - (${insetCfg.y} * 2))`
-      : "100vh"
+        ? `calc(100dvh - ${insetCfg.y * 2}px)`
+        : `calc(100dvh - (${insetCfg.y} * 2))`
+      : "100dvh"
 
   const hero = (
     // WCAG 1.3.1: Semantic section element with accessible name
@@ -185,6 +188,8 @@ export default function VideoHero({
             autoPlay={!prefersReducedMotion} // WCAG 2.3.3: Respects reduced motion
             poster={fallbackImage}
             onCanPlay={() => setCanPlay(true)}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
             onError={(e) => {
               console.warn(
                 "Hero video error",
@@ -194,11 +199,6 @@ export default function VideoHero({
             }}
             aria-hidden="true" // WCAG 1.1.1: Decorative video - DO NOT REMOVE
             preload="metadata"
-            onLoadedMetadata={() => {
-              if (!prefersReducedMotion) {
-                videoRef.current?.play().catch(() => setFailed(true))
-              }
-            }}
           >
             {sources.map((s, i) => (
               <source key={i} src={s.src} type={s.type} />
@@ -303,10 +303,10 @@ export default function VideoHero({
             component="h2"
             sx={{ display: "block", mb: 0.5 }}
           >
-            {t("homePanel.titleLine1")}
+            What is the future of
           </Typography>
           <Typography variant="h1" component="h1" sx={{ display: "block" }}>
-            {t("homePanel.titleLine2")}
+            California&apos;s Water?
           </Typography>
         </Box>
 
