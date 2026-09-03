@@ -7,6 +7,7 @@
 
 import { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
+import { ScrollToButton } from "@repo/ui"
 import {
   useMotionValue,
   useTransform,
@@ -1331,6 +1332,28 @@ export default function TierAnimationSection() {
             hideControls={prefersReducedMotion}
             heatmapExtraColumnCount={heatmapExtraColumns.length}
           />
+
+          {/* Always-visible affordance to move past the storyboard to the
+           *  next Learn section, styled to match the homepage's sticky-panel
+           *  scroll arrows (AboutCoeqwalPanel, WaterThemesPanel). */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 40,
+              left: "50%",
+              transform: "translate(-50%)",
+              zIndex: 10,
+              pointerEvents: "auto",
+            }}
+          >
+            <ScrollToButton
+              color={theme.palette.brand.panelLight}
+              size={52}
+              scrollToId="data-in-depth-intro"
+              scrollOffset={() => theme.layout.headerHeight}
+              ariaLabel="Scroll down to the data in depth section"
+            />
+          </Box>
         </>
       )}
     </Box>
