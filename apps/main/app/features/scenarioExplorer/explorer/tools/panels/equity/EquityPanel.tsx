@@ -28,6 +28,7 @@ import { useEquityObjectives } from "./useEquityObjectives"
 import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
 import ScrollRightIndicator from "../../chrome/layout/ScrollRightIndicator"
 import { useTourAnchor } from "../../tour"
+import { useEquityOutcomeColumnSync } from "./tour"
 import { HydroclimateGate } from "../../../../../scenarios/components/HydroclimateGate"
 import {
   OUTCOME_NAMES,
@@ -957,6 +958,8 @@ export default function EquityPanel({
     },
     [scrollRef, gridTourRef],
   )
+  const outcomeColumnTourRef = useTourAnchor("equity.grid.outcomeColumn")
+  const tourHighlightCategory = useEquityOutcomeColumnSync()
 
   return (
     <Box
@@ -1007,6 +1010,8 @@ export default function EquityPanel({
                 showMapView
                 focusScenarioId={focusScenarioId}
                 onChartHover={onChartHover}
+                tourHighlightCategory={tourHighlightCategory}
+                tourHighlightCategoryRef={outcomeColumnTourRef}
               />
             </HydroclimateGate>
           </Box>

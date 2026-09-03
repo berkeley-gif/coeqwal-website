@@ -49,8 +49,9 @@ export default function ToolToolbar({
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
   // Register the climate-chip group as a tour anchor for the radar
-  // tour. Resilience reuses this control too but its tour does not
-  // step through it, so a single id is fine.
+  // tour. Equity reuses this same control for its own tour, and
+  // resilience reuses the control without stepping through it, so a
+  // single shared id covers every tool.
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
   const showMapAnchorRef = useTourAnchor("toolbar.showMap")
   // High-level orientation anchor for the list tour: the whole strip
