@@ -216,7 +216,7 @@ export default function AboutPage() {
         title="Project Goals"
         body1="Our overall project goal is to make data used in water planning and decision-making more accessible. Our website invites visitors to learn about California's water system and explore how alternative water management strategies affect outcomes for cities, agriculture, and the environment."
         body2="Tools on the sites are designed to guide visitors to specific scenarios that align with their interests. We aim to help users to better understand the nature of trade-offs among management objectives and to provide data that empower communities to shape our water future."
-        imgSrc="/images/about/tiered-image-text-hills.jpg"
+        imgSrc="/images/about/tiered-image-text-hills.png"
         imgAlt="Photo of hills and farmland in california"
         logoSrc="/images/about/logo-uc-ri.png"
         logoAlt="University of California Research and Innovation"

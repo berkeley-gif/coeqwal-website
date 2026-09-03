@@ -128,7 +128,7 @@ export function Header() {
   return (
     <BaseHeader
       onLogoClick={handleLogoClick}
-      onAboutClick={() => router.push("/about")}
+      onAboutClick={() => (window.location.href = "/about/")}
       onGetDataClick={() => router.push("/data")}
       onGetStartedClick={() => navigateToTab("learn")}
       onToolsClick={() => navigateToTab("explore")}

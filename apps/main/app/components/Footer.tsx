@@ -63,13 +63,13 @@ function footerAccordionSx(theme: Theme, isExpanded: boolean) {
     },
     isExpanded
       ? {
-          "& .MuiAccordion-region": { height: "auto" },
-          "& .MuiAccordionDetails-root": { display: "block" },
-        }
+        "& .MuiAccordion-region": { height: "auto" },
+        "& .MuiAccordionDetails-root": { display: "block" },
+      }
       : {
-          "& .MuiAccordion-region": { height: 0 },
-          "& .MuiAccordionDetails-root": { display: "none" },
-        },
+        "& .MuiAccordion-region": { height: 0 },
+        "& .MuiAccordionDetails-root": { display: "none" },
+      },
   ]
 }
 
@@ -208,10 +208,10 @@ export function Footer() {
             <Typography
               variant="dashboard"
               component="button"
-              onClick={() => router.push("/about")}
+              onClick={() => (window.location.href = "/about/")}
               sx={footerLinkButtonSx}
             >
-              ABOUT
+              About
             </Typography>{" "}
             to learn how COEQWAL scenarios were developed.
           </Typography>
@@ -381,7 +381,7 @@ export function Footer() {
         <Typography
           variant="caption"
           component="button"
-          onClick={() => router.push("/about")}
+          onClick={() => (window.location.href = "/about/")}
           sx={footerLinkButtonSx}
         >
           About

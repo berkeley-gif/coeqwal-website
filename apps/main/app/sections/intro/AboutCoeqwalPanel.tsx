@@ -11,7 +11,6 @@
  * sticky region reads as continuous white frame.
  */
 
-import Link from "next/link"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { NavArrow, ScrollToButton, resolveCssLengthPx } from "@repo/ui"
 import { StickyScrollSection } from "@repo/scrollytelling"
@@ -179,7 +178,7 @@ function AboutCtaLink({
   href: string
 }) {
   return (
-    <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
+    <a href={href} style={{ textDecoration: "none", color: "inherit" }}>
       <Box
         sx={{
           display: "inline-flex",
@@ -203,6 +202,6 @@ function AboutCtaLink({
         </Typography>
         <NavArrow className="about-arrow" />
       </Box>
-    </Link>
+    </a>
   )
 }
