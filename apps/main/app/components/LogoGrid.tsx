@@ -90,7 +90,7 @@ export function LogoGrid({ id, ariaLabel, title, logos }: LogoGridProps) {
             key={logo.src}
             loading="lazy"
             sx={{
-              height: { xs: "28px", md: "46px" }, // fixed display height for every logo
+              height: { xs: "28px", md: "55px" }, // fixed display height for every logo
               width: "auto", // preserves each logo's own aspect ratio
               objectFit: "contain",
             }}
