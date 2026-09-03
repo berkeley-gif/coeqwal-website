@@ -161,7 +161,7 @@ export function Footer() {
         <Box
           sx={{
             display: "flex",
-            height: { xs: "120px", md: "80px" },
+            height: { xs: "120px", lg: "80px" },
             gap: 2,
             alignItems: "center",
             py: { xs: 5, lg: 2 },
@@ -208,10 +208,10 @@ export function Footer() {
             <Typography
               variant="dashboard"
               component="button"
-              onClick={() => router.push("/about")}
+              onClick={() => (window.location.href = "/about/")}
               sx={footerLinkButtonSx}
             >
-              ABOUT
+              About
             </Typography>{" "}
             to learn how COEQWAL scenarios were developed.
           </Typography>
@@ -381,7 +381,7 @@ export function Footer() {
         <Typography
           variant="caption"
           component="button"
-          onClick={() => router.push("/about")}
+          onClick={() => (window.location.href = "/about/")}
           sx={footerLinkButtonSx}
         >
           About

@@ -20,7 +20,7 @@ export default function BeforeYouBeginPanel() {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
           columnGap: theme.space.section.xl,
           maxWidth: "85%",
         }}

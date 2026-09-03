@@ -6,7 +6,7 @@
  * in Narration.tsx (left column copy/timing), StoryboardControls.tsx, and
  * useOutcomeLabelGeometry (right-column per-frame label math). */
 
-import { useRef, useEffect, type RefObject } from "react"
+import { useRef, useEffect, useState, type RefObject } from "react"
 import {
   Box,
   Typography,
@@ -82,6 +82,10 @@ interface BeatTextOverlayProps {
   /** Forwarded to the geometry hook, which reports the right column's
    *  full scrollable content height on every relevant layout pass. */
   onContentHeightChange?: (height: number) => void
+  /** Fires once when the backdrop crosses from invisible to visible (or
+   *  back), not every frame - lets the parent gate the scroll-down chevron
+   *  on real visibility instead of an approximate beatIndex threshold. */
+  onBackdropVisibilityChange?: (visible: boolean) => void
   /** Extra heatmap columns beyond the primary one. Defaults to 0. */
   heatmapExtraColumnCount?: number
 }
@@ -131,6 +135,8 @@ export default function BeatTextOverlay({
   )
 
   // All per-frame label math + the DOM refs the right column attaches.
+  const [backdropVisible, setBackdropVisible] = useState(false)
+
   const {
     panelRootRef,
     rightColumnRootRef,
@@ -147,6 +153,7 @@ export default function BeatTextOverlay({
     outcomeMorphWindows,
     onGlyphLayoutChange,
     onContentHeightChange,
+    onBackdropVisibilityChange: setBackdropVisible,
     heatmapExtraColumnCount,
   })
 
@@ -244,6 +251,7 @@ export default function BeatTextOverlay({
             overscrollBehavior: "contain",
             pt: 6,
             pb: 8,
+            overflowX: "hidden",
             "& .MuiTypography-root": {
               color: theme.palette.text.primary,
             },
@@ -495,7 +503,7 @@ export default function BeatTextOverlay({
             </Box>
           )}
         </Box>
-        <ScrollDownIndicator visible={canScrollDown} />
+        <ScrollDownIndicator visible={canScrollDown && backdropVisible} />
       </Box>
     </Box>
   )

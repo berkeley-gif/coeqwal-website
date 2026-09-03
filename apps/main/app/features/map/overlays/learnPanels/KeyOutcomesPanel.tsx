@@ -28,7 +28,10 @@ export default function KeyOutcomesPanel() {
           Click on each key outcome to learn more.
         </Typography>
 
-        <InfoCardGrid columns={3} rowGap={theme.space.section.sm}>
+        <InfoCardGrid
+          columns={{ xs: 1, lg: 3 }}
+          rowGap={theme.space.section.sm}
+        >
           {KEY_OUTCOMES.map(({ outcomeCode, description }) => {
             const title = getOutcomeName(outcomeCode)
             return (

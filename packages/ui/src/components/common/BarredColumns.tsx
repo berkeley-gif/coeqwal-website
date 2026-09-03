@@ -46,7 +46,7 @@ export function BarredColumns({
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: `repeat(${items.length}, 1fr)`,
+        gridTemplateColumns: { xs: "1fr", lg: `repeat(${items.length}, 1fr)` },
         columnGap: gap,
         color,
         ...((sx as object) ?? {}),

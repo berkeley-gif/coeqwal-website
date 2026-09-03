@@ -27,7 +27,7 @@
  * </StickyScrollSection>
  */
 
-import React, { useRef, useState, useEffect } from "react"
+import React, { useRef, useState, useEffect, forwardRef } from "react"
 import { useScroll } from "@repo/motion"
 import type { ScrollOffset, ScrollSectionContextValue } from "../types"
 import { ScrollSectionContext } from "./ScrollSection"
@@ -65,29 +65,47 @@ interface StickyScrollSectionProps {
   children: React.ReactNode
 }
 
-export function StickyScrollSection({
-  height = "200vh",
-  stickyTop = "0px",
-  offset = ["start start", "end end"],
-  overlap = "0px",
-  stickyHeight = "100vh",
-  // Below this viewport width, the pin is disabled and content flows
-  // normally instead of using `position: sticky`. 900px matches the
-  // theme's `md` breakpoint that AboutCoeqwalPanel/WaterThemesPanel
-  // already use to switch between their mobile/desktop layouts.
-  mobileBreakpoint = 900,
-  debug = false,
-  id,
-  ariaLabel,
-  style,
-  stickyStyle,
-  className,
-  stickyClassName,
-  children,
-}: StickyScrollSectionProps) {
+export const StickyScrollSection = forwardRef<
+  HTMLElement,
+  StickyScrollSectionProps
+>(function StickyScrollSection(
+  {
+    height = "200vh",
+    stickyTop = "0px",
+    offset = ["start start", "end end"],
+    overlap = "0px",
+    stickyHeight = "100vh",
+    // Below this viewport width, the pin is disabled and content flows
+    // normally instead of using `position: sticky`. 900px matches the
+    // theme's `md` breakpoint that AboutCoeqwalPanel/WaterThemesPanel
+    // already use to switch between their mobile/desktop layouts.
+    mobileBreakpoint = 900,
+    debug = false,
+    id,
+    ariaLabel,
+    style,
+    stickyStyle,
+    className,
+    stickyClassName,
+    children,
+  }: StickyScrollSectionProps,
+  forwardedRef,
+) {
   const sectionRef = useRef<HTMLElement>(null)
   const [debugProgress, setDebugProgress] = useState(0)
   const [isPinned, setIsPinned] = useState(true)
+
+  // Merges the caller's ref (e.g. react-scrollama's Step, which needs a
+  // real DOM node to intersection-observe) with our own internal
+  // sectionRef, which useScroll below still needs as its `target`.
+  const setSectionRef = (node: HTMLElement | null) => {
+    sectionRef.current = node
+    if (typeof forwardedRef === "function") {
+      forwardedRef(node)
+    } else if (forwardedRef) {
+      forwardedRef.current = node
+    }
+  }
 
   useEffect(() => {
     if (!mobileBreakpoint) return
@@ -121,7 +139,7 @@ export function StickyScrollSection({
   return (
     <ScrollSectionContext.Provider value={contextValue}>
       <section
-        ref={sectionRef}
+        ref={setSectionRef}
         id={id}
         aria-label={ariaLabel}
         className={className}
@@ -168,4 +186,6 @@ export function StickyScrollSection({
       </section>
     </ScrollSectionContext.Provider>
   )
-}
+})
+
+StickyScrollSection.displayName = "StickyScrollSection"

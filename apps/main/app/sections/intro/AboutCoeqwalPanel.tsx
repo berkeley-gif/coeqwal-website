@@ -11,7 +11,6 @@
  * sticky region reads as continuous white frame.
  */
 
-import Link from "next/link"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { NavArrow, ScrollToButton, resolveCssLengthPx } from "@repo/ui"
 import { StickyScrollSection } from "@repo/scrollytelling"
@@ -50,7 +49,7 @@ export function AboutCoeqwalPanel() {
             sx={{
               color: theme.palette.text.primary,
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
               rowGap: { xs: 0, md: 2 },
               columnGap: { md: 6 },
               maxWidth: theme.breakpoints.values.xl,
@@ -62,7 +61,7 @@ export function AboutCoeqwalPanel() {
                 gridColumn: "1 / -1",
                 mb: { xs: 2, md: 3 },
                 gap: 7,
-                textAlign: { xs: "center", md: "left" },
+                textAlign: { xs: "center", lg: "left" },
               }}
             >
               <Typography
@@ -179,7 +178,7 @@ function AboutCtaLink({
   href: string
 }) {
   return (
-    <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
+    <a href={href} style={{ textDecoration: "none", color: "inherit" }}>
       <Box
         sx={{
           display: "inline-flex",
@@ -203,6 +202,6 @@ function AboutCtaLink({
         </Typography>
         <NavArrow className="about-arrow" />
       </Box>
-    </Link>
+    </a>
   )
 }

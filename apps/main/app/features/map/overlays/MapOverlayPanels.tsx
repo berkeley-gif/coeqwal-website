@@ -399,6 +399,7 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
         */}
         <Step data={"outcomes-viz" as SubSectionId} progress>
           <StickyScrollSection
+            id="outcomes-viz"
             height="200vh"
             stickyTop={theme.layout.headerHeight}
             stickyHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
@@ -469,7 +470,7 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
               paddingLeft: defaultLeftPadding,
               paddingRight: (theme) => theme.space.panel.padding,
               transition: defPaddingTransition,
-              my: theme.space.section.xl,
+              mt: theme.space.section.xl,
             }}
           >
             <BeforeYouBeginPanel />
