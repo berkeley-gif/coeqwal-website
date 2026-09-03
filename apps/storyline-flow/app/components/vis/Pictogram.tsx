@@ -24,6 +24,15 @@ interface PictogramProps {
   unit?: number
   rowCount?: number
   reversed?: boolean
+  /**
+   * "absolute" (default) positions the pictogram via config.shift within a
+   * container that spans the full visual area (the wide/xl Benefits layout).
+   * "flow" drops the absolute positioning so a flex parent can center the
+   * pictogram instead — used by the compact (narrower laptop) layout, where
+   * config.shift percentages (tuned for a full-width container) would leave
+   * the pictogram off-center or clipped.
+   */
+  layout?: "absolute" | "flow"
 }
 
 interface PictogramIconProps {
@@ -50,6 +59,7 @@ function Pictogram({
   unit = 1000000,
   reversed = true,
   rowCount = 10,
+  layout = "absolute",
 }: PictogramProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [displayStatus, setDisplayStatus] = React.useState<
@@ -141,9 +151,13 @@ function Pictogram({
       style={{
         width: size.width,
         height: size.height,
-        position: "fixed",
-        left: config.shift.left,
-        top: config.shift.top,
+        ...(layout === "absolute"
+          ? {
+              position: "absolute",
+              left: config.shift.left,
+              top: config.shift.top,
+            }
+          : { position: "relative", flexShrink: 0 }),
         visibility: displayStatus,
         opacity: overallOpacity,
         fontSize: theme.typography.caption.fontSize,

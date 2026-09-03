@@ -225,29 +225,17 @@ function ContentContainer() {
         </Step>
         {/* Section 6 - Benefits */}
         <Step data={"city" as SectionId}>
-          <Box
-            height="150vh"
-            width="100%"
-            className="story-step-sticky-container"
-          >
+          <Box width="100%" className="story-step-sticky-container">
             <CityPictogram />
           </Box>
         </Step>
         <Step data={"agriculture" as SectionId}>
-          <Box
-            height="150vh"
-            width="100%"
-            className="story-step-sticky-container"
-          >
+          <Box width="100%" className="story-step-sticky-container">
             <Agriculture />
           </Box>
         </Step>
         <Step data={"economy" as SectionId}>
-          <Box
-            height="150vh"
-            width="100%"
-            className="story-step-sticky-container"
-          >
+          <Box width="100%" className="story-step-sticky-container">
             <Economy />
           </Box>
         </Step>
