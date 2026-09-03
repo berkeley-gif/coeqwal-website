@@ -24,7 +24,7 @@ export default function InterpretingOutcomesPanel() {
         }}
       >
         {/* Left - three lenses */}
-      <Box>
+        <Box>
           <Typography
             variant="body2"
             color="text.secondary"

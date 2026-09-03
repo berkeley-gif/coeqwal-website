@@ -217,7 +217,7 @@ export function useOutcomeLabelGeometry({
    * combined as `fadeIn * (1 - fadeOut)`. */
   const backdropVisibleRef = useRef(false)
 
-  const latestNarrationFrameRef = useRef<(v: number) => void>(() => { })
+  const latestNarrationFrameRef = useRef<(v: number) => void>(() => {})
   latestNarrationFrameRef.current = (v: number) => {
     // White backdrop fades in with AG_REV's morph (the first graphic). The
     // right column's overflow is gated on the same signal so its native
@@ -238,7 +238,6 @@ export function useOutcomeLabelGeometry({
       onBackdropVisibilityChange?.(isBackdropVisible)
     }
 
-
     // Titles fade in just before their morph slice. Captions over the tail
     // of the morph window, so both read as the polygons settle.
     const windows = outcomeMorphWindowsRef.current
@@ -254,8 +253,8 @@ export function useOutcomeLabelGeometry({
       wrapDip =
         v < HEATMAP_WRAP_DIP_CENTER
           ? 1 -
-          (v - (HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF)) /
-          HEATMAP_WRAP_DIP_HALF
+            (v - (HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF)) /
+              HEATMAP_WRAP_DIP_HALF
           : (v - HEATMAP_WRAP_DIP_CENTER) / HEATMAP_WRAP_DIP_HALF
     }
     // Hold radar labels opaque through RADAR_SETTLE, fade out, hold invisible
@@ -428,7 +427,6 @@ export function useOutcomeLabelGeometry({
       }
     }
 
-
     // Slide titles to the radar [RADAR_SLIDE_START-RADAR_SLIDE_END], hold
     // while they fade out, then snap to the heatmap axis at HEATMAP_TAKEOVER+.
     // The snap is hidden because the labels are invisible there.
@@ -457,11 +455,11 @@ export function useOutcomeLabelGeometry({
         const shift = radarActive ? reflowShift.get(code) : undefined
         const radarDx = rd
           ? (shift ? -shift.dx * (1 - radarPosBlend) : 0) +
-          rd.dx * radarPosBlend
+            rd.dx * radarPosBlend
           : 0
         const radarDy = rd
           ? (shift ? -shift.dy * (1 - radarPosBlend) : 0) +
-          rd.dy * radarPosBlend
+            rd.dy * radarPosBlend
           : 0
         const dx = radarDx + (hd ? hd.dx * heatmapPosBlend : 0)
         const dy = radarDy + (hd ? hd.dy * heatmapPosBlend : 0)
@@ -785,8 +783,10 @@ export function useOutcomeLabelGeometry({
       // padding so the panel reads as evenly padded top-and-bottom, not
       // clipped tight to the last label/cell.
       const CONTENT_BOTTOM_BUFFER = 48
-      radarContentHeightRef.current = radarLabelMaxBottom + CONTENT_BOTTOM_BUFFER
-      heatmapContentHeightRef.current = heatmapLabelMaxBottom + CONTENT_BOTTOM_BUFFER
+      radarContentHeightRef.current =
+        radarLabelMaxBottom + CONTENT_BOTTOM_BUFFER
+      heatmapContentHeightRef.current =
+        heatmapLabelMaxBottom + CONTENT_BOTTOM_BUFFER
 
       const v = progress.get()
       const phase: "tall" | "radar" | "heatmap" =

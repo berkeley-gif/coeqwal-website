@@ -83,8 +83,8 @@ interface BeatTextOverlayProps {
    *  full scrollable content height on every relevant layout pass. */
   onContentHeightChange?: (height: number) => void
   /** Fires once when the backdrop crosses from invisible to visible (or
- *  back), not every frame - lets the parent gate the scroll-down chevron
- *  on real visibility instead of an approximate beatIndex threshold. */
+   *  back), not every frame - lets the parent gate the scroll-down chevron
+   *  on real visibility instead of an approximate beatIndex threshold. */
   onBackdropVisibilityChange?: (visible: boolean) => void
   /** Extra heatmap columns beyond the primary one. Defaults to 0. */
   heatmapExtraColumnCount?: number
@@ -156,7 +156,6 @@ export default function BeatTextOverlay({
     onBackdropVisibilityChange: setBackdropVisible,
     heatmapExtraColumnCount,
   })
-
 
   // Scroll position from a previous beat (e.g. having scrolled down the
   // squares grid) must not leak into a beat that doesn't scroll at all
