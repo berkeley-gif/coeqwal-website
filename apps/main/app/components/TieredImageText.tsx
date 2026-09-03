@@ -160,6 +160,7 @@ export function TieredImageText({
           component="img"
           src={imgSrc}
           alt={imgAlt}
+          loading="lazy"
           sx={{
             width: "100%",
             inset: 0,
@@ -204,6 +205,7 @@ export function TieredImageText({
             component="img"
             src={logoSrc}
             alt={logoAlt}
+            loading="lazy"
             sx={{
               width: "305px",
               height: "auto",

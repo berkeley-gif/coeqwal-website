@@ -105,7 +105,7 @@ export const LIST_TOUR: TourStep[] = [
     anchorId: "list.startVisualizing",
     eyebrow: "visualize data",
     title:
-      "Click on panel or one of the explore tools to visualize scenario outcomes",
+      "Click on this panel or one of the explore tools to visualize scenario outcomes",
     body: "You can now visualize the data for the scenarios you selected.",
     placement: "top",
   },

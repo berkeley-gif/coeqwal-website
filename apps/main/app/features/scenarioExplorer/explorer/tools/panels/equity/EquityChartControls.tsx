@@ -47,6 +47,9 @@ export default function EquityChartControls({
     null,
   )
   const toggleOutcomesTourRef = useTourAnchor("equity.controls.toggleOutcomes")
+  const chartControlsBarTourRef = useTourAnchor(
+    "equity.controls.chartControlsBar",
+  )
 
   const canSnapshot = equityFocusScenario !== null
   const { onSaveSnapshot } = share.chartControlsProps
@@ -64,7 +67,7 @@ export default function EquityChartControls({
   const defaultActiveBg = theme.palette.interaction.selectedBackground
 
   return (
-    <ChartControlsBar>
+    <ChartControlsBar ref={chartControlsBarTourRef}>
       <Box
         component="button"
         type="button"
