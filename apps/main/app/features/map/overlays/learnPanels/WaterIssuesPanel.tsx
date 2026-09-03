@@ -25,7 +25,7 @@ export default function WaterIssuesPanel() {
         considers how decisions affect the water issues that people care about.
       </Typography>
       <Box sx={{ mt: theme.space.listGap.sm }}>
-        <InfoCardGrid columns={{ xs: 1, md: WATER_ISSUE_THEMES.length }}>
+        <InfoCardGrid columns={{ xs: 1, lg: WATER_ISSUE_THEMES.length }}>
           {WATER_ISSUE_THEMES.map(
             ({ title, description, themeKey, dimmed }) => (
               <InfoCard

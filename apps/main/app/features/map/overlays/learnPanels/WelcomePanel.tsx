@@ -18,7 +18,7 @@ export default function WelcomePanel() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+            gridTemplateColumns: { xs: "1fr", lg: "repeat(3, 1fr)" },
             columnGap: theme.space.section.lg,
             rowGap: sp.lg,
           }}
