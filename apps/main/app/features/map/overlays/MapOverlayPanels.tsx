@@ -469,7 +469,7 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
               paddingLeft: defaultLeftPadding,
               paddingRight: (theme) => theme.space.panel.padding,
               transition: defPaddingTransition,
-              my: theme.space.section.xl,
+              mt: theme.space.section.xl,
             }}
           >
             <BeforeYouBeginPanel />
