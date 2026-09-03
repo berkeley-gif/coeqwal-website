@@ -60,6 +60,20 @@ export default function Opener() {
         "& > .MuiTypography-h1, & > .MuiTypography-h3": {
           maxWidth: { xs: "100%", lg: "calc(55dvw - 5rem)" },
         },
+        "@media (min-width: 900px) and (max-width: 1535.95px)": {
+          top: "calc(50% + 1.5rem)",
+          "& > .MuiTypography-h1": {
+            fontSize: "clamp(3.25rem, 5.4vw, 4.75rem)",
+            lineHeight: 0.98,
+          },
+          "& > .MuiTypography-h3": {
+            fontSize: "clamp(2rem, 3.3vw, 3rem)",
+            lineHeight: 1.05,
+          },
+          "& .text-section > .MuiStack-root": {
+            gap: 3,
+          },
+        },
       }}
       scrollIndicator={
         <Box
@@ -79,7 +93,7 @@ export default function Opener() {
           maxWidth: { xs: "75ch", lg: "calc(55dvw - 5rem)" },
         }}
       >
-        <Stack component="section" spacing={6}>
+        <Stack component="section" spacing={{ md: 3, lg: 3, xl: 6 }}>
           {copy.paragraphs.map((sentences, index) => (
             <Box key={index} component="article">
               <Paragraph blocks={sentences} />

@@ -1,6 +1,6 @@
 "use client"
 
-import { Box } from "@repo/ui/mui"
+import { Box, useMediaQuery, useTheme } from "@repo/ui/mui"
 import "./main.css"
 import { Scrollama, Step } from "react-scrollama"
 
@@ -17,11 +17,13 @@ import Conclusion from "./components/10Conclusion"
 import {
   BaseHeader,
   getWaterThemeOptions,
+  getMainHomeUrl,
   goToMainAbout,
   goToMainData,
   goToMainHome,
   goToMainLearn,
   goToMainExplore,
+  MobileNotSupported,
 } from "@repo/ui"
 import {
   SCROLLAMA_CONFIG,
@@ -33,6 +35,8 @@ import { useActiveSectionStore, type SectionId } from "./store"
 export default function StoryContainer() {
   const waterThemesOptions = useMemo(() => getWaterThemeOptions(), [])
   const activeSection = useActiveSectionStore()
+  const theme = useTheme()
+  const isSmallDevice = useMediaQuery(theme.breakpoints.down("lg"))
   const showDynamicMap =
     activeSection === "Background" ||
     activeSection === "HistoricalContext" ||
@@ -41,6 +45,15 @@ export default function StoryContainer() {
     activeSection === "ClimateResilience" ||
     activeSection === "Transparency" ||
     activeSection === "Conclusion"
+
+  if (isSmallDevice) {
+    return (
+      <MobileNotSupported
+        message="This section of COEQWAL is best experienced on a tablet, desktop, or laptop. Mobile support for our water stories is coming soon."
+        buttonHref={getMainHomeUrl()}
+      />
+    )
+  }
 
   return (
     <>
@@ -59,7 +72,6 @@ export default function StoryContainer() {
       />
       <DynamicMap isVisible={showDynamicMap} />
       <ContentContainer />
-      <SectionIndicator />
     </>
   )
 }
@@ -141,56 +153,6 @@ function ContentContainer() {
       </Scrollama>
 
       {/* minimal outro intentionally left blank */}
-    </Box>
-  )
-}
-
-function SectionIndicator() {
-  const activeSection = useActiveSectionStore()
-
-  return (
-    <Box
-      aria-live="polite"
-      sx={{
-        position: "fixed",
-        right: "1.5rem",
-        bottom: "1.5rem",
-        zIndex: 3,
-        pointerEvents: "none",
-        paddingX: 2,
-        paddingY: 1,
-        borderRadius: 999,
-        backgroundColor: "rgba(8, 16, 24, 0.72)",
-        backdropFilter: "blur(12px)",
-        border: "1px solid rgba(255, 255, 255, 0.18)",
-        color: "common.white",
-        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.24)",
-        maxWidth: "calc(100vw - 3rem)",
-      }}
-    >
-      <Box
-        component="span"
-        sx={{
-          display: "block",
-          fontSize: "0.75rem",
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          opacity: 0.75,
-        }}
-      >
-        Section
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          display: "block",
-          fontSize: "1rem",
-          fontWeight: 700,
-          lineHeight: 1.2,
-        }}
-      >
-        {activeSection}
-      </Box>
     </Box>
   )
 }

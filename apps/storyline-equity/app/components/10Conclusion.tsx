@@ -6,11 +6,7 @@ import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
 import { themeValues } from "@repo/ui/themes/theme"
 import { FloatingBubbles } from "./helpers/FloatingBubbles"
-import {
-  CONCLUSION_HANDOFF_END_PROGRESS,
-  CONCLUSION_HANDOFF_START_PROGRESS,
-  useConclusionProgress,
-} from "../store"
+import { useConclusionProgress } from "../store"
 
 const conclusionText = {
   en: {
@@ -46,11 +42,12 @@ const conclusionText = {
             text: "How do those patterns change under different management strategies and climate conditions?",
           },
         ],
-      ],
-      [
         [
           {
-            text: "COEQWAL does not determine what California’s water future should be. It helps make the consequences of different choices visible.",
+            text: "COEQWAL does not determine what California’s water future should be. ",
+          },
+          {
+            text: "It helps make the consequences of different choices visible.",
           },
         ],
         [
@@ -65,12 +62,20 @@ const conclusionText = {
 
 const LOAD_CONCLUSION_VISUAL = true
 
+// Keep the visual timing explicit so the icon-to-photo transition is easy to
+// tune independently of the map-circle exit. The second text frame begins at
+// 0.50, and the completed photos remain visible for the rest of the section.
+const BUBBLES_REVEAL_START = 0.48
+const BUBBLES_REVEAL_END = 0.56
+const PHOTOS_REVEAL_START = 0.56
+const PHOTOS_REVEAL_END = 0.72
+
 export default function Conclusion() {
   return (
     <StickyScrollSection
       id="frame-9"
       ariaLabel="Putting equity into practice"
-      height="340vh"
+      height="240vh"
       stickyTop="15vh"
       stickyHeight="70vh"
       offset={["start start", "end center"]}
@@ -124,21 +129,13 @@ function clamp01(value: number) {
 
 function ConclusionVisual() {
   const conclusionProgress = useConclusionProgress()
-  // Crossfades in as ConclusionCircleMorphOverlay (the map-side circle
-  // morph) finishes blooming and fades itself out — see the shared
-  // CONCLUSION_* thresholds in store.ts. Positions already match exactly
-  // (both read the same FloatingBubbles cluster geometry), so this is a
-  // plain opacity handoff rather than a slide/scale entrance.
   const revealOpacity = clamp01(
-    (conclusionProgress - CONCLUSION_HANDOFF_START_PROGRESS) /
-      (CONCLUSION_HANDOFF_END_PROGRESS - CONCLUSION_HANDOFF_START_PROGRESS),
+    (conclusionProgress - BUBBLES_REVEAL_START) /
+      (BUBBLES_REVEAL_END - BUBBLES_REVEAL_START),
   )
-  // After the handoff, bubbles start as the tier-colored icons they morphed
-  // in as, then fade into their photos — closing the loop with the opener's
-  // photo -> icon fade.
   const photoRevealProgress = clamp01(
-    (conclusionProgress - CONCLUSION_HANDOFF_END_PROGRESS) /
-      (1 - CONCLUSION_HANDOFF_END_PROGRESS),
+    (conclusionProgress - PHOTOS_REVEAL_START) /
+      (PHOTOS_REVEAL_END - PHOTOS_REVEAL_START),
   )
 
   if (!LOAD_CONCLUSION_VISUAL) return null

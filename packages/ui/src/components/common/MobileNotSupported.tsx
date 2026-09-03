@@ -6,7 +6,20 @@
 
 import { Box, Typography, Button, useTheme } from "@repo/ui/mui"
 
-export function MobileNotSupported() {
+export interface MobileNotSupportedProps {
+  /** Message shown to the visitor. Defaults to the COEQWAL tools copy. */
+  message?: string
+  /** href for the call-to-action button. Defaults to "/". */
+  buttonHref?: string
+  /** Label for the call-to-action button. Defaults to "Go to the homepage". */
+  buttonLabel?: string
+}
+
+export function MobileNotSupported({
+  message = "Due to the nature of the tools, this section of COEQWAL is best used on a tablet, desktop or laptop computer",
+  buttonHref = "/",
+  buttonLabel = "Go to the homepage",
+}: MobileNotSupportedProps = {}) {
   const theme = useTheme()
 
   return (
@@ -23,12 +36,9 @@ export function MobileNotSupported() {
         alignItems: "center" /* Vertical centering */,
       }}
     >
-      <Typography variant="body1">
-        Due to the nature of the tools, this section of COEQWAL is best used on
-        a tablet, desktop or laptop computer
-      </Typography>
-      <Button variant="contained" href="/">
-        Go to the homepage
+      <Typography variant="body1">{message}</Typography>
+      <Button variant="contained" href={buttonHref}>
+        {buttonLabel}
       </Button>
     </Box>
   )

@@ -226,7 +226,7 @@ export function FloatingBubbles({
     <Box
       aria-hidden="true"
       sx={{
-        display: { xs: "none", lg: "block" },
+        display: { xs: "none", md: "block" },
         position: "absolute",
         top: "50%",
         width: "min(45dvw, 72dvh)",

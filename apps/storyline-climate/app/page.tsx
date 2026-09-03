@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import { Box, CircularProgress } from "@repo/ui/mui"
+import { Box, CircularProgress, useMediaQuery, useTheme } from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
@@ -10,11 +10,13 @@ import { AnimatePresence, motion } from "@repo/motion"
 import {
   BaseHeader,
   getWaterThemeOptions,
+  getMainHomeUrl,
   goToMainAbout,
   goToMainData,
   goToMainHome,
   goToMainLearn,
   goToMainExplore,
+  MobileNotSupported,
 } from "@repo/ui"
 import {
   SCROLLAMA_CONFIG,
@@ -36,6 +38,17 @@ import {
 export default function StoryContainer() {
   const isMapReady = true //useStoryStore((state) => state.isMapReady)
   const waterThemesOptions = useMemo(() => getWaterThemeOptions(), [])
+  const theme = useTheme()
+  const isSmallDevice = useMediaQuery(theme.breakpoints.down("lg"))
+
+  if (isSmallDevice) {
+    return (
+      <MobileNotSupported
+        message="This section of COEQWAL is best experienced on a tablet, desktop, or laptop. Mobile support for our water stories is coming soon."
+        buttonHref={getMainHomeUrl()}
+      />
+    )
+  }
 
   return (
     <>

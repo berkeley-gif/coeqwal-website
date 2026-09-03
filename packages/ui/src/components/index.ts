@@ -21,6 +21,7 @@ export {
   goToMainLearn,
   goToMainExplore,
   getExploreUrl,
+  getMainHomeUrl,
   getWaterStoryUrl,
 } from "./navigation/baseHeaderLinks"
 export type { WaterStoryKey, WaterThemeKey } from "./navigation/baseHeaderLinks"
@@ -56,6 +57,7 @@ export type {
 } from "./common/tooltips/useDisclosure"
 export { AnchoredPortal } from "./common/tooltips/AnchoredPortal"
 export { MobileNotSupported } from "./common/MobileNotSupported"
+export type { MobileNotSupportedProps } from "./common/MobileNotSupported"
 export type { AnchoredPortalProps } from "./common/tooltips/AnchoredPortal"
 // Standard tooltip surfaces (hover hint + click/anchored popover)
 export { HoverTip } from "./common/tooltips/HoverTip"

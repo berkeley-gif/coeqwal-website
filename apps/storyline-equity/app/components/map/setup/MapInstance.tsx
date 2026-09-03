@@ -11,6 +11,7 @@ import { getDamConstructionLabel } from "../layers/DamChronologyLayer"
 import { USER_GROUP_AREA_COLOR } from "../layers/UserGroupAreaLayer"
 import { BACKGROUND_CIRCLE_ANNOTATIONS } from "../config/locationPresets"
 import {
+  CONCLUSION_HANDOFF_START_PROGRESS,
   CONCLUSION_MAP_FADE_END_PROGRESS,
   CONCLUSION_MORPH_LANDED_PROGRESS,
   useActiveSectionStore,
@@ -26,12 +27,20 @@ import {
 } from "../../../store"
 import { CALIFORNIA_VIEW } from "../config/cameraPresets"
 import { InfrastructureColor } from "../../helpers/colorPalette"
+import { themeValues } from "@repo/ui/themes/theme"
 
 const goldRushCaptionMarkSx = {
   infrastructure: {
     color: InfrastructureColor,
     fontWeight: 700,
   },
+} as const
+
+const conclusionCaptionMarkSx = {
+  tier1: { color: themeValues.palette.tiers.tier1, fontWeight: 700 },
+  tier2: { color: themeValues.palette.tiers.tier2, fontWeight: 700 },
+  tier3: { color: themeValues.palette.tiers.tier3, fontWeight: 700 },
+  tier4: { color: themeValues.palette.tiers.tier4, fontWeight: 700 },
 } as const
 
 const visualCopy = {
@@ -60,19 +69,42 @@ const visualCopy = {
   HistoricalContext: {
     title: "Diverse Indigenous Cultures across California",
     caption:
-      "For thousands of years, Indigenous people lived in communities with diverse cultures and distinct languages.",
+      "Each uniquely colored area maps a distinct Indigenous cultural region to a traditional homeland.",
   },
   ClimateResilience: {
-    title: "Map title — Climate resilience",
-    caption: "Placeholder caption for the Climate Resilience frame.",
+    title: "Climate resilience and vulnerability across water users",
+    caption:
+      "Water users face uneven distribution of benefits and burdens from California’s complex water system.",
   },
   Transparency: {
-    title: "Map title — Transparency",
-    caption: "Placeholder caption for the Transparency frame.",
+    title: "Computer models change representation, but not access",
+    caption:
+      "Our physical water system and water users are now represented in computer models. Rivers, infrastructure, and operating rules control the flows of water. At “stops” along the mapped flow lines, water is delivered to water users and taken out of the system.",
   },
   Conclusion: {
-    title: "Graphic title — Conclusion",
-    caption: "Placeholder caption for the Conclusion frame.",
+    title: "COEQWAL measures equity and resilience across water users",
+    caption: (
+      <Text
+        value={{
+          segments: [
+            {
+              text: "With COEQWAL, modeled outcomes are measured in ways that matter to water users, then represented as comparable levels of performance. The four performance categories — ",
+            },
+            { text: "Optimal", mark: "tier1" },
+            { text: ", " },
+            { text: "Acceptable", mark: "tier2" },
+            { text: ", " },
+            { text: "At-risk", mark: "tier3" },
+            { text: ", and " },
+            { text: "Critical", mark: "tier4" },
+            {
+              text: " — help to compare outcomes across water uses on the map.",
+            },
+          ],
+        }}
+        markSx={conclusionCaptionMarkSx}
+      />
+    ),
   },
 } as const
 
@@ -192,7 +224,7 @@ function getInfrastructureVisualCopy(progress: number) {
                 position: "after",
               },
             },
-            { text: " diverted water. At first uses were local." },
+            { text: " diverted water and ditches drained land." },
           ],
         }}
         markSx={goldRushCaptionMarkSx}
@@ -256,9 +288,13 @@ export default function MapInstance({
       ? getGoldRushVisualCopy(goldRushProgress)
       : activeSection === "Infrastructure"
         ? getInfrastructureVisualCopy(infrastructureProgress)
-        : activeSection in visualCopy
-          ? visualCopy[activeSection as keyof typeof visualCopy]
-          : null
+        : activeSection === "Conclusion"
+          ? conclusionProgress < CONCLUSION_HANDOFF_START_PROGRESS
+            ? visualCopy.Conclusion
+            : null
+          : activeSection in visualCopy
+            ? visualCopy[activeSection as keyof typeof visualCopy]
+            : null
   const prevCameraRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -314,7 +350,12 @@ export default function MapInstance({
         zIndex: 0,
         pointerEvents: "auto",
         display: "grid",
-        gridTemplateRows: "15dvh 85dvh",
+        gridTemplateRows: {
+          xs: "30dvh 70dvh",
+          md: "30dvh 70dvh",
+          lg: "24dvh 76dvh",
+          xl: "15dvh 85dvh",
+        },
       }}
     >
       <Box
@@ -349,7 +390,12 @@ export default function MapInstance({
           </>
         ) : null}
       </Box>
-      <Box sx={{ position: "relative", minHeight: 0, overflow: "hidden" }}>
+      <Box
+        component={motion.div}
+        animate={{ opacity: activeSection === "Resolution" ? 0 : 1 }}
+        transition={{ duration: 0.35, ease: "linear" }}
+        sx={{ position: "relative", minHeight: 0, overflow: "hidden" }}
+      >
         <Box
           component={motion.div}
           animate={{ opacity: conclusionMapOpacity }}
@@ -384,6 +430,7 @@ export default function MapInstance({
             "central-valley-agriculture": centralValleyIcon,
             "bay-area-city": urbanIcon,
             "los-angeles-city": urbanIcon,
+            "small-community": "/map-icons/urban_small.svg",
             delta: wetlandIcon,
             "shasta-salmon": salmonIcon,
           }}

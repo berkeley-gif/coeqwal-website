@@ -16,7 +16,10 @@ const transparencyText = {
         ],
         [
           {
-            text: "These models simplify an extraordinarily complex water system. But that simplification can hide the assumptions, priorities, and operating rules that shape how water is allocated, and can reproduce existing inequities.",
+            text: "These models simplify an extraordinarily complex water system.",
+          },
+          {
+            text: "But that simplification can hide the assumptions, priorities, and operating rules that shape how water is allocated, and can reproduce existing inequities.",
           },
         ],
         [
@@ -33,7 +36,10 @@ const transparencyText = {
         ],
         [
           {
-            text: "The water system we model today is not simply a physical system. It reflects generations of choices embedded in water rights, infrastructure, contracts, and operating rules.",
+            text: "The water system we model today is not simply a physical system.",
+          },
+          {
+            text: "It reflects generations of choices embedded in water rights, infrastructure, contracts, and operating rules.",
           },
         ],
         [
@@ -52,7 +58,7 @@ export default function Transparency() {
     <StickyScrollSection
       id="frame-6"
       ariaLabel="Why transparency matters"
-      height="680vh"
+      height="300vh"
       stickyTop="15vh"
       stickyHeight="70vh"
       offset={["start start", "end center"]}
@@ -67,54 +73,43 @@ export default function Transparency() {
           alignItems: "center",
         }}
       >
-        {transparencyText.en.sections.map((groups, index) => {
-          const start = index / transparencyText.en.sections.length
-          const end = (index + 1) / transparencyText.en.sections.length
-          return (
-            <ScrollElement
-              key={index}
-              enter={[start, start + 0.04]}
-              hold={[start + 0.04, end - 0.04]}
-              exit={[end - 0.04, end]}
-              animation="slideUp"
-              style={{ gridArea: "1 / 1" }}
-            >
-              {index === 0 ? (
-                <Box component="header">
-                  <SectionTitle text={transparencyText.en.title} />
+        <ScrollElement
+          enter={[0, 0.04]}
+          hold={[0.04, 0.31]}
+          exit={[0.31, 0.35]}
+          animation="slideUp"
+          style={{ gridArea: "1 / 1" }}
+        >
+          <Box component="header">
+            <SectionTitle text={transparencyText.en.title} />
+          </Box>
+          <Stack component="section" spacing={3.5}>
+            {transparencyText.en.sections[0].map(
+              (sentences, paragraphIndex) => (
+                <Box key={paragraphIndex} component="article">
+                  <Paragraph blocks={sentences} />
                 </Box>
-              ) : null}
-              <Stack component="section" spacing={3.5}>
-                {groups.map((sentences, paragraphIndex) => {
-                  let revealRange: [number, number] | null = null
-                  if (index === 0 && paragraphIndex === 2) {
-                    revealRange = [0.18, 0.22]
-                  } else if (index === 1 && paragraphIndex === 3) {
-                    revealRange = [0.72, 0.76]
-                  }
+              ),
+            )}
+          </Stack>
+        </ScrollElement>
 
-                  const paragraph = (
-                    <Box key={paragraphIndex} component="article">
-                      <Paragraph blocks={sentences} />
-                    </Box>
-                  )
-
-                  return revealRange ? (
-                    <ScrollElement
-                      key={paragraphIndex}
-                      enter={revealRange}
-                      hold={[revealRange[1], 1]}
-                    >
-                      {paragraph}
-                    </ScrollElement>
-                  ) : (
-                    paragraph
-                  )
-                })}
-              </Stack>
-            </ScrollElement>
-          )
-        })}
+        <ScrollElement
+          enter={[0.35, 0.39]}
+          hold={[0.39, 1]}
+          animation="slideUp"
+          style={{ gridArea: "1 / 1" }}
+        >
+          <Stack component="section" spacing={3.5}>
+            {transparencyText.en.sections[1].map(
+              (sentences, paragraphIndex) => (
+                <Box key={paragraphIndex} component="article">
+                  <Paragraph blocks={sentences} />
+                </Box>
+              ),
+            )}
+          </Stack>
+        </ScrollElement>
       </Box>
     </StickyScrollSection>
   )
