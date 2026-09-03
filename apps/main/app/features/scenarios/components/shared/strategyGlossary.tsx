@@ -116,7 +116,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
   },
   {
     pattern: /\bTUCPs?\b/g,
-    glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)",
+    glossaryTerm: "Temporary Urgency Change Petitions (TUCPs)",
   },
   {
     pattern: /\bU\.S\. Bureau of Reclamation\b/g,

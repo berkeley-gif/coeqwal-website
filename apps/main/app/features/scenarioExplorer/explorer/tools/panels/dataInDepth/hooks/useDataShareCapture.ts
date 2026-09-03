@@ -110,6 +110,7 @@ export function useDataShareCapture(
         compareBy,
         memberIds: data.members.map((m) => m.id),
         memberLabels: data.members.map((m) => m.label),
+        memberColors,
         source: data.mixedSource ? "mixed" : data.source,
         hydroclimate: capturedHydroclimate,
         cachedSvg: captured?.svg,

@@ -79,6 +79,51 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
       .first(),
   ).toBeVisible()
 
+  // The card, and therefore every rasterized export, carries a color key for
+  // the plotted members and a facts block naming what the figure shows.
+  // Scoped to the story canvas: the same card also renders in the tray, so
+  // an unscoped count would be double and would not say which card was
+  // checked. One member is staged in this flow, so one swatch.
+  const storyCard = page.locator('[data-share-region="canvas"]')
+  await expect(storyCard.locator("[data-share-legend-swatch]")).toHaveCount(1)
+  // The swatch carries an accessible name so screen readers get the color
+  // key, and it always paints: a row without a color falls back to grey.
+  const swatch = storyCard.getByRole("img", {
+    name: "Legend: Current operations",
+  })
+  await expect(swatch).toBeVisible()
+  expect(
+    await swatch.evaluate((el) => getComputedStyle(el).backgroundColor),
+  ).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/)
+  await expect(storyCard.getByText("Variable", { exact: true })).toBeVisible()
+  await expect(storyCard.getByText("View", { exact: true })).toBeVisible()
+  await expect(
+    storyCard.getByText("Water years", { exact: true }),
+  ).toBeVisible()
+  // The legend row names the member the chart drew. Exact: the standardized
+  // title above it also contains the scenario name, title-cased.
+  await expect(
+    storyCard.getByText("Current operations", { exact: true }),
+  ).toBeVisible()
+
+  // The subtitle is legible on the card. It used to take a token that
+  // resolves to the card's own background color, so it rendered invisible in
+  // every export.
+  const subtitleContrast = await storyCard
+    .getByText("Volume (TAF) (Exceedance)", { exact: true })
+    .first()
+    .evaluate((el) => {
+      const color = getComputedStyle(el).color
+      let background = ""
+      let node = el.parentElement
+      while (node && (!background || background === "rgba(0, 0, 0, 0)")) {
+        background = getComputedStyle(node).backgroundColor
+        node = node.parentElement
+      }
+      return { color, background }
+    })
+  expect(subtitleContrast.color).not.toBe(subtitleContrast.background)
+
   // Download the PNG (html-to-image path renders the live card). The raster
   // is wide enough to read as a figure, not a thumbnail.
   const pngPromise = page.waitForEvent("download")

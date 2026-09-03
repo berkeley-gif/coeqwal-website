@@ -32,7 +32,11 @@ function TabPanelsErrorFallback() {
 
 export default function LearnPage() {
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
+  const isNarrow = useMediaQuery(theme.breakpoints.down("sm")) // portrait phones
+  const isShort = useMediaQuery("(max-height: 600px)") // landscape phones
+
+  // Should be checking for landscape mode on phones as well
+  const isMobile = isNarrow || isShort
 
   if (isMobile) {
     return <MobileNotSupported />

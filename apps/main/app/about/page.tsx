@@ -42,7 +42,141 @@ export default function AboutPage() {
     },
   ]
 
-  const logos: GridLogo[] = []
+  const logos: GridLogo[] = [
+    {
+      src: "/images/about/logos/agwa.png",
+      alt: "Alliance for Global Water Adaptation",
+      width: 166,
+    },
+    { src: "/images/about/logos/flow_west.png", alt: "FlowWest", width: 143 },
+    {
+      src: "/images/about/logos/ca_native_american_gis.png",
+      alt: "California Native American GIS",
+      width: 69,
+    },
+    {
+      src: "/images/about/logos/ca_indian_water_comission.png",
+      alt: "California Indian Water Commission",
+      width: 60,
+    },
+    {
+      src: "/images/about/logos/ciwr.png",
+      alt: "California Institute for Water Resources",
+      width: 171,
+    },
+    { src: "/images/about/logos/ucd.png", alt: "UC Davis", width: 137 },
+    {
+      src: "/images/about/logos/ucla_luskin.png",
+      alt: "UCLA Luskin Center for Innovation",
+      width: 96,
+    },
+    {
+      src: "/images/about/logos/metropolitan_water_district_so_cal.png",
+      alt: "Metropolitan Water District of Southern California",
+      width: 60,
+    },
+    {
+      src: "/images/about/logos/sac_state.png",
+      alt: "Sacramento State",
+      width: 199,
+    },
+    {
+      src: "/images/about/logos/psr_la.png",
+      alt: "Physicians for Social Responsibility Los Angeles",
+      width: 141,
+    },
+    {
+      src: "/images/about/logos/clawa.png",
+      alt: "Crestline-Lake Arrowhead Water Agency",
+      width: 61,
+    },
+    { src: "/images/about/logos/stantec.png", alt: "Stantec", width: 151 },
+    {
+      src: "/images/about/logos/three_valley.png",
+      alt: "Three Valleys Municipal Water District",
+      width: 65,
+    },
+    { src: "/images/about/logos/tu.png", alt: "Trout Unlimited", width: 230 },
+    { src: "/images/about/logos/ucsc.png", alt: "UC Santa Cruz", width: 129 },
+    {
+      src: "/images/about/logos/bvr.png",
+      alt: "Buena Vista Rancheria Me-Wuk Indians",
+      width: 59,
+    },
+    {
+      src: "/images/about/logos/ucanr.png",
+      alt: "UC Agriculture and Natural Resources",
+      width: 195,
+    },
+    { src: "/images/about/logos/ucb.png", alt: "UC Berkeley", width: 107 },
+    {
+      src: "/images/about/logos/ucs.png",
+      alt: "Union of Concerned Scientists",
+      width: 84,
+    },
+    {
+      src: "/images/about/logos/waterboards.png",
+      alt: "California Water Boards",
+      width: 84,
+    },
+    {
+      src: "/images/about/logos/sf_baykeeper.png",
+      alt: "San Francisco Baykeeper",
+      width: 81,
+    },
+    {
+      src: "/images/about/logos/dwr.png",
+      alt: "California Department of Water Resources",
+      width: 60,
+    },
+    {
+      src: "/images/about/logos/bww.png",
+      alt: "Black Women for Wellness",
+      width: 80,
+    },
+    {
+      src: "/images/about/logos/dsc.png",
+      alt: "Delta Stewardship Council",
+      width: 100,
+    },
+    {
+      src: "/images/about/logos/restore_the_delta.png",
+      alt: "Restore the Delta",
+      width: 64,
+    },
+    {
+      src: "/images/about/logos/national_women_ag.png",
+      alt: "National Women in Ag Association",
+      width: 90,
+    },
+    {
+      src: "/images/about/logos/noaa_fisheries.png",
+      alt: "NOAA Fisheries",
+      width: 39,
+    },
+    {
+      src: "/images/about/logos/ncwa.png",
+      alt: "Northern California Water Association",
+      width: 95,
+    },
+    {
+      src: "/images/about/logos/tnc.png",
+      alt: "The Nature Conservancy",
+      width: 138,
+    },
+    { src: "/images/about/logos/uc_merced.png", alt: "UC Merced", width: 48 },
+    {
+      src: "/images/about/logos/ucsd_scripps.png",
+      alt: "UC San Diego, Scripps Institution of Oceanography",
+      width: 309,
+    },
+    { src: "/images/about/logos/virga.png", alt: "Virga Labs", width: 146 },
+    {
+      src: "/images/about/logos/norcal_salmon.png",
+      alt: "Nor-Cal Guides & Sportsmen's Association",
+      width: 60,
+    },
+  ]
 
   useEffect(() => {
     // Guard required: this effect touches browser-only APIs (window.history, window.scrollTo).

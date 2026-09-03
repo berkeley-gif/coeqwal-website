@@ -71,17 +71,15 @@ export function LogoGrid({ id, ariaLabel, title, logos }: LogoGridProps) {
         variants={fadeIn}
         sx={{
           width: "100%",
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "repeat(2, 1fr)",
-            sm: "repeat(3, 1fr)",
-            md: "repeat(4, 1fr)",
-          },
-          gap: { xs: "24px", md: "16px" },
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          alignItems: "center",
+          rowGap: { xs: "20px", md: "28px" },
+          columnGap: { xs: "20px", md: "32px" },
           paddingX: { xs: "24px", md: "0" },
-          maxWidth: "900px", // Max width of grid
-          margin: "60px auto", // Centers the grid horizontally
-          placeItems: "center",
+          maxWidth: "1100px", // Max width of the logo block
+          margin: "60px auto", // Centers the block horizontally
         }}
       >
         {logos.map((logo) => (
@@ -91,9 +89,8 @@ export function LogoGrid({ id, ariaLabel, title, logos }: LogoGridProps) {
             alt={logo.alt}
             key={logo.src}
             sx={{
-              height: "auto",
-              maxWidth: "100%", // Prevents overflow
-              width: "auto", // Let it scale naturally
+              height: { xs: "28px", md: "46px" }, // fixed display height for every logo
+              width: "auto", // preserves each logo's own aspect ratio
               objectFit: "contain",
             }}
           />
