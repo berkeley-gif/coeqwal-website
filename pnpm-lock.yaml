@@ -259,6 +259,9 @@ importers:
       '@repo/motion':
         specifier: workspace:*
         version: link:../../packages/motion
+      '@repo/scrollytelling':
+        specifier: workspace:*
+        version: link:../../packages/scrollytelling
       '@repo/state':
         specifier: workspace:*
         version: link:../../packages/state
