@@ -77,6 +77,10 @@ interface UseOutcomeLabelGeometryParams {
    *  what's currently visible), so the SVG overlay can size itself to
    *  cover the whole scroll range instead of just the visible window. */
   onContentHeightChange?: (height: number) => void
+  /** Fires once when the backdrop crosses from invisible to visible (or
+   *  back), not every frame - lets the parent gate the scroll-down chevron
+   *  on real visibility instead of an approximate beatIndex threshold. */
+  onBackdropVisibilityChange?: (visible: boolean) => void
   /** Extra heatmap columns beyond the primary one. Defaults to 0. */
   heatmapExtraColumnCount?: number
 }
@@ -125,6 +129,7 @@ export function useOutcomeLabelGeometry({
   outcomeMorphWindows,
   onGlyphLayoutChange,
   onContentHeightChange,
+  onBackdropVisibilityChange,
   heatmapExtraColumnCount = 0,
 }: UseOutcomeLabelGeometryParams): OutcomeLabelRefs {
   const theme = useTheme()
@@ -210,15 +215,29 @@ export function useOutcomeLabelGeometry({
    * translates. Rebuilt every render and invoked via `narrationTickRef` (set
    * in the bridge effect below). Fades are `clamp01((v - START) / WIDTH)`,
    * combined as `fadeIn * (1 - fadeOut)`. */
-  const latestNarrationFrameRef = useRef<(v: number) => void>(() => {})
+  const backdropVisibleRef = useRef(false)
+
+  const latestNarrationFrameRef = useRef<(v: number) => void>(() => { })
   latestNarrationFrameRef.current = (v: number) => {
+    // White backdrop fades in with AG_REV's morph (the first graphic). The
+    // right column's overflow is gated on the same signal so its native
+    // scrollbar can't peek out from behind an invisible panel on beat 0/1.
+    const fadeIn = clamp01(
+      (v - BACKDROP_FADE_IN_PROGRESS) / BACKDROP_FADE_IN_WIDTH,
+    )
     if (beat2PanelRef.current) {
-      // White backdrop fades in with AG_REV's morph (the first graphic).
-      const fadeIn = clamp01(
-        (v - BACKDROP_FADE_IN_PROGRESS) / BACKDROP_FADE_IN_WIDTH,
-      )
       beat2PanelRef.current.style.opacity = String(fadeIn)
     }
+    if (rightColumnRootRef.current) {
+      rightColumnRootRef.current.style.overflowY =
+        fadeIn > 0 ? "auto" : "hidden"
+    }
+    const isBackdropVisible = fadeIn > 0
+    if (isBackdropVisible !== backdropVisibleRef.current) {
+      backdropVisibleRef.current = isBackdropVisible
+      onBackdropVisibilityChange?.(isBackdropVisible)
+    }
+
 
     // Titles fade in just before their morph slice. Captions over the tail
     // of the morph window, so both read as the polygons settle.
@@ -235,8 +254,8 @@ export function useOutcomeLabelGeometry({
       wrapDip =
         v < HEATMAP_WRAP_DIP_CENTER
           ? 1 -
-            (v - (HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF)) /
-              HEATMAP_WRAP_DIP_HALF
+          (v - (HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF)) /
+          HEATMAP_WRAP_DIP_HALF
           : (v - HEATMAP_WRAP_DIP_CENTER) / HEATMAP_WRAP_DIP_HALF
     }
     // Hold radar labels opaque through RADAR_SETTLE, fade out, hold invisible
@@ -368,11 +387,13 @@ export function useOutcomeLabelGeometry({
         }
       })
     }
-    // Radar/heatmap are sized to fit one viewport, but the distribution
-    // grid's placeholder rows stay mounted at their locked (tall) height
-    // underneath - they just fade out. `measure()` only recomputes content
-    // height on resize, so a plain scroll across this boundary needs its
-    // own check here, on every tick, to catch it.
+    // Radar/heatmap are sized to their real measured content, but the
+    // distribution grid's placeholder rows stay mounted at their locked
+    // (tall) height underneath - they just fade out, clipped to the new
+    // target height so they don't inflate scrollHeight past it.
+    // `measure()` only recomputes content height on resize, so a plain
+    // scroll across this boundary needs its own check here, on every
+    // tick, to catch it.
     const contentPhase: "tall" | "radar" | "heatmap" =
       v < RADAR_SLIDE_START
         ? "tall"
@@ -383,17 +404,17 @@ export function useOutcomeLabelGeometry({
       contentHeightPhaseRef.current = contentPhase
       const rootEl = rightColumnRootRef.current
       if (rootEl) {
-        const visibleHeight = rootEl.getBoundingClientRect().height
         const targetHeight =
           contentPhase === "tall"
             ? tallContentHeightRef.current
-            : Math.max(
-                visibleHeight,
-                contentPhase === "radar"
-                  ? radarContentHeightRef.current
-                  : heatmapContentHeightRef.current,
-              )
+            : contentPhase === "radar"
+              ? radarContentHeightRef.current
+              : heatmapContentHeightRef.current
         onContentHeightChange?.(targetHeight)
+        const backdrop = beat2PanelRef.current
+        if (backdrop) {
+          backdrop.style.height = `${targetHeight}px`
+        }
         const gridWrapperEl = gridWrapperRef.current
         if (gridWrapperEl) {
           if (contentPhase === "tall") {
@@ -406,6 +427,7 @@ export function useOutcomeLabelGeometry({
         }
       }
     }
+
 
     // Slide titles to the radar [RADAR_SLIDE_START-RADAR_SLIDE_END], hold
     // while they fade out, then snap to the heatmap axis at HEATMAP_TAKEOVER+.
@@ -435,11 +457,11 @@ export function useOutcomeLabelGeometry({
         const shift = radarActive ? reflowShift.get(code) : undefined
         const radarDx = rd
           ? (shift ? -shift.dx * (1 - radarPosBlend) : 0) +
-            rd.dx * radarPosBlend
+          rd.dx * radarPosBlend
           : 0
         const radarDy = rd
           ? (shift ? -shift.dy * (1 - radarPosBlend) : 0) +
-            rd.dy * radarPosBlend
+          rd.dy * radarPosBlend
           : 0
         const dx = radarDx + (hd ? hd.dx * heatmapPosBlend : 0)
         const dy = radarDy + (hd ? hd.dy * heatmapPosBlend : 0)
@@ -519,17 +541,10 @@ export function useOutcomeLabelGeometry({
         )
       })
       onGlyphLayoutChange(layout)
-      // The actual `onContentHeightChange` call happens further down,
-      // once the heatmap/radar geometry tells us which phase we're in.
+      // The actual backdrop-height sync and `onContentHeightChange` call
+      // happen further down, once the heatmap/radar geometry tells us
+      // which phase we're in - see the `phase` block below.
       tallContentHeightRef.current = Math.max(maxContentBottom, rootRect.height)
-
-      // Sync the white backdrop's height to the content column. They are
-      // siblings (nesting would cause a z-index conflict with the SVG
-      // overlay), so copy the height instead.
-      const backdrop = beat2PanelRef.current
-      if (backdrop) {
-        backdrop.style.height = `${rootRect.height}px`
-      }
 
       // Radar center / radius (shared with `OutcomeMorphOverlay`). Labels
       // ring `labelR` (just past the axis tips) so they clear the outer ring.
@@ -748,6 +763,11 @@ export function useOutcomeLabelGeometry({
           heatmapLabelMaxBottom = Math.max(
             heatmapLabelMaxBottom,
             targetCenterY + rH.height / 2,
+            // The colored cell (fixed ~44px, see computeHeatmapColumnFrame)
+            // is usually taller than its row label's own text - without
+            // this, the last row's cell rendered a few px past where we'd
+            // sized the panel to.
+            targetCenterY + heatCellH / 2,
           )
           boxEl.style.justifyContent = prevJ
           textEl.style.whiteSpace = prevWhite
@@ -761,17 +781,12 @@ export function useOutcomeLabelGeometry({
         })
       }
 
-      // A small buffer, not a load-bearing estimate: `getBoundingClientRect`
-      // is exact, this just avoids clipping right at a shared pixel edge.
-      const CONTENT_BOTTOM_BUFFER = 8
-      radarContentHeightRef.current = Math.max(
-        rootRect.height,
-        radarLabelMaxBottom + CONTENT_BOTTOM_BUFFER,
-      )
-      heatmapContentHeightRef.current = Math.max(
-        rootRect.height,
-        heatmapLabelMaxBottom + CONTENT_BOTTOM_BUFFER,
-      )
+      // Bottom breathing room, matching BeatTextOverlay's `pt: 6` (48px) top
+      // padding so the panel reads as evenly padded top-and-bottom, not
+      // clipped tight to the last label/cell.
+      const CONTENT_BOTTOM_BUFFER = 48
+      radarContentHeightRef.current = radarLabelMaxBottom + CONTENT_BOTTOM_BUFFER
+      heatmapContentHeightRef.current = heatmapLabelMaxBottom + CONTENT_BOTTOM_BUFFER
 
       const v = progress.get()
       const phase: "tall" | "radar" | "heatmap" =
@@ -781,13 +796,22 @@ export function useOutcomeLabelGeometry({
             ? "radar"
             : "heatmap"
       contentHeightPhaseRef.current = phase
-      onContentHeightChange?.(
+      const measuredContentHeight =
         phase === "tall"
           ? tallContentHeightRef.current
           : phase === "radar"
             ? radarContentHeightRef.current
-            : heatmapContentHeightRef.current,
-      )
+            : heatmapContentHeightRef.current
+      onContentHeightChange?.(measuredContentHeight)
+
+      // Sync the white backdrop's height to the *actual* content for this
+      // phase, not the fixed scroll viewport - they're siblings (nesting
+      // would z-index-conflict with the SVG overlay), so copy the height
+      // instead of nesting.
+      const backdrop = beat2PanelRef.current
+      if (backdrop) {
+        backdrop.style.height = `${measuredContentHeight}px`
+      }
 
       // A resize (e.g. sidebar toggle) just recomputed radar/heatmap label
       // deltas above, but the transform that actually places labels only
