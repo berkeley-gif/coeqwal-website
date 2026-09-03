@@ -268,7 +268,9 @@ function AgricultureContent() {
           partialLabel="in 1980 — 14B cash receipts"
           totalLabel="in 2023 — 59.3B cash receipts"
           size={{ width: 550, height: 340 }}
-          config={pictogramTransform[breakpoint]?.agriculture as pictogramConfig}
+          config={
+            pictogramTransform[breakpoint]?.agriculture as pictogramConfig
+          }
           scrollYProgress={progress}
           layout={isCompact ? "flow" : "absolute"}
         />

@@ -152,7 +152,11 @@ function Pictogram({
         width: size.width,
         height: size.height,
         ...(layout === "absolute"
-          ? { position: "absolute", left: config.shift.left, top: config.shift.top }
+          ? {
+              position: "absolute",
+              left: config.shift.left,
+              top: config.shift.top,
+            }
           : { position: "relative", flexShrink: 0 }),
         visibility: displayStatus,
         opacity: overallOpacity,
