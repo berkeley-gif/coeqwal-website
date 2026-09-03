@@ -192,10 +192,10 @@ test("cws variables fetch their per-variable measures and go live", async ({
     .click()
 
   // "Surface water deliveries" also exists in the Agricultural water sector,
-  // so scope to the list that carries the unique "M&I supply shortage".
-  const cwsList = page
-    .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
+  // so scope to the list that carries the unique "Municipal supply shortages".
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
 
   // Deliveries: the default pinned location is the group's first entry
   // (All North of Delta) -> subject NOD_CWS, measure delivery.
@@ -231,7 +231,9 @@ test("cws variables fetch their per-variable measures and go live", async ({
 
   // Shortages, volume view (default): the SAME endpoint serves a different
   // measure for this variable; the SOD pin persists per location group.
-  await cwsList.getByRole("button", { name: "M&I supply shortage" }).click()
+  await cwsList
+    .getByRole("button", { name: "Municipal supply shortages" })
+    .click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
     .poll(() =>
@@ -287,10 +289,10 @@ test("cws variables disable the water-year-type row and never send wyt", async (
   ).toBeVisible()
 
   // "Surface water deliveries" also exists in the Agricultural water sector,
-  // so scope to the list that carries the unique "M&I supply shortage".
-  const cwsList = page
-    .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
+  // so scope to the list that carries the unique "Municipal supply shortages".
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
 
   const expectChipsNotApplicable = async () => {
     await expect(
@@ -321,7 +323,9 @@ test("cws variables disable the water-year-type row and never send wyt", async (
   await expectChipsNotApplicable()
 
   // Shortages, volume view.
-  await cwsList.getByRole("button", { name: "M&I supply shortage" }).click()
+  await cwsList
+    .getByRole("button", { name: "Municipal supply shortages" })
+    .click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
     .poll(() => requested.some((r) => r.measures === "shortage_total"))
@@ -359,9 +363,9 @@ test("cws systems are pickable per measure family and pins carry over only when 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  const cwsList = page
-    .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
@@ -386,7 +390,9 @@ test("cws systems are pickable per measure family and pins carry over only when 
 
   // Shortages do not serve MWD: the pin heals to the aggregate and the
   // request never names MWD.
-  await cwsList.getByRole("button", { name: "M&I supply shortage" }).click()
+  await cwsList
+    .getByRole("button", { name: "Municipal supply shortages" })
+    .click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
     .poll(() =>
@@ -435,7 +441,9 @@ test("cws systems are pickable per measure family and pins carry over only when 
       ),
     )
     .toBe(true)
-  await cwsList.getByRole("button", { name: "M&I supply shortage" }).click()
+  await cwsList
+    .getByRole("button", { name: "Municipal supply shortages" })
+    .click()
   await expect
     .poll(() =>
       requested.some(
@@ -461,9 +469,9 @@ test("cws deliveries drop the partial calendar years and export calendar-year ro
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  const cwsList = page
-    .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
@@ -512,9 +520,9 @@ test("a subject absent from a served block is reported as no data, not sample", 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  const cwsList = page
-    .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
@@ -541,9 +549,9 @@ test("welfare loss reads the welfare_loss measure and displays millions of dolla
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  const cwsList = page
-    .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
   await cwsList.getByRole("button", { name: "Welfare loss" }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
@@ -588,7 +596,7 @@ test("welfare loss reads the welfare_loss measure and displays millions of dolla
 // Surface water delivery shortage (2026-08-26, project lead and CWS team):
 // derived on the site as 100 minus the served pct_demand_met measure on the
 // delivery family, carrying the Community deliveries key-outcome chip. The
-// relabeled M&I supply shortage keeps its series and loses that chip.
+// relabeled Municipal supply shortages keeps its series and loses that chip.
 test("surface water delivery shortage derives 100 minus percent met from the served delivery family", async ({
   page,
 }) => {
@@ -600,9 +608,9 @@ test("surface water delivery shortage derives 100 minus percent met from the ser
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  const cwsList = page
-    .getByRole("list")
-    .filter({ has: page.getByRole("button", { name: "M&I supply shortage" }) })
+  const cwsList = page.getByRole("list").filter({
+    has: page.getByRole("button", { name: "Municipal supply shortages" }),
+  })
 
   await cwsList
     .getByRole("button", { name: "Surface water delivery shortage" })
@@ -622,8 +630,10 @@ test("surface water delivery shortage derives 100 minus percent met from the ser
   ).toBeVisible()
   await expect(page.getByText(/^Provisional$/)).toHaveCount(0)
 
-  // The relabeled M&I supply shortage: same series as before, no chip.
-  await cwsList.getByRole("button", { name: "M&I supply shortage" }).click()
+  // The relabeled Municipal supply shortages: same series as before, no chip.
+  await cwsList
+    .getByRole("button", { name: "Municipal supply shortages" })
+    .click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect(page.getByText(/42(\.0)? TAF/).first()).toBeVisible()
   await expect(

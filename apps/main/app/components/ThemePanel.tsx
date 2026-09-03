@@ -26,6 +26,7 @@ import { useWhichScrollSection } from "../hooks/useWhichScrollSection"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import { themeValues } from "@repo/ui/themes/theme"
 import { InlineNavLink } from "./InlineNavLink"
+import { FloatingGlossary } from "../features/glossary"
 
 interface ThemePanelProps {
   // All the theme content and information
@@ -573,6 +574,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                 bgColor={muiTheme.palette.brand.water}
                 textColor={muiTheme.palette.text.secondary}
               />
+              <FloatingGlossary />
             </Box>
           </motion.div>
         </>

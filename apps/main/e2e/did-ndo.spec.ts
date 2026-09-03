@@ -122,15 +122,16 @@ test("delta outflow fetches the SAC000 river series and goes live on the annual 
 
   // The registry lists a monthly view for this variable, but ViewBar and
   // SectorRail both filter "monthly" out, so the annual distribution is the
-  // only view the UI offers. Pinned here so that if monthly is ever restored,
-  // this spec fails and its sample-data labeling gets covered deliberately
-  // rather than shipping unlabeled.
+  // only view the UI offers - and a single-view variable renders no view
+  // tabs at all (a one-tab strip offers no choice). Pinned here so that if
+  // monthly is ever restored, this spec fails and its sample-data labeling
+  // gets covered deliberately rather than shipping unlabeled.
   await expect(
     page.getByRole("button", { name: "Monthly pattern" }),
   ).toHaveCount(0)
   await expect(
     page.getByRole("button", { name: "Annual distribution" }),
-  ).toBeVisible()
+  ).toHaveCount(0)
 
   // The distribution chart styles all read the same live series.
   await page.getByRole("button", { name: "Box plot" }).click()
