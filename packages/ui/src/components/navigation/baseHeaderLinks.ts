@@ -4,7 +4,7 @@ import type { NavDropdownOption } from "./NavDropdown"
 import { WATER_THEME_REGISTRY, type WaterThemeId } from "../../themes/theme"
 
 const DEFAULT_MAIN_APP_URL =
-  process.env.NEXT_PUBLIC_MAIN_APP_URL ?? "https://dev.coeqwal.org"
+  process.env.NEXT_PUBLIC_MAIN_APP_URL ?? "https://coeqwal.org"
 
 export type WaterStoryKey = "flow" | "climate" | "managed" | "equity"
 
