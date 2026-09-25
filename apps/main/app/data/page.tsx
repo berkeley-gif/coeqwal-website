@@ -49,6 +49,7 @@ import {
   WATER_ISSUE_DOCUMENTS,
   getWaterIssueDocumentUrl,
 } from "../content/waterIssues"
+import CtaLink from "../components/CtaLink"
 
 const { OpenInNew: OpenInNewIcon } = icons
 
@@ -743,7 +744,9 @@ export default function DataPage() {
                               selectedZipDataset,
                               "zip",
                             )}
+                            variant="outlined"
                           />
+
                         </Box>
                       )}
                     </>
@@ -854,16 +857,14 @@ export default function DataPage() {
                     outputs, and other COEQWAL resources programmatically.
                   </Typography>
 
-                  <DownloadButton
-                    fileId="api-docs"
-                    filename="api-docs"
-                    downloadUrl="https://api.coeqwal.org/docs"
+                  <CtaLink
+                    href="https://api.coeqwal.org/docs"
                     target="_blank"
                     rel="noopener noreferrer"
                     icon={<OpenInNewIcon />}
                   >
                     COEQWAL API
-                  </DownloadButton>
+                  </CtaLink>
                 </Box>
               </Grid>
 
@@ -901,10 +902,8 @@ export default function DataPage() {
 
                   {selectedBackgroundBriefDocument && (
                     <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedBackgroundBriefDocument.id}
-                        filename={selectedBackgroundBriefDocument.file}
-                        downloadUrl={getBackgroundBriefDocumentUrl(
+                      <CtaLink
+                        href={getBackgroundBriefDocumentUrl(
                           selectedBackgroundBriefDocument.file,
                         )}
                         target="_blank"
@@ -912,7 +911,7 @@ export default function DataPage() {
                         icon={<OpenInNewIcon />}
                       >
                         View {selectedBackgroundBriefDocument.label}
-                      </DownloadButton>
+                      </CtaLink>
                     </Box>
                   )}
                 </Box>
@@ -946,17 +945,15 @@ export default function DataPage() {
                     }}
                   >
                     {BACKGROUND_BRIEF_STANDALONE_DOCUMENTS.map((doc) => (
-                      <DownloadButton
+                      <CtaLink
                         key={doc.id}
-                        fileId={doc.id}
-                        filename={doc.file}
-                        downloadUrl={getBackgroundBriefDocumentUrl(doc.file)}
+                        href={getBackgroundBriefDocumentUrl(doc.file)}
                         target="_blank"
                         rel="noopener noreferrer"
                         icon={<OpenInNewIcon />}
                       >
                         View {doc.label}
-                      </DownloadButton>
+                      </CtaLink>
                     ))}
                   </Box>
 
@@ -968,10 +965,8 @@ export default function DataPage() {
 
                   {selectedStrategyDocument && (
                     <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedStrategyDocument.id}
-                        filename={selectedStrategyDocument.file}
-                        downloadUrl={getStrategyDocumentUrl(
+                      <CtaLink
+                        href={getStrategyDocumentUrl(
                           selectedStrategyDocument.file,
                         )}
                         target="_blank"
@@ -979,7 +974,7 @@ export default function DataPage() {
                         icon={<OpenInNewIcon />}
                       >
                         View {selectedStrategyDocument.label}
-                      </DownloadButton>
+                      </CtaLink>
                     </Box>
                   )}
                 </Box>
@@ -1010,10 +1005,8 @@ export default function DataPage() {
 
                   {selectedOutcomeLevelDocument && (
                     <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedOutcomeLevelDocument.id}
-                        filename={selectedOutcomeLevelDocument.file}
-                        downloadUrl={getOutcomeLevelDocumentUrl(
+                      <CtaLink
+                        href={getOutcomeLevelDocumentUrl(
                           selectedOutcomeLevelDocument.file,
                         )}
                         target="_blank"
@@ -1021,7 +1014,7 @@ export default function DataPage() {
                         icon={<OpenInNewIcon />}
                       >
                         View {selectedOutcomeLevelDocument.label}
-                      </DownloadButton>
+                      </CtaLink>
                     </Box>
                   )}
                 </Box>
@@ -1052,10 +1045,8 @@ export default function DataPage() {
 
                   {selectedWaterIssueDocument && (
                     <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedWaterIssueDocument.id}
-                        filename={selectedWaterIssueDocument.file}
-                        downloadUrl={getWaterIssueDocumentUrl(
+                      <CtaLink
+                        href={getWaterIssueDocumentUrl(
                           selectedWaterIssueDocument.file,
                         )}
                         target="_blank"
@@ -1063,7 +1054,7 @@ export default function DataPage() {
                         icon={<OpenInNewIcon />}
                       >
                         View {selectedWaterIssueDocument.label}
-                      </DownloadButton>
+                      </CtaLink>
                     </Box>
                   )}
                 </Box>
@@ -1071,18 +1062,16 @@ export default function DataPage() {
                 {/* Plain HTML directory of every document above, so search
                     engines can discover pages that would otherwise only be
                     reachable through the dropdowns' client-side state. */}
-                <Typography
-                  variant="body2"
-                  sx={{ mt: (theme) => theme.space.section.lg }}
-                >
-                  <Link
+                <Box sx={{ mt: (theme) => theme.space.section.lg }}>
+                  <CtaLink
                     href="/documents/index.html"
                     target="_blank"
                     rel="noopener noreferrer"
+                    icon={<OpenInNewIcon />}
                   >
                     Browse the full document library
-                  </Link>
-                </Typography>
+                  </CtaLink>
+                </Box>
               </Grid>
             </Grid>
           </Container>
