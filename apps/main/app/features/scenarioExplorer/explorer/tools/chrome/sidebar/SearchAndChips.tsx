@@ -69,6 +69,7 @@ export default function SearchAndChips({
   const keyOperationsChipAnchorRef = useTourAnchor(
     "list.toolbar.keyOperationsChip",
   )
+  const SHOW_KEY_OPERATIONS_CHIP = false
 
   return (
     <>
@@ -263,13 +264,15 @@ export default function SearchAndChips({
               onClick={() => setGroupByTheme(!groupByTheme)}
             />
           </Box>
-          <Box ref={keyOperationsChipAnchorRef} sx={{ display: "inline-flex" }}>
-            <ToggleChip
-              label="key operations"
-              active={showKeyOperations}
-              onClick={() => setShowKeyOperations(!showKeyOperations)}
-            />
-          </Box>
+          {SHOW_KEY_OPERATIONS_CHIP && (
+            <Box ref={keyOperationsChipAnchorRef} sx={{ display: "inline-flex" }}>
+              <ToggleChip
+                label="key operations"
+                active={showKeyOperations}
+                onClick={() => setShowKeyOperations(!showKeyOperations)}
+              />
+            </Box>
+          )}
         </Box>
       </Box>
     </>
