@@ -196,118 +196,135 @@ export default function LearnPanel() {
         </div>
       )}
       {activeSection === "water-issues" && (
-        <Box
-          sx={{
-            p: 4,
-            color: theme.palette.text.secondary,
-            backgroundColor: theme.palette.blue.medium,
-            backgroundImage: `url(${DELTA_AERIALS_SRC})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center bottom -160px",
-            backgroundRepeat: "no-repeat",
-            flex: "1 0 auto",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            pointerEvents: "auto",
-            paddingTop: (theme) => theme.space.panel.padding,
-            paddingBottom: (theme) => theme.space.panel.padding,
-            paddingLeft: (theme) =>
-              `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
-            paddingRight: (theme) => theme.space.panel.padding,
-          }}
-        >
-          <Typography variant="h3" sx={{ maxWidth: "100%" }}>
-            What water issues matter to you?
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ maxWidth: "75%", mt: theme.space.listGap.sm }}
-          >
-            Water is important to all of us – from farmers in the Central Valley
+        <LearnFullPageSection
+          title="What water issues matter to you?"
+          description="Water is important to all of us – from farmers in the Central Valley
             to communities in the Delta, from salmon in the Sacramento River to
             urban water users in Los Angeles. COEQWAL considers how decisions
-            affect the water issues that people care about.
-          </Typography>
-          <Box sx={{ mt: theme.space.listGap.sm }}>
-            <InfoCardGrid
-              columns={{ xs: 2, sm: 3, md: WATER_ISSUE_THEMES.length }}
-            >
-              {WATER_ISSUE_THEMES.map(
-                ({ title, description, themeKey, dimmed }) => (
-                  <InfoCard
-                    key={themeKey}
-                    title={title}
-                    description={description}
-                    onClick={
-                      dimmed ? undefined : () => openThemePanel(themeKey)
-                    }
-                    dimmed={dimmed}
-                    variant="onLight"
-                  />
-                ),
-              )}
-            </InfoCardGrid>
-          </Box>
-        </Box>
+            affect the water issues that people care about."
+          backgroundColor="#aacbd9"
+          backgroundImage={DELTA_AERIALS_SRC}
+          navWidth={navWidth}
+          items={WATER_ISSUE_THEMES.map(
+            ({ title, description, themeKey, dimmed }) => ({
+              key: themeKey,
+              title,
+              description,
+              dimmed,
+              onClick: () => openThemePanel(themeKey),
+            }),
+          )}
+        />
       )}
 
       {activeSection === "water-stories" && (
-        <Box
-          sx={{
-            p: 4,
-            color: theme.palette.common.white,
-            flex: "1 0 auto",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            backgroundColor: theme.palette.nature.forest,
-            pointerEvents: "auto",
-            paddingTop: (theme) => theme.space.panel.padding,
-            paddingBottom: (theme) => theme.space.panel.padding,
-            paddingLeft: (theme) =>
-              `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
-            paddingRight: (theme) => theme.space.panel.padding,
-          }}
-        >
-          <Typography variant="h3" sx={{ maxWidth: "66%" }}>
-            Want to learn more about California water?
-          </Typography>
-          <Box sx={{ mt: theme.space.listGap.sm }}>
-            <Typography
-              variant="body1"
-              sx={{ maxWidth: "75%", mt: theme.space.listGap.sm }}
-            >
-              Do you know that California has one of the most complex water
-              systems in the world? Learn about how water flows through
-              California’s Central Valley, how the state’s history influenced
-              who has access to water today, and the ways in which climate
-              change is affecting our water system.
-            </Typography>
-            <Box sx={{ mt: theme.space.listGap.sm }}>
-              <InfoCardGrid columns={5}>
-                {WATER_STORIES.map(
-                  ({ id, label, description, href, dimmed }) => (
-                    <InfoCard
-                      key={id}
-                      title={label}
-                      description={description}
-                      onClick={
-                        dimmed || !href
-                          ? undefined
-                          : () =>
-                              window.open(href, "_blank", "noopener,noreferrer")
-                      }
-                      dimmed={dimmed}
-                      variant="onDark"
-                    />
-                  ),
-                )}
-              </InfoCardGrid>
-            </Box>
-          </Box>
-        </Box>
+        <LearnFullPageSection
+          title="Want to learn more about California water?"
+          description="Do you know that California has one of the most complex water
+            systems in the world? Learn about how water flows through
+            California’s Central Valley, how the state’s history influenced
+            who has access to water today, and the ways in which climate
+            change is affecting our water system."
+          backgroundColor="#aacbd9"
+          backgroundImage={DELTA_AERIALS_SRC}
+          navWidth={navWidth}
+          items={WATER_STORIES.map(({ id, label, description, href, dimmed }) => ({
+            key: id,
+            title: label,
+            description,
+            dimmed,
+            onClick: href
+              ? () => window.open(href, "_blank", "noopener,noreferrer")
+              : undefined,
+          }))}
+        />
       )}
     </>
+  )
+}
+
+
+/*───────────────── */
+/* SHARED FULL-PAGE SECTION                                                 */
+/*───────────────── */
+
+interface LearnFullPageSectionItem {
+  /** Stable key for the card (theme key, story id, etc.) */
+  key: string
+  title: string
+  description: string
+  dimmed?: boolean
+  /** Click handler; ignored (treated as absent) when `dimmed` is true. */
+  onClick?: () => void
+}
+
+interface LearnFullPageSectionProps {
+  title: string
+  description: string
+  items: LearnFullPageSectionItem[]
+  navWidth: number
+  /** Each section may end up with its own background photo/color, so
+   *  these are passed in per call site rather than hardcoded here. */
+  backgroundColor: string
+  backgroundImage: string
+}
+
+/** Shared full-page layout for the top-nav-driven "Water issues" and "Water
+ *  stories" sections in the Learn tab — same heading/copy/card-grid
+ *  structure, different content and (eventually) different backgrounds. */
+function LearnFullPageSection({
+  title,
+  description,
+  items,
+  navWidth,
+  backgroundColor,
+  backgroundImage,
+}: LearnFullPageSectionProps) {
+  const theme = useTheme()
+
+  return (
+    <Box
+      sx={{
+        p: 4,
+        color: theme.palette.text.primary,
+        backgroundColor,
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center bottom -250px",
+        backgroundRepeat: "no-repeat",
+        flex: "1 0 auto",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        pointerEvents: "auto",
+        paddingTop: (theme) => theme.space.panel.padding,
+        paddingBottom: (theme) => theme.space.panel.padding,
+        paddingLeft: (theme) =>
+          `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
+        paddingRight: (theme) => theme.space.panel.padding,
+      }}
+    >
+      <Typography variant="h3">{title}</Typography>
+      <Typography
+        variant="body1"
+        sx={{ maxWidth: "75ch", mt: theme.space.listGap.sm }}
+      >
+        {description}
+      </Typography>
+      <Box sx={{ mt: theme.space.listGap.sm }}>
+        <InfoCardGrid columns={{ xs: 2, sm: 3, md: items.length }}>
+          {items.map(({ key, title, description, dimmed, onClick }) => (
+            <InfoCard
+              key={key}
+              title={title}
+              description={description}
+              onClick={dimmed ? undefined : onClick}
+              dimmed={dimmed}
+              variant="onLight"
+            />
+          ))}
+        </InfoCardGrid>
+      </Box>
+    </Box>
   )
 }

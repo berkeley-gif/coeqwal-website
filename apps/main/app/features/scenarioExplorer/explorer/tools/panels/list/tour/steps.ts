@@ -84,7 +84,7 @@ export const LIST_TOUR: TourStep[] = [
     body: "Click on this button to view only selected scenarios. The others are hidden so the shortlist becomes easier to compare.",
     placement: "left-start",
   },
-  {
+  /* {
     id: "list.step9.keyOperations",
     anchorId: "list.toolbar.keyOperationsChip",
     eyebrow: "key operations",
@@ -99,7 +99,7 @@ export const LIST_TOUR: TourStep[] = [
     title: "Click an icon to filter by that operation",
     body: "Selecting an icon selects every scenario in the library that shares it, so you can build a shortlist around one water-management decision.",
     placement: "right",
-  },
+  }, */
   {
     id: "list.journey",
     anchorId: "list.startVisualizing",
