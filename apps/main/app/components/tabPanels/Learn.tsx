@@ -38,7 +38,8 @@ import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { WATER_ISSUE_THEMES } from "../../features/map/overlays/content"
 import { WATER_STORIES } from "../../content/stories"
 import type { LearnNavSection } from "../../features/map/config/sectionLayers"
-const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
+const DELTA_AERIALS_SRC = "/images/2025_08_28_KJ_3517_Delta_Aerials.png"
+const CNRA_CANAL_SRC = "/images/2023_06_02_CDWR_CNRA.png"
 
 export default function LearnPanel() {
   const mapReady = useMapReady()
@@ -226,7 +227,7 @@ export default function LearnPanel() {
             who has access to water today, and the ways in which climate
             change is affecting our water system."
           backgroundColor="#aacbd9"
-          backgroundImage={DELTA_AERIALS_SRC}
+          backgroundImage={CNRA_CANAL_SRC}
           navWidth={navWidth}
           items={WATER_STORIES.map(({ id, label, description, href, dimmed }) => ({
             key: id,
