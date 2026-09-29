@@ -8,7 +8,6 @@ import { useCallback } from "react"
 import type { StepEvent, StepProgressEvent } from "react-scrollama"
 import { mapActions } from "../store"
 import type { SubSectionId } from "../config/sectionLayers"
-import { smoothScrollToCenter } from "../../../utils/smoothScrollToCenter"
 
 /**
  * Hook that returns scroll callbacks for react-scrollama.
@@ -20,7 +19,7 @@ export function useLearnScrollama() {
    * Updates the active section in the store.
    */
   const onStepEnter = useCallback(
-    ({ data, direction }: StepEvent<SubSectionId>) => {
+    ({ data }: StepEvent<SubSectionId>) => {
       // The california step has no visible content. Entering it immediately triggers
       // the central-valley map state so the zoom animation starts right away.
       const effectiveSection = data === "california" ? "central-valley" : data
@@ -28,13 +27,6 @@ export function useLearnScrollama() {
 
       if (data !== "outcomes-viz") {
         mapActions.clearOutcomeVisualization()
-      }
-
-      // When naturally scrolling into the central-valley step, ease the content
-      // to the viewport center using the same animation as the "Scroll to Explore"
-      // button. Only fires on downward entry.not when scrolling back up.
-      if (data === "central-valley" && direction === "down") {
-        smoothScrollToCenter("central-valley-content")
       }
     },
     [],
