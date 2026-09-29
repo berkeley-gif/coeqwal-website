@@ -18,6 +18,7 @@ import { themeValues } from "@repo/ui/themes/theme"
 import { sacramentoRiverMainstem, sanJoaquinRiverMainstem } from "@repo/data"
 import {
   useActiveOutcomeVisualization,
+  useActiveSubSection,
   useIsOutcomeVisualizationActive,
   useMapMode,
 } from "../store"
@@ -39,6 +40,16 @@ export const RIVER_LAYER_IDS = [
 const DEFAULT_RIVER_BODY_COLOR = "#042f67" // rgb(4, 47, 103)
 const RIVER_TROUGH_COLOR = "#1a3a52"
 const RIVER_OUTLINE_COLOR = themeValues.palette.common.white
+
+/**
+ * Fraction of each river line (from its upstream end) that falls outside
+ * DELTA_VIEW. Both mainstems enter that viewport at ~77% of their length, so
+ * revealing from 0 spends the first half of the rivers section drawing
+ * off-screen. Starting just before that point makes the visible part draw as
+ * soon as the section is entered.
+ * Coupled to DELTA_VIEW and the river geometry: re-measure if either changes.
+ */
+const RIVER_REVEAL_START = 0.75
 
 interface RiversLayerProps {
   visible: boolean
@@ -84,10 +95,17 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
         <path id={pathId} d={curvePath} fill="none" />
       </defs>
       <text
-        fontSize="15"
+        fontSize="17"
         fontFamily="Georgia, 'Times New Roman', serif"
         fontStyle="italic"
-        fill={theme.palette.common.white}
+        style={{
+          fill: theme.palette.common.white,
+          fillOpacity: 0.9,
+          stroke: "black",
+          strokeWidth: 3,
+          strokeLinejoin: "round",
+          paintOrder: "stroke",
+        }}
         fillOpacity="0.9"
         fontWeight="700"
         letterSpacing={letterSpacing}
@@ -100,6 +118,57 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
   )
 })
 
+/**
+ * Straight italic place label for close zooms (DELTA_VIEW), where the large
+ * rotated CurvedRiverLabel wouldn't fit. Shared by Delta and the two river
+ * labels so the styling can't drift between them.
+ */
+const FlatMapLabel = memo(function FlatMapLabel({
+  text,
+  opacity,
+}: {
+  text: string
+  opacity: number
+}) {
+  const theme = useTheme()
+
+  return (
+    <div style={{ opacity, transition: "opacity 0.3s ease-out" }}>
+      {/* Text is centered on the SVG's midpoint (x="50%") so the Marker's
+          anchor="center" lands on the coordinate at any width. overflow
+          visible keeps the halo and long names from being clipped. */}
+      <svg
+        width="360"
+        height="30"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ overflow: "visible" }}
+      >
+        <text
+          x="50%"
+          y="20"
+          textAnchor="middle"
+          style={{
+            fontFamily: "Georgia, Times New Roman, serif",
+            fontSize: "17px",
+            fontWeight: theme.typography.fontWeightBold,
+            fontStyle: "italic",
+            fill: theme.palette.common.white,
+            fillOpacity: 0.9,
+            stroke: "black",
+            strokeWidth: 3,
+            strokeLinejoin: "round",
+            paintOrder: "stroke",
+          }}
+        >
+
+          {text}
+        </text>
+      </svg>
+    </div>
+  )
+})
+
+
 export default function RiversLayer({
   visible,
   progress,
@@ -110,6 +179,7 @@ export default function RiversLayer({
   const isOutcomeActive = useIsOutcomeVisualizationActive()
   const activeOutcomeViz = useActiveOutcomeVisualization()
   const mapMode = useMapMode()
+  const activeSubSection = useActiveSubSection()
   const isExploreMode = mapMode === "explore"
   const isSalmonOutcome = activeOutcomeViz?.outcomeCode === "WRC_SALMON_AB"
 
@@ -117,9 +187,11 @@ export default function RiversLayer({
   const sacramentoColor = useSalmonRiverColor()
 
   const clampedProgress = Math.max(0, Math.min(1, progress))
+  const trimStart =
+    RIVER_REVEAL_START + (1 - RIVER_REVEAL_START) * clampedProgress
   const trimOffset = useMemo<[number, number]>(
-    () => [clampedProgress, 1],
-    [clampedProgress],
+    () => [trimStart, 1],
+    [trimStart],
   )
   const visibilityValue = visible ? "visible" : "none"
 
@@ -165,6 +237,12 @@ export default function RiversLayer({
     return Math.max(0, Math.min(1, (clampedProgress - 0.3) / 0.2))
   }, [visible, clampedProgress, isOutcomeActive, isExploreMode])
 
+  // Rivers is the only section using DELTA_VIEW. The zoomed-out sections
+  // (distribution, calsim) already show the curved labels, so showing these
+  // there too would duplicate them.
+  const deltaViewLabelOpacity =
+    activeSubSection === "rivers" ? labelOpacity : 0
+
   const deltaOpacity = useMemo(() => {
     if (!visible || isExploreMode) return 0
     return Math.max(0, Math.min(1, (clampedProgress - 0.8) / 0.15))
@@ -174,7 +252,11 @@ export default function RiversLayer({
     () => ({
       sacramento: { lon: -121.6, lat: 39.4 },
       sanJoaquin: { lon: -120.6, lat: 37.7 },
-      delta: { lon: -122.2, lat: 37.9 },
+      delta: { lon: -122.1, lat: 37.99 },
+      // Close-zoom positions, offset ~0.2° east of each river line so the text
+      // sits beside the line rather than on it.
+      sacramentoDeltaView: { lon: -121.85, lat: 38.45 },
+      sanJoaquinDeltaView: { lon: -121.65, lat: 37.8 },
     }),
     [],
   )
@@ -342,31 +424,32 @@ export default function RiversLayer({
       )}
 
       <Marker
+        longitude={labelPositions.sacramentoDeltaView.lon}
+        latitude={labelPositions.sacramentoDeltaView.lat}
+        anchor="center"
+      >
+        <FlatMapLabel text="Sacramento River" opacity={deltaViewLabelOpacity} />
+      </Marker>
+
+      {!sacramentoOnly && (
+        <Marker
+          longitude={labelPositions.sanJoaquinDeltaView.lon}
+          latitude={labelPositions.sanJoaquinDeltaView.lat}
+          anchor="center"
+        >
+          <FlatMapLabel
+            text="San Joaquin River"
+            opacity={deltaViewLabelOpacity}
+          />
+        </Marker>
+      )}
+
+      <Marker
         longitude={labelPositions.delta.lon}
         latitude={labelPositions.delta.lat}
         anchor="center"
       >
-        <div
-          style={{ opacity: deltaOpacity, transition: "opacity 0.3s ease-out" }}
-        >
-          <svg width="60" height="30" xmlns="http://www.w3.org/2000/svg">
-            <text
-              x="30"
-              y="20"
-              textAnchor="middle"
-              style={{
-                fontFamily: "Georgia, Times New Roman, serif",
-                fontSize: "15px",
-                fontWeight: theme.typography.fontWeightBold,
-                fontStyle: "italic",
-                fill: theme.palette.common.white,
-                fillOpacity: 0.9,
-              }}
-            >
-              Delta
-            </text>
-          </svg>
-        </div>
+        <FlatMapLabel text="Delta" opacity={deltaOpacity} />
       </Marker>
     </>
   )
