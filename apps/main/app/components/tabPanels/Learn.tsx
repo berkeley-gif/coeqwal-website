@@ -229,21 +229,22 @@ export default function LearnPanel() {
           backgroundColor="#aacbd9"
           backgroundImage={CNRA_CANAL_SRC}
           navWidth={navWidth}
-          items={WATER_STORIES.map(({ id, label, description, href, dimmed }) => ({
-            key: id,
-            title: label,
-            description,
-            dimmed,
-            onClick: href
-              ? () => window.open(href, "_blank", "noopener,noreferrer")
-              : undefined,
-          }))}
+          items={WATER_STORIES.map(
+            ({ id, label, description, href, dimmed }) => ({
+              key: id,
+              title: label,
+              description,
+              dimmed,
+              onClick: href
+                ? () => window.open(href, "_blank", "noopener,noreferrer")
+                : undefined,
+            }),
+          )}
         />
       )}
     </>
   )
 }
-
 
 /*───────────────── */
 /* SHARED FULL-PAGE SECTION                                                 */

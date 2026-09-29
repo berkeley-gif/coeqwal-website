@@ -160,7 +160,6 @@ const FlatMapLabel = memo(function FlatMapLabel({
             paintOrder: "stroke",
           }}
         >
-
           {text}
         </text>
       </svg>
@@ -168,13 +167,11 @@ const FlatMapLabel = memo(function FlatMapLabel({
   )
 })
 
-
 export default function RiversLayer({
   visible,
   progress,
   sacramentoOnly = false,
 }: RiversLayerProps) {
-  const theme = useTheme()
   const { mapRef } = useMap()
   const isOutcomeActive = useIsOutcomeVisualizationActive()
   const activeOutcomeViz = useActiveOutcomeVisualization()
@@ -240,8 +237,7 @@ export default function RiversLayer({
   // Rivers is the only section using DELTA_VIEW. The zoomed-out sections
   // (distribution, calsim) already show the curved labels, so showing these
   // there too would duplicate them.
-  const deltaViewLabelOpacity =
-    activeSubSection === "rivers" ? labelOpacity : 0
+  const deltaViewLabelOpacity = activeSubSection === "rivers" ? labelOpacity : 0
 
   const deltaOpacity = useMemo(() => {
     if (!visible || isExploreMode) return 0

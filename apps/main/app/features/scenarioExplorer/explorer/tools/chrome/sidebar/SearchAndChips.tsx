@@ -265,7 +265,10 @@ export default function SearchAndChips({
             />
           </Box>
           {SHOW_KEY_OPERATIONS_CHIP && (
-            <Box ref={keyOperationsChipAnchorRef} sx={{ display: "inline-flex" }}>
+            <Box
+              ref={keyOperationsChipAnchorRef}
+              sx={{ display: "inline-flex" }}
+            >
               <ToggleChip
                 label="key operations"
                 active={showKeyOperations}

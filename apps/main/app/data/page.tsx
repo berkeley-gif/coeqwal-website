@@ -19,7 +19,6 @@ import {
   Alert,
   useTheme,
   icons,
-  Link,
 } from "@repo/ui/mui"
 import { CircularArrowButton, ScenarioBadge } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
@@ -746,7 +745,6 @@ export default function DataPage() {
                             )}
                             variant="outlined"
                           />
-
                         </Box>
                       )}
                     </>

@@ -17,58 +17,58 @@ import React from "react"
 import { Box, Typography } from "@repo/ui/mui"
 
 interface CtaLinkProps {
-    href: string
-    children: React.ReactNode
-    icon: React.ReactNode
-    /** Anchor target, e.g. "_blank" to open in a new tab. */
-    target?: string
-    /** Anchor rel; pair with target="_blank" (e.g. "noopener noreferrer"). */
-    rel?: string
+  href: string
+  children: React.ReactNode
+  icon: React.ReactNode
+  /** Anchor target, e.g. "_blank" to open in a new tab. */
+  target?: string
+  /** Anchor rel; pair with target="_blank" (e.g. "noopener noreferrer"). */
+  rel?: string
 }
 
 export default function CtaLink({
-    href,
-    children,
-    icon,
-    target,
-    rel,
+  href,
+  children,
+  icon,
+  target,
+  rel,
 }: CtaLinkProps) {
-    return (
-        <a
-            href={href}
-            target={target}
-            rel={rel}
-            style={{ textDecoration: "none", color: "inherit" }}
+  return (
+    <a
+      href={href}
+      target={target}
+      rel={rel}
+      style={{ textDecoration: "none", color: "inherit" }}
+    >
+      <Box
+        sx={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 1,
+          py: 1,
+          "&:hover .cta-link-icon": { transform: "translateX(4px)" },
+        }}
+      >
+        <Typography
+          component="span"
+          sx={(theme) => ({
+            ...theme.typography.overline,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            lineHeight: 1.6,
+            textDecoration: "underline",
+            color: "inherit",
+          })}
         >
-            <Box
-                sx={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 1,
-                    py: 1,
-                    "&:hover .cta-link-icon": { transform: "translateX(4px)" },
-                }}
-            >
-                <Typography
-                    component="span"
-                    sx={(theme) => ({
-                        ...theme.typography.overline,
-                        fontWeight: 600,
-                        letterSpacing: "0.2em",
-                        lineHeight: 1.6,
-                        textDecoration: "underline",
-                        color: "inherit",
-                    })}
-                >
-                    {children}
-                </Typography>
-                <Box
-                    className="cta-link-icon"
-                    sx={{ display: "inline-flex", transition: "transform 0.15s ease" }}
-                >
-                    {icon}
-                </Box>
-            </Box>
-        </a>
-    )
+          {children}
+        </Typography>
+        <Box
+          className="cta-link-icon"
+          sx={{ display: "inline-flex", transition: "transform 0.15s ease" }}
+        >
+          {icon}
+        </Box>
+      </Box>
+    </a>
+  )
 }

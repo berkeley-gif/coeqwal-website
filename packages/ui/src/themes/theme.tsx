@@ -269,7 +269,6 @@ const palette = {
     orange: "#FFA200",
     alert: "#E54545",
     glossary: "#FFB347", // Warm orange
-    mapLabel: "#e9c823", // Bright yellow that does well against the Mapbox satellite map
   },
 
   // California landscape

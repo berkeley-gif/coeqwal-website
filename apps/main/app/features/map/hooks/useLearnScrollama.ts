@@ -18,19 +18,16 @@ export function useLearnScrollama() {
    * Called when a step enters the viewport.
    * Updates the active section in the store.
    */
-  const onStepEnter = useCallback(
-    ({ data }: StepEvent<SubSectionId>) => {
-      // The california step has no visible content. Entering it immediately triggers
-      // the central-valley map state so the zoom animation starts right away.
-      const effectiveSection = data === "california" ? "central-valley" : data
-      mapActions.setActiveSubSection(effectiveSection)
+  const onStepEnter = useCallback(({ data }: StepEvent<SubSectionId>) => {
+    // The california step has no visible content. Entering it immediately triggers
+    // the central-valley map state so the zoom animation starts right away.
+    const effectiveSection = data === "california" ? "central-valley" : data
+    mapActions.setActiveSubSection(effectiveSection)
 
-      if (data !== "outcomes-viz") {
-        mapActions.clearOutcomeVisualization()
-      }
-    },
-    [],
-  )
+    if (data !== "outcomes-viz") {
+      mapActions.clearOutcomeVisualization()
+    }
+  }, [])
 
   /**
    * Called when a step exits the viewport.
