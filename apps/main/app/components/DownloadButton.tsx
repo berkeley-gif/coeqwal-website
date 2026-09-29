@@ -32,7 +32,7 @@ export default function DownloadButton({
   disabled = false,
   children,
   variant = "contained",
-  color = "primary",
+  color = "inherit",
   sx = {},
   target,
   rel,

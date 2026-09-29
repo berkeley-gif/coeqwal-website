@@ -35,7 +35,7 @@ import { ScrollToButton, resolveCssLengthPx } from "@repo/ui"
 /* IMAGE & TAB CARDS                                                       */
 /*───────────────── */
 
-const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
+const DELTA_AERIALS_SRC = "/images/2025_08_28_KJ_3517_Delta_Aerials.png"
 
 interface TabCard {
   tab: TabKey
