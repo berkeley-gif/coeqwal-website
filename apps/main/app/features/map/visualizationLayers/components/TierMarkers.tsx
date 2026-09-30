@@ -3,8 +3,10 @@
 /**
  * TierMarkers - Map markers showing tier data by location
  *
- * Displays markers on the map for each location with tier data.
- * Uses lightweight tier assignments (no geometry) with hardcoded coordinates.
+ * Displays a square marker on the map for each location with tier data
+ * (every point location is a square on every tool; see
+ * ../../config/markerShape.ts). Uses lightweight tier assignments (no
+ * geometry) with hardcoded coordinates.
  * Reports hover/click events to parent for unified tooltip handling.
  */
 
@@ -20,6 +22,10 @@ import {
   ENV_FLOWS_COORDINATES,
   ENV_FLOWS_NAMES,
 } from "../../config/outcomeLocations"
+import {
+  getPointMarkerShape,
+  SQUARE_MARKER_RADIUS_PX,
+} from "../../config/markerShape"
 
 // =============================================================================
 // COMPONENT
@@ -56,8 +62,6 @@ export default function TierMarkers({
         return theme.palette.grey[500]
     }
   }
-
-  const isDiamond = tierCode === "ENV_FLOWS" || tierCode === "CWS_DEL"
 
   const buildFeatureInfo = (
     loc: TierLocation,
@@ -127,23 +131,23 @@ export default function TierMarkers({
             anchor="center"
           >
             <div
+              data-marker-shape={getPointMarkerShape()}
               style={{
-                width: isHighlighted ? 26 : 20,
-                height: isHighlighted ? 26 : 20,
+                // The old diamond was a 20px box squashed to half width; an
+                // unsquashed 20px square reads much heavier, so squares are
+                // sized closer to the diamond's visual weight.
+                width: isHighlighted ? 18 : 14,
+                height: isHighlighted ? 18 : 14,
                 backgroundColor: getTierColor(loc.tier_level),
                 border: isHighlighted
                   ? `3px solid ${goldAccent}`
-                  : isDiamond
-                    ? `2px solid ${theme.palette.common.white}E6`
-                    : theme.border.onDark,
+                  : `2px solid ${theme.palette.common.white}E6`,
                 boxShadow: isHighlighted
                   ? `0 2px 6px rgba(0,0,0,0.5)`
                   : theme.shadow.sm,
                 cursor: "pointer",
-                borderRadius: isDiamond
-                  ? theme.borderRadius.xs
-                  : theme.borderRadius.circle,
-                transform: isDiamond ? "scale(0.5, 1) rotate(45deg)" : "none",
+                borderRadius: SQUARE_MARKER_RADIUS_PX,
+                transform: "none",
                 transformOrigin: "center",
                 transition:
                   "width 0.15s, height 0.15s, border 0.15s, box-shadow 0.15s",

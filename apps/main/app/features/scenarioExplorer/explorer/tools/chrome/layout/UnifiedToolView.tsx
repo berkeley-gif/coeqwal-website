@@ -22,6 +22,7 @@ import {
 import { mapActions } from "../../../../../map/store"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import ToolJourneyStrip from "./ToolJourneyStrip"
+import { SQUARE_MARKER_RADIUS_PX } from "../../../../../map/config/markerShape"
 
 const SIDEBAR_WIDTH_COLLAPSED = 320
 const SIDEBAR_WIDTH_EXPANDED = 480
@@ -59,7 +60,7 @@ export default function UnifiedToolView({
   // depth ignores the shared showMap flag entirely (no map, full width).
   const mapActive = showMap && isMapPairedMode(exploreMode)
 
-  // Distribution's comparison-mode pins use triangle-up/circle/triangle-down
+  // Distribution's comparison-mode pins use triangle-up/square/triangle-down
   // to encode improved/no-change/worsened (see EquityPanel's handleShowOnMap).
   const showComparisonLegend =
     mapActive && exploreMode === "equity" && showEquityComparison
@@ -321,7 +322,7 @@ export default function UnifiedToolView({
                   width: 12,
                   height: 12,
                   flexShrink: 0,
-                  borderRadius: "50%",
+                  borderRadius: `${SQUARE_MARKER_RADIUS_PX}px`,
                   backgroundColor: "#999",
                   border: "1px solid #fff",
                 }}

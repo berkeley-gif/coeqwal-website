@@ -45,6 +45,10 @@ import {
   needsScenarioPrompt,
   SCENARIO_PROMPT_TEXT,
 } from "../../components/scenarioPrompt"
+import {
+  getPointMarkerShape,
+  SQUARE_MARKER_RADIUS_PX,
+} from "../../../../../map/config/markerShape"
 
 const TIERS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]
 
@@ -610,6 +614,13 @@ export default function EquityPanel({
           isTriangle = false
         }
         const markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4]
+        const shape = getPointMarkerShape(
+          isTriangle
+            ? triangleDirection === "up"
+              ? "improved"
+              : "worsened"
+            : undefined,
+        )
 
         // Get coordinates - try polygon centroid first, fallback to hardcoded
         let coords: [number, number] | null = null
@@ -829,9 +840,10 @@ export default function EquityPanel({
                 >
                   {obj.locationName}
                 </Box> */}
-                {isTriangle ? (
+                {shape !== "square" ? (
                   <Box
                     component="svg"
+                    data-marker-shape={shape}
                     sx={{
                       width: 16,
                       height: 16,
@@ -839,7 +851,7 @@ export default function EquityPanel({
                     }}
                     viewBox="0 0 14 14"
                   >
-                    {triangleDirection === "up" ? (
+                    {shape === "triangleUp" ? (
                       <polygon
                         points="7,2 2,12 12,12"
                         fill={markerColor}
@@ -857,10 +869,11 @@ export default function EquityPanel({
                   </Box>
                 ) : (
                   <Box
+                    data-marker-shape="square"
                     sx={{
                       width: 12,
                       height: 12,
-                      borderRadius: "50%",
+                      borderRadius: `${SQUARE_MARKER_RADIUS_PX}px`,
                       backgroundColor: markerColor,
                       border: "1px solid white",
                       // boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
