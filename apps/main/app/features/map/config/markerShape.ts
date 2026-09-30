@@ -7,8 +7,8 @@
  * comparison mode keeps its direction triangles for improved and worsened
  * locations; unchanged locations are squares.
  *
- * Exports: getPointMarkerShape, SQUARE_MARKER_RADIUS_PX, MarkerShape,
- * ComparisonDirection.
+ * Exports: getPointMarkerShape, comparisonDirection, SQUARE_MARKER_RADIUS_PX,
+ * MarkerShape, ComparisonDirection.
  */
 
 export type MarkerShape = "square" | "triangleUp" | "triangleDown"
@@ -22,6 +22,17 @@ export function getPointMarkerShape(
   if (direction === "improved") return "triangleUp"
   if (direction === "worsened") return "triangleDown"
   return "square"
+}
+
+/** Direction of change from the baseline tier. Tier 1 is the best
+ *  (Optimal), so a lower tier number than the baseline is an improvement. */
+export function comparisonDirection(
+  tier: number,
+  baselineTier: number,
+): ComparisonDirection {
+  if (tier < baselineTier) return "improved"
+  if (tier > baselineTier) return "worsened"
+  return "unchanged"
 }
 
 /** Corner radius, in CSS px, for square markers: small enough that a

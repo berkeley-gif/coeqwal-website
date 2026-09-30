@@ -46,6 +46,7 @@ import {
   SCENARIO_PROMPT_TEXT,
 } from "../../components/scenarioPrompt"
 import {
+  comparisonDirection,
   getPointMarkerShape,
   SQUARE_MARKER_RADIUS_PX,
 } from "../../../../../map/config/markerShape"
@@ -588,37 +589,16 @@ export default function EquityPanel({
       // Create marker elements for each location
       const markerElements = objectivesToShow.map((obj) => {
         // Get tier color and shape based on comparison mode
-        let isTriangle = false
-        let triangleDirection: "up" | "down" = "up"
-
-        if (showEquityComparison) {
-          const currentTierNum = parseInt(obj.tier.replace("Tier ", ""))
-          const baselineTierNum = parseInt(
-            obj.baselineTier.replace("Tier ", ""),
-          )
-          if (currentTierNum === baselineTierNum) {
-            // markerColor = "#64b5f6" // Light blue - no change
-            isTriangle = false // Circle for no change
-          } else if (currentTierNum < baselineTierNum) {
-            // markerColor = "#1976d2" // Blue - improved
-            isTriangle = true
-            triangleDirection = "up" // Triangle pointing up for improvement
-          } else {
-            // markerColor = "#d32f2f" // Red - worsened
-            isTriangle = true
-            triangleDirection = "down" // Triangle pointing down for worse
-          }
-        } else {
-          // Use tier color when not in comparison mode
-          // markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4] || "#999"
-          isTriangle = false
-        }
+        // Comparison mode encodes the change from the baseline tier in the
+        // marker shape: up and down triangles for improved and worsened,
+        // a square for no change (and for every marker outside comparison).
         const markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4]
         const shape = getPointMarkerShape(
-          isTriangle
-            ? triangleDirection === "up"
-              ? "improved"
-              : "worsened"
+          showEquityComparison
+            ? comparisonDirection(
+                parseInt(obj.tier.replace("Tier ", "")),
+                parseInt(obj.baselineTier.replace("Tier ", "")),
+              )
             : undefined,
         )
 
