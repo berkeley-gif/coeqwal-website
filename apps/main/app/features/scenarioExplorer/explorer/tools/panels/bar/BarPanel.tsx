@@ -36,6 +36,8 @@ import type { ScenarioTheme } from "../../../../../../content/scenarios"
 import { captureBarChartRow } from "../list/grid/captureBarChartRow"
 import { InlineRowActions } from "../list/grid/InlineRowActions"
 import { stageShareItem } from "../../../share/stage"
+import SelectScenarioPrompt from "../../components/SelectScenarioPrompt"
+import { SCENARIO_PROMPT_TEXT } from "../../components/scenarioPrompt"
 
 /** Fixed column width so header cells and every card's glyph cells line up. */
 const OUTCOME_COLUMN_WIDTH = 90
@@ -325,21 +327,7 @@ export default function BarPanel() {
   }
 
   if (cardScenarios.length === 0) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          p: theme.space.component.xl,
-        }}
-      >
-        <Typography variant="body2" sx={{ color: theme.palette.grey[600] }}>
-          Select scenarios in the sidebar to compare their bar charts here.
-        </Typography>
-      </Box>
-    )
+    return <SelectScenarioPrompt message={SCENARIO_PROMPT_TEXT.bar} />
   }
 
   // Bar chart scenario card

@@ -40,6 +40,11 @@ import {
 } from "../../../../../map/config/outcomeLayerRegistry"
 import { resolveSourceForQuery } from "../../../../../map/config/tilesetSources"
 import { useMap, Marker } from "@repo/map"
+import SelectScenarioPrompt from "../../components/SelectScenarioPrompt"
+import {
+  needsScenarioPrompt,
+  SCENARIO_PROMPT_TEXT,
+} from "../../components/scenarioPrompt"
 
 const TIERS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]
 
@@ -307,6 +312,15 @@ export default function EquityPanel({
   // than the shared multi-select, so entering/leaving Distribution
   // does not disturb List/Radar/Resilience/Comparison selections.
   const { equityFocusScenario, showMap, setShowMap } = useWorkspaceSlice()
+  const tourTool = useWorkspaceSlice((s) => s.tour.tool)
+  const promptShown = needsScenarioPrompt({
+    mode: "equity",
+    selectedScenarioCount: 0,
+    showAll: false,
+    equityFocusScenario,
+    tourActive: tourTool === "equity",
+  })
+
   const { showEquityComparison, yAxisMode, equityHiddenCategories } =
     useEquitySlice()
 
@@ -895,7 +909,8 @@ export default function EquityPanel({
   // Paint map markers when the user selects grid cells. Selection turns the
   // map panel on if it was off. handleShowOnMap also sets mapMode explore.
   useEffect(() => {
-    if (selectedObjectives.length > 0) {
+    // Never paint (or turn the map on) behind the select-a-scenario prompt.
+    if (selectedObjectives.length > 0 && !promptShown) {
       const selectedTierLocationCodes = selectedObjectives.map(
         (obj) => `${obj.tierCode}:${obj.locationId}`,
       )
@@ -904,7 +919,7 @@ export default function EquityPanel({
       setMotionChildren(null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedObjectives, handleShowOnMap])
+  }, [selectedObjectives, handleShowOnMap, promptShown])
 
   useEffect(() => {
     if (showMap && !hasShownMapHint) {
@@ -959,7 +974,20 @@ export default function EquityPanel({
     [scrollRef, gridTourRef],
   )
   const outcomeColumnTourRef = useTourAnchor("equity.grid.outcomeColumn")
+
+  // When the prompt takes over (for example when a tour that drew the
+  // current-operations grid ends), drop grid selections so their map
+  // markers go too; the paint effect above clears markers on an empty
+  // selection.
+  useEffect(() => {
+    if (promptShown) setSelectedObjectives((prev) => (prev.length ? [] : prev))
+  }, [promptShown])
+
   const tourHighlightCategory = useEquityOutcomeColumnSync()
+
+  if (promptShown) {
+    return <SelectScenarioPrompt message={SCENARIO_PROMPT_TEXT.equity} />
+  }
 
   return (
     <Box
