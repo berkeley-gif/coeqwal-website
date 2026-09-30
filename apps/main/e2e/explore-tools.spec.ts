@@ -1,6 +1,10 @@
 import { fileURLToPath } from "node:url"
 import { test, expect, type Page } from "@playwright/test"
-import { collectConsoleErrors, setupNetwork } from "./support/network"
+import {
+  API_URL_PATTERN,
+  collectConsoleErrors,
+  setupNetwork,
+} from "./support/network"
 
 // Explore tools, offline: the empty-selection prompt on every sidebar tool.
 // Later changes extend this single test. It is one test on purpose: its HAR
@@ -34,13 +38,17 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
   // Explore tools' data calls. Replay aborts on a miss, so this fixture
   // alone must cover the whole flow.
   await setupNetwork(page, { har: TOOLS_HAR, recording: RECORDING })
-  // Any API request that fails, other than the refused prefetches, means
-  // the fixture is missing data this flow needs.
+  // Any API request that fails or returns an error status, other than the
+  // refused prefetches, means the fixture is missing data this flow needs.
   const apiFailures: string[] = []
+  const isTracked = (url: string) =>
+    API_URL_PATTERN.test(url) && !PREFETCH_LOCATIONS.test(url)
   page.on("requestfailed", (request) => {
-    const url = request.url()
-    if (/api\.coeqwal\.org/.test(url) && !PREFETCH_LOCATIONS.test(url)) {
-      apiFailures.push(url)
+    if (isTracked(request.url())) apiFailures.push(request.url())
+  })
+  page.on("response", (response) => {
+    if (isTracked(response.url()) && response.status() >= 400) {
+      apiFailures.push(`${response.status()} ${response.url()}`)
     }
   })
   // The explorer warms a per-scenario location cache for every scenario in

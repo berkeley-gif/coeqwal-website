@@ -299,9 +299,9 @@ export default function ResilienceControls({
   const scenarioTotal = scenarioItems.length
   const scenariosLabel =
     scenarioCount === 0
-      ? resilienceShowAllScenarios
-        ? `all ${scenarioTotal} scenarios`
-        : "no scenarios picked"
+      ? promptShown
+        ? "no scenarios picked"
+        : `all ${scenarioTotal} scenarios`
       : scenarioCount === 1
         ? "1 scenario"
         : `${scenarioCount} of ${scenarioTotal} scenarios`
@@ -559,9 +559,9 @@ export default function ResilienceControls({
           title="Which scenarios?"
           subtitle={
             scenarioCount === 0
-              ? resilienceShowAllScenarios
-                ? `You haven't picked any in the sidebar, so the chart is showing all ${scenarioTotal}.`
-                : "You haven't picked any in the sidebar yet."
+              ? promptShown
+                ? "You haven't picked any in the sidebar yet."
+                : `You haven't picked any in the sidebar, so the chart is showing all ${scenarioTotal}.`
               : `${scenarioCount} of ${scenarioTotal} picked from the sidebar.`
           }
           width={300}
