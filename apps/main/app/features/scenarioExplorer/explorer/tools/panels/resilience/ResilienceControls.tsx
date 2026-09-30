@@ -69,6 +69,7 @@ import {
   HYDROCLIMATE_SHORT_LABELS,
 } from "../../../../../../content/scenarios"
 import { useScenarioList } from "../../../../../scenarios/hooks/useScenarioList"
+import { needsScenarioPrompt } from "../../components/scenarioPrompt"
 
 interface ResilienceControlsProps {
   /** Called when the user clicks the Save snapshot button in the
@@ -129,7 +130,18 @@ export default function ResilienceControls({
     showResilienceOutcomeSelector,
     setShowResilienceOutcomeSelector,
     resilienceVisibleOutcomes,
+    resilienceShowAllScenarios,
   } = useResilienceSlice()
+  const tourTool = useWorkspaceSlice((s) => s.tour.tool)
+  // While the panel shows the select-a-scenario prompt there is no chosen
+  // figure to save.
+  const promptShown = needsScenarioPrompt({
+    mode: "resilience",
+    selectedScenarioCount: selectedScenarios.length,
+    showAll: resilienceShowAllScenarios,
+    equityFocusScenario: null,
+    tourActive: tourTool === "resilience",
+  })
 
   const scenarioItems = useMemo(() => {
     return siblingGroups.map((s) => ({
@@ -524,7 +536,11 @@ export default function ResilienceControls({
         </InlineTourAnchor>
         {onSaveSnapshot && (
           <InlineTourAnchor anchorId="resilience.saveSnapshot">
-            <SaveSnapshotButton onClick={onSaveSnapshot} sx={{ ml: 2 }} />
+            <SaveSnapshotButton
+              disabled={promptShown}
+              onClick={onSaveSnapshot}
+              sx={{ ml: 2 }}
+            />
           </InlineTourAnchor>
         )}
       </Box>
