@@ -34,6 +34,15 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
   // Explore tools' data calls. Replay aborts on a miss, so this fixture
   // alone must cover the whole flow.
   await setupNetwork(page, { har: TOOLS_HAR, recording: RECORDING })
+  // Any API request that fails, other than the refused prefetches, means
+  // the fixture is missing data this flow needs.
+  const apiFailures: string[] = []
+  page.on("requestfailed", (request) => {
+    const url = request.url()
+    if (/api\.coeqwal\.org/.test(url) && !PREFETCH_LOCATIONS.test(url)) {
+      apiFailures.push(url)
+    }
+  })
   // The explorer warms a per-scenario location cache for every scenario in
   // the background (errors swallowed by design). Those responses are
   // megabytes and nothing here reads them, so they are refused in both
@@ -77,6 +86,12 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "save snapshot" }),
   ).toBeDisabled()
+  // The scenario phrase must not claim the chart shows every scenario.
+  await expect(page.getByText(/^all \d+ scenarios$/)).toHaveCount(0)
+  await page.getByText("no scenarios picked", { exact: true }).click()
+  await expect(page.getByText(/showing all/)).toHaveCount(0)
+  await expect(page.getByText(/Leave none picked/)).toHaveCount(0)
+  await page.keyboard.press("Escape")
 
   await openTool(page, /^Bar: /)
   await expect(
@@ -100,13 +115,27 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
   ).toBeVisible()
   await expect(showMapSwitch(page)).not.toBeChecked()
 
-  // One selection clears the prompt on Radar.
+  // One selection clears the prompt on Radar and draws its chart (the
+  // fixture must carry real tier data, not just let the prompt disappear).
   await openTool(page, /^Radar: /)
-  await page
+  const firstScenario = page
     .getByRole("checkbox", { name: /^Select .+ scenario$/ })
     .first()
-    .check()
+  await firstScenario.check()
   await expect(page.locator("[data-select-scenario-prompt]")).toHaveCount(0)
+  await expect(
+    page.getByRole("button", { name: /^About / }).first(),
+  ).toBeVisible()
 
+  // Deselecting brings the prompt back with no chart controls left over it.
+  await firstScenario.uncheck()
+  await expect(
+    page.getByText(
+      "Select scenarios in the sidebar to compare them on the radar chart.",
+    ),
+  ).toBeVisible()
+  await expect(page.getByRole("button", { name: /^About / })).toHaveCount(0)
+
+  expect(apiFailures).toEqual([])
   expect(errors).toEqual([])
 })

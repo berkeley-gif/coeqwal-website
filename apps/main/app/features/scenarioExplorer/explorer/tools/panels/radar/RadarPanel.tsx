@@ -364,6 +364,9 @@ export default function RadarPanel({
   // Only one open at a time. Clicking another closes the previous.
   const [openInfoAxis, setOpenInfoAxis] = useState<string | null>(null)
   const closeInfoTooltip = useCallback(() => setOpenInfoAxis(null), [])
+  useEffect(() => {
+    if (showSelectPrompt) setOpenInfoAxis(null)
+  }, [showSelectPrompt])
 
   // Tour sync: open the first axis's info popover during the radar
   // tour's "Outcome summary" step. Lives in panels/radar/tour/ so the
@@ -817,7 +820,8 @@ export default function RadarPanel({
     visibleAxisNames,
   ])
 
-  if (isLoading && !hasData) {
+  // The prompt needs no chart data, so it never waits on loading.
+  if (isLoading && !hasData && !showSelectPrompt) {
     return (
       <Box
         sx={{
@@ -924,7 +928,7 @@ export default function RadarPanel({
               container's pixel size, so SVG user units == DOM pixels here,
               and this overlay shares the same bounds and transform as the
               chart wrapper). */}
-            {axisPositions.length > 0 && (
+            {!showSelectPrompt && axisPositions.length > 0 && (
               <Box
                 sx={{
                   position: "absolute",
@@ -1053,29 +1057,32 @@ export default function RadarPanel({
             )}
           </Box>
 
-          {hasRadarTraceData && !isLoading && visibleAxisNames.length <= 2 && (
-            <ChartToast maxWidth={440}>
-              <Box
-                sx={{
-                  pointerEvents: "auto",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1,
-                }}
-              >
-                <Box component="span">To show data, use</Box>
-                <InlineToggleChip
-                  label="choose outcome axes"
-                  active={showAxisSelector}
-                  onClick={() => setShowAxisSelector(!showAxisSelector)}
-                  onDarkBackground
-                />
-                <Box component="span">in the chart controls above.</Box>
-              </Box>
-            </ChartToast>
-          )}
+          {!showSelectPrompt &&
+            hasRadarTraceData &&
+            !isLoading &&
+            visibleAxisNames.length <= 2 && (
+              <ChartToast maxWidth={440}>
+                <Box
+                  sx={{
+                    pointerEvents: "auto",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 1,
+                  }}
+                >
+                  <Box component="span">To show data, use</Box>
+                  <InlineToggleChip
+                    label="choose outcome axes"
+                    active={showAxisSelector}
+                    onClick={() => setShowAxisSelector(!showAxisSelector)}
+                    onDarkBackground
+                  />
+                  <Box component="span">in the chart controls above.</Box>
+                </Box>
+              </ChartToast>
+            )}
         </Box>
       </Box>
 
