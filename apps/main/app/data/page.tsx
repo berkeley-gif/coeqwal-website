@@ -525,7 +525,7 @@ function OutcomeBriefDocumentSelect({
         MenuProps={menuProps}
         renderValue={(v) => {
           const doc = RESULT_SUMMARY_OUTCOME_DOCUMENTS.find((d) => d.id === v)
-          return doc ? doc.label : "Choose an Outcome brief"
+          return doc ? doc.label : "Choose an outcome brief"
         }}
       >
         {RESULT_SUMMARY_OUTCOME_DOCUMENTS.map((doc) => (
@@ -586,7 +586,7 @@ function LOIDocumentSelect({
         MenuProps={menuProps}
         renderValue={(v) => {
           const doc = RESULT_SUMMARY_LOI_DOCUMENTS.find((d) => d.id === v)
-          return doc ? doc.label : "Choose a Location of Interest (LOI) brief"
+          return doc ? doc.label : "Choose a location of interest (LOI) brief"
         }}
       >
         {RESULT_SUMMARY_LOI_DOCUMENTS.map((doc) => (
