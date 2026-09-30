@@ -38,7 +38,8 @@ test("guard: no diamond or circle styles in the marker renderers", () => {
   expect(tierMarkers).not.toContain("rotate(45deg)")
   expect(tierMarkers).not.toContain("isDiamond")
   expect(tierMarkers).not.toContain("borderRadius.circle")
-  expect(tierMarkers).not.toContain('"50%"')
+  // Any 50% radius, in any quote style, would draw a circle.
+  expect(tierMarkers).not.toMatch(/50%/)
   // The visible square is small; a larger transparent hit area around it
   // keeps hover and click as easy to reach as the old, taller diamond.
   expect(tierMarkers).toContain("data-marker-hit")
@@ -58,6 +59,10 @@ test("guard: no diamond or circle styles in the marker renderers", () => {
   expect(tierMarkers).toContain("getPointMarkerShape(")
   expect(tierMarkers).toContain("data-marker-shape")
   expect(equity).toContain("getPointMarkerShape(")
-  expect(equity).toContain("comparisonDirection(")
+  // Selected tier first, baseline second: reversing them would swap the
+  // improved and worsened triangles while every other test stayed green.
+  expect(equity).toMatch(
+    /comparisonDirection\(\s*parseInt\(obj\.tier\.replace[^)]*\)\),\s*parseInt\(obj\.baselineTier\./,
+  )
   expect(equity).toContain("data-marker-shape")
 })
