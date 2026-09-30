@@ -36,6 +36,11 @@ export const BACKGROUND_BRIEF_DOCUMENTS: BackgroundBriefDocument[] = [
     label: "Known limitations and how COEQWAL handles them",
     file: "known-limitations-and-how-coeqwal-handles-them.html",
   },
+  {
+    id: "strategy_hydroclimate_decomposition_brief",
+    label: "Strategy and hydroclimate decomposition",
+    file: "strategy_hydroclimate_decomposition_brief.html",
+  },
 ]
 
 /**
