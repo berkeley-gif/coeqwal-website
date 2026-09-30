@@ -978,7 +978,7 @@ export default function EquityPanel({
   // markers go too; the paint effect above clears markers on an empty
   // selection.
   useEffect(() => {
-    if (promptShown) setSelectedObjectives([])
+    if (promptShown) setSelectedObjectives((prev) => (prev.length ? [] : prev))
   }, [promptShown])
 
   const tourHighlightCategory = useEquityOutcomeColumnSync()
