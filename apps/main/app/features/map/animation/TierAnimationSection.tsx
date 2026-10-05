@@ -987,6 +987,53 @@ export default function TierAnimationSection() {
   const [demoHoveredLocation, setDemoHoveredLocation] =
     useState<LocationInfo | null>(null)
 
+  // The scripted demo yields to the user. Once they hover or pin any
+  // location, the demo highlight is dismissed and stays dismissed until the
+  // engine starts it again (re-entering step 5).
+  const [isDemoDismissed, setIsDemoDismissed] = useState(false)
+
+  useEffect(() => {
+    if (demoLocation) setIsDemoDismissed(false)
+  }, [demoLocation])
+
+  useEffect(() => {
+    if (!isInteractive || activeLocationSet.size === 0) return
+    setIsDemoDismissed(true)
+  }, [isInteractive, activeLocationSet])
+
+  // Step 5, after the user has taken over: mirror the hovered square's gold
+  // ring onto its map polygon. Only Agricultural revenue polygons are drawn
+  // on this beat, so other outcomes have nothing to outline.
+  const hoveredAgDuId =
+    hoveredLocation?.code === "AG_REV" ? hoveredLocation.sourceId : null
+
+  useEffect(() => {
+    // Once an outcome is selected (a click), the interactive painter owns
+    // the layer and draws its own highlight, so stay out of its way.
+    if (!isInteractive || !onLoiBeat || selectedOutcomeCode !== null) return
+    if (!isDemoDismissed) return
+    const mapPaintArbiter = arbitersRef.current?.find(
+      (arbiter): arbiter is MapPaintArbiter =>
+        arbiter instanceof MapPaintArbiter,
+    )
+    const ctx = engineContextRef.current
+    if (mapPaintArbiter && ctx) {
+      mapPaintArbiter.setLoiGoldRing(ctx, hoveredAgDuId)
+    }
+  }, [
+    isInteractive,
+    onLoiBeat,
+    selectedOutcomeCode,
+    isDemoDismissed,
+    hoveredAgDuId,
+  ])
+
+
+  const visibleDemoLocationKey = isDemoDismissed ? null : demoLocationKey
+  const visibleDemoHoveredLocation = isDemoDismissed
+    ? null
+    : demoHoveredLocation
+
   const engineContext: BeatEngineContext = useMemo(
     () => ({
       mapRef: mapAPI.mapRef ?? null,
@@ -1273,9 +1320,10 @@ export default function TierAnimationSection() {
                   isInteractive ? activeLocationSet : undefined
                 }
                 hoveredLocation={
-                  isInteractive ? hoveredLocation : demoHoveredLocation
+                  (isInteractive ? hoveredLocation : null) ??
+                  visibleDemoHoveredLocation
                 }
-                demoHighlightedLocationKey={demoLocationKey}
+                demoHighlightedLocationKey={visibleDemoLocationKey}
                 mustIncludeSourceIds={overlayMustIncludeSourceIds}
                 onLocationEnter={
                   isInteractive ? locHandlers.onMouseEnter : undefined
@@ -1294,10 +1342,10 @@ export default function TierAnimationSection() {
                 onBarClick={
                   isInteractive
                     ? (code: string, tier: number) => {
-                        setSpotlightedTier((prev) =>
-                          prev === tier ? null : tier,
-                        )
-                      }
+                      setSpotlightedTier((prev) =>
+                        prev === tier ? null : tier,
+                      )
+                    }
                     : undefined
                 }
               />

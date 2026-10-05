@@ -20,6 +20,7 @@ import {
 } from "../demandUnitsBaseline"
 import { BLUE_MID, blueFillExpr } from "../bluePalette"
 import { BASEMAP_DIM_OPACITY } from "../../../../map/config/outcomeLayerRegistry"
+import { HIGHLIGHT_GOLD } from "../../demandUnitsPaint"
 
 /** Progress window for fading in the dark basemap overlay. Holds at 0
  *  through the reset window, ramps to `BASEMAP_DIM_OPACITY`, then holds.
@@ -156,11 +157,30 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
 
   teardown(ctx: BeatEngineContext): void {
     // Clear any leftover state. Called on unmount and on navigation.
-    if (!this.loiGoldRingOn) return
+    this.setLoiGoldRing(ctx, null)
+  }
+
+  /** Move the step 5 gold ring to `duId`, or clear it with `null`. Called
+   *  once the user takes over from the scripted demo, so the ring follows
+   *  the location they hover. The scripted ring comes back the next time
+   *  its actor enters. */
+  setLoiGoldRing(ctx: BeatEngineContext, duId: string | null): void {
     const map = getMapWriteView(ctx)
     if (!map) return
-    this.applyLoiGoldRingOff(map, ctx)
+    if (duId === null) {
+      if (this.loiGoldRingOn) this.applyLoiGoldRingOff(map, ctx)
+      return
+    }
+    // applyLoiGoldRingOn skips when a ring is already on, so reset the flag
+    // to let it repaint on a different unit.
+    this.loiGoldRingOn = false
+    this.applyLoiGoldRingOn(
+      map,
+      { kind: "loi-gold-ring", loiDuId: duId, goldHex: HIGHLIGHT_GOLD },
+      ctx,
+    )
   }
+
 
   // Paint sequences
 
@@ -577,7 +597,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
         map.setPaintProperty("demand-units-outline", "line-width", [
           "case",
           match,
-          2,
+          4,
           0.5,
         ] as never)
       }
