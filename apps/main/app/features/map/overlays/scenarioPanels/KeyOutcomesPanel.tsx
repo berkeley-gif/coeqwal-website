@@ -62,7 +62,7 @@ export function KeyOutcomesPanel({
       if (!variantId) continue
       preload(CACHE_KEYS.scenarioTiers(variantId), () =>
         fetchScenarioTiers(variantId),
-      )
+      ).catch(() => {})
     }
   }, [scenarioId, allMappings])
 
