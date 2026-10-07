@@ -140,6 +140,7 @@ export function KeyOutcomesPanel({
             chartData={chartData[code]}
             isActive={!isLoading && isActive}
             isSelected={selectedOutcomeCode === code}
+            actionLabel={`Show ${displayName} on the map`}
             isTooltipActive={openTooltip === code}
             size={glyphSize}
             showLabel={true}

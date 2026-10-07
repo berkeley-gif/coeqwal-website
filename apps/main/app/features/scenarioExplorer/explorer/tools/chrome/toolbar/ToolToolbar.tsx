@@ -116,6 +116,7 @@ export default function ToolToolbar({
                 size="small"
                 checked={showMap}
                 onChange={(_, checked) => setShowMap(checked)}
+                inputProps={{ "aria-label": "Show map" }}
                 sx={{ ml: -0.5 }}
               />
             </Box>

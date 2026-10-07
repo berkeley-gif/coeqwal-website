@@ -1,0 +1,155 @@
+{
+  "scenario": "s0020",
+  "results": {
+    "ENV_FLOWS": {
+      "scenario": "s0020",
+      "tier_code": "ENV_FLOWS",
+      "tier_name": "Environmental flows",
+      "tier_type": "multi_value",
+      "locations": [
+        {
+          "location_id": "AMR004",
+          "location_name": "C2VSIM/CalSim2 Node at I-80 Bridge",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.090"
+        },
+        {
+          "location_id": "TRN111",
+          "location_name": "Trinity River at Lewiston",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.490"
+        },
+        {
+          "location_id": "FTR029",
+          "location_name": "Feather River at Yuba City. CalSim2 Node.",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.290"
+        },
+        {
+          "location_id": "FTR003",
+          "location_name": "C2VSIM Node",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.310"
+        },
+        {
+          "location_id": "MOK028",
+          "location_name": "C2VSIM Node.",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.600"
+        },
+        {
+          "location_id": "MCD005",
+          "location_name": "Merced River at Stevinson",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.700"
+        },
+        {
+          "location_id": "SAC000",
+          "location_name": "Sacramento/San Joaquin confluence??",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.000"
+        },
+        {
+          "location_id": "SAC049",
+          "location_name": "Sacramento River at Freeport.",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.000"
+        },
+        {
+          "location_id": "SAC122",
+          "location_name": "Tisdale Weir",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.090"
+        },
+        {
+          "location_id": "SAC148",
+          "location_name": "Colusa Weir. Colusa Weir Spill to Butte Basin near Colusa.",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.000"
+        },
+        {
+          "location_id": "SAC257",
+          "location_name": "Sacramento River above Bend Bridge near Red Bluff. USGS11377100/DWRA02788",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.180"
+        },
+        {
+          "location_id": "SJR127",
+          "location_name": "Confluence with Salt Slough",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.980"
+        },
+        {
+          "location_id": "SAC289",
+          "location_name": "South Bonnieville Pumping Plant",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.270"
+        },
+        {
+          "location_id": "SJR070",
+          "location_name": "C2VSIM node. USGS Gage near Vernalis",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.000"
+        },
+        {
+          "location_id": "STS011",
+          "location_name": "C2VSIM node. ",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.730"
+        },
+        {
+          "location_id": "TUO003",
+          "location_name": "TUO003",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.560"
+        },
+        {
+          "location_id": "YUB002",
+          "location_name": "Yuba River at Marysville",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.180"
+        }
+      ],
+      "metadata": {
+        "total_locations": 17,
+        "location_types": ["demand_unit"],
+        "tier_counts": { "1": 0, "2": 1, "3": 8, "4": 8 }
+      }
+    }
+  },
+  "missing": []
+}

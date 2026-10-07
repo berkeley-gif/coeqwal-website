@@ -18,8 +18,16 @@ const TOOLS_HAR = fileURLToPath(
   new URL("./fixtures/tools/tools.har", import.meta.url),
 )
 const RECORDING = !!process.env.RECORD_TOOLS_FIXTURES
-/** Background per-scenario location prefetches (see the route below) */
-const PREFETCH_LOCATIONS = /\/api\/tiers\/scenarios\/[^/]+\/locations/
+/** The explorer's background location prefetch for every scenario (see the
+ *  route below). It asks for all nine outcomes at once, and the sorted code
+ *  list it sends always starts with these three; the map's own requests ask
+ *  for the multi-value outcomes only, or for one outcome, so they never
+ *  match. */
+const BACKGROUND_PREFETCH =
+  /\/api\/tiers\/scenarios\/[^/]+\/locations\?codes=AG_REV,CWS_DEL,DELTA_ECO,/
+/** Square map markers (TierMarkers); the map mounts offline because the
+ *  build carries a placeholder Mapbox token, see ci.yml */
+const SQUARE_MARKERS = "[data-marker-shape='square']"
 
 async function openTool(page: Page, name: RegExp) {
   await page.getByRole("tab", { name }).click()
@@ -33,7 +41,9 @@ function showMapSwitch(page: Page) {
 }
 
 test("explore tools ask for a scenario before drawing", async ({ page }) => {
-  const errors = collectConsoleErrors(page, { ignoreUrls: PREFETCH_LOCATIONS })
+  const errors = collectConsoleErrors(page, {
+    ignoreUrls: BACKGROUND_PREFETCH,
+  })
   // This spec replays its own fixture: the shared api.har predates the
   // Explore tools' data calls. Replay aborts on a miss, so this fixture
   // alone must cover the whole flow.
@@ -42,7 +52,7 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
   // refused prefetches, means the fixture is missing data this flow needs.
   const apiFailures: string[] = []
   const isTracked = (url: string) =>
-    API_URL_PATTERN.test(url) && !PREFETCH_LOCATIONS.test(url)
+    API_URL_PATTERN.test(url) && !BACKGROUND_PREFETCH.test(url)
   page.on("requestfailed", (request) => {
     if (isTracked(request.url())) apiFailures.push(request.url())
   })
@@ -55,7 +65,9 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
   // the background (errors swallowed by design). Those responses are
   // megabytes and nothing here reads them, so they are refused in both
   // recording and replay; registered last, this route is consulted first.
-  await page.route(PREFETCH_LOCATIONS, (route) => route.abort())
+  // The map layer's own location requests (for the scenario whose outcome
+  // is mapped below) pass through to the fixture, so the markers can draw.
+  await page.route(BACKGROUND_PREFETCH, (route) => route.abort())
   await page.addInitScript(() => {
     // Mark every tool tour seen: tours keep the chart up on purpose.
     for (const tool of ["radar", "bar", "equity", "resilience", "list"]) {
@@ -143,6 +155,51 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
     ),
   ).toBeVisible()
   await expect(page.getByRole("button", { name: /^About / })).toHaveCount(0)
+
+  // Bar: the glyph sent to the map keeps a visible outline until the user
+  // clears it, and the outline must not change the glyph's size (the border
+  // stays 2px wide; only its color changes). palette.blue.bright is #449cd9.
+  const ACTIVE_BORDER = "rgb(68, 156, 217)"
+  const TRANSPARENT = /rgba\(0, 0, 0, 0\)|transparent/
+  await firstScenario.check()
+  await openTool(page, /^Bar: /)
+  await page.getByRole("checkbox", { name: "Show map" }).check()
+  // Bar's glyphs toggle the map, and their name says so (OutcomeGlyphItem's
+  // actionLabel); the default "View details for" name stays on other glyphs.
+  const glyph = page
+    .getByRole("button", { name: /^Show .+ on the map$/ })
+    .first()
+  const border = () =>
+    glyph.evaluate((el) => {
+      const style = getComputedStyle(el)
+      return `${style.borderTopWidth} ${style.borderTopColor}`
+    })
+  expect(await border()).toMatch(TRANSPARENT)
+  expect(await border()).toMatch(/^2px /)
+  // The state is announced, not only drawn: the glyph is a pressed toggle.
+  await expect(glyph).toHaveAttribute("aria-pressed", "false")
+  await expect(page.locator(SQUARE_MARKERS)).toHaveCount(0)
+  await glyph.click()
+  await expect.poll(border).toBe(`2px ${ACTIVE_BORDER}`)
+  await expect(glyph).toHaveAttribute("aria-pressed", "true")
+  // The outline and the map agree: the first glyph is community surface
+  // water, which the current-operations scenario maps as 74 locations.
+  const squares = page.locator(SQUARE_MARKERS)
+  await expect(squares).toHaveCount(74)
+  await expect(squares.first()).toHaveCSS("border-radius", "2px")
+  // A hydroclimate switch re-resolves the scenario; outline and markers stay.
+  await page
+    .getByRole("button", { name: "Moderate climate stress", exact: true })
+    .click()
+  await expect(squares).toHaveCount(74)
+  await expect.poll(border).toBe(`2px ${ACTIVE_BORDER}`)
+  // Toggling again from the keyboard clears the map and the outline.
+  await glyph.focus()
+  await page.keyboard.press("Enter")
+  await expect.poll(border).toMatch(TRANSPARENT)
+  await expect.poll(border).toMatch(/^2px /)
+  await expect(glyph).toHaveAttribute("aria-pressed", "false")
+  await expect(squares).toHaveCount(0)
 
   expect(apiFailures).toEqual([])
   expect(errors).toEqual([])

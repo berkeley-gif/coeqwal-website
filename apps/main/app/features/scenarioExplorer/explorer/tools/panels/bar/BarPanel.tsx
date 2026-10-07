@@ -213,7 +213,8 @@ export default function BarPanel() {
   const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
   const addShareItem = useWorkspaceSlice((s) => s.addShareItem)
 
-  const { showOutcomeOnMap, isMapVisible } = useOutcomeMapAction()
+  const { showOutcomeOnMap, isOutcomeActive, isMapVisible } =
+    useOutcomeMapAction()
 
   const { allChartData, outcomeNames, allScoreData, isLoading, error } =
     useResolvedScenarioTiers()
@@ -399,6 +400,11 @@ export default function BarPanel() {
                 outcomeCode={shortCode}
                 chartData={chartData[shortCode]}
                 isActive={!!chartData[shortCode]}
+                // The glyph whose outcome is on the map keeps an outline
+                // until the user clears it, so the page says what the map
+                // shows after the pointer leaves the glyph.
+                isSelected={isOutcomeActive(shortCode, scenario.scenarioId)}
+                actionLabel={`Show ${displayName} on the map`}
                 showLabel={true}
                 showInfoButton={false}
                 onGlyphClick={
