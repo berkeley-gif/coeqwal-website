@@ -54,6 +54,16 @@ function joinAsProse(labels: readonly string[]): string {
   return `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`
 }
 
+/** "All Water Years", "Dry and Critical Water Years", or undefined when
+ *  water-year typing does not apply (`null`). Pure. */
+export function waterYearsPhrase(
+  labels: readonly string[] | null,
+): string | undefined {
+  if (labels === null) return undefined
+  if (labels.length === 0) return "All Water Years"
+  return `${joinAsProse(labels.map(titleCaseLabel))} Water Years`
+}
+
 export interface FigureTitleParts {
   /** Variable display name, e.g. "April reservoir storage" */
   variableName: string
@@ -83,12 +93,7 @@ export function buildFigureTitle(parts: FigureTitleParts): string {
     (parts.locationName
       ? `${titleCaseLabel(parts.variableName)} (${titleCaseLabel(parts.locationName)})`
       : titleCaseLabel(parts.variableName))
-  const waterYears =
-    parts.waterYearTypeLabels === null
-      ? undefined
-      : parts.waterYearTypeLabels.length === 0
-        ? "All Water Years"
-        : `${joinAsProse(parts.waterYearTypeLabels.map(titleCaseLabel))} Water Years`
+  const waterYears = waterYearsPhrase(parts.waterYearTypeLabels)
   const segments = [
     head,
     titleCaseLabel(parts.memberSummary),
