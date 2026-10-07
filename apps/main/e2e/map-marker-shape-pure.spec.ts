@@ -1,10 +1,12 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { test, expect } from "@playwright/test"
+import { rectPoints, POINTS_PER_SHAPE } from "@repo/viz"
 import {
   comparisonDirection,
   getPointMarkerShape,
   SQUARE_MARKER_RADIUS_PX,
+  SQUARE_MARKER_SIZE_PX,
 } from "../app/features/map/config/markerShape"
 
 // Every point location on the Explore maps is a square. Distribution's
@@ -64,6 +66,12 @@ test("guard: no diamond or circle styles in the marker renderers", () => {
   expect(projection).toContain("rectPoints(")
   expect(projection).toContain("SQUARE_MARKER_SIZE_PX")
   expect(tierMarkers).toContain("SQUARE_MARKER_SIZE_PX")
+  // Both shape-creation paths (first collection and per-frame reprojection)
+  // call rectPoints with exactly the shared size and radius constants; a
+  // different literal in either call would slip past a token scan.
+  const startSquareCall =
+    /rectPoints\(\s*sx,\s*sy,\s*SQUARE_MARKER_SIZE_PX,\s*SQUARE_MARKER_SIZE_PX,\s*POINTS_PER_SHAPE,\s*SQUARE_MARKER_RADIUS_PX,?\s*\)/g
+  expect(projection.match(startSquareCall)?.length).toBe(2)
 
   // The renderers take their shape from the one rule and label it, so a
   // DOM check can find the actual shape element.
@@ -76,4 +84,28 @@ test("guard: no diamond or circle styles in the marker renderers", () => {
     /comparisonDirection\(\s*parseInt\(obj\.tier\.replace[^)]*\)\),\s*parseInt\(obj\.baselineTier\./,
   )
   expect(equity).toContain("data-marker-shape")
+})
+
+test("the morph's start square is the marker's size, centered on the point", () => {
+  const pts = rectPoints(
+    100,
+    50,
+    SQUARE_MARKER_SIZE_PX,
+    SQUARE_MARKER_SIZE_PX,
+    POINTS_PER_SHAPE,
+    SQUARE_MARKER_RADIUS_PX,
+  )
+  expect(pts).toHaveLength(POINTS_PER_SHAPE)
+  const xs = pts.map((p) => p[0])
+  const ys = pts.map((p) => p[1])
+  expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(
+    SQUARE_MARKER_SIZE_PX,
+    5,
+  )
+  expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(
+    SQUARE_MARKER_SIZE_PX,
+    5,
+  )
+  expect((Math.max(...xs) + Math.min(...xs)) / 2).toBeCloseTo(100, 5)
+  expect((Math.max(...ys) + Math.min(...ys)) / 2).toBeCloseTo(50, 5)
 })

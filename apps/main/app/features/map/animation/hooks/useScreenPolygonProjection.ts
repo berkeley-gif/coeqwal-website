@@ -410,7 +410,12 @@ export function useScreenPolygonProjection({
       if (!locData) continue
 
       for (const locId of locData.ids) {
-        if (vpMap.has(locId)) continue
+        // vpMap starts as a copy of the last projection, so checking it here
+        // would keep every point at its old screen position for the whole
+        // move and let it jump at moveend. Polygons keep precedence over a
+        // point with the same id; everything else is re-projected per frame,
+        // like the polygons above.
+        if (cachedGeoRingsRef.current.has(locId)) continue
         const coords = getOutcomeLocationCoordinates(code, locId)
         if (!coords) continue
         try {
@@ -440,7 +445,7 @@ export function useScreenPolygonProjection({
       const locData = outcomeLocations[code]
       if (!locData) continue
       const syntheticId = [...locData.ids][0] ?? code
-      if (vpMap.has(syntheticId)) continue
+      if (cachedGeoRingsRef.current.has(syntheticId)) continue
       try {
         const pt = map.project(SALMON_RIVER_CENTROID)
         const sx = pt.x
