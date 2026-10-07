@@ -78,39 +78,50 @@ export async function captureShareItemSvgString(
   return captureCardSvgString(liveEl, { backgroundColor })
 }
 
-/** PNG download path. Captures the item then triggers the download. */
+/** PNG download path. Captures the item then triggers the download.
+ *  Resolves false when nothing could be produced (nothing is downloaded
+ *  rather than a bare chart); the caller tells the user. */
 export async function downloadShareItemAsPng(
   item: ShareItem,
   liveEl: HTMLElement | null,
   backgroundColor: string,
   lookups: CsvLookups,
-): Promise<void> {
+): Promise<boolean> {
   const blob = await captureShareItemPngBlob(item, liveEl, backgroundColor)
-  if (blob) {
-    downloadBlob(blob, withExt(shareItemFilenameLabel(item, lookups), "png"))
-  } else {
-    // Nothing is downloaded rather than a bare chart; say so where the
-    // capture failure itself is already reported.
+  if (!blob) {
     console.warn("[Share] PNG export produced nothing for", item.id)
+    return false
   }
+  downloadBlob(blob, withExt(shareItemFilenameLabel(item, lookups), "png"))
+  return true
 }
 
-/** SVG download path. Captures the item then triggers the download. */
+/** SVG download path. Captures the item then triggers the download.
+ *  Resolves false when nothing could be produced. */
 export async function downloadShareItemAsSvg(
   item: ShareItem,
   liveEl: HTMLElement | null,
   backgroundColor: string,
   lookups: CsvLookups,
-): Promise<void> {
+): Promise<boolean> {
   const svg = await captureShareItemSvgString(item, liveEl, backgroundColor)
-  if (svg) {
-    downloadSvgString(
-      svg,
-      withExt(shareItemFilenameLabel(item, lookups), "svg"),
-    )
-  } else {
+  if (!svg) {
     console.warn("[Share] SVG export produced nothing for", item.id)
+    return false
   }
+  downloadSvgString(svg, withExt(shareItemFilenameLabel(item, lookups), "svg"))
+  return true
+}
+
+/** What a bulk image export managed to include. An item can count as both
+ *  included (one image made it) and incomplete (the other did not). */
+export interface ImageZipResult {
+  /** Items the export was asked for */
+  total: number
+  /** Items with at least one image in the archive */
+  included: number
+  /** Items that lost an image: no mounted card, or a capture that failed */
+  incomplete: number
 }
 
 /**
@@ -123,7 +134,8 @@ export async function downloadShareItemAsSvg(
  *
  * Items that yield neither a PNG nor an SVG are skipped. Per-item
  * failures are caught so one bad capture does not abort the rest. The
- * download is suppressed when nothing was included.
+ * download is suppressed when nothing was included. The result counts
+ * what was included and what lost an image, so the caller can say so.
  */
 export async function exportAllShareItemImagesAsZip(
   items: ShareItem[],
@@ -131,10 +143,11 @@ export async function exportAllShareItemImagesAsZip(
   backgroundColor: string,
   lookups: CsvLookups,
   resolveLiveEl: (id: string) => HTMLElement | null,
-): Promise<void> {
+): Promise<ImageZipResult> {
   const zip = new JSZip()
   const usedNames = new Set<string>()
   let included = 0
+  let incomplete = 0
 
   for (const item of items) {
     try {
@@ -142,12 +155,14 @@ export async function exportAllShareItemImagesAsZip(
       if (!liveEl) {
         // No mounted card, no template: skip rather than ship a bare chart.
         console.warn("[Share] no mounted card for", item.id, "- skipped in ZIP")
+        incomplete += 1
         continue
       }
       const [pngBlob, svgString] = await Promise.all([
         captureShareItemPngBlob(item, liveEl, backgroundColor),
         captureShareItemSvgString(item, liveEl, backgroundColor),
       ])
+      if (!pngBlob || !svgString) incomplete += 1
       if (!pngBlob && !svgString) continue
       const base = dedupeLabel(shareItemFilenameLabel(item, lookups), usedNames)
       if (pngBlob) zip.file(withExt(base, "png"), pngBlob)
@@ -155,11 +170,13 @@ export async function exportAllShareItemImagesAsZip(
       included += 1
     } catch (err) {
       console.warn("[Share] image export failed for one item, skipping:", err)
+      incomplete += 1
     }
   }
 
-  if (included === 0) return
-
-  const blob = await zip.generateAsync({ type: "blob" })
-  downloadBlob(blob, filename)
+  if (included > 0) {
+    const blob = await zip.generateAsync({ type: "blob" })
+    downloadBlob(blob, filename)
+  }
+  return { total: items.length, included, incomplete }
 }

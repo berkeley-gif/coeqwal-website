@@ -28,6 +28,9 @@ interface StoryCardProps extends ShareCardRenderProps {
   onDelete: (id: string) => void
   onDownloadData: (item: ShareItem) => void
   onRegisterContentRef: (id: string, el: HTMLDivElement | null) => void
+  /** Called with a sentence for the user when an export produced no
+   *  file (the panel shows it); the console carries the cause. */
+  onExportFailed?: (message: string) => void
   onNoteChange: (id: string, note: string) => void
   csvLookups: CsvLookups
 }
@@ -43,6 +46,7 @@ export default function StoryCard({
   onDelete,
   onDownloadData,
   onRegisterContentRef,
+  onExportFailed,
   onNoteChange,
   outcomeNames,
   scenarioLookup,
@@ -62,22 +66,32 @@ export default function StoryCard({
   } = useSortable({ id: item.id })
 
   const handleDownloadPng = useCallback(async () => {
-    await downloadShareItemAsPng(
+    const ok = await downloadShareItemAsPng(
       item,
       contentRef.current,
       theme.palette.common.white,
       csvLookups,
     )
-  }, [item, theme.palette.common.white, csvLookups])
+    if (!ok) {
+      onExportFailed?.(
+        "This figure could not be exported as a PNG, so nothing was downloaded.",
+      )
+    }
+  }, [item, theme.palette.common.white, csvLookups, onExportFailed])
 
   const handleDownloadSvg = useCallback(async () => {
-    await downloadShareItemAsSvg(
+    const ok = await downloadShareItemAsSvg(
       item,
       contentRef.current,
       theme.palette.common.white,
       csvLookups,
     )
-  }, [item, theme.palette.common.white, csvLookups])
+    if (!ok) {
+      onExportFailed?.(
+        "This figure could not be exported as an SVG, so nothing was downloaded.",
+      )
+    }
+  }, [item, theme.palette.common.white, csvLookups, onExportFailed])
 
   const style: React.CSSProperties = {
     transform: transformToCSS(transform),
