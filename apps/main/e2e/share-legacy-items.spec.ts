@@ -89,5 +89,20 @@ test("legacy and template data items render from storage", async ({ page }) => {
   await expect(canvas.getByText("Kept note")).toBeVisible()
   await expect(canvas.getByText("Box plot", { exact: true })).toBeVisible()
 
+  // A legacy card exports the same way as a template card: when its live
+  // capture fails, no bare cached chart goes out under its name, and the
+  // user is told. (html-to-image rasterizes through a canvas.)
+  await page.evaluate(() => {
+    HTMLCanvasElement.prototype.toDataURL = () => {
+      throw new Error("forced capture failure (test)")
+    }
+  })
+  const notice = page.locator("[data-share-export-notice]")
+  await expect(notice).toHaveCount(0)
+  await canvas.getByRole("button", { name: "Download as PNG" }).first().click()
+  await expect(notice).toContainText(
+    "could not be exported as a PNG, so nothing was downloaded",
+  )
+
   expect(errors).toEqual([])
 })

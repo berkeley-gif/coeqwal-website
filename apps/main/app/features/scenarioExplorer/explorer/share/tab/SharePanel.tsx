@@ -353,6 +353,18 @@ function SharePanelContent() {
             pb: 3,
           }}
         >
+          {exportNotice && (
+            // Sticky at the top of the column: the card whose export failed
+            // may be far down a long story, and the user must see this.
+            <Alert
+              severity="warning"
+              onClose={() => setExportNotice(null)}
+              data-share-export-notice=""
+              sx={{ position: "sticky", top: 0, zIndex: 1, mb: 1 }}
+            >
+              {exportNotice}
+            </Alert>
+          )}
           <StoryCanvas
             storyItems={storyItems}
             storyItemIds={storyItemIds}
@@ -370,16 +382,6 @@ function SharePanelContent() {
             csvLookups={csvLookups}
           />
 
-          {exportNotice && (
-            <Alert
-              severity="warning"
-              onClose={() => setExportNotice(null)}
-              data-share-export-notice=""
-              sx={{ mb: 1 }}
-            >
-              {exportNotice}
-            </Alert>
-          )}
           {storyItems.length > 0 && (
             <ShareExportBar
               onDownloadAllImages={handleDownloadAllImagesNoticed}
