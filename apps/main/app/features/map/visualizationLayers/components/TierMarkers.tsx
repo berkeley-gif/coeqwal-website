@@ -3,8 +3,10 @@
 /**
  * TierMarkers - Map markers showing tier data by location
  *
- * Displays markers on the map for each location with tier data.
- * Uses lightweight tier assignments (no geometry) with hardcoded coordinates.
+ * Displays a square marker on the map for each location with tier data
+ * (every point location is a square on every tool; see
+ * ../../config/markerShape.ts). Uses lightweight tier assignments (no
+ * geometry) with hardcoded coordinates.
  * Reports hover/click events to parent for unified tooltip handling.
  */
 
@@ -20,10 +22,21 @@ import {
   ENV_FLOWS_COORDINATES,
   ENV_FLOWS_NAMES,
 } from "../../config/outcomeLocations"
+import {
+  getPointMarkerShape,
+  SQUARE_MARKER_RADIUS_PX,
+} from "../../config/markerShape"
 
 // =============================================================================
 // COMPONENT
 // =============================================================================
+
+/** Transparent box that receives hover and click (CSS px): about the reach
+ *  of the old diamond marker (14px wide, 28px tall), slightly wider so the
+ *  square's corners are covered, and no wider, so dense clusters do not
+ *  steal hover from their neighbors. */
+const HIT_TARGET_WIDTH_PX = 20
+const HIT_TARGET_HEIGHT_PX = 28
 
 interface TierMarkersProps {
   locations: TierLocation[]
@@ -56,8 +69,6 @@ export default function TierMarkers({
         return theme.palette.grey[500]
     }
   }
-
-  const isDiamond = tierCode === "ENV_FLOWS" || tierCode === "CWS_DEL"
 
   const buildFeatureInfo = (
     loc: TierLocation,
@@ -126,32 +137,44 @@ export default function TierMarkers({
             latitude={lat}
             anchor="center"
           >
+            {/* Transparent hit area: the visible square is small, so hover
+                and click use a larger centered box, about as tall as the
+                old diamond marker was. */}
             <div
+              data-marker-hit=""
               style={{
-                width: isHighlighted ? 26 : 20,
-                height: isHighlighted ? 26 : 20,
-                backgroundColor: getTierColor(loc.tier_level),
-                border: isHighlighted
-                  ? `3px solid ${goldAccent}`
-                  : isDiamond
-                    ? `2px solid ${theme.palette.common.white}E6`
-                    : theme.border.onDark,
-                boxShadow: isHighlighted
-                  ? `0 2px 6px rgba(0,0,0,0.5)`
-                  : theme.shadow.sm,
+                width: HIT_TARGET_WIDTH_PX,
+                height: HIT_TARGET_HEIGHT_PX,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 cursor: "pointer",
-                borderRadius: isDiamond
-                  ? theme.borderRadius.xs
-                  : theme.borderRadius.circle,
-                transform: isDiamond ? "scale(0.5, 1) rotate(45deg)" : "none",
-                transformOrigin: "center",
-                transition:
-                  "width 0.15s, height 0.15s, border 0.15s, box-shadow 0.15s",
               }}
               onMouseEnter={() => onHover?.(featureInfo)}
               onMouseLeave={() => onHover?.(null)}
               onClick={() => onClick?.(featureInfo)}
-            />
+            >
+              <div
+                data-marker-shape={getPointMarkerShape()}
+                style={{
+                  // The old diamond was a 20px box squashed to half width; an
+                  // unsquashed 20px square reads much heavier, so squares are
+                  // sized closer to the diamond's visual weight.
+                  width: isHighlighted ? 18 : 14,
+                  height: isHighlighted ? 18 : 14,
+                  backgroundColor: getTierColor(loc.tier_level),
+                  border: isHighlighted
+                    ? `3px solid ${goldAccent}`
+                    : `2px solid ${theme.palette.common.white}E6`,
+                  boxShadow: isHighlighted
+                    ? `0 2px 6px rgba(0,0,0,0.5)`
+                    : theme.shadow.sm,
+                  borderRadius: SQUARE_MARKER_RADIUS_PX,
+                  transition:
+                    "width 0.15s, height 0.15s, border 0.15s, box-shadow 0.15s",
+                }}
+              />
+            </div>
           </Marker>
         )
       })}
