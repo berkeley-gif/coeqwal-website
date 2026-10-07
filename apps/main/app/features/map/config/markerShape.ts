@@ -7,8 +7,8 @@
  * comparison mode keeps its direction triangles for improved and worsened
  * locations; unchanged locations are squares.
  *
- * Exports: getPointMarkerShape, comparisonDirection, SQUARE_MARKER_RADIUS_PX,
- * MarkerShape, ComparisonDirection.
+ * Exports: getPointMarkerShape, comparisonDirection, SQUARE_MARKER_SIZE_PX,
+ * SQUARE_MARKER_RADIUS_PX, MarkerShape, ComparisonDirection.
  */
 
 export type MarkerShape = "square" | "triangleUp" | "triangleDown"
@@ -34,6 +34,11 @@ export function comparisonDirection(
   if (tier > baselineTier) return "worsened"
   return "unchanged"
 }
+
+/** Side, in CSS px, of a point marker's square when it is not highlighted.
+ *  The Learn animation starts its morph from squares of this size so the
+ *  lift-off from the map markers has no jump. */
+export const SQUARE_MARKER_SIZE_PX = 14
 
 /** Corner radius, in CSS px, for square markers: small enough that a
  *  12 to 20 px marker still reads as a square. */
