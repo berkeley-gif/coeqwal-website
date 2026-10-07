@@ -9,6 +9,7 @@
  */
 
 import type { OutcomeDisplayMode } from "../store"
+import type { FigureTemplateSpec } from "./figureTemplate"
 
 /**
  * Patch shape accepted by `updateShareItem`. Narrower than
@@ -147,6 +148,11 @@ export type ShareItem =
        *  did not share one provenance, so no single label describes it. */
       source: "live" | "mock" | "mixed"
       hydroclimate: string
+      /** Figure-template rows captured with the chart (absent on items
+       *  staged before the template, and on URL-restored items) */
+      figureSpec?: FigureTemplateSpec
+      /** Stats plots: panel headings, left to right */
+      panelHeadings?: string[]
     })
 
 /**
