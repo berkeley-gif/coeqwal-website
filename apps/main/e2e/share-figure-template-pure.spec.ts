@@ -177,10 +177,22 @@ test("data in depth: verbatim head, no unit, and non-applicable water years", ()
 })
 
 test("chart kind labels", () => {
+  // The plain distribution view is named by its style alone; the other
+  // distribution views keep their view label, which the variable row's
+  // unit does not carry ("%" could be of capacity or of demand).
   expect(dataChartKindLabel("dist", "box", "Volume (TAF)")).toBe("Box plot")
-  expect(dataChartKindLabel("pct", "exceedance", "Percent")).toBe(
-    "Exceedance plot",
+  expect(dataChartKindLabel("pct", "exceedance", "% of capacity")).toBe(
+    "Exceedance plot, % of capacity",
   )
-  expect(dataChartKindLabel("level", "stats", "Level")).toBe("Stats plot")
+  expect(dataChartKindLabel("pct_demand", "box", "% of demand")).toBe(
+    "Box plot, % of demand",
+  )
+  expect(dataChartKindLabel("level", "stats", "Level (ft)")).toBe(
+    "Stats plot, Level (ft)",
+  )
   expect(dataChartKindLabel("monthly", "box", "Monthly")).toBe("Monthly")
+  // An unknown style falls back to the view label rather than inventing one.
+  expect(dataChartKindLabel("dist", "other", "Volume (TAF)")).toBe(
+    "Volume (TAF)",
+  )
 })

@@ -90,9 +90,18 @@ async function withExportLayout<T>(
         img.decode().catch(() => undefined),
       ),
     )
-    await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-    )
+    // Two frames let the clone lay out before capture. Bounded: a tab in
+    // the background gets no animation frames, and an export started just
+    // before a tab switch must still finish and remove its host.
+    await new Promise<void>((resolve) => {
+      const fallback = setTimeout(resolve, 150)
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          clearTimeout(fallback)
+          resolve()
+        }),
+      )
+    })
     return await capture(clone)
   } finally {
     host.remove()

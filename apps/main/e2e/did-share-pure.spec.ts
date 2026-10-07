@@ -346,7 +346,7 @@ test("shareFigureFooter names the source, the provenance and the capture date", 
     hydroclimate: "historical",
   })
   expect(mixed.provenance).toBe(
-    "Live data from api.coeqwal.org for some series; see the legend.",
+    "Live data from api.coeqwal.org for some series; the data download names each series' source.",
   )
 })
 

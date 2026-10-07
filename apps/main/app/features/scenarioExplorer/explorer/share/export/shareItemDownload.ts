@@ -88,6 +88,10 @@ export async function downloadShareItemAsPng(
   const blob = await captureShareItemPngBlob(item, liveEl, backgroundColor)
   if (blob) {
     downloadBlob(blob, withExt(shareItemFilenameLabel(item, lookups), "png"))
+  } else {
+    // Nothing is downloaded rather than a bare chart; say so where the
+    // capture failure itself is already reported.
+    console.warn("[Share] PNG export produced nothing for", item.id)
   }
 }
 
@@ -104,6 +108,8 @@ export async function downloadShareItemAsSvg(
       svg,
       withExt(shareItemFilenameLabel(item, lookups), "svg"),
     )
+  } else {
+    console.warn("[Share] SVG export produced nothing for", item.id)
   }
 }
 

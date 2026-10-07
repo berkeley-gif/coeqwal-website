@@ -47,14 +47,19 @@ const DIST_KIND_LABELS: Record<string, string> = {
 }
 
 /** "Box plot", "Exceedance plot", "Stats plot", or the view label for
- *  views without the toggle (e.g. "Monthly"). Pure. */
+ *  views without the toggle (e.g. "Monthly"). A distribution view other
+ *  than the plain one keeps its view label after the style ("Box plot, %
+ *  of capacity"), since the variable row's unit alone does not say what
+ *  the chart measures. Pure. */
 export function dataChartKindLabel(
   view: string,
   distKind: string,
   viewLabel: string,
 ): string {
-  if (DIST_VIEWS.has(view)) return DIST_KIND_LABELS[distKind] ?? viewLabel
-  return viewLabel
+  if (!DIST_VIEWS.has(view)) return viewLabel
+  const style = DIST_KIND_LABELS[distKind]
+  if (!style) return viewLabel
+  return view === "dist" ? style : `${style}, ${viewLabel}`
 }
 
 /** Template spec for one Data in Depth figure. Pure. */

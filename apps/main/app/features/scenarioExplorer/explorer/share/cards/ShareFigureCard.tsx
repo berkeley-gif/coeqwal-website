@@ -57,10 +57,19 @@ export default function ShareFigureCard({
 }: ShareFigureCardProps) {
   const theme = useTheme()
   const hasImage = Boolean(cachedSvg || cachedImageDataUrl || liveChart)
+  // The image's name says what the figure holds and what it compares: the
+  // rows, then the legend heading with its members.
+  const comparedText =
+    legend && legend.length > 0
+      ? `${template.legendHeading ?? "Legend"}: ${legend
+          .map((row) => row.label)
+          .join(", ")}`
+      : null
   const ariaLabel = [
     template.toolLabel,
     template.chartKindLabel,
     ...template.rows.map((r) => r.value),
+    ...(comparedText ? [comparedText] : []),
   ].join(", ")
 
   return (
