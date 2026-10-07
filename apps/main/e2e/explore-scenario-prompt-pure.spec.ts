@@ -55,14 +55,17 @@ test("distribution prompts until a focus scenario is picked", () => {
 })
 
 test("a running tour keeps the chart visible", () => {
-  for (const mode of ["radar", "resilience", "equity"] as const) {
+  // Bar included: its tour anchors on a card's glyphs, pin and share
+  // controls, which only exist while a card is drawn.
+  for (const mode of ["radar", "resilience", "equity", "bar"] as const) {
     expect(needsScenarioPrompt({ ...base, mode, tourActive: true })).toBe(false)
   }
 })
 
-test("bar keeps its pre-existing rule and ignores tours", () => {
-  // Bar already showed this prompt before; its tour behavior is unchanged.
-  expect(needsScenarioPrompt({ ...base, mode: "bar", tourActive: true })).toBe(
+test("another tool's tour does not lift the prompt", () => {
+  // tourActive is per tool (tour.tool === mode); a Radar tour running while
+  // Bar is somehow rendered must not count for Bar.
+  expect(needsScenarioPrompt({ ...base, mode: "bar", tourActive: false })).toBe(
     true,
   )
 })

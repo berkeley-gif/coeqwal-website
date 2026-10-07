@@ -8,10 +8,10 @@
  *   - Data in depth: current operations is its built-in reference series.
  *   - "Show all scenarios" (radar) or the all-scenarios heatmap view: the
  *     user asked for every scenario, so there is something to draw.
- *   - A running Radar, Heatmap or Distribution tour: tour steps anchor on
- *     chart elements, so the chart stays up (with its old fallback) until
- *     the tour ends. Bar keeps its long-standing rule (prompt whenever
- *     nothing is selected, tour or not); this module only names it.
+ *   - A running tour of that tool: tour steps anchor on chart elements, so
+ *     the chart stays up until the tour ends. Radar, Heatmap and
+ *     Distribution keep their old fallback for it; Bar, which never had one,
+ *     draws the current-operations card.
  *
  * Exports: needsScenarioPrompt, SCENARIO_PROMPT_TEXT, ScenarioPromptInput,
  * PromptTool.
@@ -35,6 +35,7 @@ export interface ScenarioPromptInput {
 export function needsScenarioPrompt(input: ScenarioPromptInput): boolean {
   switch (input.mode) {
     case "bar":
+      if (input.tourActive) return false
       return input.selectedScenarioCount === 0
     case "radar":
     case "resilience":

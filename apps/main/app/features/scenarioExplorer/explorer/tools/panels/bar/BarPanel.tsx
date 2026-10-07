@@ -37,7 +37,11 @@ import { captureBarChartRow } from "../list/grid/captureBarChartRow"
 import { InlineRowActions } from "../list/grid/InlineRowActions"
 import { stageShareItem } from "../../../share/stage"
 import SelectScenarioPrompt from "../../components/SelectScenarioPrompt"
-import { SCENARIO_PROMPT_TEXT } from "../../components/scenarioPrompt"
+import {
+  needsScenarioPrompt,
+  SCENARIO_PROMPT_TEXT,
+} from "../../components/scenarioPrompt"
+import { BASELINE_SCENARIO_ID } from "../../../../constants"
 
 /** Fixed column width so header cells and every card's glyph cells line up. */
 const OUTCOME_COLUMN_WIDTH = 90
@@ -175,6 +179,18 @@ function BarOutcomeHeaderCell({
 export default function BarPanel() {
   const theme = useTheme()
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
+  const tourTool = useWorkspaceSlice((s) => s.tour.tool)
+  // With nothing selected the panel asks for a selection instead of drawing
+  // a card. While the Bar tour runs it draws the current-operations card
+  // instead, because the tour's steps anchor on a card's glyphs, pin and
+  // share controls (see tools/components/scenarioPrompt.ts).
+  const showSelectPrompt = needsScenarioPrompt({
+    mode: "bar",
+    selectedScenarioCount: selectedScenarios.length,
+    showAll: false,
+    equityFocusScenario: null,
+    tourActive: tourTool === "bar",
+  })
   const {
     sortBy,
     sortDirection,
@@ -284,10 +300,14 @@ export default function BarPanel() {
     () => new Set(pinnedScenarioIds),
     [pinnedScenarioIds],
   )
-  const cardScenarios = useMemo(
-    () => orderedScenarios.filter((s) => selectedSet.has(s.scenarioId)),
-    [orderedScenarios, selectedSet],
-  )
+  const cardScenarios = useMemo(() => {
+    const selected = orderedScenarios.filter((s) =>
+      selectedSet.has(s.scenarioId),
+    )
+    if (selected.length > 0 || showSelectPrompt) return selected
+    // Tour running with nothing selected: show the baseline for its steps.
+    return orderedScenarios.filter((s) => s.scenarioId === BASELINE_SCENARIO_ID)
+  }, [orderedScenarios, selectedSet, showSelectPrompt])
   const pinnedCardScenarios = useMemo(
     () => cardScenarios.filter((s) => pinnedSet.has(s.scenarioId)),
     [cardScenarios, pinnedSet],
@@ -326,7 +346,7 @@ export default function BarPanel() {
     )
   }
 
-  if (cardScenarios.length === 0) {
+  if (showSelectPrompt || cardScenarios.length === 0) {
     return <SelectScenarioPrompt message={SCENARIO_PROMPT_TEXT.bar} />
   }
 
