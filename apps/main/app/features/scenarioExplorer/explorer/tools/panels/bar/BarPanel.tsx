@@ -27,6 +27,7 @@ import {
 } from "../../../../../scenarios/components/shared"
 import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
+import { useScenarioList } from "../../../../../scenarios/hooks/useScenarioList"
 import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
 import ScrollRightIndicator from "../../chrome/layout/ScrollRightIndicator"
 import { useTierTooltipState } from "../../../../../tooltips/useTierTooltipState"
@@ -191,6 +192,9 @@ export default function BarPanel() {
     equityFocusScenario: null,
     tourActive: tourTool === "bar",
   })
+  // The tour's stand-in card, and only then: a selection that the list
+  // filters hide must still show the prompt, never an unselected card.
+  const tourFallback = tourTool === "bar" && selectedScenarios.length === 0
   const {
     sortBy,
     sortDirection,
@@ -234,6 +238,7 @@ export default function BarPanel() {
   const { allChartData, outcomeNames, allScoreData, isLoading, error } =
     useResolvedScenarioTiers()
   const { orderedScenarios } = useOrderedScenarios(allScoreData)
+  const { siblingGroups } = useScenarioList()
 
   const barGlyphTourRef = useTourAnchor("bar.outcome.glyph")
   const barPinTourRef = useTourAnchor("bar.row.pin")
@@ -301,13 +306,17 @@ export default function BarPanel() {
     [pinnedScenarioIds],
   )
   const cardScenarios = useMemo(() => {
-    const selected = orderedScenarios.filter((s) =>
-      selectedSet.has(s.scenarioId),
+    if (!tourFallback) {
+      return orderedScenarios.filter((s) => selectedSet.has(s.scenarioId))
+    }
+    // Tour running with nothing selected: the baseline stands in for its
+    // steps. Taken from the unfiltered list, so a "selected only" or
+    // theme-only filter cannot leave the tour without a card.
+    const baseline = siblingGroups.find(
+      (s) => s.scenarioId === BASELINE_SCENARIO_ID,
     )
-    if (selected.length > 0 || showSelectPrompt) return selected
-    // Tour running with nothing selected: show the baseline for its steps.
-    return orderedScenarios.filter((s) => s.scenarioId === BASELINE_SCENARIO_ID)
-  }, [orderedScenarios, selectedSet, showSelectPrompt])
+    return baseline ? [baseline] : []
+  }, [orderedScenarios, selectedSet, tourFallback, siblingGroups])
   const pinnedCardScenarios = useMemo(
     () => cardScenarios.filter((s) => pinnedSet.has(s.scenarioId)),
     [cardScenarios, pinnedSet],

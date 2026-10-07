@@ -58,8 +58,11 @@ test("the bar tour draws a card to anchor on, then the prompt returns", async ({
   // Outcome names only render with a card (header row and glyph labels).
   // The label breaks across two lines with no space in its text content.
   const outcomeLabel = panel.getByText(/Community\s*surface water/)
+  // The sidebar names the baseline once; a card names it a second time.
+  const baselineName = page.getByText("Current operations", { exact: true })
   await expect(prompt).toBeVisible()
   await expect(outcomeLabel).toHaveCount(0)
+  await expect(baselineName).toHaveCount(1)
 
   await page
     .getByRole("button", { name: "Take the tour for this chart" })
@@ -69,17 +72,52 @@ test("the bar tour draws a card to anchor on, then the prompt returns", async ({
   // The prompt gives way to the current-operations card...
   await expect(page.locator("[data-select-scenario-prompt]")).toHaveCount(0)
   await expect(outcomeLabel.first()).toBeVisible()
+  await expect(baselineName).toHaveCount(2)
   // ...and the sidebar selection is untouched.
   await expect(
     page.getByRole("checkbox", { name: /^Select .+ scenario$/, checked: true }),
   ).toHaveCount(0)
 
+  // The stand-in card draws real results: a glyph with data is labelled
+  // "<outcome> tier distribution: ...", one without "<outcome>: No data
+  // available".
+  const baselineGlyph = panel
+    .getByRole("img", { name: /^Community surface water tier distribution: / })
+    .first()
+  await expect(baselineGlyph).toBeVisible()
+
   // Every anchored step finds its element: the highlight ring is drawn only
-  // when the step's anchor resolved (a missing anchor centers the card).
+  // when the step's anchor resolved (a missing anchor centers the card). On
+  // the two steps with a known target, the ring must also sit on it.
   const ring = page.locator("[data-tour-highlight-ring]")
+  const overlaps = async (
+    a: ReturnType<typeof page.locator>,
+    b: ReturnType<typeof page.locator>,
+  ) => {
+    const [ra, rb] = await Promise.all([a.boundingBox(), b.boundingBox()])
+    if (!ra || !rb) return false
+    return (
+      ra.x < rb.x + rb.width &&
+      rb.x < ra.x + ra.width &&
+      ra.y < rb.y + rb.height &&
+      rb.y < ra.y + ra.height
+    )
+  }
+  const targets: Record<number, ReturnType<typeof page.locator>> = {
+    1: page.getByRole("tab", { name: /^Bar: / }),
+    2: baselineGlyph,
+  }
   for (let step = 1; step <= ANCHORED_STEPS; step++) {
     await tour.getByRole("button", { name: "Next" }).click()
     await expect(ring, `step ${step} should be anchored`).toHaveCount(1)
+    const target = targets[step]
+    if (target) {
+      await expect
+        .poll(() => overlaps(ring, target), {
+          message: `step ${step}'s ring should sit on its anchor`,
+        })
+        .toBe(true)
+    }
   }
 
   // Ending the tour brings the prompt back and clears the card.
@@ -87,6 +125,28 @@ test("the bar tour draws a card to anchor on, then the prompt returns", async ({
   await expect(tour).toHaveCount(0)
   await expect(prompt).toBeVisible()
   await expect(outcomeLabel).toHaveCount(0)
+  await expect(baselineName).toHaveCount(1)
+
+  // A list filter that hides the baseline ("selected only" with nothing
+  // selected empties the list) must not leave the tour without its card:
+  // the stand-in comes from the unfiltered scenario list.
+  await page.getByRole("button", { name: "selected only" }).click()
+  await expect(
+    page.getByRole("checkbox", { name: /^Select .+ scenario$/ }),
+  ).toHaveCount(0)
+  await expect(prompt).toBeVisible()
+  await page
+    .getByRole("button", { name: "Take the tour for this chart" })
+    .click()
+  await expect(tour).toBeVisible()
+  await expect(outcomeLabel.first()).toBeVisible()
+  await expect(ring).toHaveCount(0) // the hero step is centered
+  await tour.getByRole("button", { name: "Next" }).click()
+  await expect(ring).toHaveCount(1)
+  await page.keyboard.press("Escape")
+  await expect(prompt).toBeVisible()
+  await expect(outcomeLabel).toHaveCount(0)
+  await page.getByRole("button", { name: "selected only" }).click()
 
   expect(apiFailures).toEqual([])
   expect(errors).toEqual([])
