@@ -90,8 +90,14 @@ export interface OutcomeGlyphItemProps {
   chartData: ChartDataPoint[] | undefined
   /** Whether this outcome has active/valid data */
   isActive: boolean
-  /** Whether this outcome is currently selected (shows border) */
+  /** Whether this outcome is currently selected (shows border). Pass a
+   *  boolean when the click toggles that state (the outcome shown on the
+   *  map): a clickable glyph then exposes it as aria-pressed. */
   isSelected?: boolean
+  /** Accessible name of a clickable glyph. Defaults to "View details for
+   *  <displayName>"; pass what the click really does when it is something
+   *  else, e.g. "Show <outcome> on the map". */
+  actionLabel?: string
   /** Whether tooltip is active for this outcome */
   isTooltipActive?: boolean
   /** Override the auto-detected glyph variant (bars/dots/distribution) */
@@ -303,7 +309,8 @@ export function OutcomeGlyphItem({
   outcomeCode,
   chartData,
   isActive,
-  isSelected = false,
+  isSelected,
+  actionLabel,
   isTooltipActive = false,
   variant: variantOverride,
   morphEnabled = false,
@@ -353,7 +360,10 @@ export function OutcomeGlyphItem({
         borderRadius: theme.borderRadius.sm,
         transition: "background-color 0.2s ease",
         // Note: opacity removed from parent - inactive styling handled per-element for WCAG compliance
-        border: isSelected ? theme.border.active : "2px solid transparent",
+        // The border keeps one width in both states (theme.border.active is a
+        // hairline, which would be hard to see and would shift the glyph by
+        // 1.5px each time the selection changes); only the color changes.
+        border: `2px solid ${isSelected ? theme.palette.blue.bright : "transparent"}`,
         minWidth: 0,
         overflow: "hidden",
         "&:hover": {
@@ -370,7 +380,15 @@ export function OutcomeGlyphItem({
       // WCAG 2.1.1: Make clickable glyphs keyboard accessible
       tabIndex={isClickable ? 0 : undefined}
       role={isClickable ? "button" : undefined}
-      aria-label={isClickable ? `View details for ${displayName}` : undefined}
+      aria-label={
+        isClickable
+          ? (actionLabel ?? `View details for ${displayName}`)
+          : undefined
+      }
+      // A glyph that toggles a state announces it, not just outlines it
+      aria-pressed={
+        isClickable && isSelected !== undefined ? isSelected : undefined
+      }
       onKeyDown={
         isClickable
           ? (e) => {

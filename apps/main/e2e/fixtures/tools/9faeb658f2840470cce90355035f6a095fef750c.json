@@ -1,0 +1,35 @@
+{
+  "scenario": "s0020",
+  "results": {
+    "FW_EXP": {
+      "scenario": "s0020",
+      "tier_code": "FW_EXP",
+      "tier_name": "Freshwater for Delta exports",
+      "tier_type": "single_value",
+      "locations": [
+        {
+          "location_id": "CAA003",
+          "location_name": "Harvey O. Banks Pumping Plant (formerly CalSim ID 419)",
+          "location_type": "network_node",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.720"
+        },
+        {
+          "location_id": "DMC000",
+          "location_name": "C2VSIM node. C.W. \"Bill\" Jones (formerly Tracy) Pumping Plant",
+          "location_type": "network_node",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.720"
+        }
+      ],
+      "metadata": {
+        "total_locations": 2,
+        "location_types": ["network_node"],
+        "tier_counts": { "1": 0, "2": 2, "3": 0, "4": 0 }
+      }
+    }
+  },
+  "missing": []
+}
