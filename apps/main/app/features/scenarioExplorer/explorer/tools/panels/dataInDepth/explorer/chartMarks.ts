@@ -112,6 +112,8 @@ export interface StatsPanelSpec {
   /** Panel caption on screen, and the panel's y-axis label in the composed
    *  export, so a stitched figure still says what each panel shows. */
   title: string
+  /** Heading above the panel in the figure-template share card. */
+  heading: string
   /** Y-axis label on screen (the full unit sentence for the mean panel). */
   yLabel: string
   format: (v: number) => string
@@ -133,6 +135,7 @@ export function buildStatsPanels(
     {
       key: "mean",
       title: `Mean (${unit})`,
+      heading: "Mean",
       yLabel: axisLabel,
       format: (v) => formatValue(v, unit),
       valueOf: (m) => m.stats.mean,
@@ -140,6 +143,7 @@ export function buildStatsPanels(
     {
       key: "cv",
       title: "CV",
+      heading: "Coefficient of variation",
       yLabel: "CV",
       format: (v) => v.toFixed(2),
       valueOf: (m) => m.stats.cv,
@@ -149,6 +153,7 @@ export function buildStatsPanels(
     panels.push({
       key: "trend",
       title: "Trend (ft/yr)",
+      heading: "Trend",
       yLabel: "ft/yr",
       format: (v) => formatValue(v, "ft/yr"),
       valueOf: (m) => linearTrendPerYear(m.series),

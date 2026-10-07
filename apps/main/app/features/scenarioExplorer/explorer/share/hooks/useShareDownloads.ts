@@ -87,15 +87,19 @@ export function useShareDownloads({
     [csvLookups],
   )
 
-  const handleDownloadAllImages = useCallback(async () => {
-    await exportAllShareItemImagesAsZip(
-      exportItems,
-      withExt("coeqwal-share-images", "zip"),
-      backgroundColor,
-      csvLookups,
-      resolveLiveCardEl,
-    )
-  }, [exportItems, backgroundColor, csvLookups, resolveLiveCardEl])
+  /** Resolves to what the archive managed to include, so the panel can
+   *  tell the user when a figure's image is missing from it. */
+  const handleDownloadAllImages = useCallback(
+    () =>
+      exportAllShareItemImagesAsZip(
+        exportItems,
+        withExt("coeqwal-share-images", "zip"),
+        backgroundColor,
+        csvLookups,
+        resolveLiveCardEl,
+      ),
+    [exportItems, backgroundColor, csvLookups, resolveLiveCardEl],
+  )
 
   const handleDownloadAllData = useCallback(async () => {
     await exportAllShareItemsAsZip(
