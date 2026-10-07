@@ -27,6 +27,7 @@ import {
 } from "../../../../../scenarios/components/shared"
 import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
+import { useScenarioList } from "../../../../../scenarios/hooks/useScenarioList"
 import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
 import ScrollRightIndicator from "../../chrome/layout/ScrollRightIndicator"
 import { useTierTooltipState } from "../../../../../tooltips/useTierTooltipState"
@@ -37,7 +38,11 @@ import { captureBarChartRow } from "../list/grid/captureBarChartRow"
 import { InlineRowActions } from "../list/grid/InlineRowActions"
 import { stageShareItem } from "../../../share/stage"
 import SelectScenarioPrompt from "../../components/SelectScenarioPrompt"
-import { SCENARIO_PROMPT_TEXT } from "../../components/scenarioPrompt"
+import {
+  needsScenarioPrompt,
+  SCENARIO_PROMPT_TEXT,
+} from "../../components/scenarioPrompt"
+import { BASELINE_SCENARIO_ID } from "../../../../constants"
 
 /** Fixed column width so header cells and every card's glyph cells line up. */
 const OUTCOME_COLUMN_WIDTH = 90
@@ -175,6 +180,21 @@ function BarOutcomeHeaderCell({
 export default function BarPanel() {
   const theme = useTheme()
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
+  const tourTool = useWorkspaceSlice((s) => s.tour.tool)
+  // With nothing selected the panel asks for a selection instead of drawing
+  // a card. While the Bar tour runs it draws the current-operations card
+  // instead, because the tour's steps anchor on a card's glyphs, pin and
+  // share controls (see tools/components/scenarioPrompt.ts).
+  const showSelectPrompt = needsScenarioPrompt({
+    mode: "bar",
+    selectedScenarioCount: selectedScenarios.length,
+    showAll: false,
+    equityFocusScenario: null,
+    tourActive: tourTool === "bar",
+  })
+  // The tour's stand-in card, and only then: a selection that the list
+  // filters hide must still show the prompt, never an unselected card.
+  const tourFallback = tourTool === "bar" && selectedScenarios.length === 0
   const {
     sortBy,
     sortDirection,
@@ -218,6 +238,7 @@ export default function BarPanel() {
   const { allChartData, outcomeNames, allScoreData, isLoading, error } =
     useResolvedScenarioTiers()
   const { orderedScenarios } = useOrderedScenarios(allScoreData)
+  const { siblingGroups } = useScenarioList()
 
   const barGlyphTourRef = useTourAnchor("bar.outcome.glyph")
   const barPinTourRef = useTourAnchor("bar.row.pin")
@@ -284,10 +305,18 @@ export default function BarPanel() {
     () => new Set(pinnedScenarioIds),
     [pinnedScenarioIds],
   )
-  const cardScenarios = useMemo(
-    () => orderedScenarios.filter((s) => selectedSet.has(s.scenarioId)),
-    [orderedScenarios, selectedSet],
-  )
+  const cardScenarios = useMemo(() => {
+    if (!tourFallback) {
+      return orderedScenarios.filter((s) => selectedSet.has(s.scenarioId))
+    }
+    // Tour running with nothing selected: the baseline stands in for its
+    // steps. Taken from the unfiltered list, so a "selected only" or
+    // theme-only filter cannot leave the tour without a card.
+    const baseline = siblingGroups.find(
+      (s) => s.scenarioId === BASELINE_SCENARIO_ID,
+    )
+    return baseline ? [baseline] : []
+  }, [orderedScenarios, selectedSet, tourFallback, siblingGroups])
   const pinnedCardScenarios = useMemo(
     () => cardScenarios.filter((s) => pinnedSet.has(s.scenarioId)),
     [cardScenarios, pinnedSet],
@@ -326,7 +355,7 @@ export default function BarPanel() {
     )
   }
 
-  if (cardScenarios.length === 0) {
+  if (showSelectPrompt || cardScenarios.length === 0) {
     return <SelectScenarioPrompt message={SCENARIO_PROMPT_TEXT.bar} />
   }
 
