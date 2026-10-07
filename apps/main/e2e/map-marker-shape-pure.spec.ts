@@ -54,6 +54,17 @@ test("guard: no diamond or circle styles in the marker renderers", () => {
   )
   expect(layout).not.toContain('borderRadius: "50%"')
 
+  // The Learn animation lifts point locations off the map as the shape the
+  // markers draw, sized by the same constant, so the two cannot drift apart.
+  const projection = read(
+    "../app/features/map/animation/hooks/useScreenPolygonProjection.ts",
+  )
+  expect(projection).not.toContain("diamondPoints(")
+  expect(projection).not.toContain("circlePoints(")
+  expect(projection).toContain("rectPoints(")
+  expect(projection).toContain("SQUARE_MARKER_SIZE_PX")
+  expect(tierMarkers).toContain("SQUARE_MARKER_SIZE_PX")
+
   // The renderers take their shape from the one rule and label it, so a
   // DOM check can find the actual shape element.
   expect(tierMarkers).toContain("getPointMarkerShape(")

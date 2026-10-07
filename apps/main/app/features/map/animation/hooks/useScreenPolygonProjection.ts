@@ -7,13 +7,12 @@
 
 import { useRef, useState, useEffect, useCallback } from "react"
 import { useMap } from "@repo/map"
-import {
-  diamondPoints,
-  circlePoints,
-  lineSegmentPoints,
-  POINTS_PER_SHAPE,
-} from "@repo/viz"
+import { lineSegmentPoints, rectPoints, POINTS_PER_SHAPE } from "@repo/viz"
 import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
+import {
+  SQUARE_MARKER_RADIUS_PX,
+  SQUARE_MARKER_SIZE_PX,
+} from "../../config/markerShape"
 import {
   getOutcomeLocationCoordinates,
   SALMON_RIVER_CENTROID,
@@ -291,12 +290,16 @@ export function useScreenPolygonProjection({
           const sx = pt.x
           const sy = pt.y
 
-          let vpPoly: [number, number][]
-          if (code === "ENV_FLOWS") {
-            vpPoly = diamondPoints(sx, sy, 14, 20, POINTS_PER_SHAPE)
-          } else {
-            vpPoly = circlePoints(sx, sy, 8, POINTS_PER_SHAPE)
-          }
+          // Point locations start as the same squares the map markers draw
+          // (TierMarkers), so the morph lifts off without a jump.
+          const vpPoly = rectPoints(
+            sx,
+            sy,
+            SQUARE_MARKER_SIZE_PX,
+            SQUARE_MARKER_SIZE_PX,
+            POINTS_PER_SHAPE,
+            SQUARE_MARKER_RADIUS_PX,
+          )
           vpMap.set(locId, { screenPoly: vpPoly, centroidScreen: [sx, sy] })
         } catch {
           /* outside projection bounds */
@@ -414,12 +417,16 @@ export function useScreenPolygonProjection({
           const pt = map.project(coords)
           const sx = pt.x
           const sy = pt.y
-          let vpPoly: [number, number][]
-          if (code === "ENV_FLOWS") {
-            vpPoly = diamondPoints(sx, sy, 14, 20, POINTS_PER_SHAPE)
-          } else {
-            vpPoly = circlePoints(sx, sy, 8, POINTS_PER_SHAPE)
-          }
+          // Point locations start as the same squares the map markers draw
+          // (TierMarkers), so the morph lifts off without a jump.
+          const vpPoly = rectPoints(
+            sx,
+            sy,
+            SQUARE_MARKER_SIZE_PX,
+            SQUARE_MARKER_SIZE_PX,
+            POINTS_PER_SHAPE,
+            SQUARE_MARKER_RADIUS_PX,
+          )
           vpMap.set(locId, { screenPoly: vpPoly, centroidScreen: [sx, sy] })
         } catch {
           /* outside projection bounds */

@@ -25,6 +25,7 @@ import {
 import {
   getPointMarkerShape,
   SQUARE_MARKER_RADIUS_PX,
+  SQUARE_MARKER_SIZE_PX,
 } from "../../config/markerShape"
 
 // =============================================================================
@@ -160,8 +161,8 @@ export default function TierMarkers({
                   // The old diamond was a 20px box squashed to half width; an
                   // unsquashed 20px square reads much heavier, so squares are
                   // sized closer to the diamond's visual weight.
-                  width: isHighlighted ? 18 : 14,
-                  height: isHighlighted ? 18 : 14,
+                  width: isHighlighted ? 18 : SQUARE_MARKER_SIZE_PX,
+                  height: isHighlighted ? 18 : SQUARE_MARKER_SIZE_PX,
                   backgroundColor: getTierColor(loc.tier_level),
                   border: isHighlighted
                     ? `3px solid ${goldAccent}`
