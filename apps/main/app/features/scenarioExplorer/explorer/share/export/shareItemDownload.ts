@@ -7,22 +7,20 @@
  * `exportAllShareItemImagesAsZip` reuses the producers to build a bulk
  * archive.
  *
- * Every path prefers the live card element (full card chrome via
- * html-to-image) and falls back to the item's `cachedSvg` (and, for
- * PNG, an older `cachedImageDataUrl`) when the card is not mounted,
- * e.g. URL-restored items that have not been added to the story
- * canvas. Filename basenames and raster dimensions both come from the
- * variant registry so a new variant only fills in one row.
+ * Every path exports the mounted card element (the full card chrome,
+ * laid out at the fixed export width via html-to-image). Downloads only
+ * happen on the Share page, which mounts every tray and story card, so
+ * an item without a mounted element has no figure to export: the
+ * producers return null rather than emit a bare chart without its
+ * template and SOURCE. Filename basenames come from the variant registry
+ * so a new variant only fills in one row.
  */
 
 import JSZip from "jszip"
 import type { ShareItem } from "../types"
 import { handlerForItem, type CsvLookups } from "../variants"
-import { CAPTURE_DIMENSIONS } from "../capture/dimensions"
-import { svgIntrinsicSize } from "../svgIntrinsicSize"
 import { withExt, dedupeLabel } from "../utils/filename"
 import { captureCardPngDataUrl, captureCardSvgString } from "../cardExport"
-import { rasterizeSvgString, embedFontStylesInSvg } from "./svgRasterize"
 import { dataUrlToBlob, downloadBlob, downloadSvgString } from "./download"
 
 /**
@@ -40,37 +38,10 @@ export function shareItemFilenameLabel(
 }
 
 /**
- * Raster dimensions for the `cachedSvg` PNG fallback. Variants whose
- * size depends on the item (resilience: single tile vs full panel)
- * provide `rasterSizeFor`; the rest fall back to the static
- * `rasterDimensionsKey` lookup into {@link CAPTURE_DIMENSIONS}.
- */
-function shareItemRasterSize(item: ShareItem) {
-  // Prefer the dimensions the SVG was actually captured at: content-aware
-  // captures (the resilience small-multiples panel) are taller than the
-  // static dimensions, and rasterizing them into the fixed size squeezes
-  // the figure into letterbox bars.
-  if (item.cachedSvg) {
-    const intrinsic = svgIntrinsicSize(item.cachedSvg)
-    if (intrinsic) return intrinsic
-  }
-  const handler = handlerForItem(item)
-  return (
-    handler.rasterSizeFor?.(item) ??
-    CAPTURE_DIMENSIONS[handler.rasterDimensionsKey]
-  )
-}
-
-/**
- * Produce a PNG Blob for a share item, or null when no source is
- * available. Order of preference:
- *   1. live card element via html-to-image. Captures the full card
- *      (tool label, title, definition, hydroclimate badge, chart,
- *      chips, user-written note) so the image matches what the user
- *      sees in the share tray. Dominant path for mounted items.
- *   2. cachedSvg, rasterized on demand. Bare-chart fallback when the
- *      card is not currently mounted.
- *   3. cachedImageDataUrl. An older cached PNG fallback.
+ * Produce a PNG Blob for a share item from its mounted card element via
+ * html-to-image, or null when there is no element or the capture fails.
+ * A mounted card exports as the full card or not at all: falling back to
+ * a bare chart would silently drop the template and SOURCE.
  *
  * This is the produce half of PNG export. The single-item download and
  * the bulk image ZIP both build on it.
@@ -80,44 +51,20 @@ export async function captureShareItemPngBlob(
   liveEl: HTMLElement | null,
   backgroundColor: string,
 ): Promise<Blob | null> {
-  if (liveEl) {
-    const dataUrl = await captureCardPngDataUrl(liveEl, { backgroundColor })
-    if (dataUrl) return dataUrlToBlob(dataUrl)
-  }
-
-  if (item.cachedSvg) {
-    try {
-      const size = shareItemRasterSize(item)
-      const { dataUrl } = await rasterizeSvgString(
-        item.cachedSvg,
-        size.width,
-        size.height,
-        { backgroundColor },
-      )
-      return await dataUrlToBlob(dataUrl)
-    } catch (err) {
-      console.warn(
-        "[Share] PNG capture via cachedSvg failed, falling back to cached PNG:",
-        err,
-      )
-    }
-  }
-
-  if (item.cachedImageDataUrl) {
-    return dataUrlToBlob(item.cachedImageDataUrl)
-  }
-
-  return null
+  // Figures export as the mounted, fixed-width card. With no card element
+  // there is no figure to export: refuse rather than emit a bare chart
+  // (or a map's JPEG bytes under a .png name).
+  if (!liveEl) return null
+  const dataUrl = await captureCardPngDataUrl(liveEl, { backgroundColor })
+  return dataUrl ? dataUrlToBlob(dataUrl) : null
 }
 
 /**
- * Produce an SVG string for a share item, or null when no source is
- * available. Order of preference:
- *   1. live card element via html-to-image's foreignObject SVG.
- *      Carries the full card chrome at vector resolution, modulo the
- *      legacy-renderer caveat documented on `captureCardSvgString`.
- *   2. cachedSvg with embedded font @import. Bare-chart fallback when
- *      the card is not mounted. Still opens cleanly in vector tools.
+ * Produce an SVG string for a share item from its mounted card element
+ * (html-to-image's foreignObject SVG, carrying the full card chrome at
+ * vector resolution, modulo the legacy-renderer caveat documented on
+ * `captureCardSvgString`), or null when there is no element or the
+ * capture fails.
  *
  * This is the produce half of SVG export.
  */
@@ -126,14 +73,9 @@ export async function captureShareItemSvgString(
   liveEl: HTMLElement | null,
   backgroundColor: string,
 ): Promise<string | null> {
-  if (liveEl) {
-    const svg = await captureCardSvgString(liveEl, { backgroundColor })
-    if (svg) return svg
-  }
-
-  if (item.cachedSvg) return embedFontStylesInSvg(item.cachedSvg)
-
-  return null
+  // Same rule as the PNG producer: no mounted card, no export.
+  if (!liveEl) return null
+  return captureCardSvgString(liveEl, { backgroundColor })
 }
 
 /** PNG download path. Captures the item then triggers the download. */
@@ -170,7 +112,8 @@ export async function downloadShareItemAsSvg(
  * card. Basenames match the per-card downloads, deduped on collision,
  * so single and bulk downloads land on the same names. `resolveLiveEl`
  * returns the mounted card element for an item id, or null when the
- * item is not on screen (capture then falls back to cached data).
+ * item is not on screen, in which case the item is skipped: without a
+ * card there is no template to export.
  *
  * Items that yield neither a PNG nor an SVG are skipped. Per-item
  * failures are caught so one bad capture does not abort the rest. The
@@ -190,6 +133,11 @@ export async function exportAllShareItemImagesAsZip(
   for (const item of items) {
     try {
       const liveEl = resolveLiveEl(item.id)
+      if (!liveEl) {
+        // No mounted card, no template: skip rather than ship a bare chart.
+        console.warn("[Share] no mounted card for", item.id, "- skipped in ZIP")
+        continue
+      }
       const [pngBlob, svgString] = await Promise.all([
         captureShareItemPngBlob(item, liveEl, backgroundColor),
         captureShareItemSvgString(item, liveEl, backgroundColor),
