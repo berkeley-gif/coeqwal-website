@@ -114,6 +114,8 @@ export interface ScenarioListItem {
    * is the canonical variant lookup
    */
   sibling_group: string
+  /** Display order for the scenario */
+  display_order: number
 }
 
 /**

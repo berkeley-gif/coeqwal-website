@@ -41,12 +41,15 @@ export function useScenarioList() {
         iconPath: metadata.iconPath,
         hydroclimateId: apiScenario.hydroclimate_id,
         siblingGroup: apiScenario.sibling_group,
+        display_order: apiScenario.display_order,
       }
     })
     return enriched.sort((a, b) => {
       if (a.scenarioId === "s0020") return -1
       if (b.scenarioId === "s0020") return 1
-      return 0
+      const orderA = a.display_order ?? 0
+      const orderB = b.display_order ?? 0
+      return orderA - orderB
     })
   }, [rawScenarios])
 
