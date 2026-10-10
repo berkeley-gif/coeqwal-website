@@ -63,6 +63,8 @@ export interface Scenario {
   hydroclimateId: number
   /** Sibling group, same strategy under different hydroclimates */
   siblingGroup: string
+  /** Display order for the scenario */
+  display_order: number
 }
 
 export interface HydroclimateOption {

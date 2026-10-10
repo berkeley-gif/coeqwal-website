@@ -120,6 +120,9 @@ export function computeOrderedScenarios({
       const aOrder = a.theme ? (THEME_ORDER[a.theme] ?? 99) : 99
       const bOrder = b.theme ? (THEME_ORDER[b.theme] ?? 99) : 99
       if (aOrder !== bOrder) return aOrder - bOrder
+      const orderA = a.display_order ?? 0
+      const orderB = b.display_order ?? 0
+      if (orderA !== orderB) return orderA - orderB
       return compareScenarioIdsForThemeSubgroupOrder(a.scenarioId, b.scenarioId)
     })
   }
