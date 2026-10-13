@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo, useCallback } from "react"
-import { Box, Typography, Button, icons, useTheme } from "@repo/ui/mui"
+import { useMemo, useCallback, useState } from "react"
+import { Alert, Box, Typography, Button, icons, useTheme } from "@repo/ui/mui"
 import { useWorkspaceSlice } from "../../store"
 import type { ShareItem } from "../types"
 import type { ShareRadarLiveDataFields } from "../utils/shareRadarLiveData"
@@ -18,6 +18,7 @@ import TrayCard, { TRAY_CARD_WIDTH } from "../components/TrayCard"
 import StoryCanvas from "../components/StoryCanvas"
 import ShareExportBar from "../components/ShareExportBar"
 import { GlossaryTermLink } from "../../../../glossary"
+import SharePersistWarning from "../components/SharePersistWarning"
 
 /**
  * Per-hydroclimate radar fields for share. See `buildShareRadarLiveDataFields`
@@ -113,6 +114,24 @@ function SharePanelContent() {
   )
   const dataReady = useShareDataReady(bulkItems)
 
+  // One sentence shown above the export bar when an export produced no
+  // file, or a ZIP is missing some images. Exports fail closed (a figure
+  // is the full card or nothing), so the user must hear about it here.
+  const [exportNotice, setExportNotice] = useState<string | null>(null)
+  const handleDownloadAllImagesNoticed = useCallback(async () => {
+    setExportNotice(null)
+    const { total, included, incomplete } = await handleDownloadAllImages()
+    if (included === 0) {
+      setExportNotice(
+        "No figure could be exported as an image, so nothing was downloaded.",
+      )
+    } else if (incomplete > 0) {
+      setExportNotice(
+        `${incomplete} of ${total} figures could not be exported in full; the ZIP holds the rest.`,
+      )
+    }
+  }, [handleDownloadAllImages])
+
   // The host has to live inside the share panel so the rehydrators
   // can read SWR caches the panel already populated (resolved tier
   // data, comparison data). Build the context once per render with
@@ -197,6 +216,7 @@ function SharePanelContent() {
         overflow: "hidden",
       }}
     >
+      <SharePersistWarning />
       <ShareDataRehydrationHost
         items={shareItems}
         context={rehydrationContext}
@@ -335,6 +355,18 @@ function SharePanelContent() {
             pb: 3,
           }}
         >
+          {exportNotice && (
+            // Sticky at the top of the column: the card whose export failed
+            // may be far down a long story, and the user must see this.
+            <Alert
+              severity="warning"
+              onClose={() => setExportNotice(null)}
+              data-share-export-notice=""
+              sx={{ position: "sticky", top: 0, zIndex: 1, mb: 1 }}
+            >
+              {exportNotice}
+            </Alert>
+          )}
           <StoryCanvas
             storyItems={storyItems}
             storyItemIds={storyItemIds}
@@ -343,6 +375,7 @@ function SharePanelContent() {
             onDelete={removeShareItem}
             onDownloadData={handleDownloadData}
             onRegisterContentRef={registerCardRef}
+            onExportFailed={setExportNotice}
             onNoteChange={handleNoteChange}
             outcomeNames={outcomeNames}
             scenarioLookup={scenarioLookup}
@@ -353,7 +386,7 @@ function SharePanelContent() {
 
           {storyItems.length > 0 && (
             <ShareExportBar
-              onDownloadAllImages={handleDownloadAllImages}
+              onDownloadAllImages={handleDownloadAllImagesNoticed}
               onDownloadAllData={handleDownloadAllData}
               dataReady={dataReady}
             />

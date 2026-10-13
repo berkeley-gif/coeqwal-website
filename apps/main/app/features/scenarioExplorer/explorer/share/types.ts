@@ -9,6 +9,7 @@
  */
 
 import type { OutcomeDisplayMode } from "../store"
+import type { FigureTemplateSpec } from "./figureTemplate"
 
 /**
  * Patch shape accepted by `updateShareItem`. Narrower than
@@ -147,6 +148,29 @@ export type ShareItem =
        *  did not share one provenance, so no single label describes it. */
       source: "live" | "mock" | "mixed"
       hydroclimate: string
+      /** Figure-template rows captured with the chart (absent on items
+       *  staged before the template, and on URL-restored items) */
+      figureSpec?: FigureTemplateSpec
+      /** Stats plots: panel headings, left to right */
+      panelHeadings?: string[]
+    })
+  | (ShareItemBaseFields & {
+      type: "map"
+      /** Explore tool the map was saved from ("bar", "radar", "equity",
+       *  "resilience") */
+      tool: string
+      /** Outcome codes painted on the map */
+      outcomeCodes: string[]
+      /** Sibling-group id of the mapped scenario; "" when unknown */
+      scenarioId: string
+      /** Strategy label the map caption showed (absent on URL-restored
+       *  items, which fall back to local scenario metadata) */
+      scenarioLabel?: string
+      hydroclimate: string
+      /** Distribution comparison mode at capture */
+      comparedWithBaseline: boolean
+      /** Width over height of the saved image */
+      imageAspect?: number
     })
 
 /**

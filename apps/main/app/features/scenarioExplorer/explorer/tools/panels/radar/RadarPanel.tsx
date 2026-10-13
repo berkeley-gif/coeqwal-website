@@ -53,6 +53,11 @@ import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
 import { useTourAnchor } from "../../tour"
 import { useRadarInfoIconSync } from "./tour"
+import SelectScenarioPrompt from "../../components/SelectScenarioPrompt"
+import {
+  needsScenarioPrompt,
+  SCENARIO_PROMPT_TEXT,
+} from "../../components/scenarioPrompt"
 
 import { OUTCOME_LABEL_BREAKS } from "../../../../../../content/outcomes"
 
@@ -208,6 +213,7 @@ export default function RadarPanel({
     showTierZones,
     hydroclimate,
     addShareItem,
+    tour,
   } = useWorkspaceSlice()
   const {
     radarVisibleAxes,
@@ -219,6 +225,16 @@ export default function RadarPanel({
     showAxisSelector,
     setShowAxisSelector,
   } = useRadarSlice()
+
+  // With nothing selected the radar asks for a selection instead of drawing
+  // the whole library (see tools/components/scenarioPrompt.ts).
+  const showSelectPrompt = needsScenarioPrompt({
+    mode: "radar",
+    selectedScenarioCount: selectedScenarios.length,
+    showAll: radarShowAll,
+    equityFocusScenario: null,
+    tourActive: tour.tool === "radar",
+  })
 
   const { getDisplayName } = useScenarioList()
   const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
@@ -348,6 +364,9 @@ export default function RadarPanel({
   // Only one open at a time. Clicking another closes the previous.
   const [openInfoAxis, setOpenInfoAxis] = useState<string | null>(null)
   const closeInfoTooltip = useCallback(() => setOpenInfoAxis(null), [])
+  useEffect(() => {
+    if (showSelectPrompt) setOpenInfoAxis(null)
+  }, [showSelectPrompt])
 
   // Tour sync: open the first axis's info popover during the radar
   // tour's "Outcome summary" step. Lives in panels/radar/tour/ so the
@@ -470,11 +489,12 @@ export default function RadarPanel({
 
   const filteredData = useMemo(() => {
     let base: typeof comparisonData
-    // With nothing selected, fall back to showing the full library
-    // instead of an empty chart. The radar is most useful as a quick
-    // overview on first landing, and a blank canvas could read as broken or otherwise be confusing.
+    // With nothing selected the panel shows the select-a-scenario prompt,
+    // so there is nothing to draw. During the radar tour the full library
+    // stays up instead, because tour steps anchor on the drawn polygons.
     if (radarShowAll) base = comparisonData
-    else if (selectedScenarios.length === 0) base = comparisonData
+    else if (selectedScenarios.length === 0)
+      base = showSelectPrompt ? [] : comparisonData
     else base = comparisonData.filter((d) => selectedSet.has(d.id))
 
     if (highlightedIds == null || highlightedIds.size === 0) return base
@@ -496,6 +516,7 @@ export default function RadarPanel({
     selectedScenarios.length,
     radarShowAll,
     highlightedIds,
+    showSelectPrompt,
   ])
 
   const filteredLineColors = useMemo(
@@ -656,7 +677,8 @@ export default function RadarPanel({
   // The toolbar "save snapshot" button needs both data AND at
   // least one axis to draw. Zero axes means a blank wireframe with
   // no spokes. Capturing that would produce a useless share card.
-  const canCaptureRadar = hasRadarTraceData && visibleAxisNames.length > 0
+  const canCaptureRadar =
+    hasRadarTraceData && visibleAxisNames.length > 0 && !showSelectPrompt
   useEffect(() => {
     onCanCaptureChange?.(canCaptureRadar)
   }, [canCaptureRadar, onCanCaptureChange])
@@ -798,7 +820,8 @@ export default function RadarPanel({
     visibleAxisNames,
   ])
 
-  if (isLoading && !hasData) {
+  // The prompt needs no chart data, so it never waits on loading.
+  if (isLoading && !hasData && !showSelectPrompt) {
     return (
       <Box
         sx={{
@@ -862,7 +885,9 @@ export default function RadarPanel({
               transform: "translateY(-10px)",
             }}
           >
-            {showUnavailableBlock ? (
+            {showSelectPrompt ? (
+              <SelectScenarioPrompt message={SCENARIO_PROMPT_TEXT.radar} />
+            ) : showUnavailableBlock ? (
               <HydroclimateUnavailablePlaceholder
                 hydroclimate={hydroclimate}
                 variant="block"
@@ -903,7 +928,7 @@ export default function RadarPanel({
               container's pixel size, so SVG user units == DOM pixels here,
               and this overlay shares the same bounds and transform as the
               chart wrapper). */}
-            {axisPositions.length > 0 && (
+            {!showSelectPrompt && axisPositions.length > 0 && (
               <Box
                 sx={{
                   position: "absolute",
@@ -1032,29 +1057,32 @@ export default function RadarPanel({
             )}
           </Box>
 
-          {hasRadarTraceData && !isLoading && visibleAxisNames.length <= 2 && (
-            <ChartToast maxWidth={440}>
-              <Box
-                sx={{
-                  pointerEvents: "auto",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1,
-                }}
-              >
-                <Box component="span">To show data, use</Box>
-                <InlineToggleChip
-                  label="choose outcome axes"
-                  active={showAxisSelector}
-                  onClick={() => setShowAxisSelector(!showAxisSelector)}
-                  onDarkBackground
-                />
-                <Box component="span">in the chart controls above.</Box>
-              </Box>
-            </ChartToast>
-          )}
+          {!showSelectPrompt &&
+            hasRadarTraceData &&
+            !isLoading &&
+            visibleAxisNames.length <= 2 && (
+              <ChartToast maxWidth={440}>
+                <Box
+                  sx={{
+                    pointerEvents: "auto",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 1,
+                  }}
+                >
+                  <Box component="span">To show data, use</Box>
+                  <InlineToggleChip
+                    label="choose outcome axes"
+                    active={showAxisSelector}
+                    onClick={() => setShowAxisSelector(!showAxisSelector)}
+                    onDarkBackground
+                  />
+                  <Box component="span">in the chart controls above.</Box>
+                </Box>
+              </ChartToast>
+            )}
         </Box>
       </Box>
 

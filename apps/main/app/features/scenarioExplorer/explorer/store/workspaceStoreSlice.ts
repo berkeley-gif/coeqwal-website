@@ -63,6 +63,8 @@ export interface WorkspaceState {
   storyItemIds: string[]
   showShareDrawer: boolean
   shareUrlVersionMismatch: boolean
+  /** The last share-tray save to localStorage failed (quota); never persisted */
+  sharePersistFailed: boolean
 
   // --- Chart cosmetics (radar panel, tier overlays, some list/radar hooks) ---
   relativeToBaseline: boolean
@@ -98,6 +100,7 @@ export interface WorkspaceActions {
   updateShareItem: (id: string, patch: ShareItemPatch) => void
   setShowShareDrawer: (open: boolean) => void
   setShareUrlVersionMismatch: (mismatch: boolean) => void
+  setSharePersistFailed: (failed: boolean) => void
   dismissShareUrlVersionMismatch: () => void
   addToStory: (id: string) => void
   removeFromStory: (id: string) => void
@@ -134,6 +137,7 @@ export const workspaceInitialState: WorkspaceState = {
   storyItemIds: persisted.storyItemIds,
   showShareDrawer: false,
   shareUrlVersionMismatch: false,
+  sharePersistFailed: false,
   relativeToBaseline: true,
   highlightBaseline: false,
   overlayTiers: false,
@@ -276,6 +280,11 @@ export function createWorkspaceSlice(
     dismissShareUrlVersionMismatch: () =>
       set((state) => {
         state.shareUrlVersionMismatch = false
+      }),
+
+    setSharePersistFailed: (failed) =>
+      set((state) => {
+        state.sharePersistFailed = failed
       }),
 
     addToStory: (id) =>

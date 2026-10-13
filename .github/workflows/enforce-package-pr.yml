@@ -17,7 +17,7 @@ name: Enforce package-PR rule
 
 on:
   push:
-    branches: [dev]
+    branches: [dev, main]
     paths:
       - "packages/**"
       - "pnpm-lock.yaml"

@@ -13,7 +13,7 @@
  * - Tooltips (unified via useMapTooltips hook)
  */
 
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react"
 import { useMap, Source, Layer, Popup } from "@repo/map"
 import { Box, useTheme, alpha } from "@repo/ui/mui"
 
@@ -49,7 +49,9 @@ import {
   getOnLocationClick,
   getOnLocationHover,
   useActiveSubSection,
+  mapActions,
 } from "../store"
+import { mapPaintKey } from "../config/mapPaintKey"
 import { MAP_THEME_URLS } from "@repo/map"
 
 // Large polygon covering well beyond California for dim overlay.
@@ -101,6 +103,8 @@ export default function VisualizationLayers({
     tierLevelMap,
     locationData,
     featureIds,
+    featureCount,
+    isLoading: tierDataLoading,
   } = useOutcomeVisualization()
 
   // Clear all pinned tooltips when signal changes (triggered by glyph clicks)
@@ -122,10 +126,11 @@ export default function VisualizationLayers({
   const shouldFetchAssignments = Boolean(
     config && scenarioId && !usesMapboxLayers && mapMode !== "hidden",
   )
-  const { data: assignmentsData } = useTierLocationAssignments(
-    shouldFetchAssignments && config ? scenarioId : null,
-    shouldFetchAssignments && config ? config.tierCode : null,
-  )
+  const { data: assignmentsData, isLoading: assignmentsLoading } =
+    useTierLocationAssignments(
+      shouldFetchAssignments && config ? scenarioId : null,
+      shouldFetchAssignments && config ? config.tierCode : null,
+    )
   const tierLocations: TierLocation[] = useMemo(
     () =>
       shouldFetchAssignments && assignmentsData
@@ -133,6 +138,28 @@ export default function VisualizationLayers({
         : [],
     [shouldFetchAssignments, assignmentsData],
   )
+
+  // Report a finished paint only when the data for THIS outcome and
+  // scenario has loaded: keepPreviousData can leave the previous outcome
+  // on screen while the new one loads.
+  const painted =
+    isVisualizationActive &&
+    !tierDataLoading &&
+    (usesMapboxLayers
+      ? featureCount > 0
+      : !assignmentsLoading && tierLocations.length > 0)
+  // The data object drawn; a new one (even with the same counts) is a new
+  // paint, so a save in flight across a refresh is voided. A layout effect
+  // bumps the paint revision in the commit that brings the new data,
+  // before Mapbox's next frame can draw it.
+  const paintedData = usesMapboxLayers ? tierColorMap : assignmentsData
+  useLayoutEffect(() => {
+    if (painted && outcomeCode) {
+      mapActions.markMapPainted(
+        mapPaintKey({ mode: "tiers", outcomeCode, scenarioId }),
+      )
+    }
+  }, [painted, outcomeCode, scenarioId, paintedData])
   const tierCode: string | null = useMemo(
     () =>
       shouldFetchAssignments && assignmentsData

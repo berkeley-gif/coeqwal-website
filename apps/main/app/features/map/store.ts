@@ -12,6 +12,7 @@ import {
   type LearnNavSection,
 } from "./config/sectionLayers"
 import { MAP_THEME_URLS } from "@repo/map"
+import { getDistributionPaintKey } from "./config/mapPaintKey"
 
 // ============================================================================
 // Types
@@ -21,6 +22,22 @@ import { MAP_THEME_URLS } from "@repo/map"
 export type MapMode = "hidden" | "learn" | "explore"
 
 /** Outcome visualization state used by both Learn and Explore modes */
+/** The data behind Distribution's map markers at the moment they were
+ *  painted, so the map caption describes the markers, not the controls. */
+export interface DistributionMapSnapshot {
+  /** Outcome short codes with at least one painted marker */
+  outcomeCodes: string[]
+  /** Logical scenario (sibling-group) id the markers were built from */
+  scenarioId: string
+  /** Workspace hydroclimate value the markers were built under */
+  hydroclimate: string
+  /** Markers encode the change from current operations */
+  comparedWithBaseline: boolean
+  /** Painted markers as `tierCode:locationId:tier:baselineTier`, so the
+   *  paint key changes whenever a marker's color or shape would */
+  locationKeys: string[]
+}
+
 export interface OutcomeVisualization {
   /** Outcome short code (e.g., "CWS_DEL", "AG_REV") */
   outcomeCode: string
@@ -74,6 +91,16 @@ interface MapState {
 
   // Visualization
   activeOutcomeVisualization: OutcomeVisualization | null
+  /** What Distribution's painted markers show (it draws its own markers,
+   *  so activeOutcomeVisualization stays null there), captured when the
+   *  markers are built. Read by the map caption. */
+  distributionMapSnapshot: DistributionMapSnapshot | null
+  /** What the renderer last finished drawing; generation is the
+   *  paintRevision at that paint, so a repaint during a save is detectable */
+  paintedVisualization: { key: string; generation: number } | null
+  /** Monotonic counter bumped on every paint and every paint invalidation;
+   *  never reset, so A to B to A during a save is still detected */
+  paintRevision: number
 
   // Tooltip control signal (incrementing triggers clearAllPinned in VisualizationLayers)
   clearTooltipsSignal: number
@@ -116,6 +143,9 @@ const initialState: MapState = {
   isVertNavExpanded: false,
   explorePanelWidth: 50,
   activeOutcomeVisualization: null,
+  distributionMapSnapshot: null,
+  paintedVisualization: null,
+  paintRevision: 0,
   clearTooltipsSignal: 0,
   locationHighlights: [],
   showHoverHighlightsOnMap: false,
@@ -128,6 +158,25 @@ const initialState: MapState = {
 // ============================================================================
 
 export const useMapStore = create<MapState>()(immer(() => initialState))
+
+/** State patch that drops a finished tier-layer paint (Bar, Radar,
+ *  Heatmap, Learn) when what the tier layer is asked to draw changes to
+ *  `next`, so a save cannot pair an old picture with a new request. An
+ *  unchanged request keeps the paint (the renderer would not re-mark it).
+ *  Distribution's paint is left alone: it survives a map close and
+ *  reopen. */
+function tierPaintInvalidation(
+  next: OutcomeVisualization | null,
+): Partial<MapState> {
+  const { paintedVisualization, paintRevision, activeOutcomeVisualization } =
+    useMapStore.getState()
+  const unchanged =
+    activeOutcomeVisualization?.outcomeCode === next?.outcomeCode &&
+    activeOutcomeVisualization?.scenarioId === next?.scenarioId
+  return !unchanged && paintedVisualization?.key.startsWith("tiers|")
+    ? { paintedVisualization: null, paintRevision: paintRevision + 1 }
+    : {}
+}
 
 // Stored outside immer to avoid proxy/freeze issues with function values
 let _onLocationToggle: ((key: string) => void) | null = null
@@ -151,6 +200,7 @@ export const mapActions = {
         mode === "hidden"
           ? null
           : useMapStore.getState().activeOutcomeVisualization,
+      ...(mode === "hidden" ? tierPaintInvalidation(null) : {}),
     }
 
     // Learn and get-started always use the satellite basemap
@@ -219,6 +269,7 @@ export const mapActions = {
       learnMapScrollOffset: 0,
       isVertNavExpanded: false,
       activeOutcomeVisualization: null,
+      ...tierPaintInvalidation(null),
     }),
 
   // Visualization
@@ -231,10 +282,16 @@ export const mapActions = {
       activeOutcomeVisualization: outcomeCode
         ? { outcomeCode, scenarioId, siblingGroupId }
         : null,
+      ...tierPaintInvalidation(
+        outcomeCode ? { outcomeCode, scenarioId, siblingGroupId } : null,
+      ),
     }),
 
   clearOutcomeVisualization: () =>
-    useMapStore.setState({ activeOutcomeVisualization: null }),
+    useMapStore.setState({
+      activeOutcomeVisualization: null,
+      ...tierPaintInvalidation(null),
+    }),
 
   toggleOutcomeVisualization: (
     outcomeCode: string,
@@ -252,8 +309,42 @@ export const mapActions = {
       activeOutcomeVisualization: isSame
         ? null
         : { outcomeCode, scenarioId, siblingGroupId },
+      ...tierPaintInvalidation(
+        isSame ? null : { outcomeCode, scenarioId, siblingGroupId },
+      ),
     })
   },
+
+  setDistributionMapSnapshot: (snapshot: DistributionMapSnapshot | null) => {
+    const state = useMapStore.getState()
+    // A different set of painted markers invalidates Distribution's last
+    // paint; the panel marks the new one once it has built the markers.
+    const changed =
+      getDistributionPaintKey(snapshot) !==
+      getDistributionPaintKey(state.distributionMapSnapshot)
+    useMapStore.setState({
+      distributionMapSnapshot: snapshot,
+      ...(changed && state.paintedVisualization?.key.startsWith("equity|")
+        ? {
+            paintedVisualization: null,
+            paintRevision: state.paintRevision + 1,
+          }
+        : {}),
+    })
+  },
+
+  /** The renderer finished drawing `key` */
+  markMapPainted: (key: string) =>
+    useMapStore.setState((state) => ({
+      paintRevision: state.paintRevision + 1,
+      paintedVisualization: { key, generation: state.paintRevision + 1 },
+    })),
+
+  clearMapPainted: () =>
+    useMapStore.setState((state) => ({
+      paintRevision: state.paintRevision + 1,
+      paintedVisualization: null,
+    })),
 
   // Tooltips
   clearMapTooltips: () =>
@@ -350,6 +441,12 @@ export const useActiveOutcomeVisualization = () =>
 
 export const useIsOutcomeVisualizationActive = () =>
   useMapStore((s) => s.activeOutcomeVisualization !== null)
+
+export const useDistributionMapSnapshot = () =>
+  useMapStore((s) => s.distributionMapSnapshot)
+
+export const usePaintedVisualization = () =>
+  useMapStore((s) => s.paintedVisualization)
 
 // Tooltips
 export const useClearTooltipsSignal = () =>

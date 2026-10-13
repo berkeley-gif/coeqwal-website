@@ -23,6 +23,7 @@ import radarHandler from "./variants/radar"
 import equityHandler from "./variants/equity"
 import resilienceHandler from "./variants/resilience"
 import dataHandler from "./variants/data"
+import mapHandler from "./variants/map"
 
 export interface ShareItemScenarioInfo {
   name: string
@@ -134,6 +135,7 @@ export const VARIANT_REGISTRY = {
   equity: equityHandler,
   resilience: resilienceHandler,
   data: dataHandler,
+  map: mapHandler,
 } as const satisfies ShareVariantRegistry
 
 /**

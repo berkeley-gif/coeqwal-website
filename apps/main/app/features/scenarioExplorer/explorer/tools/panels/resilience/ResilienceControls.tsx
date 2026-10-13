@@ -69,6 +69,7 @@ import {
   HYDROCLIMATE_SHORT_LABELS,
 } from "../../../../../../content/scenarios"
 import { useScenarioList } from "../../../../../scenarios/hooks/useScenarioList"
+import { needsScenarioPrompt } from "../../components/scenarioPrompt"
 
 interface ResilienceControlsProps {
   /** Called when the user clicks the Save snapshot button in the
@@ -129,7 +130,18 @@ export default function ResilienceControls({
     showResilienceOutcomeSelector,
     setShowResilienceOutcomeSelector,
     resilienceVisibleOutcomes,
+    resilienceShowAllScenarios,
   } = useResilienceSlice()
+  const tourTool = useWorkspaceSlice((s) => s.tour.tool)
+  // While the panel shows the select-a-scenario prompt there is no chosen
+  // figure to save.
+  const promptShown = needsScenarioPrompt({
+    mode: "resilience",
+    selectedScenarioCount: selectedScenarios.length,
+    showAll: resilienceShowAllScenarios,
+    equityFocusScenario: null,
+    tourActive: tourTool === "resilience",
+  })
 
   const scenarioItems = useMemo(() => {
     return siblingGroups.map((s) => ({
@@ -287,7 +299,9 @@ export default function ResilienceControls({
   const scenarioTotal = scenarioItems.length
   const scenariosLabel =
     scenarioCount === 0
-      ? `all ${scenarioTotal} scenarios`
+      ? promptShown
+        ? "no scenarios picked"
+        : `all ${scenarioTotal} scenarios`
       : scenarioCount === 1
         ? "1 scenario"
         : `${scenarioCount} of ${scenarioTotal} scenarios`
@@ -524,7 +538,11 @@ export default function ResilienceControls({
         </InlineTourAnchor>
         {onSaveSnapshot && (
           <InlineTourAnchor anchorId="resilience.saveSnapshot">
-            <SaveSnapshotButton onClick={onSaveSnapshot} sx={{ ml: 2 }} />
+            <SaveSnapshotButton
+              disabled={promptShown}
+              onClick={onSaveSnapshot}
+              sx={{ ml: 2 }}
+            />
           </InlineTourAnchor>
         )}
       </Box>
@@ -541,14 +559,16 @@ export default function ResilienceControls({
           title="Which scenarios?"
           subtitle={
             scenarioCount === 0
-              ? `You haven't picked any in the sidebar, so the chart is showing all ${scenarioTotal}.`
+              ? promptShown
+                ? "You haven't picked any in the sidebar yet."
+                : `You haven't picked any in the sidebar, so the chart is showing all ${scenarioTotal}.`
               : `${scenarioCount} of ${scenarioTotal} picked from the sidebar.`
           }
           width={300}
         >
           <Typography variant="caption" sx={{ fontSize: "0.75rem" }}>
             Tick or untick scenarios in the sidebar to change what&apos;s on the
-            chart. Leave none picked to see them all.
+            chart.
           </Typography>
           {scenarioCount > 0 && (
             <Box

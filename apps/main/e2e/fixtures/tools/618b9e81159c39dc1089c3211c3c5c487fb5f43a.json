@@ -1,0 +1,74 @@
+[
+  {
+    "short_code": "DELTA_ECO",
+    "name": "Delta ecology",
+    "description": "Ecological responses to flow, measured by direct indicators (SAV growth, salinity, turbidity, microhabitat availability)",
+    "tier_type": "single_value",
+    "tier_count": 1,
+    "is_active": true
+  },
+  {
+    "short_code": "FW_DELTA_USES",
+    "name": "Freshwater for in-Delta uses",
+    "description": "How often water in the western Delta is fresh enough for in-Delta uses",
+    "tier_type": "single_value",
+    "tier_count": 1,
+    "is_active": true
+  },
+  {
+    "short_code": "FW_EXP",
+    "name": "Freshwater for Delta exports",
+    "description": "Frequency with which water at Delta pumps (Banks and Jones) meets salinity thresholds for drinking water",
+    "tier_type": "single_value",
+    "tier_count": 1,
+    "is_active": true
+  },
+  {
+    "short_code": "WRC_SALMON_AB",
+    "name": "Salmon abundance",
+    "description": "Population levels of Winter-run Chinook salmon in the Sacramento River",
+    "tier_type": "single_value",
+    "tier_count": 1,
+    "is_active": true
+  },
+  {
+    "short_code": "AG_REV",
+    "name": "Agricultural revenue",
+    "description": "Impact on agricultural production and revenue",
+    "tier_type": "multi_value",
+    "tier_count": 4,
+    "is_active": true
+  },
+  {
+    "short_code": "CWS_DEL",
+    "name": "Community water system deliveries",
+    "description": "Water delivered to community water systems for residential, commercial, and industrial use",
+    "tier_type": "multi_value",
+    "tier_count": 4,
+    "is_active": true
+  },
+  {
+    "short_code": "ENV_FLOWS",
+    "name": "Environmental flows",
+    "description": "Water allocated to support ecosystem health, wildlife habitats, and environmental protection",
+    "tier_type": "multi_value",
+    "tier_count": 4,
+    "is_active": true
+  },
+  {
+    "short_code": "GW_STOR",
+    "name": "Groundwater storage",
+    "description": "Amount of water stored in underground aquifer systems",
+    "tier_type": "multi_value",
+    "tier_count": 4,
+    "is_active": true
+  },
+  {
+    "short_code": "RES_STOR",
+    "name": "Reservoir storage",
+    "description": "Amount of water stored in California's major reservoir systems each spring",
+    "tier_type": "multi_value",
+    "tier_count": 4,
+    "is_active": true
+  }
+]

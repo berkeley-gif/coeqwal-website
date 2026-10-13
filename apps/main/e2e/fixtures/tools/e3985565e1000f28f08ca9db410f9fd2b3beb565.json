@@ -1,0 +1,27 @@
+{
+  "scenario": "s0020",
+  "results": {
+    "WRC_SALMON_AB": {
+      "scenario": "s0020",
+      "tier_code": "WRC_SALMON_AB",
+      "tier_name": "Salmon abundance",
+      "tier_type": "single_value",
+      "locations": [
+        {
+          "location_id": "SAC299",
+          "location_name": "Sacramento River at Keswick",
+          "location_type": "network_node",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.240"
+        }
+      ],
+      "metadata": {
+        "total_locations": 1,
+        "location_types": ["network_node"],
+        "tier_counts": { "1": 0, "2": 0, "3": 0, "4": 1 }
+      }
+    }
+  },
+  "missing": []
+}

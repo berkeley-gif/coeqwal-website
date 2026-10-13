@@ -28,17 +28,15 @@ on:
           - storyline-management
           - all
       branch:
-        # Only `dev` is offered today. Production branches will be added to
-        # this list, the MAP block in the deploy job, and the README "Apps and
-        # Amplify ids" table when the production Amplify apps are created
         description: "Amplify branch to deploy"
         required: true
         type: choice
-        default: dev
+        default: main
         options:
           - dev
+          - main
   push:
-    branches: [dev]
+    branches: [dev, main]
     paths:
       - "apps/main/**"
       - "apps/storyline-flow/**"
@@ -55,7 +53,7 @@ permissions:
   id-token: write
   contents: read
 
-# Serialize per-branch so two pushes to dev (or a dispatch racing a push)
+# Serialize per-branch so two pushes to dev or main (or a dispatch racing a push)
 # queue instead of clobbering each other in Amplify (StartJob rejects when a
 # job is already pending or running for a branch). cancel-in-progress: false
 # keeps the queue intact rather than dropping queued work.
@@ -187,6 +185,11 @@ jobs:
             ["dev:storyline-climate"]="d1tv02ylgdru7l"
             ["dev:storyline-equity"]="d4gv5pgozj14e"
             ["dev:storyline-management"]="d3vuf3410wjicl"
+            ["main:main"]="d2yqk6im560ffz"
+            ["main:storyline-flow"]="d11fk80jyl948s"
+            ["main:storyline-climate"]="d1tv02ylgdru7l"
+            ["main:storyline-equity"]="d4gv5pgozj14e"
+            ["main:storyline-management"]="d3vuf3410wjicl"
           )
           ID="${MAP[${BRANCH}:${APP}]:-}"
           if [[ -z "$ID" ]]; then

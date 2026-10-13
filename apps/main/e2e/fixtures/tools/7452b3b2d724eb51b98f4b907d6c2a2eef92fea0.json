@@ -1,0 +1,35 @@
+{
+  "scenario": "s0020",
+  "results": {
+    "FW_DELTA_USES": {
+      "scenario": "s0020",
+      "tier_code": "FW_DELTA_USES",
+      "tier_name": "Freshwater for in-Delta uses",
+      "tier_type": "single_value",
+      "locations": [
+        {
+          "location_id": "EM",
+          "location_name": "Emmaton",
+          "location_type": "compliance_station",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.860"
+        },
+        {
+          "location_id": "JP",
+          "location_name": "Jersey Point",
+          "location_type": "compliance_station",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.860"
+        }
+      ],
+      "metadata": {
+        "total_locations": 2,
+        "location_types": ["compliance_station"],
+        "tier_counts": { "1": 0, "2": 2, "3": 0, "4": 0 }
+      }
+    }
+  },
+  "missing": []
+}

@@ -125,6 +125,11 @@ import type {
 } from "../../../share/capture/types"
 
 import { useTourAnchor } from "../../tour/anchors/TourAnchorContext"
+import SelectScenarioPrompt from "../../components/SelectScenarioPrompt"
+import {
+  needsScenarioPrompt,
+  SCENARIO_PROMPT_TEXT,
+} from "../../components/scenarioPrompt"
 interface ResiliencePanelProps {
   highlightedIds?: Set<string> | null
   onChartHover?: (info: HoveredInteraction | null) => void
@@ -194,7 +199,7 @@ export default function ResiliencePanel({
     setResilienceVisibleOutcomes,
     resilienceDistributionMode: distributionMode,
   } = useResilienceSlice()
-  const { selectedScenarios, setHydroclimate } = useWorkspaceSlice()
+  const { selectedScenarios, setHydroclimate, tour } = useWorkspaceSlice()
   const heatmapGridAnchorRef = useTourAnchor("resilience.heatmapGrid")
   // ============================================================
   // Store-derived scope, columns, and rows
@@ -1933,6 +1938,18 @@ export default function ResiliencePanel({
     onSquareHover: handleSquareHover,
     onSquareClick: handleSquareClick,
     renderTileActions: renderTileShareAction,
+  }
+
+  if (
+    needsScenarioPrompt({
+      mode: "resilience",
+      selectedScenarioCount: selectedScenarios.length,
+      showAll: showAllScenarios,
+      equityFocusScenario: null,
+      tourActive: tour.tool === "resilience",
+    })
+  ) {
+    return <SelectScenarioPrompt message={SCENARIO_PROMPT_TEXT.resilience} />
   }
 
   return (
