@@ -103,14 +103,14 @@ test("climate futures axis fetches each hydroclimate variant and goes live", asy
   // Sanity precondition: with a real scenario list, the default scenarios
   // axis already serves live data (baseline resolves to s0020). This half
   // holds before the climates-axis change and pins the fixture wiring.
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   expect(fetchedIds).toContain("s0020")
 
   // The behavior under test: switching to the climate-futures axis keeps the
   // card live, renders one member per hydroclimate, and fetches every
   // variant id exactly as resolved from the sibling group.
   await page.getByRole("button", { name: "Hydroclimates", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect(page.getByText(/^Sample data$/)).not.toBeVisible()
   for (const label of [
     "Historical",
@@ -120,6 +120,12 @@ test("climate futures axis fetches each hydroclimate variant and goes live", asy
     "Extreme stress",
   ]) {
     await expect(page.getByText(label, { exact: true }).first()).toBeVisible()
+  }
+  // Every compared hydroclimate drew its own served series: no member is
+  // left waiting, failed, or without data.
+  const card = page.locator('[data-did-chart-state="drawn"]')
+  for (const chip of ["loading", "could not load", "no data"]) {
+    await expect(card.getByText(chip, { exact: true })).toHaveCount(0)
   }
   await expect
     .poll(() => new Set(fetchedIds).size, { timeout: 10_000 })

@@ -23,7 +23,7 @@ test("legacy and template data items render from storage", async ({ page }) => {
       compareBy: "climates",
       memberIds: ["historical", "cc50"],
       memberLabels: ["Historical", "Moderate stress"],
-      source: "mock",
+      source: "live",
       hydroclimate: "historical",
       cachedSvg: svg,
     }
@@ -36,11 +36,13 @@ test("legacy and template data items render from storage", async ({ page }) => {
           "April Reservoir Storage (Shasta Reservoir), Current Operations, 2 Hydroclimates, All Water Years",
         waterYearTypesLabel: "All years",
         unitLabel: "thousand acre-feet",
+        members: [{ isLive: true }, { isLive: true }],
       },
     }
     const templated = {
       ...base,
       id: "data-new-1",
+      cachedChartData: { members: [{ isLive: true }, { isLive: true }] },
       figureSpec: {
         toolLabel: "Data in depth",
         chartKindLabel: "Box plot",
@@ -104,5 +106,87 @@ test("legacy and template data items render from storage", async ({ page }) => {
     "could not be exported as a PNG, so nothing was downloaded",
   )
 
+  expect(errors).toEqual([])
+})
+
+// Figures saved while the site could show sample data are dropped on load
+// (and from the story order): the site shows model results only, so a stored
+// sample or mixed figure must never render or export again.
+test("stored sample and mixed data figures are dropped on load", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  await page.addInitScript((svg) => {
+    if (window.localStorage.getItem("coeqwal-share-v2")) return
+    const item = (id: string, source: string, note: string) => ({
+      id,
+      type: "data",
+      variableId: "res_apr",
+      view: "dist",
+      distKind: "box",
+      compareBy: "scenarios",
+      memberIds: ["s0020"],
+      memberLabels: ["Current operations"],
+      source,
+      hydroclimate: "historical",
+      note,
+      cachedSvg: svg,
+    })
+    const items = [
+      {
+        ...item("data-live", "live", "Model results note"),
+        cachedChartData: {
+          members: [{ isLive: true }, { isLive: false, liveDataMissing: true }],
+        },
+      },
+      item("data-mock", "mock", "Sample note"),
+      item("data-mixed", "mixed", "Mixed note"),
+      // Saved before mixed figures were tagged: "live" with a stand-in
+      // member drawn beside a served one.
+      {
+        ...item("data-old-live", "live", "Old mixed note"),
+        cachedChartData: { members: [{ isLive: true }, { isLive: false }] },
+      },
+      // Saved before captures recorded per-member provenance.
+      item("data-unverified", "live", "Unverified note"),
+    ]
+    window.localStorage.setItem(
+      "coeqwal-share-v2",
+      JSON.stringify({
+        version: 2,
+        shareItems: items,
+        storyItemIds: items.map((i) => i.id),
+      }),
+    )
+  }, SVG)
+  await page.goto("/share")
+  const canvas = page.locator('[data-share-region="canvas"]')
+  await expect(canvas.getByText("Model results note")).toBeVisible()
+  await expect(canvas.getByText("Sample note")).toHaveCount(0)
+  await expect(canvas.getByText("Mixed note")).toHaveCount(0)
+  await expect(canvas.getByText("Old mixed note")).toHaveCount(0)
+  await expect(canvas.getByText("Unverified note")).toHaveCount(0)
+  await expect(page.getByText(/sample data/i)).toHaveCount(0)
+  expect(errors).toEqual([])
+})
+
+// A share link minted for a sample figure restores nothing for that item;
+// the model-results item in the same link restores normally.
+test("a share link drops its sample data figures", async ({ page }) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  // Data token: variable.view.distKind.compareBy.members.source.hydroclimate
+  await page.goto(
+    "/share?v=1&items=d.res_apr.dist.box.scenarios.s0020.live.,d.ag_rev.dist.box.scenarios.s0020.mock.",
+  )
+  const canvas = page.locator(
+    '[data-share-region="canvas"], [data-share-region="tray"]',
+  )
+  await expect(
+    canvas.getByText("April reservoir storage").first(),
+  ).toBeVisible()
+  await expect(canvas.getByText("Gross crop revenues")).toHaveCount(0)
+  await expect(page.getByText(/sample data/i)).toHaveCount(0)
   expect(errors).toEqual([])
 })

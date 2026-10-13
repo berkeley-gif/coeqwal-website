@@ -75,12 +75,12 @@ export async function captureDataInDepthOffscreen(
   const fmt = (v: number) => formatValue(v, input.unit)
   const yLabel = input.view === "cv" ? "CV" : (input.axisLabel ?? input.unit)
 
-  // Same rule the live card applies: a member whose scenario is not modeled
-  // for this variable is recorded but never drawn, so the exported image can
-  // never carry a fabricated curve the on-screen chart refused to draw.
+  // Same rule the live card applies: only members carrying served model
+  // results are drawn, so the exported image can never carry a stand-in
+  // curve the on-screen chart refused to draw.
   const plotted = input.members
     .map((m, i) => ({ member: m, color: input.memberColors[i] ?? "" }))
-    .filter((p) => !p.member.liveDataMissing)
+    .filter((p) => p.member.isLive === true)
   const drawnMembers = plotted.map((p) => p.member)
   const drawnColors = plotted.map((p) => p.color)
 
@@ -173,10 +173,11 @@ export async function captureDataInDepthOffscreen(
     // their year-labeled rows instead of falling back to an index axis.
     members: input.members.map((m) => ({
       label: m.label,
-      series: m.liveDataMissing ? [] : m.series,
-      waterYears: m.liveDataMissing ? [] : m.waterYears,
+      series: m.isLive === true ? m.series : [],
+      waterYears: m.isLive === true ? m.waterYears : [],
       isLive: m.isLive,
       liveDataMissing: m.liveDataMissing,
+      loadFailed: m.loadFailed,
       stats: m.stats,
       value: m.value,
     })),

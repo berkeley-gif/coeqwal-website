@@ -175,7 +175,7 @@ test("a scenario with no served block is detected from its response, not its id"
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // Add the Delta Conveyance Project scenario to the comparison. The chart
   // now holds one scenario the endpoint serves and one it does not.
@@ -216,15 +216,14 @@ test("a scenario with no served block is detected from its response, not its id"
       .filter({ hasText: /Winter-run salmon data are not available/ }),
   ).toHaveCount(1)
 
-  // The chart-level caption stops claiming the whole figure is live.
-  await expect(
-    page.getByText(/for 1 of 2 series; see the legend/),
-  ).toBeVisible()
+  // No source badge or note: the figure only ever shows model results.
+  await expect(page.getByText(/live data/i)).toHaveCount(0)
+  await expect(page.getByText(/sample/i)).toHaveCount(0)
 
   // The substance of the honesty pass: TWO members are legended but only ONE
   // curve is drawn. The sample engine always produces a series, so without
   // this the chart would draw an invented curve for a scenario the model has
-  // no results for, under a badge reading "Live data". Exceedance curves are
+  // no results for. Exceedance curves are
   // the only stroke-width-2 unfilled paths in the plot.
   const curves = page.locator('svg path[stroke-width="2"][fill="none"][stroke]')
   await expect.poll(() => curves.count()).toBe(1)
@@ -253,7 +252,7 @@ test("switching the workspace hydroclimate keeps the scenarios axis live", async
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await page
     .getByLabel("Select Delta Conveyance Project scenario")
     .check({ timeout: 10_000 })
@@ -278,7 +277,7 @@ test("switching the workspace hydroclimate keeps the scenarios axis live", async
     .poll(() => requestedScenarios.some((s) => s.includes("s0157")))
     .toBe(true)
 
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect(page.getByText(/^Sample data$/)).toHaveCount(0)
   await expect(page.getByText("sample", { exact: true })).toHaveCount(0)
   await expect(page.getByText("no data", { exact: true })).toHaveCount(1)
@@ -320,7 +319,7 @@ test("a member whose live request is still in flight is shown as loading, not dr
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   await page
     .getByLabel("Select Delta Conveyance Project scenario")

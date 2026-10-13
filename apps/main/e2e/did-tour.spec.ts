@@ -18,7 +18,7 @@ test("the data in depth tour auto-starts, walks every step, and closes", async (
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   const first = DATA_TOUR[0]
   const last = DATA_TOUR[DATA_TOUR.length - 1]
@@ -59,7 +59,7 @@ test("every anchored tour step resolves to an element on the tool", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await page
     .getByRole("button", { name: "Take the tour for this chart" })
     .click()

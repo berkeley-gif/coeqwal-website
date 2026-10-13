@@ -15,7 +15,7 @@ async function openDataTool(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 
 test("variables rail collapses to a strip and reopens", async ({ page }) => {
@@ -84,7 +84,7 @@ test("collapsed rails survive tool switch and reload", async ({ page }) => {
 
   // Same-tab reload restores the collapsed session state.
   await page.reload()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect(
     page.getByRole("button", { name: "Expand variables" }),
   ).toBeVisible()

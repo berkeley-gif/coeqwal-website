@@ -39,7 +39,7 @@ async function openDataInDepth(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 
 test("explore landing has no blocking a11y violations", async ({ page }) => {

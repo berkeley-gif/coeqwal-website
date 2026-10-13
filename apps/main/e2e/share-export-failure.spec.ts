@@ -16,7 +16,7 @@ test("a failed image export tells the user instead of doing nothing", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await page.getByRole("button", { name: "save snapshot" }).click()
   await page.getByRole("button", { name: "Go to Share" }).dispatchEvent("click")
   await page.getByRole("button", { name: "Add to story" }).click()

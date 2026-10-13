@@ -38,13 +38,9 @@ function capturedLine(iso: string | undefined): string | undefined {
 export function shareFigureFooter(item: ShareItem): ShareFigureFooter {
   const capturedAt = capturedLine(item.capturedAt)
   if (item.type === "data") {
-    const provenance =
-      item.source === "live"
-        ? "Live data from api.coeqwal.org."
-        : item.source === "mixed"
-          ? "Live data from api.coeqwal.org for some series; the data download names each series' source."
-          : "Sample data, not model results."
-    return { source: SOURCE_MODEL, provenance, capturedAt }
+    // Data figures are model results only (sample-data items are dropped
+    // when the tray loads), so no provenance note is needed.
+    return { source: SOURCE_MODEL, capturedAt }
   }
   if (item.type === "map") {
     return { source: SOURCE_MAP, capturedAt }
