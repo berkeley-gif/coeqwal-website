@@ -55,6 +55,12 @@ test("guard: no diamond or circle styles in the marker renderers", () => {
     "../app/features/scenarioExplorer/explorer/tools/chrome/layout/UnifiedToolView.tsx",
   )
   expect(layout).not.toContain('borderRadius: "50%"')
+  // The comparison key on the map takes its shapes from the same rule.
+  const directionLegend = read(
+    "../app/features/scenarioExplorer/explorer/share/cards/MapDirectionLegend.tsx",
+  )
+  expect(directionLegend).not.toMatch(/50%/)
+  expect(directionLegend).toContain("getPointMarkerShape(")
 
   // The Learn animation lifts point locations off the map as the shape the
   // markers draw, sized by the same constant, so the two cannot drift apart.

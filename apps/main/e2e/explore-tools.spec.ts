@@ -201,6 +201,56 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
   await expect(glyph).toHaveAttribute("aria-pressed", "false")
   await expect(squares).toHaveCount(0)
 
+  // Map caption: with nothing mapped, the map shows the hydroclimate badge.
+  const caption = page.getByRole("region", { name: "Map description" })
+  // The toolbar carries its own hydroclimate badge; look inside the map.
+  const mapPanel = page.locator("[data-explore-map-panel]")
+  await expect(caption).toHaveCount(0)
+  await expect(
+    mapPanel.getByText("Moderate climate stress hydroclimate", { exact: true }),
+  ).toBeVisible()
+  // Mapping an outcome names it, the strategy and the hydroclimate in the
+  // figure-template rows, with the tier color key.
+  await glyph.click()
+  await expect(squares).toHaveCount(74)
+  await expect(caption.getByText("Map", { exact: true })).toBeVisible()
+  await expect(caption.getByText("Bar tool", { exact: true })).toBeVisible()
+  await expect(caption.getByText("Outcome", { exact: true })).toBeVisible()
+  await expect(
+    caption.getByText("Community surface water", { exact: true }),
+  ).toBeVisible()
+  await expect(caption.getByText("Strategy", { exact: true })).toBeVisible()
+  await expect(caption).toContainText("Current Operations")
+  await expect(caption.getByText("Hydroclimate", { exact: true })).toBeVisible()
+  await expect(
+    caption.getByText("Moderate stress", { exact: true }),
+  ).toBeVisible()
+  // Each tier label shares a span with its number ("1Optimal").
+  const tiers = caption.getByRole("group", { name: "Tier color legend" })
+  for (const [n, tier] of [
+    [1, "Optimal"],
+    [2, "Acceptable"],
+    [3, "At-risk"],
+    [4, "Critical"],
+  ] as const) {
+    await expect(tiers).toContainText(`${n}${tier}`)
+  }
+  // A hydroclimate switch with the caption up: the map re-resolves to the
+  // historical variant and the caption follows it.
+  await page.getByRole("button", { name: "Historical", exact: true }).click()
+  await expect(squares).toHaveCount(74)
+  await expect(caption.getByText("Historical", { exact: true })).toBeVisible()
+  await expect(
+    caption.getByText("Moderate stress", { exact: true }),
+  ).toHaveCount(0)
+  // Clearing the map takes the caption away and brings the badge back.
+  await glyph.click()
+  await expect(squares).toHaveCount(0)
+  await expect(caption).toHaveCount(0)
+  await expect(
+    mapPanel.getByText("Historical hydroclimate", { exact: true }),
+  ).toBeVisible()
+
   expect(apiFailures).toEqual([])
   expect(errors).toEqual([])
 })
