@@ -22,6 +22,10 @@ import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import ToolJourneyStrip from "./ToolJourneyStrip"
 import MapFigureCaption from "./MapFigureCaption"
 import MapDirectionLegend from "../../../share/cards/MapDirectionLegend"
+import {
+  BASEMAP_PICKER_BOTTOM_PX,
+  BASEMAP_PICKER_HEIGHT_PX,
+} from "../../../../../map/controls/BasemapPicker"
 import { TAB_WIDTH as SHARE_TAB_WIDTH } from "../../../share/ShareDrawer"
 
 const SIDEBAR_WIDTH_COLLAPSED = 320
@@ -283,7 +287,8 @@ export default function UnifiedToolView({
           <Box
             sx={{
               position: "absolute",
-              bottom: theme.spacing(1),
+              // Sit above the basemap picker at the bottom of the map.
+              bottom: `calc(${BASEMAP_PICKER_BOTTOM_PX + BASEMAP_PICKER_HEIGHT_PX}px + ${theme.spacing(1)})`,
               left: theme.spacing(1),
               zIndex: 2,
               display: "flex",
