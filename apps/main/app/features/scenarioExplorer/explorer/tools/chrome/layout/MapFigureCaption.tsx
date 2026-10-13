@@ -46,7 +46,9 @@ export default function MapFigureCaption({
         boxShadow: theme.shadows[2],
         px: 1.5,
         py: 1,
-        pointerEvents: "auto",
+        // Nothing here is interactive: let drags and marker hovers reach
+        // the map underneath.
+        pointerEvents: "none",
       }}
     >
       <Box
