@@ -125,10 +125,10 @@ test("dataInDepthToCSV emits header, stats block, and year-labeled series", () =
   const lines = csv!.split("\n")
   expect(lines[0]).toBe("Coeqwal export,Data in depth")
   expect(csv).toContain("Variable,Reservoir storage (April)")
-  expect(csv).toContain("Data source,Live data")
+  expect(csv).toContain("Data source,CalSim3 model results")
   expect(csv).toContain("Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max,Source")
   expect(csv).toContain(
-    "Current Operations,3660,0.15,3100,3210,3375,3650,3925,4090,4200,Live",
+    "Current Operations,3660,0.15,3100,3210,3375,3650,3925,4090,4200,CalSim3 model results",
   )
   expect(csv).toContain("Water year,Current Operations")
   expect(csv).toContain("1921,4200")
@@ -202,7 +202,7 @@ test("dataInDepthToCSV labels per-member provenance in the stats table", () => {
     { variantTitle: "Data in depth" },
   )
   expect(csv).toContain(
-    "Live one,3660,0.15,3100,3210,3375,3650,3925,4090,4200,Live",
+    "Live one,3660,0.15,3100,3210,3375,3650,3925,4090,4200,CalSim3 model results",
   )
   expect(csv).toContain(
     "Mock one,3660,0.15,3100,3210,3375,3650,3925,4090,4200,Sample",
@@ -314,10 +314,11 @@ test("shareFigureFooter names the source, the provenance and the capture date", 
     capturedAt: "2026-08-24T19:00:00.000Z",
   })
   expect(live.source).toBe("COEQWAL, coeqwal.org. CalSim3 model results.")
-  expect(live.provenance).toBe("Live data from api.coeqwal.org.")
+  // Model results need no provenance note; only legacy sample items carry one.
+  expect(live.provenance).toBeUndefined()
   expect(live.capturedAt).toBe("Captured Aug 24, 2026.")
   expect(shareFigureFooterText(live)).toBe(
-    "COEQWAL, coeqwal.org. CalSim3 model results. Live data from api.coeqwal.org. Captured Aug 24, 2026.",
+    "COEQWAL, coeqwal.org. CalSim3 model results. Captured Aug 24, 2026.",
   )
   const sample = shareFigureFooter({
     id: "y",
@@ -346,7 +347,7 @@ test("shareFigureFooter names the source, the provenance and the capture date", 
     hydroclimate: "historical",
   })
   expect(mixed.provenance).toBe(
-    "Live data from api.coeqwal.org for some series; the data download names each series' source.",
+    "Some series in this figure are sample data, not model results.",
   )
 })
 

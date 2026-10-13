@@ -28,7 +28,6 @@ import {
   type SummaryMember,
 } from "../hooks/interpretiveText"
 import { WYT_LABELS } from "../config/wytFilter"
-import { MOCK_YEARS } from "../config/mockDataEngine"
 import {
   axisLabelFor,
   buildStatsPanels,
@@ -95,8 +94,6 @@ export default function ChartCard() {
     cursor: "help",
   } as const
 
-  const liveMemberCount = data.members.filter((m) => m.isLive).length
-
   const summaryMembers: SummaryMember[] = data.members.map((m) => ({
     id: m.id,
     label: m.label,
@@ -145,9 +142,7 @@ export default function ChartCard() {
   const noDataNotice =
     hasPlotted && missingMembers.length > 0
       ? (data.variable?.noLiveDataExplanation ??
-        `Live data is not available for ${missingMembers
-          .map((m) => m.label)
-          .join(", ")}.`)
+        `No data for ${missingMembers.map((m) => m.label).join(", ")}.`)
       : null
 
   // Dev-only (NEXT_PUBLIC_PERF_LOG=1): approximate when the explorer chart
@@ -209,7 +204,7 @@ export default function ChartCard() {
         <Typography variant="body2">
           {hasMembers
             ? (data.variable?.noLiveDataExplanation ??
-              "Live data is not available for the selected scenarios.")
+              "No data for the selected scenarios.")
             : "Nothing to compare yet. Pick members in the controls above."}
         </Typography>
       </Box>
@@ -285,8 +280,19 @@ export default function ChartCard() {
     )
   }
 
+  // What the chart area shows: model results, a loading note, a no-data
+  // note, or a reason the view does not apply. Exposed for tests.
+  const chartState = data.unavailableReason
+    ? "unavailable"
+    : hasPlotted
+      ? "drawn"
+      : anyPending
+        ? "loading"
+        : "no-data"
+
   return (
     <Box
+      data-did-chart-state={chartState}
       sx={{
         border: `1px solid ${theme.palette.divider}`,
         borderRadius: 2,
@@ -294,26 +300,8 @@ export default function ChartCard() {
         backgroundColor: theme.palette.background.paper,
       }}
     >
-      {/* Data-source labels */}
+      {/* Provisional flag and the save button */}
       <Box sx={{ display: "flex", gap: 1, mb: 1.5, flexWrap: "wrap" }}>
-        {/* Nothing is claimed when nothing is shown, or not yet known */}
-        {!data.unavailableReason && !(anyPending && !hasPlotted) && (
-          <Chip
-            size="small"
-            label={data.source === "live" ? "Live data" : "Sample data"}
-            sx={{
-              backgroundColor:
-                data.source === "live"
-                  ? theme.palette.info.light
-                  : theme.palette.grey[100],
-              color:
-                data.source === "live"
-                  ? theme.palette.info.dark
-                  : theme.palette.grey[600],
-              fontWeight: 600,
-            }}
-          />
-        )}
         {data.provisional && (
           <Tooltip title="Scope still under discussion (deck vs. outcomes sheet)">
             <Chip
@@ -435,12 +423,8 @@ export default function ChartCard() {
                   reference
                 </Box>
               )}
-              {/* Per-curve provenance. The chart-level badge above describes
-                  the figure as a whole; once one series is live and another
-                  is not, only a per-curve label is honest. "No data" and
-                  "sample" are deliberately different words: the first means
-                  the scenario is not modeled for this variable at all, the
-                  second means it is not wired to live data yet. */}
+              {/* Per-curve state: still loading, or no model results to show
+                  (the site never draws a stand-in). */}
               {m.pending ? (
                 <Tooltip title="Waiting for model results for this series.">
                   <Box component="span" sx={memberChipSx}>
@@ -451,23 +435,14 @@ export default function ChartCard() {
                 <Tooltip
                   title={
                     data.variable?.noLiveDataExplanation ??
-                    "Live data is not available for this scenario."
+                    "No model results for this scenario here."
                   }
                 >
                   <Box component="span" sx={memberChipSx}>
                     no data
                   </Box>
                 </Tooltip>
-              ) : (
-                data.mixedSource &&
-                !m.isLive && (
-                  <Tooltip title="This series is sample data, not model results.">
-                    <Box component="span" sx={memberChipSx}>
-                      sample
-                    </Box>
-                  </Tooltip>
-                )
-              )}
+              ) : null}
             </Box>
           ))}
         </Box>
@@ -484,25 +459,6 @@ export default function ChartCard() {
           }}
         >
           {data.variable.footnote}
-        </Typography>
-      )}
-
-      {/* Provenance note */}
-      {!data.unavailableReason && (
-        <Typography
-          variant="caption"
-          sx={{
-            display: "block",
-            mt: 1.5,
-            color: theme.palette.grey[500],
-            fontStyle: "italic",
-          }}
-        >
-          {data.source === "live"
-            ? data.mixedSource
-              ? `Live data from api.coeqwal.org (CalSim3 post-processed annual series) for ${liveMemberCount} of ${data.members.length} series; see the legend for series shown as sample or without data.`
-              : "Live data from api.coeqwal.org (CalSim3 post-processed annual series)."
-            : `Sample data (${MOCK_YEARS} simulated years, seeded): illustrative structure that mimics CalSim3 post-processed output, not model results.`}
         </Typography>
       )}
     </Box>

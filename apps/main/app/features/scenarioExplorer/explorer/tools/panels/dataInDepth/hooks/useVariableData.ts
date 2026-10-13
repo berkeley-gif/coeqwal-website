@@ -93,7 +93,6 @@ import {
   includeForView,
   pickLiveSeriesPoints,
   sumAlignedSeriesPoints,
-  blockHasSubject,
   trimPointsToYearRange,
   locationAxisRequest,
   SSJV_ALL_ROUTES_LOCATION,
@@ -321,6 +320,9 @@ export function useVariableData(): VariableData {
   // rather than borrowing another climate's series.
   const resolvedAll = useResolvedIdMappings()
   const heldMapping = resolvedAll[heldClimate]?.idMapping
+  // An empty mapping means the scenario list has not loaded yet.
+  const mappingUnloaded =
+    heldMapping == null || Object.keys(heldMapping).length === 0
   const liveEligible =
     domain != null &&
     (isLocationsAxis
@@ -653,9 +655,6 @@ export function useVariableData(): VariableData {
       }
       let waterYears: number[] | undefined
       let adoptedLive = false
-      // The served block exists but lacks this member's subject: not
-      // modeled for this scenario, reported like an empty response.
-      let subjectAbsent = false
 
       // Live override: the endpoint already returns the requested unit
       // (TAF / PCT_CAP / km), so no capacity math is applied to live series.
@@ -671,12 +670,6 @@ export function useVariableData(): VariableData {
             : subject
         const memberSingle =
           typeof memberSubject === "string" ? memberSubject : null
-        subjectAbsent =
-          !!block &&
-          !!slot?.hasData &&
-          !slot.isLoading &&
-          memberSingle != null &&
-          !blockHasSubject(block, domain, memberSingle)
         // Served stub years (the CWS delivery family) are dropped before
         // anything is computed from the series.
         const range = variable.servedYearRange
@@ -761,23 +754,23 @@ export function useVariableData(): VariableData {
         )
       else value = stats.p50
 
-      // "Not modeled for this scenario", as distinct from "not wired yet".
-      // Only meaningful when the variable IS live-eligible and this member's
-      // own request resolved; adoptedLive / anyLive / source semantics are
-      // deliberately unchanged.
-      const liveDataMissing =
-        liveEligible &&
-        spec.slotIndex != null &&
-        (emptyResponseBySlot[spec.slotIndex] === true || subjectAbsent)
-
       // In flight: this member's own request has not answered yet, so the
       // series it carries is the sample engine's stand-in. It is flagged so
       // the card neither draws nor quotes it until the answer lands.
+      // The scenario list has not loaded yet, so no member can be resolved:
+      // that is loading, not "no variant".
       const pending =
         liveEligible &&
         !adoptedLive &&
-        spec.slotIndex != null &&
-        activeSlots[spec.slotIndex]?.isLoading === true
+        (mappingUnloaded ||
+          (spec.slotIndex != null &&
+            activeSlots[spec.slotIndex]?.isLoading === true))
+
+      // No model results to show. The site never draws the sample engine's
+      // stand-in: a member without a live series (not modeled, no variant
+      // under the held hydroclimate, a failed request, a derived total that
+      // failed closed) is reported as "no data" instead of drawn.
+      const liveDataMissing = !adoptedLive && !pending
 
       return {
         id: spec.id,
@@ -813,18 +806,18 @@ export function useVariableData(): VariableData {
       unit,
       unitLabel,
       provisional: variable.provisional ?? false,
-      // A live request that served nothing for every member (the scenario, or
-      // the subject, is not modeled) is still a live answer: the card shows
-      // the no-data notice under a "Live data" badge rather than a "Sample
-      // data" badge over an empty chart.
+      // Only live series are ever drawn (members without one are "no data"),
+      // so a figure is live whenever it shows anything.
       source:
         anyLive ||
         (members.length > 0 && members.every((m) => m.liveDataMissing))
           ? "live"
           : "mock",
-      // A single chart-level badge misdescribes the figure the moment one
-      // series is live and another is not.
-      mixedSource: anyLive && members.some((m) => !m.isLive),
+      // A drawn series that is not live: none, now that sample stand-ins
+      // are never drawn. Kept so saved items keep their meaning.
+      mixedSource: members.some(
+        (m) => !m.isLive && !m.liveDataMissing && !m.pending,
+      ),
       ...emptyContext,
       wytApplicable,
       ...(unavailableReason ? { unavailableReason } : {}),
@@ -854,6 +847,7 @@ export function useVariableData(): VariableData {
     emptyResponseSignature,
     liveLoading,
     loadingSignature,
+    mappingUnloaded,
     wytJoined,
     unavailableReason,
     locationRequestSignature,

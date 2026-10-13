@@ -38,12 +38,14 @@ function capturedLine(iso: string | undefined): string | undefined {
 export function shareFigureFooter(item: ShareItem): ShareFigureFooter {
   const capturedAt = capturedLine(item.capturedAt)
   if (item.type === "data") {
+    // Figures show model results only. Items saved before sample stand-ins
+    // were removed keep a note saying what they hold.
     const provenance =
-      item.source === "live"
-        ? "Live data from api.coeqwal.org."
-        : item.source === "mixed"
-          ? "Live data from api.coeqwal.org for some series; the data download names each series' source."
-          : "Sample data, not model results."
+      item.source === "mixed"
+        ? "Some series in this figure are sample data, not model results."
+        : item.source === "mock"
+          ? "Sample data, not model results."
+          : undefined
     return { source: SOURCE_MODEL, provenance, capturedAt }
   }
   if (item.type === "map") {

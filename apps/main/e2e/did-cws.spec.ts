@@ -202,7 +202,11 @@ test("cws variables fetch their per-variable measures and go live", async ({
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -220,7 +224,11 @@ test("cws variables fetch their per-variable measures and go live", async ({
     .filter({ hasText: "All North of Delta" })
     .click()
   await page.getByRole("option", { name: "All South of Delta" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -234,7 +242,11 @@ test("cws variables fetch their per-variable measures and go live", async ({
   await cwsList
     .getByRole("button", { name: "Municipal supply shortages" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -249,7 +261,11 @@ test("cws variables fetch their per-variable measures and go live", async ({
   // Percent-of-demand view: switches to the served shortage_pct measure,
   // and the unit follows the view.
   await page.getByRole("button", { name: "% of demand", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -316,7 +332,11 @@ test("cws variables disable the water-year-type row and never send wyt", async (
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() => requested.some((r) => r.measures === "delivery"))
     .toBe(true)
@@ -326,7 +346,11 @@ test("cws variables disable the water-year-type row and never send wyt", async (
   await cwsList
     .getByRole("button", { name: "Municipal supply shortages" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() => requested.some((r) => r.measures === "shortage_total"))
     .toBe(true)
@@ -334,7 +358,11 @@ test("cws variables disable the water-year-type row and never send wyt", async (
 
   // Shortages, percent-of-demand view.
   await page.getByRole("button", { name: "% of demand", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() => requested.some((r) => r.measures === "shortage_pct"))
     .toBe(true)
@@ -369,7 +397,11 @@ test("cws systems are pickable per measure family and pins carry over only when 
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
 
   // A delivery-only system.
   await page
@@ -393,7 +425,11 @@ test("cws systems are pickable per measure family and pins carry over only when 
   await cwsList
     .getByRole("button", { name: "Municipal supply shortages" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -475,7 +511,11 @@ test("cws deliveries drop the partial calendar years and export calendar-year ro
   await cwsList
     .getByRole("button", { name: "Surface water deliveries" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   // Stats: with every full year at 350 the mean is exactly 350 only when the
   // 70 and 280 stubs are gone.
   await page.getByRole("button", { name: "Stats", exact: true }).click()
@@ -553,7 +593,11 @@ test("welfare loss reads the welfare_loss measure and displays millions of dolla
     has: page.getByRole("button", { name: "Municipal supply shortages" }),
   })
   await cwsList.getByRole("button", { name: "Welfare loss" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -615,7 +659,11 @@ test("surface water delivery shortage derives 100 minus percent met from the ser
   await cwsList
     .getByRole("button", { name: "Surface water delivery shortage" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -634,7 +682,11 @@ test("surface water delivery shortage derives 100 minus percent met from the ser
   await cwsList
     .getByRole("button", { name: "Municipal supply shortages" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect(page.getByText(/42(\.0)? TAF/).first()).toBeVisible()
   await expect(
     page.getByText(/key outcome: Community surface water/),

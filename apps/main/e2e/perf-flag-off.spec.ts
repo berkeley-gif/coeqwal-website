@@ -17,7 +17,7 @@ test("perf instrumentation is absent from the default build", async ({
   // by-variable Explorer is the default mode and draws from the Current
   // Operations reference before any scenario selection, so the data-source
   // chip is the reliable ready marker (same wait as smoke.spec.ts).
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   const hasPerfGlobal = await page.evaluate(() => "__coeqwalPerf" in window)
   expect(hasPerfGlobal).toBe(false)

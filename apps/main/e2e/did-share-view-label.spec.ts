@@ -14,7 +14,7 @@ test("a percent-of-capacity figure names its view on the card", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   // The reservoir variables offer the plain volume view and percent of
   // capacity; the toggle group is labelled "Data view".
   await page

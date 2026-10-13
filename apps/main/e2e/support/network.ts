@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import type { Page } from "@playwright/test"
 
@@ -18,6 +20,32 @@ export const API_URL_PATTERN =
   /^https:\/\/(api\.coeqwal\.org|x66ckhp067\.execute-api\.us-west-2\.amazonaws\.com)\//
 
 const RECORDING = !!process.env.RECORD_FIXTURES
+
+// API responses can also replay from a per-URL cache shared by every spec
+// (fixtures/api-cache, one JSON file per request URL). A HAR fixture is
+// written whole when its page closes, so specs recording one HAR overwrite
+// each other; this cache merges instead. RECORD_API_CACHE=1 fetches any
+// response missing from the cache from the live API and stores it (run with
+// --workers=1). In replay a URL missing from the cache falls through to the
+// spec's HAR route, which refuses it if it is missing there too, so a gap
+// fails visibly. Data in Depth relies on it: it needs the scenario list and
+// its own endpoints, which no single HAR holds.
+const API_CACHE_DIR = fileURLToPath(
+  new URL("../fixtures/api-cache/", import.meta.url),
+)
+const RECORDING_API_CACHE = !!process.env.RECORD_API_CACHE
+
+interface CachedResponse {
+  url: string
+  status: number
+  headers: Record<string, string>
+  body: string
+}
+
+function apiCacheFile(url: string): string {
+  const key = createHash("sha1").update(url).digest("hex")
+  return `${API_CACHE_DIR}${key}.json`
+}
 
 export interface NetworkOptions {
   /** HAR fixture to replay (default: the shared fixtures/api.har) */
@@ -54,6 +82,40 @@ export async function setupNetwork(
     url: API_URL_PATTERN,
     update: recording,
     notFound: recording ? "fallback" : "abort",
+  })
+  // Registered last, consulted first: API requests come from the shared
+  // per-URL cache when it holds them (see API_CACHE_DIR).
+  await page.route(API_URL_PATTERN, async (route) => {
+    const url = route.request().url()
+    if (route.request().method() !== "GET") return route.fallback()
+    const file = apiCacheFile(url)
+    if (existsSync(file)) {
+      const cached = JSON.parse(readFileSync(file, "utf8")) as CachedResponse
+      return route.fulfill({
+        status: cached.status,
+        headers: cached.headers,
+        body: cached.body,
+      })
+    }
+    if (!RECORDING_API_CACHE) return route.fallback()
+    const response = await route.fetch()
+    const body = await response.text()
+    const all = response.headers()
+    const headers: Record<string, string> = {}
+    for (const name of ["content-type", "access-control-allow-origin"]) {
+      if (all[name]) headers[name] = all[name]
+    }
+    if (response.ok()) {
+      mkdirSync(API_CACHE_DIR, { recursive: true })
+      const entry: CachedResponse = {
+        url,
+        status: response.status(),
+        headers,
+        body,
+      }
+      writeFileSync(file, `${JSON.stringify(entry, null, 2)}\n`)
+    }
+    return route.fulfill({ response, body })
   })
 }
 

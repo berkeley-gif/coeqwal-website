@@ -3,9 +3,8 @@ import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
 
 // Core export flow: save a Data-in-Depth chart snapshot, see it as a share
-// card, and download its image and underlying data. Runs offline (HAR
-// fixture): the data-in-depth live endpoints are absent from the HAR, so
-// the chart renders from the deterministic sample-data engine.
+// card, and download its image and underlying data. Runs offline: the chart
+// draws recorded model results (see the API cache in support/network.ts).
 
 test("data-in-depth chart can be saved, shared, and exported", async ({
   page,
@@ -16,10 +15,8 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  // Offline the chart always renders sample data (the HAR fixture drives no
-  // live request); assert that up front so an unexpected live render fails
-  // here, not later at the CSV body diff.
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  // The chart draws recorded model results before anything is saved.
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // Stage the snapshot from the chart card. This auto-opens the persistent
   // share drawer on the right.
@@ -66,16 +63,18 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   // contains commas).
   expect(csv).toContain("Figure title,")
   expect(csv).toContain("April Reservoir Storage (Shasta Reservoir)")
-  expect(csv).toContain("Data source,Sample data")
+  expect(csv).toContain("Data source,CalSim3 model results")
   expect(csv).toContain("Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max,Source")
-  expect(csv).toContain("Year index")
+  // Model results carry water years, so the series is keyed by year.
+  expect(csv).toContain("Water year")
+  expect(csv).not.toMatch(/sample/i)
 
   // The figure footer is part of the card, so it travels with every export:
-  // source, data provenance, capture date.
+  // source and capture date (model results need no provenance note).
   await expect(
     page
       .getByText(
-        /COEQWAL, coeqwal\.org\. CalSim3 model results\. Sample data, not model results\. Captured \w+ \d+, \d{4}\./,
+        /COEQWAL, coeqwal\.org\. CalSim3 model results\. Captured \w+ \d+, \d{4}\./,
       )
       .first(),
   ).toBeVisible()
@@ -146,7 +145,8 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   }
   const svg = Buffer.concat(svgChunks).toString("utf8")
   expect(svg).toContain("thousand acre feet (TAF)")
-  expect(svg).toContain("Sample data, not model results.")
+  expect(svg).toContain("CalSim3 model results.")
+  expect(svg).not.toMatch(/sample data/i)
   // The template rows survive the export of the live card.
   expect(svg).toContain("April Reservoir Storage (TAF)")
   expect(svg).toContain("Shasta Reservoir")

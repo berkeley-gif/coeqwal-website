@@ -28,7 +28,7 @@ test("data-in-depth tool activates and renders its panel", async ({ page }) => {
   // The tool opens on the shared journey-strip header (the legacy
   // By category / Explorer toggle is retired), and the by-variable Explorer
   // works from the Current Operations reference, so a chart card renders
-  // before any scenario is selected: the data-source chip and the
+  // before any scenario is selected: the chart draws model results and the
   // comparison controls are visible.
   await expect(
     page.getByRole("heading", { name: "Data in Depth" }),
@@ -36,7 +36,7 @@ test("data-in-depth tool activates and renders its panel", async ({ page }) => {
   await expect(
     page.getByText("Explore additional outcome variables."),
   ).toBeVisible()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect(page.getByRole("group", { name: "Compare by" })).toBeVisible()
   // Every chart carries the standardized figure title.
   await expect(
@@ -44,5 +44,11 @@ test("data-in-depth tool activates and renders its panel", async ({ page }) => {
       /^April Reservoir Storage \(Shasta Reservoir\), Current Operations, Historical Hydroclimate, All Water Years$/,
     ),
   ).toBeVisible()
+  // The tool shows model results only: no data-source badge, and no sample
+  // or synthetic data, anywhere on the page.
+  await expect(page.getByText(/live data/i)).toHaveCount(0)
+  await expect(
+    page.getByText(/sample data|\bsample\b|simulated years/i),
+  ).toHaveCount(0)
   expect(errors).toEqual([])
 })

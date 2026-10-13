@@ -1,0 +1,9 @@
+{
+  "url": "https://api.coeqwal.org/api/data-in-depth/reservoir-storage?scenarios=s0020&subjects=SHSTA&periods=april&units=volume&include=values&wyt=4",
+  "status": 200,
+  "headers": {
+    "content-type": "application/json",
+    "access-control-allow-origin": "http://localhost:4173"
+  },
+  "body": "{\"wyt_filter\":[4],\"scenarios\":[{\"scenario\":\"s0020\",\"n_years\":21,\"reservoirs\":[{\"subject\":\"SHSTA\",\"kind\":\"entity\",\"label\":\"Shasta\",\"periods\":{\"april\":{\"TAF\":{\"values\":[{\"water_year\":1925,\"value\":3370.4724},{\"water_year\":1926,\"value\":3624.0808},{\"water_year\":1930,\"value\":2860.2346},{\"water_year\":1939,\"value\":3642.7559},{\"water_year\":1944,\"value\":3890.1436},{\"water_year\":1949,\"value\":4370.8394},{\"water_year\":1950,\"value\":3966.197},{\"water_year\":1955,\"value\":3616.6938},{\"water_year\":1960,\"value\":4029.9385},{\"water_year\":1961,\"value\":4335.2876},{\"water_year\":1964,\"value\":3737.5513},{\"water_year\":1981,\"value\":4505.9497},{\"water_year\":1985,\"value\":4144.4453},{\"water_year\":1987,\"value\":3891.4597},{\"water_year\":1989,\"value\":3896.2395},{\"water_year\":2001,\"value\":4457.2974},{\"water_year\":2002,\"value\":4552.1001},{\"water_year\":2007,\"value\":4326.689},{\"water_year\":2009,\"value\":3695.0029},{\"water_year\":2013,\"value\":3748.0771},{\"water_year\":2020,\"value\":3829.3118}]}}}}]}]}"
+}

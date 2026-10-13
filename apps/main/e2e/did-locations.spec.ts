@@ -152,7 +152,7 @@ async function openDataInDepth(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 
 const sameSet = (a: string[], b: string[]) =>
@@ -166,7 +166,11 @@ test("reservoirs compare live in one request, each member by its own subject", a
   const log = await setupRoutes(page)
   await openDataInDepth(page)
   await page.getByRole("button", { name: "Locations", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   // Exactly one reservoir request carried the three seeded reservoirs.
   await expect
     .poll(
@@ -210,7 +214,11 @@ test("reservoirs compare live in one request, each member by its own subject", a
         ).length,
     )
     .toBe(1)
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   expect(errors).toEqual([])
 })
 
@@ -226,7 +234,11 @@ test("groundwater basins and totals compare live through the picker", async ({
     .getByRole("button", { name: "Groundwater storage" })
     .click()
   await page.getByRole("button", { name: "Locations", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   await expect
     .poll(() =>
       log.some(
@@ -258,7 +270,11 @@ test("groundwater basins and totals compare live through the picker", async ({
       ),
     )
     .toBe(true)
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   expect(errors).toEqual([])
 })
 
@@ -274,7 +290,11 @@ test("the SSJV total sums its routes in the shared request and fails closed when
     .first()
     .click()
   await page.getByRole("button", { name: "Locations", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
   // The seeded members are the total, Cross Valley Canal and Friant; the
   // request carries the three route subjects once each.
   await expect
@@ -298,7 +318,7 @@ test("the SSJV total sums its routes in the shared request and fails closed when
   expect(errors).toEqual([])
 })
 
-test("a missing route makes the SSJV total sample, labeled, while the route members stay live", async ({
+test("a missing route leaves the SSJV total without data, while the route members stay live", async ({
   page,
 }) => {
   const errors = collectConsoleErrors(page)
@@ -310,9 +330,15 @@ test("a missing route makes the SSJV total sample, labeled, while the route memb
     .first()
     .click()
   await page.getByRole("button", { name: "Locations", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
-  // The per-member "sample" chip marks the total; the canal is live.
-  await expect(page.getByText("sample", { exact: true }).first()).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
+  // The total refuses a partial sum: it reads "no data" (never a stand-in
+  // series); the canal is live.
+  await expect(page.getByText("no data", { exact: true }).first()).toBeVisible()
+  await expect(page.getByText("sample", { exact: true })).toHaveCount(0)
   await expect(page.getByText(/100 TAF at Cross Valley Canal/)).toBeVisible()
   await expect(page.getByText(/1,300 TAF/)).toHaveCount(0)
   expect(errors).toEqual([])
@@ -326,7 +352,11 @@ test("switching the workspace climate re-resolves the locations axis", async ({
   await setupRoutes(page)
   await openDataInDepth(page)
   await page.getByRole("button", { name: "Locations", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(
+    page.locator(
+      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
+    ),
+  ).toBeVisible()
 
   // The per-tool climate pin was removed: the shared "View by hydroclimate"
   // control in the toolbar is the only hydroclimate input for this tool.
@@ -334,12 +364,14 @@ test("switching the workspace climate re-resolves the locations axis", async ({
     page.getByRole("combobox", { name: "Hydroclimate" }),
   ).toHaveCount(0)
 
-  // Driving that control moves the whole chart off the historical fixture,
-  // so the offline suite falls back to the sample engine for every member.
+  // Driving that control re-resolves every member to the moderate-high
+  // variants. This spec's scenario list holds historical variants only, so
+  // nothing resolves and the chart reads "no data" instead of drawing a
+  // stand-in or keeping the historical curves.
   await page
     .getByRole("button", { name: /Moderate-high climate stress/ })
     .first()
     .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="no-data"]')).toBeVisible()
   expect(errors).toEqual([])
 })

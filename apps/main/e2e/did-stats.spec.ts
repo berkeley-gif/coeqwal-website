@@ -22,7 +22,7 @@ async function openDataTool(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 
 test("Stats style shows mean and CV bar plots for the volume view", async ({

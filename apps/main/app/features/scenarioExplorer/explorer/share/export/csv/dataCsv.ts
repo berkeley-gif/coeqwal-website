@@ -90,7 +90,7 @@ export function dataInDepthToCSV(
           data.source === "mixed"
             ? "Mixed (see the Source column)"
             : data.source === "live"
-              ? "Live data"
+              ? "CalSim3 model results"
               : "Sample data",
         ],
         ...(data.waterYearTypesLabel
@@ -141,7 +141,7 @@ export function dataInDepthToCSV(
         num(m.stats.p75),
         num(m.stats.p90),
         num(m.stats.max),
-        m.isLive ? "Live" : "Sample",
+        m.isLive ? "CalSim3 model results" : "Sample",
       ].join(","),
     )
   }

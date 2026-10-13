@@ -36,7 +36,7 @@ async function stageTwoCards(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   await page.getByRole("button", { name: "save snapshot" }).click()
   // The share drawer auto-opens over the chart card and covers the save
