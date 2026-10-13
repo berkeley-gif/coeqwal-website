@@ -121,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     # Default-deny roll-up: every job in `needs` must succeed. Add a required
     # check by appending its job id here - no shell edits needed.
-    needs: [static-checks, build]
+    needs: [static-checks, build, e2e-core]
     if: ${{ always() }}
     timeout-minutes: 5
     env:
@@ -146,12 +146,13 @@ jobs:
     name: e2e-core
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # Advisory: reports its own status without gating merges (not in
-    # gate.needs). Promote by moving it into gate.needs once it has proven
-    # stable across several PRs. Runs the Playwright smoke suite against the
-    # shipped static export, fully offline (API replayed from a committed HAR,
-    # other origins aborted), so no Mapbox token or live backend is needed.
-    continue-on-error: true
+    # Required (in gate.needs). Runs the Playwright suite against the shipped
+    # static export, fully offline: the API replays from committed HAR
+    # fixtures and every other origin is aborted, so no live backend is
+    # needed. The build gets a placeholder Mapbox token because Mapbox GL
+    # refuses to start without one and never validates it offline; with it
+    # the map mounts and the DOM markers render, so specs can assert what the
+    # map shows. Styles and tiles stay blocked, so imagery and polygons do not.
     steps:
       - uses: actions/checkout@v7
         with:
@@ -165,6 +166,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm rebuild
       - run: pnpm turbo run build --filter=main
+        env:
+          NEXT_PUBLIC_MAPBOX_TOKEN: pk.e2e-placeholder
       - run: pnpm --filter main exec playwright install --with-deps chromium
       - run: pnpm --filter main e2e
       - uses: actions/upload-artifact@v7
