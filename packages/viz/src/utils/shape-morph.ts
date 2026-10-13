@@ -147,8 +147,8 @@ export function rectPoints(
 
 /**
  * Generate `n` resampled points for a diamond (rotated square) centered
- * at (cx, cy). Matches the ENV_FLOWS marker visual: the diamond is
- * `w` wide and `h` tall (use h > w for the vertically-elongated style).
+ * at (cx, cy). The diamond is `w` wide and `h` tall (use h > w for the
+ * vertically-elongated style).
  */
 export function diamondPoints(
   cx: number,

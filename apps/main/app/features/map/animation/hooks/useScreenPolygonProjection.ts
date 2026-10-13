@@ -7,13 +7,12 @@
 
 import { useRef, useState, useEffect, useCallback } from "react"
 import { useMap } from "@repo/map"
-import {
-  diamondPoints,
-  circlePoints,
-  lineSegmentPoints,
-  POINTS_PER_SHAPE,
-} from "@repo/viz"
+import { lineSegmentPoints, rectPoints, POINTS_PER_SHAPE } from "@repo/viz"
 import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
+import {
+  SQUARE_MARKER_RADIUS_PX,
+  SQUARE_MARKER_SIZE_PX,
+} from "../../config/markerShape"
 import {
   getOutcomeLocationCoordinates,
   SALMON_RIVER_CENTROID,
@@ -291,12 +290,16 @@ export function useScreenPolygonProjection({
           const sx = pt.x
           const sy = pt.y
 
-          let vpPoly: [number, number][]
-          if (code === "ENV_FLOWS") {
-            vpPoly = diamondPoints(sx, sy, 14, 20, POINTS_PER_SHAPE)
-          } else {
-            vpPoly = circlePoints(sx, sy, 8, POINTS_PER_SHAPE)
-          }
+          // Point locations start as the same squares the map markers draw
+          // (TierMarkers), so the morph lifts off without a jump.
+          const vpPoly = rectPoints(
+            sx,
+            sy,
+            SQUARE_MARKER_SIZE_PX,
+            SQUARE_MARKER_SIZE_PX,
+            POINTS_PER_SHAPE,
+            SQUARE_MARKER_RADIUS_PX,
+          )
           vpMap.set(locId, { screenPoly: vpPoly, centroidScreen: [sx, sy] })
         } catch {
           /* outside projection bounds */
@@ -407,19 +410,28 @@ export function useScreenPolygonProjection({
       if (!locData) continue
 
       for (const locId of locData.ids) {
-        if (vpMap.has(locId)) continue
+        // vpMap starts as a copy of the last projection, so checking it here
+        // would keep every point at its old screen position for the whole
+        // move and let it jump at moveend. Polygons keep precedence over a
+        // point with the same id; everything else is re-projected per frame,
+        // like the polygons above.
+        if (cachedGeoRingsRef.current.has(locId)) continue
         const coords = getOutcomeLocationCoordinates(code, locId)
         if (!coords) continue
         try {
           const pt = map.project(coords)
           const sx = pt.x
           const sy = pt.y
-          let vpPoly: [number, number][]
-          if (code === "ENV_FLOWS") {
-            vpPoly = diamondPoints(sx, sy, 14, 20, POINTS_PER_SHAPE)
-          } else {
-            vpPoly = circlePoints(sx, sy, 8, POINTS_PER_SHAPE)
-          }
+          // Point locations start as the same squares the map markers draw
+          // (TierMarkers), so the morph lifts off without a jump.
+          const vpPoly = rectPoints(
+            sx,
+            sy,
+            SQUARE_MARKER_SIZE_PX,
+            SQUARE_MARKER_SIZE_PX,
+            POINTS_PER_SHAPE,
+            SQUARE_MARKER_RADIUS_PX,
+          )
           vpMap.set(locId, { screenPoly: vpPoly, centroidScreen: [sx, sy] })
         } catch {
           /* outside projection bounds */
@@ -433,7 +445,7 @@ export function useScreenPolygonProjection({
       const locData = outcomeLocations[code]
       if (!locData) continue
       const syntheticId = [...locData.ids][0] ?? code
-      if (vpMap.has(syntheticId)) continue
+      if (cachedGeoRingsRef.current.has(syntheticId)) continue
       try {
         const pt = map.project(SALMON_RIVER_CENTROID)
         const sx = pt.x
