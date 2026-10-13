@@ -11,6 +11,10 @@
  *
  * Implementation notes:
  *
+ *   - Every export is laid out at `EXPORT_CARD_WIDTH_PX` in an off-screen
+ *     copy of the card and rasterized at a fixed 3x, so a figure downloads
+ *     at the same pixel size wherever the card sits and whatever the screen.
+ *
  *   - Both PNG and SVG render the live DOM via `html-to-image`. The
  *     SVG file uses html-to-image's foreignObject embedding so the
  *     vector retains the same layout. This opens cleanly in modern
@@ -45,14 +49,64 @@ export function cardElementFilter(node: HTMLElement): boolean {
 interface ExportOptions {
   /** Background color painted under the card (white, paper, etc.). */
   backgroundColor: string
-  /** Optional pixel-ratio multiplier on top of devicePixelRatio. */
+  /** Optional raster scale (CSS px to output px); default 3. */
   rasterScale?: number
 }
 
-// Three times the card's CSS size (times the device pixel ratio): a 360px
-// story card exports at about 1,080px wide, legible as a figure rather than
-// a thumbnail.
+// Three times the export layout's CSS size, independent of the device pixel
+// ratio: legible as a figure rather than a thumbnail, and the same size on
+// every screen.
 const DEFAULT_RASTER_SCALE = 3
+
+/**
+ * Every exported card is laid out at this CSS width, so a figure downloads
+ * at the same size whether it sits alone in a wide story column, beside
+ * other cards, or in the narrow tray. At the default 3x raster scale this is
+ * a 1,440 px wide PNG.
+ */
+export const EXPORT_CARD_WIDTH_PX = 480
+
+/**
+ * Run `capture` on a copy of `liveEl` laid out at EXPORT_CARD_WIDTH_PX in
+ * an off-screen host, so the on-screen card never reflows. Side effects:
+ * appends a hidden node to document.body for the duration of the call and
+ * always removes it.
+ */
+async function withExportLayout<T>(
+  liveEl: HTMLElement,
+  capture: (el: HTMLElement) => Promise<T>,
+): Promise<T> {
+  const host = document.createElement("div")
+  host.setAttribute("aria-hidden", "true")
+  host.style.cssText = `position:fixed;left:-10000px;top:0;width:${EXPORT_CARD_WIDTH_PX}px;pointer-events:none;`
+  const clone = liveEl.cloneNode(true) as HTMLElement
+  clone.style.width = "100%"
+  clone.style.maxWidth = "none"
+  host.appendChild(clone)
+  document.body.appendChild(host)
+  try {
+    await Promise.all(
+      Array.from(clone.querySelectorAll("img")).map((img) =>
+        img.decode().catch(() => undefined),
+      ),
+    )
+    // Two frames let the clone lay out before capture. Bounded: a tab in
+    // the background gets no animation frames, and an export started just
+    // before a tab switch must still finish and remove its host.
+    await new Promise<void>((resolve) => {
+      const fallback = setTimeout(resolve, 150)
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          clearTimeout(fallback)
+          resolve()
+        }),
+      )
+    })
+    return await capture(clone)
+  } finally {
+    host.remove()
+  }
+}
 
 /**
  * Web font embedding pipeline.
@@ -176,15 +230,18 @@ export async function captureCardPngDataUrl(
   options: ExportOptions,
 ): Promise<string | null> {
   try {
-    const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1
     const fontOpts = await fontEmbedOptions()
-    return await toPng(liveEl, {
-      pixelRatio: dpr * (options.rasterScale ?? DEFAULT_RASTER_SCALE),
-      backgroundColor: options.backgroundColor,
-      filter: cardElementFilter,
-      cacheBust: true,
-      ...fontOpts,
-    })
+    return await withExportLayout(liveEl, (el) =>
+      toPng(el, {
+        // Fixed, not multiplied by devicePixelRatio: every screen exports
+        // the same pixel size (480 CSS px x 3 = 1,440 px).
+        pixelRatio: options.rasterScale ?? DEFAULT_RASTER_SCALE,
+        backgroundColor: options.backgroundColor,
+        filter: cardElementFilter,
+        cacheBust: true,
+        ...fontOpts,
+      }),
+    )
   } catch (err) {
     console.warn("[Share] card PNG capture failed:", err)
     return null
@@ -202,12 +259,14 @@ export async function captureCardSvgString(
 ): Promise<string | null> {
   try {
     const fontOpts = await fontEmbedOptions()
-    const dataUrl = await toSvg(liveEl, {
-      backgroundColor: options.backgroundColor,
-      filter: cardElementFilter,
-      cacheBust: true,
-      ...fontOpts,
-    })
+    const dataUrl = await withExportLayout(liveEl, (el) =>
+      toSvg(el, {
+        backgroundColor: options.backgroundColor,
+        filter: cardElementFilter,
+        cacheBust: true,
+        ...fontOpts,
+      }),
+    )
     return decodeSvgDataUrl(dataUrl)
   } catch (err) {
     console.warn("[Share] card SVG capture failed:", err)

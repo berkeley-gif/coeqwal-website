@@ -1,3 +1,4 @@
+import JSZip from "jszip"
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
 
@@ -95,37 +96,28 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   expect(
     await swatch.evaluate((el) => getComputedStyle(el).backgroundColor),
   ).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/)
+  // The card is laid out as the figure template: tool eyebrow and chart kind
+  // in the header, the held dimensions as rows, the compared dimension as
+  // the legend heading, and a SOURCE footer. The old View row is gone.
+  await expect(
+    storyCard.getByText("Data in depth", { exact: true }).first(),
+  ).toBeVisible()
+  await expect(
+    storyCard.getByText("Exceedance plot", { exact: true }),
+  ).toBeVisible()
   await expect(storyCard.getByText("Variable", { exact: true })).toBeVisible()
-  await expect(storyCard.getByText("View", { exact: true })).toBeVisible()
   await expect(
     storyCard.getByText("Water years", { exact: true }),
   ).toBeVisible()
-  // The legend row names the member the chart drew. Exact: the standardized
-  // title above it also contains the scenario name, title-cased.
+  await expect(storyCard.getByText("Strategy", { exact: true })).toBeVisible()
+  await expect(storyCard.getByText("Source", { exact: true })).toBeVisible()
+  await expect(storyCard.getByText("View", { exact: true })).toHaveCount(0)
+  // The legend row names the member the chart drew.
   await expect(
     storyCard.getByText("Current operations", { exact: true }),
   ).toBeVisible()
 
-  // The subtitle is legible on the card. It used to take a token that
-  // resolves to the card's own background color, so it rendered invisible in
-  // every export.
-  const subtitleContrast = await storyCard
-    .getByText("Volume (TAF) (Exceedance)", { exact: true })
-    .first()
-    .evaluate((el) => {
-      const color = getComputedStyle(el).color
-      let background = ""
-      let node = el.parentElement
-      while (node && (!background || background === "rgba(0, 0, 0, 0)")) {
-        background = getComputedStyle(node).backgroundColor
-        node = node.parentElement
-      }
-      return { color, background }
-    })
-  expect(subtitleContrast.color).not.toBe(subtitleContrast.background)
-
-  // Download the PNG (html-to-image path renders the live card). The raster
-  // is wide enough to read as a figure, not a thumbnail.
+  // Download the PNG (html-to-image path renders the live card).
   const pngPromise = page.waitForEvent("download")
   await page.getByRole("button", { name: "Download as PNG" }).click()
   const png = await pngPromise
@@ -138,10 +130,11 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   // PNG IHDR: width at bytes 16..19, height at 20..23 (big-endian).
   const pngWidth = pngBytes.readUInt32BE(16)
   const pngHeight = pngBytes.readUInt32BE(20)
-  expect(pngWidth).toBeGreaterThanOrEqual(1000)
-  // The chart box follows the chart's 900 x 520 shape, so the card is not
-  // taller than it is wide by much: no blank bands around the chart.
-  expect(pngHeight / pngWidth).toBeLessThan(1.15)
+  // Every export is laid out at one fixed width, so a card that sits alone
+  // in a wide story column downloads at the same size as one in the tray:
+  // 480 CSS px at the 3x raster scale (headless dpr 1) = 1,440 px.
+  expect(pngWidth).toBe(1440)
+  expect(pngHeight).toBeGreaterThan(400)
 
   // The SVG export carries the long axis label and the footer as text.
   const svgPromise = page.waitForEvent("download")
@@ -154,7 +147,45 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   const svg = Buffer.concat(svgChunks).toString("utf8")
   expect(svg).toContain("thousand acre feet (TAF)")
   expect(svg).toContain("Sample data, not model results.")
-  expect(svg).toContain("April Reservoir Storage (Shasta Reservoir)")
+  // The template rows survive the export of the live card.
+  expect(svg).toContain("April Reservoir Storage (TAF)")
+  expect(svg).toContain("Shasta Reservoir")
+
+  // Cleanup: the off-screen export host must be gone after downloads.
+  const hosts = () =>
+    page.evaluate(
+      () => document.querySelectorAll('body > div[aria-hidden="true"]').length,
+    )
+  const hostsBefore = await hosts()
+
+  // Two cards in the story: the grid narrows each card, but every export is
+  // still laid out at 480 CSS px, so every PNG is still exactly 1,440 px.
+  // The tray persists in localStorage across the navigation.
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  await page.getByRole("button", { name: "save snapshot" }).click()
+  await page.getByRole("button", { name: "Go to Share" }).dispatchEvent("click")
+  await page.getByRole("button", { name: "Add to story" }).first().click()
+  await expect(
+    storyCard.getByRole("button", { name: "Download as PNG" }),
+  ).toHaveCount(2)
+  const zipPromise = page.waitForEvent("download")
+  await page.getByText("Download all images", { exact: true }).click()
+  const zipDownload = await zipPromise
+  const zipChunks: Buffer[] = []
+  for await (const chunk of await zipDownload.createReadStream()) {
+    zipChunks.push(chunk as Buffer)
+  }
+  const zip = await JSZip.loadAsync(Buffer.concat(zipChunks))
+  const pngNames = Object.keys(zip.files).filter((n) => n.endsWith(".png"))
+  expect(pngNames).toHaveLength(2)
+  for (const name of pngNames) {
+    const buf = await zip.files[name]!.async("nodebuffer")
+    expect(buf.readUInt32BE(16)).toBe(1440)
+  }
+  expect(await hosts()).toBe(hostsBefore)
 
   expect(errors).toEqual([])
 })

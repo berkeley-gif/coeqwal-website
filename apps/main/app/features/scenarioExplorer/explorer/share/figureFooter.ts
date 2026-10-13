@@ -40,7 +40,7 @@ export function shareFigureFooter(item: ShareItem): ShareFigureFooter {
       item.source === "live"
         ? "Live data from api.coeqwal.org."
         : item.source === "mixed"
-          ? "Live data from api.coeqwal.org for some series; see the legend."
+          ? "Live data from api.coeqwal.org for some series; the data download names each series' source."
           : "Sample data, not model results."
     return { source: SOURCE_MODEL, provenance, capturedAt }
   }

@@ -119,12 +119,16 @@ test("Stats style saves a composed snapshot to the share drawer", async ({
 
   await page.getByRole("button", { name: "save snapshot" }).click()
 
-  // The staged card carries the standardized title and a stitched thumbnail
-  // (compose mode wraps every panel chart in one SVG).
+  // The staged card carries the figure-template rows (variable with its
+  // unit, held location) and a stitched thumbnail (compose mode wraps every
+  // panel chart in one SVG).
   const drawer = page.locator(".MuiDrawer-root")
   await expect(
-    drawer.getByText(/April Reservoir Storage \(Shasta Reservoir\)/),
+    drawer.getByText("April Reservoir Storage (TAF)", { exact: true }),
   ).toBeVisible({ timeout: 20_000 })
+  await expect(
+    drawer.getByText("Shasta Reservoir", { exact: true }),
+  ).toBeVisible()
   // The captured thumbnail itself, not just any svg: the drawer chrome has
   // its own close icons, and a failed capture stages the card anyway (the
   // staging helper swallows capture errors), so a bare svg match would pass

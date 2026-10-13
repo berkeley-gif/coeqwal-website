@@ -10,6 +10,8 @@
 
 import React from "react"
 import ShareSnapshotCard from "../cards/ShareSnapshotCard"
+import ShareFigureCard from "../cards/ShareFigureCard"
+import { buildFigureTemplate } from "../figureTemplate"
 import {
   dataInDepthToCSV,
   type DataChartDataShape,
@@ -25,7 +27,7 @@ import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"
 import { shareFigureFooter } from "../figureFooter"
 import { thumbnailAspectRatioFor } from "../thumbnailAspect"
 import type { ShareItemOfType } from "../types"
-import type { VariantHandler } from "../variants"
+import type { RenderContext, VariantHandler } from "../variants"
 
 type DataItem = ShareItemOfType<"data">
 
@@ -66,31 +68,99 @@ function viewLabelFor(item: DataItem): string {
   return dist ? `${view} (${dist})` : view
 }
 
+/** The card Data in Depth items rendered before the figure template: the
+ *  standardized title, a subtitle, a facts block and a provenance chip.
+ *  Items staged before the template, and URL-restored items (the link
+ *  carries no figureSpec), keep it with every fact it showed. */
+function renderLegacyCard(item: DataItem, ctx: RenderContext): React.ReactNode {
+  const variable = getVariable(item.variableId)
+  const variableName = variable?.name ?? item.variableId
+  // The standardized figure title captured with the chart leads the card
+  // (and therefore the exported PNG/SVG, which raster the card chrome);
+  // URL-restored items without cached chart data fall back to the
+  // variable name.
+  const chartData = item.cachedChartData as
+    | {
+        figureTitle?: string
+        waterYearTypesLabel?: string
+        unitLabel?: string
+      }
+    | undefined
+  const figureTitle = chartData?.figureTitle
+
+  // Color key for the plotted members. Items staged before the card
+  // carried a legend, and URL-restored items, have no persisted colors;
+  // the deterministic assignment reproduces them from the same scope and
+  // ids the chart used.
+  const colors =
+    item.memberColors ??
+    getStableSeriesColors(
+      item.compareBy === "locations"
+        ? `locations:${variable?.locationGroup ?? ""}`
+        : item.compareBy,
+      item.memberIds,
+    )
+  const legend = item.memberLabels.map((label, i) => ({
+    label,
+    color: colors[i] ?? "",
+  }))
+
+  // What the figure shows, in the reader's terms. The hydroclimate is on
+  // the badge below and the held location is inside the standardized
+  // title, so neither is repeated here.
+  const figureFacts = [
+    { label: "Variable", value: variableName },
+    { label: "View", value: viewLabelFor(item) },
+    {
+      label: "Compared",
+      value: comparedSummary(item.compareBy, item.memberLabels.length),
+    },
+    {
+      label: "Water years",
+      value: chartData?.waterYearTypesLabel ?? "All years",
+    },
+    ...(chartData?.unitLabel
+      ? [{ label: "Units", value: chartData.unitLabel }]
+      : []),
+  ]
+  return React.createElement(ShareSnapshotCard, {
+    id: item.id,
+    toolLabel: "Data in depth",
+    title: figureTitle ?? variableName,
+    // The members are named in the color legend below the chart, so the
+    // subtitle carries the view only instead of repeating the whole list.
+    subtitle: viewLabelFor(item),
+    figureFooter: shareFigureFooter(item),
+    thumbnailAspectRatio: thumbnailAspectRatioFor(item),
+    // The members moved to the color legend below the thumbnail, so the
+    // chip row carries provenance only.
+    chips: [
+      item.source === "mixed"
+        ? "Mixed data"
+        : item.source === "live"
+          ? "Live data"
+          : "Sample data",
+    ],
+    legend,
+    figureFacts,
+    hydroclimate: item.hydroclimate,
+    cachedSvg: item.cachedSvg,
+    cachedImageDataUrl: item.cachedImageDataUrl,
+    note: item.note,
+    onNoteChange: ctx.onNoteChange,
+    onRemove: ctx.onRemove,
+  })
+}
+
 const dataHandler: VariantHandler<DataItem> = {
   type: "data",
   urlPrefix: "d", // "d"ata; unique across the registry
   rasterDimensionsKey: "data",
 
   renderCard(item, ctx) {
+    // Pre-template items and URL-restored items keep their original card.
+    if (!item.figureSpec) return renderLegacyCard(item, ctx)
     const variable = getVariable(item.variableId)
-    const variableName = variable?.name ?? item.variableId
-    // The standardized figure title captured with the chart leads the card
-    // (and therefore the exported PNG/SVG, which raster the card chrome);
-    // URL-restored items without cached chart data fall back to the
-    // variable name.
-    const chartData = item.cachedChartData as
-      | {
-          figureTitle?: string
-          waterYearTypesLabel?: string
-          unitLabel?: string
-        }
-      | undefined
-    const figureTitle = chartData?.figureTitle
-
-    // Color key for the plotted members. Items staged before the card
-    // carried a legend, and URL-restored items, have no persisted colors;
-    // the deterministic assignment reproduces them from the same scope and
-    // ids the chart used.
     const colors =
       item.memberColors ??
       getStableSeriesColors(
@@ -99,52 +169,18 @@ const dataHandler: VariantHandler<DataItem> = {
           : item.compareBy,
         item.memberIds,
       )
-    const legend = item.memberLabels.map((label, i) => ({
-      label,
-      color: colors[i] ?? "",
-    }))
-
-    // What the figure shows, in the reader's terms. The hydroclimate is on
-    // the badge below and the held location is inside the standardized
-    // title, so neither is repeated here.
-    const figureFacts = [
-      { label: "Variable", value: variableName },
-      { label: "View", value: viewLabelFor(item) },
-      {
-        label: "Compared",
-        value: comparedSummary(item.compareBy, item.memberLabels.length),
-      },
-      {
-        label: "Water years",
-        value: chartData?.waterYearTypesLabel ?? "All years",
-      },
-      ...(chartData?.unitLabel
-        ? [{ label: "Units", value: chartData.unitLabel }]
-        : []),
-    ]
-    return React.createElement(ShareSnapshotCard, {
+    return React.createElement(ShareFigureCard, {
       id: item.id,
-      toolLabel: "Data in depth",
-      title: figureTitle ?? variableName,
-      // The members are named in the color legend below the chart, so the
-      // subtitle carries the view only instead of repeating the whole list.
-      subtitle: viewLabelFor(item),
-      figureFooter: shareFigureFooter(item),
-      thumbnailAspectRatio: thumbnailAspectRatioFor(item),
-      // The members moved to the color legend below the thumbnail, so the
-      // chip row carries provenance only.
-      chips: [
-        item.source === "mixed"
-          ? "Mixed data"
-          : item.source === "live"
-            ? "Live data"
-            : "Sample data",
-      ],
-      legend,
-      figureFacts,
-      hydroclimate: item.hydroclimate,
+      template: buildFigureTemplate(item.figureSpec),
+      panelHeadings: item.panelHeadings,
       cachedSvg: item.cachedSvg,
       cachedImageDataUrl: item.cachedImageDataUrl,
+      thumbnailAspectRatio: thumbnailAspectRatioFor(item),
+      legend: item.memberLabels.map((label, i) => ({
+        label,
+        color: colors[i] ?? "",
+      })),
+      figureFooter: shareFigureFooter(item),
       note: item.note,
       onNoteChange: ctx.onNoteChange,
       onRemove: ctx.onRemove,

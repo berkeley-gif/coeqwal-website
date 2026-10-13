@@ -9,10 +9,14 @@
  * Side effects: appends one item to the workspace share store per call.
  */
 
-import { axisLabelFor } from "../explorer/chartMarks"
+import { axisLabelFor, buildStatsPanels } from "../explorer/chartMarks"
 import { useCallback, useMemo } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { stageShareItem } from "../../../../share/stage"
+import {
+  dataFigureSpec,
+  dataChartKindLabel,
+} from "../../../../share/dataFigureSpec"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
 import { VIEW_LABELS, type VariableView } from "../config/variableRegistry"
 import { WYT_LABELS } from "../config/wytFilter"
@@ -53,6 +57,9 @@ export function useDataShareCapture(
   const saveSnapshot = useCallback(async () => {
     if (data.members.length === 0) return
     const variableName = data.variable?.name ?? selectedVariableId
+    const waterYearTypeLabels = data.wytApplicable
+      ? selectedWaterYearTypes.map((c) => WYT_LABELS[c] ?? String(c))
+      : null
     // Same standardized title the on-screen card shows above the chart.
     const figureTitle = dataFigureTitle({
       variableName,
@@ -63,14 +70,34 @@ export function useDataShareCapture(
       locationTitleName: data.locationTitleName,
       climateName: data.climateName,
       scenarioName: data.scenarioName,
-      waterYearTypeLabels: data.wytApplicable
-        ? selectedWaterYearTypes.map((c) => WYT_LABELS[c] ?? String(c))
-        : null,
+      waterYearTypeLabels,
     })
     const viewLabel =
       data.variable?.viewLabels?.[data.view as VariableView] ??
       VIEW_LABELS[data.view as VariableView] ??
       data.view
+    // The figure-template rows the share card and the exports render.
+    const figureSpec = dataFigureSpec({
+      variableName,
+      figureTitleHead: data.variable?.figureTitleHead,
+      unit: data.unit,
+      compareBy,
+      locationName: data.locationTitleName,
+      scenarioName: data.scenarioName,
+      climateName: data.climateName,
+      waterYearTypeLabels,
+      chartKindLabel: dataChartKindLabel(data.view, distKind, viewLabel),
+    })
+    // Stats plots stitch their bar panels side by side (same condition as
+    // the off-screen capture); the card heads each panel.
+    const panelHeadings =
+      distKind === "stats" && data.view !== "cv" && data.view !== "value"
+        ? buildStatsPanels(
+            data.view,
+            data.unit,
+            axisLabelFor(data.variable, data.view, data.unit),
+          ).map((p) => p.heading)
+        : undefined
     // The chart is always generated under the workspace hydroclimate: the
     // per-tool climate pin was removed, so "View by hydroclimate" is the
     // only hydroclimate input, on every compare axis.
@@ -113,6 +140,8 @@ export function useDataShareCapture(
         memberColors,
         source: data.mixedSource ? "mixed" : data.source,
         hydroclimate: capturedHydroclimate,
+        figureSpec,
+        panelHeadings,
         cachedSvg: captured?.svg,
         cachedImageDataUrl: captured?.dataUrl,
         cachedChartData: captured?.chartData as
