@@ -13,7 +13,7 @@
  * - Tooltips (unified via useMapTooltips hook)
  */
 
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react"
 import { useMap, Source, Layer, Popup } from "@repo/map"
 import { Box, useTheme, alpha } from "@repo/ui/mui"
 
@@ -149,9 +149,11 @@ export default function VisualizationLayers({
       ? featureCount > 0
       : !assignmentsLoading && tierLocations.length > 0)
   // The data object drawn; a new one (even with the same counts) is a new
-  // paint, so a save in flight across a refresh is voided.
+  // paint, so a save in flight across a refresh is voided. A layout effect
+  // bumps the paint revision in the commit that brings the new data,
+  // before Mapbox's next frame can draw it.
   const paintedData = usesMapboxLayers ? tierColorMap : assignmentsData
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (painted && outcomeCode) {
       mapActions.markMapPainted(
         mapPaintKey({ mode: "tiers", outcomeCode, scenarioId }),

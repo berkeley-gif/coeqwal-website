@@ -33,7 +33,8 @@ export interface DistributionMapSnapshot {
   hydroclimate: string
   /** Markers encode the change from current operations */
   comparedWithBaseline: boolean
-  /** Painted `tierCode:locationId` keys */
+  /** Painted markers as `tierCode:locationId:tier:baselineTier`, so the
+   *  paint key changes whenever a marker's color or shape would */
   locationKeys: string[]
 }
 

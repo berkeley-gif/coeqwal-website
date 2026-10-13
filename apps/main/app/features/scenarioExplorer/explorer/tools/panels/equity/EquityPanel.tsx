@@ -949,8 +949,12 @@ export default function EquityPanel({
                 paintedCodes.every((code) =>
                   markerSourceRef.current.baselineCodes.includes(code),
                 ),
+              // Each painted marker with what decides its color and shape
+              // (tier, and baseline tier for the comparison direction), so
+              // any change to the drawn markers changes the paint key.
               locationKeys: paintedObjectives.map(
-                (obj) => `${obj.tierCode}:${obj.locationId}`,
+                (obj) =>
+                  `${obj.tierCode}:${obj.locationId}:${obj.tierLevel}:${obj.baselineTier}`,
               ),
             }
           : null
