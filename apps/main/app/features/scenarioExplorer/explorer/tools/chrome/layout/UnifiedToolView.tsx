@@ -13,7 +13,6 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import { Box, useTheme, DragIndicatorIcon } from "@repo/ui/mui"
-import { HydroclimateBadge } from "@repo/ui"
 import {
   useWorkspaceSlice,
   useEquitySlice,
@@ -22,7 +21,8 @@ import {
 import { mapActions } from "../../../../../map/store"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import ToolJourneyStrip from "./ToolJourneyStrip"
-import { SQUARE_MARKER_RADIUS_PX } from "../../../../../map/config/markerShape"
+import MapFigureCaption from "./MapFigureCaption"
+import MapDirectionLegend from "../../../share/cards/MapDirectionLegend"
 
 const SIDEBAR_WIDTH_COLLAPSED = 320
 const SIDEBAR_WIDTH_EXPANDED = 480
@@ -203,6 +203,7 @@ export default function UnifiedToolView({
       </Box>
 
       <Box
+        data-explore-map-panel=""
         sx={{
           position: "relative",
           width: mapActive ? (mapWidthPx ?? `${MAP_WIDTH_PERCENT}%`) : 0,
@@ -255,12 +256,13 @@ export default function UnifiedToolView({
             </Box>
           </Box>
         )}
-        {mapActive && mapHydroBadge && (
+        {mapActive && (
           <Box
             sx={{
               position: "absolute",
               top: theme.spacing(1),
-              left: theme.spacing(1),
+              // Clear the 16 px drag handle on the panel's left edge.
+              left: theme.spacing(3),
               right: theme.spacing(1),
               zIndex: 2,
               display: "flex",
@@ -268,11 +270,7 @@ export default function UnifiedToolView({
               pointerEvents: "none",
             }}
           >
-            <HydroclimateBadge
-              title={mapHydroBadge.title}
-              accentColor={mapHydroBadge.accentColor}
-              surface="solid"
-            />
+            <MapFigureCaption hydroBadge={mapHydroBadge} />
           </Box>
         )}
         {showComparisonLegend && (
@@ -294,75 +292,7 @@ export default function UnifiedToolView({
               pointerEvents: "none",
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                style={{ flexShrink: 0 }}
-              >
-                <polygon
-                  points="7,2 2,12 12,12"
-                  fill="#999"
-                  stroke="#fff"
-                  strokeWidth="1"
-                />
-              </svg>
-              <Box
-                component="span"
-                sx={{
-                  fontSize: "0.75rem",
-                  color: theme.palette.text.primary,
-                }}
-              >
-                Improved from baseline
-              </Box>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  flexShrink: 0,
-                  borderRadius: `${SQUARE_MARKER_RADIUS_PX}px`,
-                  backgroundColor: "#999",
-                  border: "1px solid #fff",
-                }}
-              />
-              <Box
-                component="span"
-                sx={{
-                  fontSize: "0.75rem",
-                  color: theme.palette.text.primary,
-                }}
-              >
-                No change
-              </Box>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                style={{ flexShrink: 0 }}
-              >
-                <polygon
-                  points="7,12 2,2 12,2"
-                  fill="#999"
-                  stroke="#fff"
-                  strokeWidth="1"
-                />
-              </svg>
-              <Box
-                component="span"
-                sx={{
-                  fontSize: "0.75rem",
-                  color: theme.palette.text.primary,
-                }}
-              >
-                Worsened from baseline
-              </Box>
-            </Box>
+            <MapDirectionLegend />
           </Box>
         )}
       </Box>
