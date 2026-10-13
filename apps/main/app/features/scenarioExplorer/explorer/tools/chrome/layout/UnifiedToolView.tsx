@@ -23,6 +23,7 @@ import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import ToolJourneyStrip from "./ToolJourneyStrip"
 import MapFigureCaption from "./MapFigureCaption"
 import MapDirectionLegend from "../../../share/cards/MapDirectionLegend"
+import { TAB_WIDTH as SHARE_TAB_WIDTH } from "../../../share/ShareDrawer"
 
 const SIDEBAR_WIDTH_COLLAPSED = 320
 const SIDEBAR_WIDTH_EXPANDED = 480
@@ -261,9 +262,10 @@ export default function UnifiedToolView({
             sx={{
               position: "absolute",
               top: theme.spacing(1),
-              // Clear the 16 px drag handle on the panel's left edge.
+              // Clear the 16 px drag handle on the panel's left edge and the
+              // Share tab pinned to the window's right edge.
               left: theme.spacing(3),
-              right: theme.spacing(1),
+              right: `calc(${SHARE_TAB_WIDTH}px + ${theme.spacing(1)})`,
               zIndex: 2,
               display: "flex",
               justifyContent: "center",

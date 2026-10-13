@@ -17,7 +17,9 @@ import { useShareRenderContext } from "./hooks/useShareRenderContext"
 import { ShareRadarLiveProvider } from "./ShareRadarLiveProvider"
 
 const DRAWER_WIDTH = 360
-const TAB_WIDTH = 36
+/** Width of the Share tab pinned to the window's right edge; overlays
+ *  near that edge (the map caption) keep clear of it. */
+export const TAB_WIDTH = 36
 
 function ShareTab({
   count,
