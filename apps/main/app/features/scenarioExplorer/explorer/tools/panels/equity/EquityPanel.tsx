@@ -7,7 +7,14 @@
  * using an interactive tier-based grid visualization.
  */
 
-import { useMemo, useState, useCallback, useEffect, useRef } from "react"
+import {
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  type SetStateAction,
+} from "react"
 import {
   Box,
   useTheme,
@@ -424,6 +431,17 @@ export default function EquityPanel({
   const [selectedObjectives, setSelectedObjectives] = useState<
     TierGridProps["objectives"]
   >([])
+  // Only a selection the user makes in the grid opens the map. Selections
+  // rebuilt from refreshed data (a hydroclimate, scenario or comparison
+  // change) repaint the markers but leave a closed map closed.
+  const openMapOnPaintRef = useRef(false)
+  const selectFromGrid = useCallback(
+    (update: SetStateAction<TierGridProps["objectives"]>) => {
+      openMapOnPaintRef.current = true
+      setSelectedObjectives(update)
+    },
+    [],
+  )
 
   const [hasShownMapHint, setHasShownMapHint] = useState(false)
   const [showMapHintSnackbar, setShowMapHintSnackbar] = useState(false)
@@ -453,7 +471,7 @@ export default function EquityPanel({
   // intermittently swallows clicks on the small (4-16px) dot targets.
   const handleObjectiveClick = useCallback(
     (objective: TierGridProps["objectives"][0]) => {
-      setSelectedObjectives((prev) => {
+      selectFromGrid((prev) => {
         const isSelected = prev.some(
           (obj) =>
             obj.locationId === objective.locationId &&
@@ -472,7 +490,7 @@ export default function EquityPanel({
         }
       })
     },
-    [],
+    [selectFromGrid],
   )
 
   const handleCategoryClick = useCallback(
@@ -480,9 +498,9 @@ export default function EquityPanel({
       const categoryObjectives = objectives.filter(
         (obj) => obj.category === categoryName,
       )
-      setSelectedObjectives(categoryObjectives)
+      selectFromGrid(categoryObjectives)
     },
-    [objectives],
+    [objectives, selectFromGrid],
   )
 
   const handleTierCategoryClick = useCallback(
@@ -523,10 +541,10 @@ export default function EquityPanel({
           )
         }
 
-        setSelectedObjectives(tierCategoryObjectives)
+        selectFromGrid(tierCategoryObjectives)
       }
     },
-    [objectives, showEquityComparison, yAxisMode],
+    [objectives, showEquityComparison, yAxisMode, selectFromGrid],
   )
 
   const handleContextMenuSelect = (
@@ -577,7 +595,7 @@ export default function EquityPanel({
       })
     }
 
-    setSelectedObjectives(filtered)
+    selectFromGrid(filtered)
     setContextMenu(null)
   }
 
@@ -939,24 +957,21 @@ export default function EquityPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [equityFocusScenario, showEquityComparison, objectives])
 
-  // Paint map markers when the user selects grid cells. A new selection
-  // turns the map panel on if it was off (handleShowOnMap also sets mapMode
-  // explore). The same selection repainting with refreshed data (a
-  // hydroclimate, scenario or comparison change) leaves the panel as is.
-  const paintedSelectionRef = useRef<string | null>(null)
+  // Paint map markers for the grid selection. A selection the user just
+  // made turns the map panel on if it was off (handleShowOnMap also sets
+  // mapMode explore); a repaint from refreshed data leaves the panel as is.
   useEffect(() => {
     // Never paint (or turn the map on) behind the select-a-scenario prompt.
     if (selectedObjectives.length > 0 && !promptShown) {
       const selectedTierLocationCodes = selectedObjectives.map(
         (obj) => `${obj.tierCode}:${obj.locationId}`,
       )
-      const selectionKey = [...selectedTierLocationCodes].sort().join("|")
-      const selectionChanged = selectionKey !== paintedSelectionRef.current
-      paintedSelectionRef.current = selectionKey
-      handleShowOnMap(selectedTierLocationCodes, { openMap: selectionChanged })
+      const openMap = openMapOnPaintRef.current
+      openMapOnPaintRef.current = false
+      handleShowOnMap(selectedTierLocationCodes, { openMap })
       return
     }
-    paintedSelectionRef.current = null
+    openMapOnPaintRef.current = false
     if (setMotionChildren) {
       setMotionChildren(null)
       mapActions.setDistributionMapSnapshot(null)

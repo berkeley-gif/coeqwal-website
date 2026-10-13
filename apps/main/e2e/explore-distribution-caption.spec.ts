@@ -102,9 +102,10 @@ test("distribution's map caption describes its painted markers", async ({
   await expect(showMap).not.toBeChecked()
   await expect(caption).toHaveCount(0)
 
-  // Reopened, caption and markers agree, under the new hydroclimate.
-  await showMap.check()
+  // A grid selection the user makes opens the closed map; caption and
+  // markers agree, under the new hydroclimate.
   await dots.first().click()
+  await expect(showMap).toBeChecked()
   await expect(markers).toHaveCount(1)
   await expect(
     caption.getByText("Moderate stress", { exact: true }),
