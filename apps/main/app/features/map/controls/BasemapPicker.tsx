@@ -12,6 +12,12 @@ const BASEMAP_OPTIONS: { key: MapThemeKey; label: string }[] = [
 
 const THUMB_SIZE = 44
 
+/** Distance of the picker from the bottom of the map, in CSS px */
+export const BASEMAP_PICKER_BOTTOM_PX = 40
+/** Picker height (thumbnail, label and padding; 75 px measured), so
+ *  overlays near the map's bottom edge can sit above it */
+export const BASEMAP_PICKER_HEIGHT_PX = 76
+
 const STYLE_OWNER_ID: Record<MapThemeKey, string> = {
   satellite: "coeqwal/cmh2f40sm000w01qy8m0gaea8",
   light: "mapbox/light-v11",
@@ -52,7 +58,7 @@ export function BasemapPicker() {
         gap: 1,
         left: "87.5%",
         right: "auto",
-        bottom: 40,
+        bottom: BASEMAP_PICKER_BOTTOM_PX,
         transform: "translateX(-50%)",
       }}
     >

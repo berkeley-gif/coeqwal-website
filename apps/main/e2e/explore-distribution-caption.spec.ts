@@ -119,6 +119,13 @@ test("distribution's map caption describes its painted markers", async ({
     `${STRATEGY}, Compared with Current Operations`,
   )
   await expect(directionKey).toBeVisible()
+  // The key sits above the basemap picker at the bottom of the map.
+  const picker = page
+    .locator('[role="button"]', { hasText: /^Satellite$/ })
+    .locator("..")
+  const keyBox = (await directionKey.boundingBox())!
+  const pickerBox = (await picker.boundingBox())!
+  expect(keyBox.y + keyBox.height).toBeLessThanOrEqual(pickerBox.y + 0.5)
   await page.getByRole("button", { name: "Compare to Baseline" }).click()
   await expect(caption).not.toContainText("Compared with")
   await expect(directionKey).toHaveCount(0)
