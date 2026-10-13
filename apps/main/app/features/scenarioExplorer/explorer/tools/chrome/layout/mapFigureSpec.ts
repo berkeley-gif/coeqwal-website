@@ -79,8 +79,6 @@ export interface MapFigureState {
   active: OutcomeVisualization | null
   /** Distribution: what its painted markers show */
   distribution: DistributionMapSnapshot | null
-  /** Workspace hydroclimate value, used only until the scenario list loads */
-  workspaceHydroclimate: string
   scenarios: readonly MapScenarioInfo[]
 }
 
@@ -93,7 +91,8 @@ const hydroclimateLabel = (value: string) =>
  * Elsewhere the map draws `active.scenarioId`, a hydroclimate variant that
  * can lag the workspace hydroclimate (it is re-resolved in an effect after a
  * switch) or stay on the previous variant when the new hydroclimate has
- * none, so the label is the variant's own hydroclimate. Pure.
+ * none, so the label is the variant's own hydroclimate, and the row is left
+ * out while that variant is not in the scenario list. Pure.
  */
 export function getMapFigureInput(state: MapFigureState): MapFigureInput {
   const scenarioLabel = (id: string) =>
@@ -116,15 +115,18 @@ export function getMapFigureInput(state: MapFigureState): MapFigureInput {
   const variant = active
     ? state.scenarios.find((s) => s.scenarioId === active.scenarioId)
     : undefined
-  const mappedHydroclimate =
-    (variant && HYDROCLIMATE_LABEL_MAP[variant.hydroclimateId]) ??
-    state.workspaceHydroclimate
+  const mappedHydroclimate = variant
+    ? HYDROCLIMATE_LABEL_MAP[variant.hydroclimateId]
+    : undefined
   const groupId = active?.siblingGroupId ?? active?.scenarioId ?? null
   return {
     mode: state.mode,
     outcomeNames: active ? [getOutcomeName(active.outcomeCode)] : [],
     scenarioLabel: groupId ? scenarioLabel(groupId) : null,
-    hydroclimateLabel: hydroclimateLabel(mappedHydroclimate),
+    // Omitted while the drawn variant is unknown rather than guessed.
+    hydroclimateLabel: mappedHydroclimate
+      ? hydroclimateLabel(mappedHydroclimate)
+      : null,
     comparedWithBaseline: false,
   }
 }

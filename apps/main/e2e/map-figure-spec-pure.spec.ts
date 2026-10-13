@@ -92,7 +92,6 @@ test("the caption names the hydroclimate of the variant the map draws", () => {
       siblingGroupId: "s0020",
     },
     distribution: null,
-    workspaceHydroclimate: "ecv",
     scenarios: SCENARIOS,
   }
   expect(rowsFor(base)).toEqual([
@@ -106,13 +105,14 @@ test("the caption names the hydroclimate of the variant the map draws", () => {
     rowsFor({
       ...base,
       active: { ...base.active!, scenarioId: "s0020" },
-      workspaceHydroclimate: "cc95",
     })?.at(-1),
   ).toEqual(["Hydroclimate", "Historical"])
-  // Before the scenario list loads, the workspace hydroclimate stands in.
-  expect(
-    rowsFor({ ...base, scenarios: [], workspaceHydroclimate: "cc95" })?.at(-1),
-  ).toEqual(["Hydroclimate", "High stress"])
+  // A variant missing from the scenario list gets no hydroclimate row
+  // rather than a guess from the controls.
+  expect(rowsFor({ ...base, scenarios: [] })?.map(([label]) => label)).toEqual([
+    "Outcome",
+    "Strategy",
+  ])
 })
 
 test("a scenario without local metadata is named from the scenario list", () => {
@@ -125,7 +125,6 @@ test("a scenario without local metadata is named from the scenario list", () => 
         siblingGroupId: "s9999",
       },
       distribution: null,
-      workspaceHydroclimate: "historical",
       scenarios: SCENARIOS,
     })?.[1],
   ).toEqual(["Strategy", "A Strategy"])
@@ -142,7 +141,6 @@ test("Distribution describes its painted markers, not the current controls", () 
       hydroclimate: "ecv",
       comparedWithBaseline: true,
     },
-    workspaceHydroclimate: "cc95",
     scenarios: SCENARIOS,
   }
   expect(rowsFor(state)).toEqual([

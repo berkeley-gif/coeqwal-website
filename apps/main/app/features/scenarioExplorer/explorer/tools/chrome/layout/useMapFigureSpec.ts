@@ -19,7 +19,6 @@ import { getMapFigureInput, mapFigureSpec } from "./mapFigureSpec"
 
 export function useMapFigureSpec(): FigureTemplateSpec | null {
   const mode = useWorkspaceSlice((s) => s.exploreMode)
-  const workspaceHydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
   const active = useActiveOutcomeVisualization()
   const distribution = useDistributionMapSnapshot()
   const { scenarios } = useScenarioList()
@@ -29,7 +28,6 @@ export function useMapFigureSpec(): FigureTemplateSpec | null {
       mode,
       active,
       distribution,
-      workspaceHydroclimate,
       scenarios,
     }),
   )

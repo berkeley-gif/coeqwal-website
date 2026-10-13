@@ -318,6 +318,18 @@ export default function EquityPanel({
   // does not disturb List/Radar/Resilience/Comparison selections.
   const { equityFocusScenario, showMap, setShowMap } = useWorkspaceSlice()
   const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
+  // The scenario and hydroclimate this render's objectives were built for,
+  // read by handleShowOnMap when it publishes the map caption's snapshot.
+  // A ref, not callback dependencies: a dependency would re-run the paint
+  // effect, and handleShowOnMap opens the map.
+  const markerSourceRef = useRef({
+    scenarioId: equityFocusScenario ?? BASELINE_SCENARIO_ID,
+    hydroclimate,
+  })
+  markerSourceRef.current = {
+    scenarioId: equityFocusScenario ?? BASELINE_SCENARIO_ID,
+    hydroclimate,
+  }
   const tourTool = useWorkspaceSlice((s) => s.tour.tool)
   const promptShown = needsScenarioPrompt({
     mode: "equity",
@@ -570,8 +582,13 @@ export default function EquityPanel({
   }
 
   const handleShowOnMap = useCallback(
-    (outcomeLocationCodes: string[]) => {
-      setShowMap(true)
+    (
+      outcomeLocationCodes: string[],
+      // False when the same selection only repaints with refreshed data, so
+      // a map the user closed stays closed.
+      { openMap = true }: { openMap?: boolean } = {},
+    ) => {
+      if (openMap) setShowMap(true)
 
       // Get the Mapbox map instance
       const map = mapRef?.current?.getMap()
@@ -884,8 +901,7 @@ export default function EquityPanel({
         paintedCodes.length > 0
           ? {
               outcomeCodes: paintedCodes,
-              scenarioId: equityFocusScenario ?? BASELINE_SCENARIO_ID,
-              hydroclimate,
+              ...markerSourceRef.current,
               comparedWithBaseline: showEquityComparison,
             }
           : null,
@@ -895,13 +911,11 @@ export default function EquityPanel({
       setMotionChildren?.(<>{markerElements}</>)
 
       // Switch to explore mode to show the map
-      mapActions.setMapMode("explore")
+      if (openMap) mapActions.setMapMode("explore")
     },
     [
       objectives,
       showEquityComparison,
-      equityFocusScenario,
-      hydroclimate,
       tierColors,
       mapRef,
       setMotionChildren,
@@ -925,16 +939,25 @@ export default function EquityPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [equityFocusScenario, showEquityComparison, objectives])
 
-  // Paint map markers when the user selects grid cells. Selection turns the
-  // map panel on if it was off. handleShowOnMap also sets mapMode explore.
+  // Paint map markers when the user selects grid cells. A new selection
+  // turns the map panel on if it was off (handleShowOnMap also sets mapMode
+  // explore). The same selection repainting with refreshed data (a
+  // hydroclimate, scenario or comparison change) leaves the panel as is.
+  const paintedSelectionRef = useRef<string | null>(null)
   useEffect(() => {
     // Never paint (or turn the map on) behind the select-a-scenario prompt.
     if (selectedObjectives.length > 0 && !promptShown) {
       const selectedTierLocationCodes = selectedObjectives.map(
         (obj) => `${obj.tierCode}:${obj.locationId}`,
       )
-      handleShowOnMap(selectedTierLocationCodes)
-    } else if (setMotionChildren) {
+      const selectionKey = [...selectedTierLocationCodes].sort().join("|")
+      const selectionChanged = selectionKey !== paintedSelectionRef.current
+      paintedSelectionRef.current = selectionKey
+      handleShowOnMap(selectedTierLocationCodes, { openMap: selectionChanged })
+      return
+    }
+    paintedSelectionRef.current = null
+    if (setMotionChildren) {
       setMotionChildren(null)
       mapActions.setDistributionMapSnapshot(null)
     }
