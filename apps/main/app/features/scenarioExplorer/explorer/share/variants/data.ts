@@ -132,15 +132,9 @@ function renderLegacyCard(item: DataItem, ctx: RenderContext): React.ReactNode {
     subtitle: viewLabelFor(item),
     figureFooter: shareFigureFooter(item),
     thumbnailAspectRatio: thumbnailAspectRatioFor(item),
-    // The members moved to the color legend below the thumbnail, so the
-    // chip row carries provenance only.
-    chips: [
-      item.source === "mixed"
-        ? "Mixed data"
-        : item.source === "live"
-          ? "Live data"
-          : "Sample data",
-    ],
+    // The members moved to the color legend below the thumbnail; every
+    // figure is model results, so no provenance chip either.
+    chips: [],
     legend,
     figureFacts,
     hydroclimate: item.hydroclimate,
@@ -204,6 +198,9 @@ const dataHandler: VariantHandler<DataItem> = {
 
   decodeUrlToken(parts) {
     if (parts.length < 1 || !parts[0]) return null
+    // Links to figures that held sample data are dropped: the site shows
+    // model results only.
+    if (parts[5] !== "live") return null
     const memberIds = (parts[4] ?? "").split("~").filter(Boolean)
     // A link minted before a variable was folded into a view of another one
     // must land on the same chart, not on a stranger or a blank panel.
@@ -217,8 +214,7 @@ const dataHandler: VariantHandler<DataItem> = {
       compareBy: parts[3] || "scenarios",
       memberIds,
       memberLabels: memberIds,
-      source:
-        parts[5] === "live" ? "live" : parts[5] === "mixed" ? "mixed" : "mock",
+      source: "live",
       hydroclimate: parts[6] || "historical",
     }
   },

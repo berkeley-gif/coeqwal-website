@@ -46,11 +46,11 @@ export function useDataShareCapture(
 
   // Every chart style can be captured: the Stats style stitches its bar
   // panels into one composed SVG (see OffscreenDataCapture). The capture
-  // needs at least one DRAWN member: when every compared scenario is
-  // unmodeled for the variable the card shows a no-data message instead of a
-  // chart, and capturing then would export panels the card never drew.
+  // needs at least one DRAWN member (served model results): otherwise the
+  // card shows a no-data, loading or load-error message instead of a chart,
+  // and capturing then would export panels the card never drew.
   const canSnapshot =
-    data.members.some((m) => !m.liveDataMissing) &&
+    data.members.some((m) => m.isLive === true) &&
     !data.isLoading &&
     !data.unavailableReason
 

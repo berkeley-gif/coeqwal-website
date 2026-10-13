@@ -108,11 +108,7 @@ test("delta outflow fetches the SAC000 river series and goes live on the annual 
     .click()
 
   await page.getByRole("button", { name: "Delta outflow volume" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // The request carries the remapped subject, not the registry location id.
   await expect.poll(() => riverUrls.length).toBeGreaterThan(0)
@@ -139,11 +135,7 @@ test("delta outflow fetches the SAC000 river series and goes live on the annual 
 
   // The distribution chart styles all read the same live series.
   await page.getByRole("button", { name: "Box plot" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   expect(errors).toEqual([])
 })

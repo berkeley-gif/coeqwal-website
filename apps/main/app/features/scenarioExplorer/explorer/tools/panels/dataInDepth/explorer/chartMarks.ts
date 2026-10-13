@@ -56,6 +56,8 @@ export interface MarkMember {
    *  DRAWN: its series exists only because the sample engine always produces
    *  one, and drawing it would put a fabricated curve on the figure. */
   liveDataMissing?: boolean
+  /** True when the member's request failed; recorded like a missing member. */
+  loadFailed?: boolean
 }
 
 /** One bar per member (the "cv" and "value" views). */

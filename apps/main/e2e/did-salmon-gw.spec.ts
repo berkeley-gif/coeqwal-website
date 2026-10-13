@@ -167,11 +167,7 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
   // disabled with the not-applicable note (first real wytApplicable: false
   // variable; this is the UI coverage for the opt-out mechanism).
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() => salmonRequests.includes("WRLCM_ADULT_FEMALES"))
     .toBe(true)
@@ -213,11 +209,7 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
   // selection is live immediately, and every served basin resolves by its
   // technical code.
   await page.getByRole("button", { name: "Groundwater storage" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() => gwRequests.includes("NOD_GroundwaterStorage"))
     .toBe(true)
@@ -226,11 +218,7 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
     .filter({ hasText: "All North of Delta" })
     .click()
   await page.getByRole("option", { name: "WBA10" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect.poll(() => gwRequests.includes("WBA10")).toBe(true)
   // The volume series feeds the summary sentence (fixture serves 46,000).
   await expect(page.getByText(/46,000 TAF/).first()).toBeVisible()
@@ -238,22 +226,14 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
   // The level view is served per basin, so it stays live on a basin, and
   // the LEVEL series (180 ft), not the volume series, feeds the display.
   await page.getByRole("button", { name: "Level (ft)" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect(page.getByText(/180 ft/).first()).toBeVisible()
   await expect(page.getByText(/46,000 ft/)).toHaveCount(0)
 
   // The one basin with a served display name resolves and stays live too.
   await page.getByRole("combobox").filter({ hasText: "WBA10" }).click()
   await page.getByRole("option", { name: "Delta-Eastside Water" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect.poll(() => gwRequests.includes("DETAW")).toBe(true)
   await page.getByRole("combobox").filter({ hasText: "Delta-Eastside" }).click()
   await page.getByRole("option", { name: "WBA10" }).click()
@@ -276,11 +256,7 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
   await page.getByRole("button", { name: "Volume (TAF)" }).click()
   await page.getByRole("combobox").filter({ hasText: "WBA10" }).click()
   await page.getByRole("option", { name: "All North of Delta" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect(page.getByRole("button", { name: "Level (ft)" })).toBeDisabled()
   await expect(
     page.getByText(
@@ -344,11 +320,7 @@ test("a restored session with a groundwater total on the Level view shows the re
     .filter({ hasText: "All South of Delta" })
     .click()
   await page.getByRole("option", { name: "WBA10" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect(page.getByText(/180 ft/).first()).toBeVisible()
   expect(errors).toEqual([])
 })

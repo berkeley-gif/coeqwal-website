@@ -18,15 +18,15 @@
  * (per-scenario parallel fan-out), and every derived value the chart needs
  * (exceedance curve, box, mean, CV) is computed on the frontend from that
  * series via `seriesStats` and `toExceedancePoints` - the same path the mock
- * engine feeds. So the live and mock members are shaped identically; only the
- * origin of `series` differs.
+ * engine feeds. The sample engine still fills `series` for members without a
+ * live one, but such members are never drawn, quoted or exported: the site
+ * shows model results only.
  *
  * The locations axis is live too: ONE request for the held scenario carries
  * every selected location's subject, and each member picks its own series by
- * subject id (`locationAxisRequest`). Any variable not served by a
- * data-in-depth endpoint uses the deterministic sample-data engine. Each
- * member falls back to mock individually if its live series is absent, and the
- * card is labeled per the resolved `source`.
+ * subject id (`locationAxisRequest`). Each member ends in exactly one state:
+ * live (`isLive`), still loading (`pending`), failed to load (`loadFailed`),
+ * or without model results (`liveDataMissing`).
  *
  * Member ids resolve to concrete scenario short_codes before fetching:
  * - scenarios axis: each compared scenario through the PINNED
@@ -50,7 +50,10 @@ import {
 } from "@repo/data/coeqwal/hooks"
 import type { DidAgMeasure } from "@repo/data/coeqwal"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
-import { useResolvedIdMappings } from "../../../../../../scenarios/hooks"
+import {
+  useResolvedIdMappings,
+  useScenarioList,
+} from "../../../../../../scenarios/hooks"
 import { BASELINE_SCENARIO_ID } from "../../../../../constants"
 import {
   getScenarioShortLabel,
@@ -71,7 +74,6 @@ import {
   gwLevelFromStorage,
   mockAnnualSeries,
   mockMonthlyBands,
-  mockSummaryValue,
   mockWaterYearType,
   seriesStats,
   type MonthlyBand,
@@ -120,16 +122,16 @@ export interface VariableMember {
   waterYears?: number[]
   /** True when this member's series came from the live API (mock fallback = false) */
   isLive?: boolean
-  /** True when the variable IS live-eligible and this member's request
-   *  resolved, but the endpoint served no block for the scenario: the
-   *  scenario is not modeled for this variable (salmon under the Delta
-   *  Conveyance Project). Distinct from a plain mock fallback, which means
-   *  "not wired yet" rather than "does not exist". `isLive` stays false. */
+  /** No model results to show: not modeled for this variable (salmon under
+   *  the Delta Conveyance Project), no variant under the held hydroclimate,
+   *  or a derived total that failed closed. Never drawn; reads "no data". */
   liveDataMissing?: boolean
-  /** True while this member's own live request is still in flight. Its
-   *  series is the sample engine's stand-in until the answer lands, so it
-   *  is neither drawn nor quoted; the card shows it as loading. */
+  /** True while this member's own live request (or the scenario list it
+   *  resolves through) is still in flight. Never drawn; reads "loading". */
   pending?: boolean
+  /** The member's live request failed. Never drawn; reads as a load error,
+   *  not as missing model results. */
+  loadFailed?: boolean
   /** Summary stats of `series` */
   stats: SeriesStats
   /** Monthly p10/p50/p90 bands (populated only for the "monthly" view) */
@@ -320,9 +322,9 @@ export function useVariableData(): VariableData {
   // rather than borrowing another climate's series.
   const resolvedAll = useResolvedIdMappings()
   const heldMapping = resolvedAll[heldClimate]?.idMapping
-  // An empty mapping means the scenario list has not loaded yet.
-  const mappingUnloaded =
-    heldMapping == null || Object.keys(heldMapping).length === 0
+  // Every climate's mapping comes from the one scenario list: while it is
+  // loading, no member can resolve yet, which is loading, not "no variant".
+  const { isLoading: mappingUnloaded } = useScenarioList()
   const liveEligible =
     domain != null &&
     (isLocationsAxis
@@ -524,6 +526,10 @@ export function useVariableData(): VariableData {
   // Per-slot in-flight state, so a member can be marked pending on its own.
   const loadingSignature = activeSlots
     .map((r) => (r?.isLoading ? "1" : "0"))
+    .join("")
+  // Per-slot failure state, so a failed member reads as a load error.
+  const errorSignature = activeSlots
+    .map((r) => (r?.error != null ? "1" : "0"))
     .join("")
 
   return useMemo<VariableData>(() => {
@@ -743,16 +749,9 @@ export function useVariableData(): VariableData {
               spec.locationId,
             )
           : []
-      let value: number
-      if (view === "cv") value = stats.cv
-      else if (view === "value")
-        value = mockSummaryValue(
-          variable.id,
-          spec.scenarioId,
-          spec.climateKey,
-          spec.locationId,
-        )
-      else value = stats.p50
+      // Summary values come from the member's own series (the "value" view
+      // is retired, and a sample value would never be shown anyway).
+      const value: number = view === "cv" ? stats.cv : stats.p50
 
       // In flight: this member's own request has not answered yet, so the
       // series it carries is the sample engine's stand-in. It is flagged so
@@ -770,7 +769,12 @@ export function useVariableData(): VariableData {
       // stand-in: a member without a live series (not modeled, no variant
       // under the held hydroclimate, a failed request, a derived total that
       // failed closed) is reported as "no data" instead of drawn.
-      const liveDataMissing = !adoptedLive && !pending
+      const loadFailed =
+        !adoptedLive &&
+        !pending &&
+        spec.slotIndex != null &&
+        activeSlots[spec.slotIndex]?.error != null
+      const liveDataMissing = !adoptedLive && !pending && !loadFailed
 
       return {
         id: spec.id,
@@ -781,6 +785,7 @@ export function useVariableData(): VariableData {
         isLive: adoptedLive,
         ...(liveDataMissing ? { liveDataMissing: true } : {}),
         ...(pending ? { pending: true } : {}),
+        ...(loadFailed ? { loadFailed: true } : {}),
         stats,
         bands,
         value,
@@ -847,6 +852,7 @@ export function useVariableData(): VariableData {
     emptyResponseSignature,
     liveLoading,
     loadingSignature,
+    errorSignature,
     mappingUnloaded,
     wytJoined,
     unavailableReason,

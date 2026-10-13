@@ -49,7 +49,7 @@ test("a populated tray keeps every card and note across a reload", async ({
       compareBy: "scenarios",
       memberIds: ["s0020"],
       memberLabels: ["Current operations"],
-      source: "mock",
+      source: "live",
       hydroclimate: "historical",
       note: `Seed note ${n}`,
       cachedSvg: svg,

@@ -183,7 +183,7 @@ test("dataInDepthToCSV pivots divergent live year sets onto a year union with bl
   expect(csv).toContain("1924,,44")
 })
 
-test("dataInDepthToCSV labels per-member provenance in the stats table", () => {
+test("dataInDepthToCSV never exports a member without model results", () => {
   const stats = csvData().members[0]!.stats
   const csv = dataInDepthToCSV(
     csvData({
@@ -196,7 +196,9 @@ test("dataInDepthToCSV labels per-member provenance in the stats table", () => {
           stats,
           value: 0.1,
         },
-        { label: "Mock one", series: [2], stats, value: 0.2 },
+        // A legacy capture: a member with a stand-in series and no
+        // provenance flag. Its numbers must never reach the export.
+        { label: "Stand-in one", series: [2], stats, value: 0.2 },
       ],
     }),
     { variantTitle: "Data in depth" },
@@ -204,17 +206,35 @@ test("dataInDepthToCSV labels per-member provenance in the stats table", () => {
   expect(csv).toContain(
     "Live one,3660,0.15,3100,3210,3375,3650,3925,4090,4200,CalSim3 model results",
   )
-  expect(csv).toContain(
-    "Mock one,3660,0.15,3100,3210,3375,3650,3925,4090,4200,Sample",
+  expect(csv).toContain("Stand-in one,,,,,,,,,,No data")
+  expect(csv).not.toMatch(/sample/i)
+})
+
+test("dataInDepthToCSV blanks a member whose request failed", () => {
+  const stats = csvData().members[0]!.stats
+  const csv = dataInDepthToCSV(
+    csvData({
+      members: [
+        ...csvData().members,
+        {
+          label: "Failed one",
+          series: [],
+          waterYears: [],
+          isLive: false,
+          loadFailed: true,
+          stats,
+          value: 0.2,
+        },
+      ],
+    }),
+    { variantTitle: "Data in depth" },
   )
-  // Mixed year coverage: fall back to index labels, never member 0's years.
-  expect(csv).toContain("Year index,Live one,Mock one")
+  expect(csv).toContain("Failed one,,,,,,,,,,No data")
 })
 
 test("dataInDepthToCSV falls back to year index labels without waterYears", () => {
   const csv = dataInDepthToCSV(
     csvData({
-      source: "mock",
       members: [
         {
           label: "A, with comma",
@@ -231,12 +251,13 @@ test("dataInDepthToCSV falls back to year index labels without waterYears", () =
             cv: 0.3,
           },
           value: 0.3,
+          isLive: true,
         },
       ],
     }),
     { variantTitle: "Data in depth" },
   )
-  expect(csv).toContain("Data source,Sample data")
+  expect(csv).toContain("Data source,CalSim3 model results")
   expect(csv).toContain('Year index,"A, with comma"')
   expect(csv).toContain("1,1")
   expect(csv).toContain("2,2")
@@ -250,11 +271,10 @@ test("dataInDepthToCSV returns null with no members", () => {
   ).toBeNull()
 })
 
-test("a mixed-provenance export labels the figure Mixed and blanks the no-data row", () => {
-  // A figure whose series do not share one provenance must not claim one, and
-  // the member the model has no results for must export as a labeled, EMPTY
+test("an export with a not-modeled member blanks its row", () => {
+  // The member the model has no results for must export as a labeled, EMPTY
   // row. The sample engine always produces a series, so writing its numbers
-  // here would hand the reader fabricated values under a live-looking export.
+  // here would hand the reader fabricated values.
   const csv = dataInDepthToCSV(
     csvData({
       source: "mixed",
@@ -283,7 +303,7 @@ test("a mixed-provenance export labels the figure Mixed and blanks the no-data r
     }),
     { variantTitle: "Data in depth" },
   )
-  expect(csv).toContain("Data source,Mixed (see the Source column)")
+  expect(csv).toContain("Data source,CalSim3 model results")
   expect(csv).toContain("Delta Conveyance Project,,,,,,,,,,No data")
   // The sample engine's stand-in values appear nowhere in the export.
   expect(csv).not.toContain("0.55")
@@ -299,7 +319,7 @@ test("a mixed-provenance export labels the figure Mixed and blanks the no-data r
 // Every exported figure carries the same footer: who produced the data, what
 // kind of data the figure shows, and when it was captured. Built by a pure
 // helper from the share item so all five card types read one way.
-test("shareFigureFooter names the source, the provenance and the capture date", () => {
+test("shareFigureFooter names the source and the capture date, never sample data", () => {
   const live = shareFigureFooter({
     id: "x",
     type: "data",
@@ -314,41 +334,30 @@ test("shareFigureFooter names the source, the provenance and the capture date", 
     capturedAt: "2026-08-24T19:00:00.000Z",
   })
   expect(live.source).toBe("COEQWAL, coeqwal.org. CalSim3 model results.")
-  // Model results need no provenance note; only legacy sample items carry one.
+  // Every figure is model results, so no provenance note.
   expect(live.provenance).toBeUndefined()
   expect(live.capturedAt).toBe("Captured Aug 24, 2026.")
   expect(shareFigureFooterText(live)).toBe(
     "COEQWAL, coeqwal.org. CalSim3 model results. Captured Aug 24, 2026.",
   )
-  const sample = shareFigureFooter({
-    id: "y",
-    type: "data",
-    variableId: "ag_rev",
-    view: "dist",
-    distKind: "box",
-    compareBy: "scenarios",
-    memberIds: ["s0020"],
-    memberLabels: ["Current operations"],
-    source: "mock",
-    hydroclimate: "historical",
-  })
-  expect(sample.provenance).toBe("Sample data, not model results.")
-  expect(sample.capturedAt).toBeUndefined()
-  const mixed = shareFigureFooter({
-    id: "z",
-    type: "data",
-    variableId: "res_apr",
-    view: "dist",
-    distKind: "exceedance",
-    compareBy: "scenarios",
-    memberIds: ["s0020", "s0065"],
-    memberLabels: ["Current operations", "DCP"],
-    source: "mixed",
-    hydroclimate: "historical",
-  })
-  expect(mixed.provenance).toBe(
-    "Some series in this figure are sample data, not model results.",
-  )
+  // Legacy items saved as sample or mixed figures read as model results too
+  // (they are dropped on load; the footer never names sample data).
+  for (const source of ["mock", "mixed"]) {
+    const legacy = shareFigureFooter({
+      id: "y",
+      type: "data",
+      variableId: "ag_rev",
+      view: "dist",
+      distKind: "box",
+      compareBy: "scenarios",
+      memberIds: ["s0020"],
+      memberLabels: ["Current operations"],
+      source,
+      hydroclimate: "historical",
+    } as never)
+    expect(legacy.provenance).toBeUndefined()
+    expect(shareFigureFooterText(legacy)).not.toMatch(/sample/i)
+  }
 })
 
 test("shareFigureFooter covers the other tools with the tiers wording", () => {

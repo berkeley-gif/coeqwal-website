@@ -119,12 +119,19 @@ export function loadShareState(): {
     const parsed = JSON.parse(raw) as unknown
     const migrated = migrateEnvelope(parsed)
     if (!migrated) return { shareItems: [], storyItemIds: [] }
-    return {
-      shareItems: Array.isArray(migrated.shareItems)
+    // The site shows model results only. Data figures saved while Data in
+    // Depth could still draw sample data (source "mock" or "mixed") are
+    // dropped, along with their story slots.
+    const shareItems = (
+      Array.isArray(migrated.shareItems)
         ? (migrated.shareItems as ShareItem[])
-        : [],
+        : []
+    ).filter((item) => item.type !== "data" || item.source === "live")
+    const kept = new Set(shareItems.map((item) => item.id))
+    return {
+      shareItems,
       storyItemIds: Array.isArray(migrated.storyItemIds)
-        ? migrated.storyItemIds
+        ? migrated.storyItemIds.filter((id) => kept.has(id))
         : [],
     }
   } catch {

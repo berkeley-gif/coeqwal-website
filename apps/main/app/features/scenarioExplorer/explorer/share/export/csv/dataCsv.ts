@@ -2,7 +2,8 @@
  * Data-in-depth card CSV builder. Emits the standard header block, one
  * summary-statistics row per member, then the annual series as one column
  * per member, labeled by real water years when the capture carried them
- * (live data) or by year index (sample data).
+ * or by year index otherwise. Only model results are ever exported: a member
+ * without them keeps a labeled row with every value blank.
  */
 
 import {
@@ -39,6 +40,7 @@ export type DataChartDataShape = {
     /** True when the scenario is not modeled for this variable at all: the
      *  row is present and labeled, but every value cell is empty. */
     liveDataMissing?: boolean
+    loadFailed?: boolean
     stats: {
       min: number
       p10: number
@@ -55,6 +57,19 @@ export type DataChartDataShape = {
 }
 
 const STATS_HEADER = "Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max,Source"
+
+type CsvMember = DataChartDataShape["members"][number]
+
+/**
+ * True when the member carries model results. Captures made before members
+ * carried a provenance flag count only when they carry water years, which
+ * only served series ever had.
+ */
+function hasModelResults(m: CsvMember): boolean {
+  if (m.liveDataMissing || m.loadFailed) return false
+  if (m.isLive !== undefined) return m.isLive
+  return !!m.waterYears && m.waterYears.length === m.series.length
+}
 
 /** Trim float noise without losing precision users care about. */
 function num(v: number): string {
@@ -85,14 +100,7 @@ export function dataInDepthToCSV(
         ["View", data.viewLabel],
         ["Compare by", data.compareByLabel],
         ["Unit", data.unitLabel],
-        [
-          "Data source",
-          data.source === "mixed"
-            ? "Mixed (see the Source column)"
-            : data.source === "live"
-              ? "CalSim3 model results"
-              : "Sample data",
-        ],
+        ["Data source", "CalSim3 model results"],
         ...(data.waterYearTypesLabel
           ? ([["Water year types", data.waterYearTypesLabel]] as Array<
               [string, string]
@@ -106,12 +114,11 @@ export function dataInDepthToCSV(
   lines.push("")
   lines.push(STATS_HEADER)
   for (const m of data.members) {
-    // A scenario that is not modeled for this variable keeps its labeled row
-    // so the reader can see it WAS compared, but every statistic is blank:
-    // the member's series is sample data standing in for something that does
-    // not exist, and exporting those numbers under a "Live" export would
-    // hand the reader fabricated values.
-    if (m.liveDataMissing) {
+    // A member without model results (not modeled for this variable, failed
+    // to load, or a stand-in series) keeps its labeled row so the reader can
+    // see it WAS compared, but every statistic is blank: exporting its
+    // numbers would hand the reader fabricated values.
+    if (!hasModelResults(m)) {
       lines.push(
         [
           csvEscape(m.label),
@@ -141,13 +148,18 @@ export function dataInDepthToCSV(
         num(m.stats.p75),
         num(m.stats.p90),
         num(m.stats.max),
-        m.isLive ? "CalSim3 model results" : "Sample",
+        "CalSim3 model results",
       ].join(","),
     )
   }
 
-  const maxLen = Math.max(...data.members.map((m) => m.series.length))
-  const allYears = data.members.every(
+  // Series columns carry model results only; any other member's column is
+  // empty.
+  const members = data.members.map((m) =>
+    hasModelResults(m) ? m : { ...m, series: [], waterYears: [] },
+  )
+  const maxLen = Math.max(...members.map((m) => m.series.length))
+  const allYears = members.every(
     (m) => m.waterYears && m.waterYears.length === m.series.length,
   )
   if (allYears && maxLen > 0) {
@@ -158,15 +170,15 @@ export function dataInDepthToCSV(
     // blank cell where a member lacks that year, so a row's label is
     // correct for every column.
     const years = Array.from(
-      new Set(data.members.flatMap((m) => m.waterYears!)),
+      new Set(members.flatMap((m) => m.waterYears!)),
     ).sort((a, b) => a - b)
-    const byYear = data.members.map(
+    const byYear = members.map(
       (m) => new Map(m.waterYears!.map((y, i) => [y, m.series[i]])),
     )
     lines.push("")
     lines.push(
       [data.yearBasis === "calendar" ? "Calendar year" : "Water year"]
-        .concat(data.members.map((m) => csvEscape(m.label)))
+        .concat(members.map((m) => csvEscape(m.label)))
         .join(","),
     )
     for (const year of years) {
@@ -182,19 +194,17 @@ export function dataInDepthToCSV(
       )
     }
   } else if (maxLen > 0) {
-    // At least one member has no year labels (sample data), so a shared
+    // At least one member has no year labels (an older capture), so a shared
     // year axis does not exist; fall back to a 1-based index.
     lines.push("")
     lines.push(
-      ["Year index"]
-        .concat(data.members.map((m) => csvEscape(m.label)))
-        .join(","),
+      ["Year index"].concat(members.map((m) => csvEscape(m.label))).join(","),
     )
     for (let row = 0; row < maxLen; row++) {
       lines.push(
         [String(row + 1)]
           .concat(
-            data.members.map((m) =>
+            members.map((m) =>
               m.series[row] == null ? "" : num(m.series[row]!),
             ),
           )

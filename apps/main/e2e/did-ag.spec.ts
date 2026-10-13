@@ -151,11 +151,7 @@ test("ag variables fetch their per-variable measures and go live", async ({
   // Deliveries: the default pinned location is the group's first entry
   // (All North of Delta) -> subject NOD_Agriculture, measure net_diversion.
   await agList.getByRole("button", { name: "Surface water deliveries" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -176,11 +172,7 @@ test("ag variables fetch their per-variable measures and go live", async ({
     .filter({ hasText: "All North of Delta" })
     .click()
   await page.getByRole("option", { name: "All South of Delta" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -194,11 +186,7 @@ test("ag variables fetch their per-variable measures and go live", async ({
   // Pumping: the SAME endpoint serves a different measure for this variable,
   // and the location pin persists per group.
   await agList.getByRole("button", { name: "Groundwater pumping" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -243,11 +231,7 @@ test("ag shortage derives its percent-of-demand view from two served measures", 
 
   // Volume view first: one measure, the served shortage series in TAF.
   await agList.getByRole("button", { name: "Water shortage" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -262,11 +246,7 @@ test("ag shortage derives its percent-of-demand view from two served measures", 
   // Percent view: BOTH measures in one request, and the rendered value is the
   // derived percent, not either input.
   await page.getByRole("button", { name: "% of demand", exact: true }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -303,11 +283,7 @@ test("ag demand units are pickable and fetch their own subject", async ({
     .getByRole("list")
     .filter({ has: page.getByRole("button", { name: "Groundwater pumping" }) })
   await agList.getByRole("button", { name: "Surface water deliveries" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // The pin is a grouped select: aggregates, then North of Delta, then
   // South of Delta. Pick a North of Delta demand unit.
@@ -325,11 +301,7 @@ test("ag demand units are pickable and fetch their own subject", async ({
   await listbox
     .getByRole("option", { name: "08N_SA2 - Glenn-Colusa ID (55% of total)" })
     .click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -396,11 +368,7 @@ test("gross crop revenues reads the revenue measure and displays millions of dol
     .getByRole("list")
     .filter({ has: page.getByRole("button", { name: "Groundwater pumping" }) })
   await agList.getByRole("button", { name: "Gross crop revenues" }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(

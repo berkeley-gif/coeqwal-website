@@ -103,6 +103,7 @@ export default function ChartCard() {
     isLive: m.isLive,
     liveDataMissing: m.liveDataMissing,
     pending: m.pending,
+    loadFailed: m.loadFailed,
   }))
 
   const ctx: SummaryContext = {
@@ -122,20 +123,19 @@ export default function ChartCard() {
   const yLabel = axisLabelFor(data.variable, data.view, data.unit)
   const hasMembers = data.members.length > 0
 
-  // Members whose scenario is not modeled for this variable keep their legend
-  // entry (with a "no data" chip and an explanation) but are NOT drawn. Their
-  // series exists only because the sample engine always produces one, and
-  // drawing it would put a fabricated curve on a chart labeled "Live data".
-  // A member whose live request is still in flight is held back the same
-  // way (legend chip "loading") so the stand-in never shows, even briefly.
+  // Only members carrying served model results are drawn. A member that is
+  // not modeled for this variable ("no data"), still loading ("loading"), or
+  // whose request failed ("could not load") keeps its legend entry with a
+  // chip but never draws: its series is the sample engine's stand-in.
   // Colors are positional, so the subset carries its own aligned colors.
   const plotted = data.members
     .map((m, i) => ({ member: m, color: memberColors[i] ?? "" }))
-    .filter((p) => !p.member.liveDataMissing && !p.member.pending)
+    .filter((p) => p.member.isLive === true)
   const plottedMembers = plotted.map((p) => p.member)
   const plottedColors = plotted.map((p) => p.color)
   const hasPlotted = plottedMembers.length > 0
   const anyPending = data.members.some((m) => m.pending)
+  const anyFailed = data.members.some((m) => m.loadFailed)
   const missingMembers = data.members.filter((m) => m.liveDataMissing)
   // One visible line, in addition to the per-curve chip, whenever a compared
   // member is not modeled for this variable and the chart still draws others.
@@ -186,6 +186,26 @@ export default function ChartCard() {
         }}
       >
         <Typography variant="body2">Loading model results.</Typography>
+      </Box>
+    )
+  } else if (!hasPlotted && anyFailed) {
+    // A request failed: say so, rather than reporting the scenario as not
+    // modeled for this variable.
+    chart = (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: CHART_HEIGHT,
+          color: theme.palette.grey[600],
+          px: 3,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="body2">
+          Model results could not be loaded. Try again in a moment.
+        </Typography>
       </Box>
     )
   } else if (!hasMembers || !hasPlotted) {
@@ -280,15 +300,18 @@ export default function ChartCard() {
     )
   }
 
-  // What the chart area shows: model results, a loading note, a no-data
-  // note, or a reason the view does not apply. Exposed for tests.
+  // What the chart area shows: model results, a loading note, a load-error
+  // note, a no-data note, or a reason the view does not apply. Exposed for
+  // tests.
   const chartState = data.unavailableReason
     ? "unavailable"
     : hasPlotted
       ? "drawn"
       : anyPending
         ? "loading"
-        : "no-data"
+        : anyFailed
+          ? "error"
+          : "no-data"
 
   return (
     <Box
@@ -423,12 +446,18 @@ export default function ChartCard() {
                   reference
                 </Box>
               )}
-              {/* Per-curve state: still loading, or no model results to show
-                  (the site never draws a stand-in). */}
+              {/* Per-curve state: still loading, failed to load, or no model
+                  results to show (the site never draws a stand-in). */}
               {m.pending ? (
                 <Tooltip title="Waiting for model results for this series.">
                   <Box component="span" sx={memberChipSx}>
                     loading
+                  </Box>
+                </Tooltip>
+              ) : m.loadFailed ? (
+                <Tooltip title="Model results for this series could not be loaded.">
+                  <Box component="span" sx={memberChipSx}>
+                    could not load
                   </Box>
                 </Tooltip>
               ) : m.liveDataMissing ? (

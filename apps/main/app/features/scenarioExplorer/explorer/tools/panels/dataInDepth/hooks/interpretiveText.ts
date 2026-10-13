@@ -51,11 +51,20 @@ export interface SummaryMember {
   /** True while the member's live request is still in flight; its series is
    *  a stand-in and must not be quoted either. */
   pending?: boolean
+  /** True when the member's request failed; its series is a stand-in and
+   *  must not be quoted. */
+  loadFailed?: boolean
 }
 
 /** A member whose series is real enough to put a number in a sentence. */
 function hasUsableSeries(m: SummaryMember): boolean {
-  return !m.liveDataMissing && !m.pending && !!m.series && m.series.length > 0
+  return (
+    !m.liveDataMissing &&
+    !m.pending &&
+    !m.loadFailed &&
+    !!m.series &&
+    m.series.length > 0
+  )
 }
 
 export interface SummaryContext {

@@ -175,11 +175,7 @@ test("a scenario with no served block is detected from its response, not its id"
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // Add the Delta Conveyance Project scenario to the comparison. The chart
   // now holds one scenario the endpoint serves and one it does not.
@@ -256,11 +252,7 @@ test("switching the workspace hydroclimate keeps the scenarios axis live", async
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await page
     .getByLabel("Select Delta Conveyance Project scenario")
     .check({ timeout: 10_000 })
@@ -285,11 +277,7 @@ test("switching the workspace hydroclimate keeps the scenarios axis live", async
     .poll(() => requestedScenarios.some((s) => s.includes("s0157")))
     .toBe(true)
 
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect(page.getByText(/^Sample data$/)).toHaveCount(0)
   await expect(page.getByText("sample", { exact: true })).toHaveCount(0)
   await expect(page.getByText("no data", { exact: true })).toHaveCount(1)
@@ -331,11 +319,7 @@ test("a member whose live request is still in flight is shown as loading, not dr
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
-  await expect(
-    page.locator(
-      '[data-did-chart-state="drawn"], [data-did-chart-state="no-data"]',
-    ),
-  ).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   await page
     .getByLabel("Select Delta Conveyance Project scenario")
