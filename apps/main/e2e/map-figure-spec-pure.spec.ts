@@ -140,6 +140,7 @@ test("Distribution describes its painted markers, not the current controls", () 
       scenarioId: "s0020",
       hydroclimate: "ecv",
       comparedWithBaseline: true,
+      locationKeys: ["CWS_DEL:02_PU", "AG_REV:WBA_10"],
     },
     scenarios: SCENARIOS,
   }

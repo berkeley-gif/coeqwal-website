@@ -28,7 +28,12 @@ import {
 import { TierGrid, type TierGridProps } from "@repo/viz"
 import { useWorkspaceSlice, useEquitySlice } from "../../../store"
 import { BASELINE_SCENARIO_ID } from "../../../../constants"
-import { mapActions, useMapStore } from "../../../../../map/store"
+import {
+  getDistributionPaintKey,
+  mapActions,
+  useMapStore,
+  type DistributionMapSnapshot,
+} from "../../../../../map/store"
 import { getTierColorsFromTheme } from "../../../../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../../../../map/config/outcomeLocations"
 import { useEquityObjectives } from "./useEquityObjectives"
@@ -909,15 +914,17 @@ export default function EquityPanel({
       // Tell the map caption what the painted markers show: their outcomes,
       // and the scenario, hydroclimate and comparison mode they were built
       // from (objectives always belong to the current focus scenario).
+      const paintedObjectives = objectivesToShow.filter(
+        (_, i) => markerElements[i] !== null,
+      )
       const paintedCodes = Array.from(
         new Set(
-          objectivesToShow
-            .filter((_, i) => markerElements[i] !== null)
+          paintedObjectives
             .map((obj) => obj.tierCode)
             .filter((c): c is string => Boolean(c)),
         ),
       )
-      mapActions.setDistributionMapSnapshot(
+      const snapshot: DistributionMapSnapshot | null =
         paintedCodes.length > 0
           ? {
               outcomeCodes: paintedCodes,
@@ -930,9 +937,15 @@ export default function EquityPanel({
                 paintedCodes.every((code) =>
                   markerSourceRef.current.baselineCodes.includes(code),
                 ),
+              locationKeys: paintedObjectives.map(
+                (obj) => `${obj.tierCode}:${obj.locationId}`,
+              ),
             }
-          : null,
-      )
+          : null
+      mapActions.setDistributionMapSnapshot(snapshot)
+      // Report the paint, so saving the map waits for these markers.
+      if (snapshot) mapActions.markMapPainted(getDistributionPaintKey(snapshot))
+      else mapActions.clearMapPainted()
 
       // Set markers on the map
       setMotionChildren?.(<>{markerElements}</>)
