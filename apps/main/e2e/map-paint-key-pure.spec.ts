@@ -20,24 +20,37 @@ test("distribution keys on painted locations, focus and comparison", () => {
     mode: "equity",
     mappedLocationKeys: ["CWS_DEL:A1", "ENV_FLOWS:B2"],
     focusScenario: "s0020",
+    hydroclimate: "historical",
     compared: false,
   })
-  expect(a).toBe("equity|CWS_DEL:A1~ENV_FLOWS:B2|s0020|0")
+  expect(a).toBe("equity|CWS_DEL:A1~ENV_FLOWS:B2|s0020|historical|0")
   // Order does not matter; comparison does.
   expect(
     mapPaintKey({
       mode: "equity",
       mappedLocationKeys: ["ENV_FLOWS:B2", "CWS_DEL:A1"],
       focusScenario: "s0020",
+      hydroclimate: "historical",
       compared: true,
     }),
-  ).toBe("equity|CWS_DEL:A1~ENV_FLOWS:B2|s0020|1")
+  ).toBe("equity|CWS_DEL:A1~ENV_FLOWS:B2|s0020|historical|1")
   // Swapping one location for another of the same outcome changes the key.
   expect(
     mapPaintKey({
       mode: "equity",
       mappedLocationKeys: ["CWS_DEL:A9", "ENV_FLOWS:B2"],
       focusScenario: "s0020",
+      hydroclimate: "historical",
+      compared: false,
+    }),
+  ).not.toBe(a)
+  // The same markers under another hydroclimate carry other tiers.
+  expect(
+    mapPaintKey({
+      mode: "equity",
+      mappedLocationKeys: ["CWS_DEL:A1", "ENV_FLOWS:B2"],
+      focusScenario: "s0020",
+      hydroclimate: "cc95",
       compared: false,
     }),
   ).not.toBe(a)

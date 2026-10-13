@@ -30,14 +30,19 @@ export function encodeMapToken(item: MapItemFields): string {
   ].join(".")
 }
 
+/** Explore tools that save maps; a link naming any other tool is dropped */
+const MAP_TOOLS: readonly string[] = ["bar", "radar", "equity", "resilience"]
+
 export function decodeMapToken(parts: string[]): MapItemFields | null {
   const outcomeCodes = (parts[0] ?? "").split("~").filter(Boolean)
   if (outcomeCodes.length === 0) return null
+  const tool = parts[3] || "bar"
+  if (!MAP_TOOLS.includes(tool)) return null
   return {
     outcomeCodes,
     scenarioId: parts[1] ?? "",
     hydroclimate: parts[2] || "historical",
-    tool: parts[3] || "bar",
+    tool,
     comparedWithBaseline: parts[4] === "1",
   }
 }

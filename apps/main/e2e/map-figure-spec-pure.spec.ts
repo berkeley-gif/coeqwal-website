@@ -208,7 +208,7 @@ test("a saved Distribution map carries its painted snapshot", () => {
     scenarios: SCENARIOS,
   })
   expect(request).toMatchObject({
-    key: "equity|CWS_DEL:02_PU|s9999|1",
+    key: "equity|CWS_DEL:02_PU|s9999|cc95|1",
     tool: "equity",
     outcomeCodes: ["CWS_DEL"],
     scenarioId: "s9999",

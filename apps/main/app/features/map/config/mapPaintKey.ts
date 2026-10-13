@@ -12,6 +12,8 @@ export interface MapPaintKeyInput {
   /** Distribution: painted `tierCode:locationId` keys */
   mappedLocationKeys?: string[]
   focusScenario?: string | null
+  /** Distribution: hydroclimate the markers' tiers were built under */
+  hydroclimate?: string | null
   compared?: boolean
 }
 
@@ -19,7 +21,7 @@ export function mapPaintKey(input: MapPaintKeyInput): string {
   if (input.mode === "equity") {
     const keys = [...(input.mappedLocationKeys ?? [])].sort()
     if (keys.length === 0) return ""
-    return `equity|${keys.join("~")}|${input.focusScenario ?? ""}|${input.compared ? 1 : 0}`
+    return `equity|${keys.join("~")}|${input.focusScenario ?? ""}|${input.hydroclimate ?? ""}|${input.compared ? 1 : 0}`
   }
   if (!input.outcomeCode) return ""
   return `tiers|${input.outcomeCode}|${input.scenarioId ?? ""}`
@@ -29,6 +31,7 @@ export function mapPaintKey(input: MapPaintKeyInput): string {
 export interface DistributionPaintSource {
   locationKeys: string[]
   scenarioId: string
+  hydroclimate: string
   comparedWithBaseline: boolean
 }
 
@@ -42,6 +45,7 @@ export function getDistributionPaintKey(
         mode: "equity",
         mappedLocationKeys: snapshot.locationKeys,
         focusScenario: snapshot.scenarioId,
+        hydroclimate: snapshot.hydroclimate,
         compared: snapshot.comparedWithBaseline,
       })
     : ""

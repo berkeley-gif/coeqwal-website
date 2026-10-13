@@ -95,6 +95,9 @@ test("map token round-trips everything but the image", () => {
     comparedWithBaseline: true,
   })
   expect(decodeMapToken(["", "s0020"])).toBeNull()
+  // A link naming an unknown tool is dropped, prototype keys included.
+  expect(decodeMapToken(["ENV_FLOWS", "s0020", "", "__proto__", ""])).toBeNull()
+  expect(decodeMapToken(["ENV_FLOWS", "s0020", "", "data", ""])).toBeNull()
 })
 
 test("url prefixes stay unique across variant handlers (source guard)", () => {

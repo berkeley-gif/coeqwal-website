@@ -57,7 +57,10 @@ export function mapFigureSpec(
     : undefined
   return {
     toolLabel: "Map",
-    chartKindLabel: MAP_TOOL_LABELS[input.mode] ?? "Map",
+    // Own-property lookup: a mode from a share link is untrusted text.
+    chartKindLabel: Object.hasOwn(MAP_TOOL_LABELS, input.mode)
+      ? (MAP_TOOL_LABELS[input.mode] ?? "Map")
+      : "Map",
     values: {
       outcome: input.outcomeNames.join(", "),
       strategy,

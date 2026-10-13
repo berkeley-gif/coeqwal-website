@@ -148,13 +148,16 @@ export default function VisualizationLayers({
     (usesMapboxLayers
       ? featureCount > 0
       : !assignmentsLoading && tierLocations.length > 0)
+  // The data object drawn; a new one (even with the same counts) is a new
+  // paint, so a save in flight across a refresh is voided.
+  const paintedData = usesMapboxLayers ? tierColorMap : assignmentsData
   useEffect(() => {
     if (painted && outcomeCode) {
       mapActions.markMapPainted(
         mapPaintKey({ mode: "tiers", outcomeCode, scenarioId }),
       )
     }
-  }, [painted, outcomeCode, scenarioId])
+  }, [painted, outcomeCode, scenarioId, paintedData])
   const tierCode: string | null = useMemo(
     () =>
       shouldFetchAssignments && assignmentsData
