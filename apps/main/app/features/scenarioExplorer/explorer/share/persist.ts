@@ -141,16 +141,18 @@ export function loadShareState(): {
 export function saveShareState(
   shareItems: ShareItem[],
   storyItemIds: string[],
-): void {
+): boolean {
   try {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined") return true
     const envelope: ShareEnvelope = {
       version: SHARE_STORAGE_VERSION,
       shareItems: shareItems.map(toPersisted),
       storyItemIds,
     }
     localStorage.setItem(SHARE_STORAGE_KEY, JSON.stringify(envelope))
+    return true
   } catch {
-    // localStorage full or unavailable, silently ignore.
+    // localStorage full or unavailable: report it so the UI can warn.
+    return false
   }
 }

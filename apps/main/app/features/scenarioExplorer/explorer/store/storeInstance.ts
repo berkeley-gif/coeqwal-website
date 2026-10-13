@@ -69,7 +69,12 @@ useExplorerStore.subscribe((state) => {
   ) {
     prevShareRef = state.shareItems
     prevStoryRef = state.storyItemIds
-    saveShareState(state.shareItems, state.storyItemIds)
+    const saved = saveShareState(state.shareItems, state.storyItemIds)
+    // Setting the flag re-runs this subscriber, but shareItems and
+    // storyItemIds are unchanged by then, so the guard above stops it.
+    if (saved === state.sharePersistFailed) {
+      useExplorerStore.getState().setSharePersistFailed(!saved)
+    }
   }
 })
 
