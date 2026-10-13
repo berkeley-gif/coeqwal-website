@@ -95,6 +95,9 @@ test("distribution's map caption describes its painted markers", async ({
   await page
     .getByRole("button", { name: "Moderate climate stress", exact: true })
     .click()
+  // Let the new hydroclimate's tier data arrive and the grid repaint
+  // before checking: the reopen came from that repaint.
+  await page.waitForLoadState("networkidle")
   await expect(dots.first()).toBeVisible()
   await expect(showMap).not.toBeChecked()
   await expect(caption).toHaveCount(0)
