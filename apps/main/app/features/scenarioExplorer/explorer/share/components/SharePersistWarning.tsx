@@ -26,9 +26,9 @@ export default function SharePersistWarning() {
         borderRadius: theme.borderRadius.sm,
       }}
     >
-      This browser could not save your share tray, so it will be lost on
-      reload. The usual cause is a full tray: remove some cards, especially
-      maps, then try again.
+      This browser could not save your share tray, so it will be lost on reload.
+      The usual cause is a full tray: remove some cards, especially maps, then
+      try again.
     </Typography>
   )
 }
