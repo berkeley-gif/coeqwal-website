@@ -32,5 +32,11 @@ export function thumbnailAspectRatioFor(item: ShareItem): number {
         : CAPTURE_DIMENSIONS.resilienceTile
     return size.width / size.height
   }
+  if (item.type === "map") {
+    return (
+      item.imageAspect ??
+      CAPTURE_DIMENSIONS.map.width / CAPTURE_DIMENSIONS.map.height
+    )
+  }
   return 1
 }

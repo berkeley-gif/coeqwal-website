@@ -28,7 +28,12 @@ import {
 import { TierGrid, type TierGridProps } from "@repo/viz"
 import { useWorkspaceSlice, useEquitySlice } from "../../../store"
 import { BASELINE_SCENARIO_ID } from "../../../../constants"
-import { mapActions, useMapStore } from "../../../../../map/store"
+import {
+  mapActions,
+  useMapStore,
+  type DistributionMapSnapshot,
+} from "../../../../../map/store"
+import { getDistributionPaintKey } from "../../../../../map/config/mapPaintKey"
 import { getTierColorsFromTheme } from "../../../../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../../../../map/config/outcomeLocations"
 import { useEquityObjectives } from "./useEquityObjectives"
@@ -318,6 +323,18 @@ export default function EquityPanel({
 }) {
   const theme = useTheme()
   const { mapRef, setMotionChildren, motionChildren } = useMap()
+  // Paint key of markers handed to the map but not yet reported painted.
+  const pendingPaintKeyRef = useRef<string | null>(null)
+  // The markers are committed with the motionChildren update; report the
+  // paint a frame later, once every effect of that commit (the Mapbox
+  // Marker attachments) has run.
+  useEffect(() => {
+    const key = pendingPaintKeyRef.current
+    if (!key || motionChildren === null) return
+    pendingPaintKeyRef.current = null
+    const frame = requestAnimationFrame(() => mapActions.markMapPainted(key))
+    return () => cancelAnimationFrame(frame)
+  }, [motionChildren])
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
 
   // The Distribution (equity) tool uses its own focus field rather
@@ -909,15 +926,17 @@ export default function EquityPanel({
       // Tell the map caption what the painted markers show: their outcomes,
       // and the scenario, hydroclimate and comparison mode they were built
       // from (objectives always belong to the current focus scenario).
+      const paintedObjectives = objectivesToShow.filter(
+        (_, i) => markerElements[i] !== null,
+      )
       const paintedCodes = Array.from(
         new Set(
-          objectivesToShow
-            .filter((_, i) => markerElements[i] !== null)
+          paintedObjectives
             .map((obj) => obj.tierCode)
             .filter((c): c is string => Boolean(c)),
         ),
       )
-      mapActions.setDistributionMapSnapshot(
+      const snapshot: DistributionMapSnapshot | null =
         paintedCodes.length > 0
           ? {
               outcomeCodes: paintedCodes,
@@ -930,9 +949,22 @@ export default function EquityPanel({
                 paintedCodes.every((code) =>
                   markerSourceRef.current.baselineCodes.includes(code),
                 ),
+              // Each painted marker with what decides its color and shape
+              // (tier, and baseline tier for the comparison direction), so
+              // any change to the drawn markers changes the paint key.
+              locationKeys: paintedObjectives.map(
+                (obj) =>
+                  `${obj.tierCode}:${obj.locationId}:${obj.tierLevel}:${obj.baselineTier}`,
+              ),
             }
-          : null,
-      )
+          : null
+      mapActions.setDistributionMapSnapshot(snapshot)
+      // Report the paint once these markers are on the map (see the
+      // effect on motionChildren below), so saving waits for them.
+      pendingPaintKeyRef.current = snapshot
+        ? getDistributionPaintKey(snapshot)
+        : null
+      if (!snapshot) mapActions.clearMapPainted()
 
       // Set markers on the map
       setMotionChildren?.(<>{markerElements}</>)

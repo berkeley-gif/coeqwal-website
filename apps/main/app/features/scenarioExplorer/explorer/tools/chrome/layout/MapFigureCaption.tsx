@@ -3,7 +3,8 @@
 /**
  * MapFigureCaption - the map panel's header: when an outcome is mapped, a
  * compact figure-template card (Outcome, Strategy, Hydroclimate) plus a
- * tier-color legend; otherwise the hydroclimate badge alone, as before.
+ * tier-color legend and a "save map" button that stages the map in the
+ * Share tray; otherwise the hydroclimate badge alone, as before.
  */
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
@@ -12,6 +13,8 @@ import { buildFigureTemplate } from "../../../share/figureTemplate"
 import FigureRows from "../../../share/cards/FigureRows"
 import ShareCardTierLegend from "../../../share/cards/ShareCardTierLegend"
 import { useMapFigureSpec } from "./useMapFigureSpec"
+import { SaveSnapshotButton } from "../actions/SaveSnapshotButton"
+import { useMapShareCapture } from "../../hooks/useMapShareCapture"
 
 export interface MapFigureCaptionProps {
   hydroBadge: { title: string; accentColor: string } | null
@@ -22,6 +25,7 @@ export default function MapFigureCaption({
 }: MapFigureCaptionProps) {
   const theme = useTheme()
   const spec = useMapFigureSpec()
+  const { saveMap, canSave, error, clearError } = useMapShareCapture()
 
   if (!spec) {
     return hydroBadge ? (
@@ -54,8 +58,7 @@ export default function MapFigureCaption({
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
+          alignItems: "center",
           gap: 1,
           mb: 0.5,
         }}
@@ -79,12 +82,49 @@ export default function MapFigureCaption({
             textTransform: "uppercase",
             color: theme.palette.grey[600],
             whiteSpace: "nowrap",
+            ml: "auto",
           }}
         >
           {template.chartKindLabel}
         </Typography>
+        <SaveSnapshotButton
+          label="save map"
+          disabled={!canSave}
+          onClick={() => void saveMap()}
+          // The caption lets pointer input through to the map; the button
+          // opts back in.
+          sx={{ pointerEvents: "auto" }}
+        />
       </Box>
       <FigureRows rows={template.rows} compact />
+      {error && (
+        <Typography
+          role="alert"
+          sx={{
+            mt: 0.5,
+            fontSize: "0.6875rem",
+            color: theme.palette.error.main,
+            pointerEvents: "auto",
+          }}
+        >
+          {error}{" "}
+          <Box
+            component="button"
+            type="button"
+            onClick={clearError}
+            sx={{
+              border: 0,
+              background: "none",
+              color: "inherit",
+              textDecoration: "underline",
+              cursor: "pointer",
+              p: 0,
+            }}
+          >
+            Dismiss
+          </Box>
+        </Typography>
+      )}
       <ShareCardTierLegend sx={{ mt: 0.75 }} />
     </Box>
   )

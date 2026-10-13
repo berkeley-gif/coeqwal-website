@@ -171,6 +171,7 @@ export const WORKSPACE_NON_PERSIST_STATE_KEYS = [
   "shareItems",
   "storyItemIds",
   "shareUrlVersionMismatch",
+  "sharePersistFailed",
 ] as const satisfies readonly (keyof WorkspaceState)[]
 
 const WORKSPACE_ACTION_KEYS = [
@@ -194,6 +195,7 @@ const WORKSPACE_ACTION_KEYS = [
   "setShowShareDrawer",
   "setShareUrlVersionMismatch",
   "dismissShareUrlVersionMismatch",
+  "setSharePersistFailed",
   "addToStory",
   "removeFromStory",
   "reorderStory",

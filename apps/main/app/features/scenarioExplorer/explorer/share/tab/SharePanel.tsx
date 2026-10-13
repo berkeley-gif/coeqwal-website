@@ -18,6 +18,7 @@ import TrayCard, { TRAY_CARD_WIDTH } from "../components/TrayCard"
 import StoryCanvas from "../components/StoryCanvas"
 import ShareExportBar from "../components/ShareExportBar"
 import { GlossaryTermLink } from "../../../../glossary"
+import SharePersistWarning from "../components/SharePersistWarning"
 
 /**
  * Per-hydroclimate radar fields for share. See `buildShareRadarLiveDataFields`
@@ -215,6 +216,7 @@ function SharePanelContent() {
         overflow: "hidden",
       }}
     >
+      <SharePersistWarning />
       <ShareDataRehydrationHost
         items={shareItems}
         context={rehydrationContext}

@@ -235,6 +235,9 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
   ] as const) {
     await expect(tiers).toContainText(`${n}${tier}`)
   }
+  // Offline the Mapbox style never loads, so the map never becomes ready
+  // and the save button stays disabled.
+  await expect(caption.getByRole("button", { name: "save map" })).toBeDisabled()
   // A hydroclimate switch with the caption up: the map re-resolves to the
   // historical variant and the caption follows it.
   await page.getByRole("button", { name: "Historical", exact: true }).click()

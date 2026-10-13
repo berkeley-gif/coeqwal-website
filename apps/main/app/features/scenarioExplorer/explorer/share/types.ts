@@ -154,6 +154,24 @@ export type ShareItem =
       /** Stats plots: panel headings, left to right */
       panelHeadings?: string[]
     })
+  | (ShareItemBaseFields & {
+      type: "map"
+      /** Explore tool the map was saved from ("bar", "radar", "equity",
+       *  "resilience") */
+      tool: string
+      /** Outcome codes painted on the map */
+      outcomeCodes: string[]
+      /** Sibling-group id of the mapped scenario; "" when unknown */
+      scenarioId: string
+      /** Strategy label the map caption showed (absent on URL-restored
+       *  items, which fall back to local scenario metadata) */
+      scenarioLabel?: string
+      hydroclimate: string
+      /** Distribution comparison mode at capture */
+      comparedWithBaseline: boolean
+      /** Width over height of the saved image */
+      imageAspect?: number
+    })
 
 /**
  * On-disk shape of a share item. Currently the same as `ShareItem`:
