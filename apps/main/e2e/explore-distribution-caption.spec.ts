@@ -109,16 +109,19 @@ test("distribution's map caption describes its painted markers", async ({
   expect(heldBaseline).toBeGreaterThan(0)
   await expect(markers).toHaveCount(1)
   await expect(caption.getByText(STRATEGY, { exact: true })).toBeVisible()
+  const directionKey = page.getByRole("group", {
+    name: "Comparison marker legend",
+  })
+  await expect(directionKey).toHaveCount(0)
   holdBaseline = false
   releaseBaseline()
   await expect(caption).toContainText(
     `${STRATEGY}, Compared with Current Operations`,
   )
-  await expect(
-    page.getByRole("group", { name: "Comparison marker legend" }),
-  ).toBeVisible()
+  await expect(directionKey).toBeVisible()
   await page.getByRole("button", { name: "Compare to Baseline" }).click()
   await expect(caption).not.toContainText("Compared with")
+  await expect(directionKey).toHaveCount(0)
 
   // Closing the map hides the caption; a hydroclimate change while it is
   // closed must not reopen it.

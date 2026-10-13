@@ -13,12 +13,11 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import { Box, useTheme, DragIndicatorIcon } from "@repo/ui/mui"
+import { useWorkspaceSlice, isMapPairedMode } from "../../../store"
 import {
-  useWorkspaceSlice,
-  useEquitySlice,
-  isMapPairedMode,
-} from "../../../store"
-import { mapActions } from "../../../../../map/store"
+  mapActions,
+  useDistributionMapSnapshot,
+} from "../../../../../map/store"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import ToolJourneyStrip from "./ToolJourneyStrip"
 import MapFigureCaption from "./MapFigureCaption"
@@ -53,7 +52,7 @@ export default function UnifiedToolView({
   const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
   const showKeyOperations = useWorkspaceSlice((s) => s.showKeyOperations)
   const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
-  const showEquityComparison = useEquitySlice((s) => s.showEquityComparison)
+  const distributionSnapshot = useDistributionMapSnapshot()
 
   const mapHydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
@@ -63,8 +62,13 @@ export default function UnifiedToolView({
 
   // Distribution's comparison-mode pins use triangle-up/square/triangle-down
   // to encode improved/no-change/worsened (see EquityPanel's handleShowOnMap).
+  // The key follows the painted markers: it shows once markers carry a
+  // comparison, not while the baseline is still loading or nothing is
+  // selected.
   const showComparisonLegend =
-    mapActive && exploreMode === "equity" && showEquityComparison
+    mapActive &&
+    exploreMode === "equity" &&
+    !!distributionSnapshot?.comparedWithBaseline
 
   const sidebarWidth =
     sidebarWidthOverride ??
