@@ -73,7 +73,6 @@ import {
   shortagePctOfDemand,
   gwLevelFromStorage,
   mockAnnualSeries,
-  mockMonthlyBands,
   mockWaterYearType,
   seriesStats,
   type MonthlyBand,
@@ -134,7 +133,8 @@ export interface VariableMember {
   loadFailed?: boolean
   /** Summary stats of `series` */
   stats: SeriesStats
-  /** Monthly p10/p50/p90 bands (populated only for the "monthly" view) */
+  /** Monthly p10/p50/p90 bands. Always empty: no monthly bands are served,
+   *  and the site never shows the sample engine's bands. */
   bands: MonthlyBand[]
   /** Single value for the "cv" and "value" views */
   value: number
@@ -183,7 +183,7 @@ interface MemberSpec {
   /** Index into the per-scenario live fan-out slots (every axis) */
   slotIndex?: number
   /** Locations axis: this member's subject in the shared block, the SSJV
-   *  route list for the synthetic total, or null when unmapped (sample). */
+   *  route list for the synthetic total, or null when unmapped (no data). */
   subject?: string | readonly string[] | null
 }
 
@@ -318,8 +318,8 @@ export function useVariableData(): VariableData {
   // scenario's variant under the held climate. Climates axis: the held
   // scenario through every compared climate, one variant id per member. A
   // climate whose scenario list has not loaded, or a scenario with no variant
-  // under it, yields null, which keeps that member on labeled sample data
-  // rather than borrowing another climate's series.
+  // under it, yields null, which leaves that member without data (or
+  // loading) rather than borrowing another climate's series.
   const resolvedAll = useResolvedIdMappings()
   const heldMapping = resolvedAll[heldClimate]?.idMapping
   // Every climate's mapping comes from the one scenario list: while it is
@@ -684,8 +684,8 @@ export function useVariableData(): VariableData {
           return range ? trimPointsToYearRange(p, range) : p
         }
         // The synthetic SSJV total sums the three served route series,
-        // FAIL-CLOSED: a null sum (missing route, misaligned years) falls
-        // back to sample labeling, never a partial total.
+        // FAIL-CLOSED: a null sum (missing route, misaligned years) reads as
+        // no data, never a partial total.
         const points =
           memberSubject == null
             ? null
@@ -697,7 +697,7 @@ export function useVariableData(): VariableData {
         // The ag percent-of-demand view has no served percent measure, so it
         // is derived from the primary shortage series and the companion
         // net_diversion series in the SAME response block. If either is
-        // missing the member falls back to sample data rather than showing a
+        // missing the member reads as no data rather than showing a
         // half-derived number.
         if (isPctDemand && companionTokens.length > 0 && memberSingle) {
           const companion = pick(
@@ -740,15 +740,7 @@ export function useVariableData(): VariableData {
       }
 
       const stats = seriesStats(series)
-      const bands =
-        view === "monthly"
-          ? mockMonthlyBands(
-              variable.id,
-              spec.scenarioId,
-              spec.climateKey,
-              spec.locationId,
-            )
-          : []
+      const bands: MonthlyBand[] = []
       // Summary values come from the member's own series (the "value" view
       // is retired, and a sample value would never be shown anyway).
       const value: number = view === "cv" ? stats.cv : stats.p50

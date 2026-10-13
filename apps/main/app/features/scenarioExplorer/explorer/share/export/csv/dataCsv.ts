@@ -117,7 +117,8 @@ export function dataInDepthToCSV(
     // A member without model results (not modeled for this variable, failed
     // to load, or a stand-in series) keeps its labeled row so the reader can
     // see it WAS compared, but every statistic is blank: exporting its
-    // numbers would hand the reader fabricated values.
+    // numbers would hand the reader fabricated values. A failed load says so,
+    // so a transient outage is not read as "not modeled".
     if (!hasModelResults(m)) {
       lines.push(
         [
@@ -131,7 +132,7 @@ export function dataInDepthToCSV(
           "",
           "",
           "",
-          "No data",
+          m.loadFailed ? "Could not load" : "No data",
         ].join(","),
       )
       continue

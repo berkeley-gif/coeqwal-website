@@ -229,7 +229,7 @@ test("dataInDepthToCSV blanks a member whose request failed", () => {
     }),
     { variantTitle: "Data in depth" },
   )
-  expect(csv).toContain("Failed one,,,,,,,,,,No data")
+  expect(csv).toContain("Failed one,,,,,,,,,,Could not load")
 })
 
 test("dataInDepthToCSV falls back to year index labels without waterYears", () => {
