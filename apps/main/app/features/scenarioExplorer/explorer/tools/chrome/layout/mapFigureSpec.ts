@@ -147,6 +147,8 @@ export interface MapSaveRequest {
   outcomeCodes: string[]
   /** Sibling-group id of the drawn scenario; "" when unknown */
   scenarioId: string
+  /** Strategy label the caption shows; null when unknown */
+  scenarioLabel: string | null
   /** Hydroclimate value of the drawn data; null when unknown (no save) */
   hydroclimate: string | null
   comparedWithBaseline: boolean
@@ -155,7 +157,8 @@ export interface MapSaveRequest {
 
 /** Save request for what the map draws. Pure. */
 export function getMapSaveRequest(state: MapFigureState): MapSaveRequest {
-  const spec = mapFigureSpec(getMapFigureInput(state))
+  const input = getMapFigureInput(state)
+  const spec = mapFigureSpec(input)
   const captionText = spec
     ? buildFigureTemplate(spec)
         .rows.map((r) => r.value)
@@ -168,6 +171,7 @@ export function getMapSaveRequest(state: MapFigureState): MapSaveRequest {
       tool: state.mode,
       outcomeCodes: d?.outcomeCodes ?? [],
       scenarioId: d?.scenarioId ?? "",
+      scenarioLabel: input.scenarioLabel,
       hydroclimate: d?.hydroclimate ?? null,
       comparedWithBaseline: d?.comparedWithBaseline ?? false,
       captionText,
@@ -186,6 +190,7 @@ export function getMapSaveRequest(state: MapFigureState): MapSaveRequest {
     tool: state.mode,
     outcomeCodes: active ? [active.outcomeCode] : [],
     scenarioId: active?.siblingGroupId ?? active?.scenarioId ?? "",
+    scenarioLabel: input.scenarioLabel,
     hydroclimate: variant
       ? (HYDROCLIMATE_LABEL_MAP[variant.hydroclimateId] ?? null)
       : null,

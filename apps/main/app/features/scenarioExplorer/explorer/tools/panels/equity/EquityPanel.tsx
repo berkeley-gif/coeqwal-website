@@ -323,6 +323,18 @@ export default function EquityPanel({
 }) {
   const theme = useTheme()
   const { mapRef, setMotionChildren, motionChildren } = useMap()
+  // Paint key of markers handed to the map but not yet reported painted.
+  const pendingPaintKeyRef = useRef<string | null>(null)
+  // The markers are committed with the motionChildren update; report the
+  // paint a frame later, once every effect of that commit (the Mapbox
+  // Marker attachments) has run.
+  useEffect(() => {
+    const key = pendingPaintKeyRef.current
+    if (!key || motionChildren === null) return
+    pendingPaintKeyRef.current = null
+    const frame = requestAnimationFrame(() => mapActions.markMapPainted(key))
+    return () => cancelAnimationFrame(frame)
+  }, [motionChildren])
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
 
   // The Distribution (equity) tool uses its own focus field rather
@@ -943,9 +955,12 @@ export default function EquityPanel({
             }
           : null
       mapActions.setDistributionMapSnapshot(snapshot)
-      // Report the paint, so saving the map waits for these markers.
-      if (snapshot) mapActions.markMapPainted(getDistributionPaintKey(snapshot))
-      else mapActions.clearMapPainted()
+      // Report the paint once these markers are on the map (see the
+      // effect on motionChildren below), so saving waits for them.
+      pendingPaintKeyRef.current = snapshot
+        ? getDistributionPaintKey(snapshot)
+        : null
+      if (!snapshot) mapActions.clearMapPainted()
 
       // Set markers on the map
       setMotionChildren?.(<>{markerElements}</>)

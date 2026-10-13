@@ -169,6 +169,7 @@ test("a saved map carries what the caption says, for the drawn variant", () => {
     tool: "bar",
     outcomeCodes: ["CWS_DEL"],
     scenarioId: "s0020",
+    scenarioLabel: "Current operations",
     hydroclimate: "ecv",
     comparedWithBaseline: false,
     captionText:
@@ -211,6 +212,9 @@ test("a saved Distribution map carries its painted snapshot", () => {
     tool: "equity",
     outcomeCodes: ["CWS_DEL"],
     scenarioId: "s9999",
+    // A scenario without local metadata keeps the API label it was shown
+    // with, so the saved card names it the same way.
+    scenarioLabel: "A strategy",
     hydroclimate: "cc95",
     comparedWithBaseline: true,
   })

@@ -88,23 +88,27 @@ export function useMapShareCapture(): {
     setSaving(true)
     try {
       const image = await captureMapImage(map, panel, request.captionText)
-      const after = readMapRequest(scenarios)
+      // Anything that changed during the capture (paint, tool, outcome,
+      // strategy, hydroclimate, comparison) voids it.
       if (
         useMapStore.getState().paintRevision !== revisionAtStart ||
         useMapStore.getState().paintedVisualization?.key !==
           paintedAtStart.key ||
-        after.key !== request.key ||
-        after.captionText !== request.captionText
+        JSON.stringify(readMapRequest(scenarios)) !== JSON.stringify(request)
       ) {
         throw new Error("the map changed while saving; try again")
       }
       const id = `map-${crypto.randomUUID()}`
+      const drawerWasOpen = useExplorerStore.getState().showShareDrawer
       addShareItem({
         id,
         type: "map",
         tool: request.tool,
         outcomeCodes: request.outcomeCodes,
         scenarioId: request.scenarioId,
+        ...(request.scenarioLabel
+          ? { scenarioLabel: request.scenarioLabel }
+          : {}),
         hydroclimate,
         comparedWithBaseline: request.comparedWithBaseline,
         imageAspect: image.width / image.height,
@@ -116,6 +120,9 @@ export function useMapShareCapture(): {
       // show a card that disappears on reload.
       if (useExplorerStore.getState().sharePersistFailed) {
         useExplorerStore.getState().removeShareItem(id)
+        // Adding opened the drawer over the map; put it back so the error
+        // below the map caption is seen.
+        useExplorerStore.getState().setShowShareDrawer(drawerWasOpen)
         throw new Error(
           "the share tray is full in this browser; remove some cards and try again",
         )

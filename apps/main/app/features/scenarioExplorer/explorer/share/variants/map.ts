@@ -34,9 +34,11 @@ const mapHandler: VariantHandler<MapItem> = {
     const spec = mapFigureSpec({
       mode: item.tool as ExploreMode,
       outcomeNames: item.outcomeCodes.map(getOutcomeName),
-      scenarioLabel: item.scenarioId
-        ? (getScenarioShortLabel(item.scenarioId) ?? item.scenarioId)
-        : null,
+      scenarioLabel:
+        item.scenarioLabel ??
+        (item.scenarioId
+          ? (getScenarioShortLabel(item.scenarioId) ?? item.scenarioId)
+          : null),
       hydroclimateLabel:
         HYDROCLIMATE_SHORT_LABELS[item.hydroclimate] ?? item.hydroclimate,
       comparedWithBaseline: item.comparedWithBaseline,
