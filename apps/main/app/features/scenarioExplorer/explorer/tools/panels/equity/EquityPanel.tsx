@@ -325,18 +325,6 @@ export default function EquityPanel({
   // does not disturb List/Radar/Resilience/Comparison selections.
   const { equityFocusScenario, showMap, setShowMap } = useWorkspaceSlice()
   const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
-  // The scenario and hydroclimate this render's objectives were built for,
-  // read by handleShowOnMap when it publishes the map caption's snapshot.
-  // A ref, not callback dependencies: a dependency would re-run the paint
-  // effect, and handleShowOnMap opens the map.
-  const markerSourceRef = useRef({
-    scenarioId: equityFocusScenario ?? BASELINE_SCENARIO_ID,
-    hydroclimate,
-  })
-  markerSourceRef.current = {
-    scenarioId: equityFocusScenario ?? BASELINE_SCENARIO_ID,
-    hydroclimate,
-  }
   const tourTool = useWorkspaceSlice((s) => s.tour.tool)
   const promptShown = needsScenarioPrompt({
     mode: "equity",
@@ -349,11 +337,25 @@ export default function EquityPanel({
   const { showEquityComparison, yAxisMode, equityHiddenCategories } =
     useEquitySlice()
 
-  const { objectives: allObjectives, categories: allCategories } =
-    useEquityObjectives({
-      scenarioId: equityFocusScenario,
-      compareToBaseline: showEquityComparison,
-    })
+  const {
+    objectives: allObjectives,
+    categories: allCategories,
+    baselineCodes,
+  } = useEquityObjectives({
+    scenarioId: equityFocusScenario,
+    compareToBaseline: showEquityComparison,
+  })
+
+  // What this render's objectives were built from, read by handleShowOnMap
+  // when it publishes the map caption's snapshot. A ref, not callback
+  // dependencies, so publishing adds no paint triggers.
+  const markerSource = {
+    scenarioId: equityFocusScenario ?? BASELINE_SCENARIO_ID,
+    hydroclimate,
+    baselineCodes,
+  }
+  const markerSourceRef = useRef(markerSource)
+  markerSourceRef.current = markerSource
 
   // Categories toggled off in EquityChartControls are excluded from the
   // grid entirely, so the remaining ones get more room.
@@ -919,8 +921,15 @@ export default function EquityPanel({
         paintedCodes.length > 0
           ? {
               outcomeCodes: paintedCodes,
-              ...markerSourceRef.current,
-              comparedWithBaseline: showEquityComparison,
+              scenarioId: markerSourceRef.current.scenarioId,
+              hydroclimate: markerSourceRef.current.hydroclimate,
+              // A comparison is only claimed once every painted outcome's
+              // baseline has loaded; until then markers show no change.
+              comparedWithBaseline:
+                showEquityComparison &&
+                paintedCodes.every((code) =>
+                  markerSourceRef.current.baselineCodes.includes(code),
+                ),
             }
           : null,
       )

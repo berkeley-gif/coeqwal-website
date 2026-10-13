@@ -1,0 +1,27 @@
+{
+  "scenario": "s0138",
+  "results": {
+    "DELTA_ECO": {
+      "scenario": "s0138",
+      "tier_code": "DELTA_ECO",
+      "tier_name": "Delta ecology",
+      "tier_type": "single_value",
+      "locations": [
+        {
+          "location_id": "DETAW",
+          "location_name": "Delta-Eastside Water",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.894"
+        }
+      ],
+      "metadata": {
+        "total_locations": 1,
+        "location_types": ["wba"],
+        "tier_counts": { "1": 0, "2": 1, "3": 0, "4": 0 }
+      }
+    }
+  },
+  "missing": []
+}

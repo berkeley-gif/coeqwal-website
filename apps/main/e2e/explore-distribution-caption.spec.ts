@@ -24,6 +24,11 @@ const RECORDING = !!process.env.RECORD_DISTRIBUTION_CAPTION_FIXTURES
 const BACKGROUND_PREFETCH =
   /\/api\/tiers\/scenarios\/[^/]+\/locations\?codes=AG_REV,CWS_DEL,DELTA_ECO,/
 const MARKERS = "[data-marker-shape]"
+/** Single-outcome tier requests for current operations: Distribution's
+ *  baseline when comparing another scenario */
+const BASELINE_TIERS =
+  /\/api\/tiers\/scenarios\/s0020\/locations\?codes=[A-Z_]+$/
+const STRATEGY = "Groundwater Pumping Limits in the San Joaquin Valley"
 
 test("distribution's map caption describes its painted markers", async ({
   page,
@@ -47,6 +52,22 @@ test("distribution's map caption describes its painted markers", async ({
     }
   })
   await page.route(BACKGROUND_PREFETCH, (route) => route.abort())
+  // Distribution fetches the baseline's tier data as soon as it opens, so
+  // hold those responses from the start to see the caption before they
+  // land.
+  let holdBaseline = true
+  let heldBaseline = 0
+  let releaseBaseline: () => void = () => {}
+  const baselineReleased = new Promise<void>((resolve) => {
+    releaseBaseline = resolve
+  })
+  await page.route(BASELINE_TIERS, async (route) => {
+    if (holdBaseline) {
+      heldBaseline += 1
+      await baselineReleased
+    }
+    await route.fallback()
+  })
   await page.addInitScript(() => {
     for (const tool of ["radar", "bar", "equity", "resilience", "list"]) {
       window.localStorage.setItem(`coeqwal-tour-seen-${tool}`, "true")
@@ -59,8 +80,14 @@ test("distribution's map caption describes its painted markers", async ({
 
   const caption = page.getByRole("region", { name: "Map description" })
   const markers = page.locator(MARKERS)
-  // Focus the baseline scenario (Distribution is single-select).
-  await page.getByText("Current operations", { exact: true }).first().click()
+  // Focus a scenario other than the baseline (Distribution is
+  // single-select), so comparison needs the baseline's own tier data.
+  await page
+    .getByText("Groundwater pumping limits in the San Joaquin Valley", {
+      exact: true,
+    })
+    .first()
+    .click()
   const dots = page.locator(".tier-dot")
   await expect(dots.first()).toBeVisible()
   await expect(caption).toHaveCount(0)
@@ -72,15 +99,20 @@ test("distribution's map caption describes its painted markers", async ({
     caption.getByText("Distribution tool", { exact: true }),
   ).toBeVisible()
   await expect(caption.getByText("Outcome", { exact: true })).toBeVisible()
-  await expect(
-    caption.getByText("Current Operations", { exact: true }),
-  ).toBeVisible()
+  await expect(caption.getByText(STRATEGY, { exact: true })).toBeVisible()
   await expect(caption.getByText("Historical", { exact: true })).toBeVisible()
 
-  // Comparison mode repaints the markers and says what they compare with.
+  // Comparison mode repaints the markers. Until the baseline's tier data
+  // lands every marker shows no change, so the caption claims no
+  // comparison; once it lands, it says what the markers compare with.
   await page.getByRole("button", { name: "Compare to Baseline" }).click()
+  expect(heldBaseline).toBeGreaterThan(0)
+  await expect(markers).toHaveCount(1)
+  await expect(caption.getByText(STRATEGY, { exact: true })).toBeVisible()
+  holdBaseline = false
+  releaseBaseline()
   await expect(caption).toContainText(
-    "Current Operations, Compared with Current Operations",
+    `${STRATEGY}, Compared with Current Operations`,
   )
   await expect(
     page.getByRole("group", { name: "Comparison marker legend" }),

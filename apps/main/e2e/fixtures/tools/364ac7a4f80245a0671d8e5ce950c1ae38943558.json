@@ -1,8 +1,8 @@
 {
-  "scenario": "s0134",
+  "scenario": "s0138",
   "results": {
     "FW_EXP": {
-      "scenario": "s0134",
+      "scenario": "s0138",
       "tier_code": "FW_EXP",
       "tier_name": "Freshwater for Delta exports",
       "tier_type": "single_value",
@@ -13,7 +13,7 @@
           "location_type": "network_node",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.151"
+          "tier_continuous": "3.033"
         },
         {
           "location_id": "DMC000",
@@ -21,7 +21,7 @@
           "location_type": "network_node",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.151"
+          "tier_continuous": "3.033"
         }
       ],
       "metadata": {

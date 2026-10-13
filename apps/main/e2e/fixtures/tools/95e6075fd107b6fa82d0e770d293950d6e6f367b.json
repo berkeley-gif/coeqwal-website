@@ -1,8 +1,8 @@
 {
-  "scenario": "s0134",
+  "scenario": "s0025",
   "results": {
     "WRC_SALMON_AB": {
-      "scenario": "s0134",
+      "scenario": "s0025",
       "tier_code": "WRC_SALMON_AB",
       "tier_name": "Salmon abundance",
       "tier_type": "single_value",
@@ -13,7 +13,7 @@
           "location_type": "network_node",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.970"
+          "tier_continuous": "3.880"
         }
       ],
       "metadata": {

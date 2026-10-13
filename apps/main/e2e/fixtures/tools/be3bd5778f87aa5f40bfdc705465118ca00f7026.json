@@ -1,8 +1,8 @@
 {
-  "scenario": "s0134",
+  "scenario": "s0138",
   "results": {
     "GW_STOR": {
-      "scenario": "s0134",
+      "scenario": "s0138",
       "tier_code": "GW_STOR",
       "tier_name": "Groundwater storage",
       "tier_type": "multi_value",
@@ -13,7 +13,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.140"
+          "tier_continuous": "3.138"
         },
         {
           "location_id": "03",
@@ -21,7 +21,7 @@
           "location_type": "wba",
           "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "1.980"
+          "tier_continuous": "1.968"
         },
         {
           "location_id": "04",
@@ -29,7 +29,7 @@
           "location_type": "wba",
           "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "2.289"
+          "tier_continuous": "2.286"
         },
         {
           "location_id": "05",
@@ -37,7 +37,7 @@
           "location_type": "wba",
           "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "1.866"
+          "tier_continuous": "1.844"
         },
         {
           "location_id": "06",
@@ -45,7 +45,7 @@
           "location_type": "wba",
           "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "2.725"
+          "tier_continuous": "2.628"
         },
         {
           "location_id": "07N",
@@ -53,7 +53,7 @@
           "location_type": "wba",
           "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "2.837"
+          "tier_continuous": "2.803"
         },
         {
           "location_id": "07S",
@@ -61,7 +61,7 @@
           "location_type": "wba",
           "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "2.163"
+          "tier_continuous": "2.157"
         },
         {
           "location_id": "08N",
@@ -69,7 +69,7 @@
           "location_type": "wba",
           "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "2.348"
+          "tier_continuous": "2.337"
         },
         {
           "location_id": "08S",
@@ -77,7 +77,7 @@
           "location_type": "wba",
           "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "2.089"
+          "tier_continuous": "2.093"
         },
         {
           "location_id": "09",
@@ -85,7 +85,7 @@
           "location_type": "wba",
           "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "1.901"
+          "tier_continuous": "1.826"
         },
         {
           "location_id": "10",
@@ -93,7 +93,7 @@
           "location_type": "wba",
           "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "1.865"
+          "tier_continuous": "1.844"
         },
         {
           "location_id": "11",
@@ -101,7 +101,7 @@
           "location_type": "wba",
           "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "1.528"
+          "tier_continuous": "1.448"
         },
         {
           "location_id": "12",
@@ -109,7 +109,7 @@
           "location_type": "wba",
           "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "2.055"
+          "tier_continuous": "2.073"
         },
         {
           "location_id": "13",
@@ -117,7 +117,7 @@
           "location_type": "wba",
           "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "2.071"
+          "tier_continuous": "2.042"
         },
         {
           "location_id": "14",
@@ -125,7 +125,7 @@
           "location_type": "wba",
           "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "2.090"
+          "tier_continuous": "2.291"
         },
         {
           "location_id": "15N",
@@ -133,7 +133,7 @@
           "location_type": "wba",
           "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "2.113"
+          "tier_continuous": "2.364"
         },
         {
           "location_id": "15S",
@@ -141,7 +141,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.120"
+          "tier_continuous": "3.305"
         },
         {
           "location_id": "16",
@@ -149,7 +149,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.005"
+          "tier_continuous": "3.007"
         },
         {
           "location_id": "17N",
@@ -157,7 +157,7 @@
           "location_type": "wba",
           "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "1.540"
+          "tier_continuous": "1.432"
         },
         {
           "location_id": "17S",
@@ -165,7 +165,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.009"
+          "tier_continuous": "3.008"
         },
         {
           "location_id": "18",
@@ -173,7 +173,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.015"
+          "tier_continuous": "3.014"
         },
         {
           "location_id": "19",
@@ -181,7 +181,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.028"
+          "tier_continuous": "3.029"
         },
         {
           "location_id": "20",
@@ -189,7 +189,7 @@
           "location_type": "wba",
           "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "1.584"
+          "tier_continuous": "1.626"
         },
         {
           "location_id": "21",
@@ -197,7 +197,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.008"
+          "tier_continuous": "3.013"
         },
         {
           "location_id": "22",
@@ -205,7 +205,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.082"
+          "tier_continuous": "3.091"
         },
         {
           "location_id": "23",
@@ -213,7 +213,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.383"
+          "tier_continuous": "3.501"
         },
         {
           "location_id": "24",
@@ -221,15 +221,15 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.506"
+          "tier_continuous": "3.585"
         },
         {
           "location_id": "25",
           "location_name": "WBA 25",
           "location_type": "wba",
-          "tier_level": 1,
+          "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "1.934"
+          "tier_continuous": "2.135"
         },
         {
           "location_id": "26N",
@@ -237,7 +237,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.276"
+          "tier_continuous": "3.316"
         },
         {
           "location_id": "26S",
@@ -245,7 +245,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.025"
+          "tier_continuous": "3.107"
         },
         {
           "location_id": "50",
@@ -253,7 +253,7 @@
           "location_type": "wba",
           "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "1.348"
+          "tier_continuous": "1.468"
         },
         {
           "location_id": "60N",
@@ -261,7 +261,7 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.124"
+          "tier_continuous": "3.489"
         },
         {
           "location_id": "60S",
@@ -269,15 +269,15 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.070"
+          "tier_continuous": "3.814"
         },
         {
           "location_id": "61",
           "location_name": "WBA 61",
           "location_type": "wba",
-          "tier_level": 1,
+          "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "1.873"
+          "tier_continuous": "3.039"
         },
         {
           "location_id": "62",
@@ -285,23 +285,23 @@
           "location_type": "wba",
           "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "3.291"
+          "tier_continuous": "3.176"
         },
         {
           "location_id": "63",
           "location_name": "WBA 63",
           "location_type": "wba",
-          "tier_level": 4,
+          "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "4.252"
+          "tier_continuous": "3.569"
         },
         {
           "location_id": "64",
           "location_name": "WBA 64",
           "location_type": "wba",
-          "tier_level": 4,
+          "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "4.394"
+          "tier_continuous": "3.489"
         },
         {
           "location_id": "71",
@@ -309,45 +309,45 @@
           "location_type": "wba",
           "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "1.566"
+          "tier_continuous": "1.493"
         },
         {
           "location_id": "72",
           "location_name": "WBA 72",
           "location_type": "wba",
-          "tier_level": 3,
+          "tier_level": 2,
           "tier_value": 1,
-          "tier_continuous": "3.137"
+          "tier_continuous": "2.405"
         },
         {
           "location_id": "73",
           "location_name": "WBA 73",
           "location_type": "wba",
-          "tier_level": 3,
+          "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "3.283"
+          "tier_continuous": "1.293"
         },
         {
           "location_id": "90",
           "location_name": "WBA 90",
           "location_type": "wba",
-          "tier_level": 4,
+          "tier_level": 1,
           "tier_value": 1,
-          "tier_continuous": "4.430"
+          "tier_continuous": "1.491"
         },
         {
           "location_id": "DETAW",
           "location_name": "Delta-Eastside Water",
           "location_type": "wba",
-          "tier_level": 2,
+          "tier_level": 3,
           "tier_value": 1,
-          "tier_continuous": "2.547"
+          "tier_continuous": "3.078"
         }
       ],
       "metadata": {
         "total_locations": 42,
         "location_types": ["wba"],
-        "tier_counts": { "1": 11, "2": 11, "3": 17, "4": 3 }
+        "tier_counts": { "1": 11, "2": 12, "3": 19, "4": 0 }
       }
     }
   },
