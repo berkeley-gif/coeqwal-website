@@ -272,3 +272,25 @@ test("ssjv all-routes total fails closed to no data when a route series is missi
   await expect(page.locator('[data-did-chart-state="no-data"]')).toBeVisible()
   await expect(page.getByText(/^No data for /)).toBeVisible()
 })
+
+test("a failed scenario list reads as a load failure, not as no data", async ({
+  page,
+}) => {
+  await setupNetwork(page)
+  // Every attempt fails (the data provider retries twice), so no member can
+  // be resolved. That is an outage, not an unmodeled scenario.
+  await page.route("**/api/scenarios", (route) =>
+    route.fulfill({ status: 500, json: { detail: "down" } }),
+  )
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  await expect(page.locator('[data-did-chart-state="error"]')).toBeVisible({
+    timeout: 30_000,
+  })
+  await expect(
+    page.getByText("Model results could not be loaded. Try again in a moment."),
+  ).toBeVisible()
+  await expect(page.getByText(/^No data for /)).toHaveCount(0)
+})

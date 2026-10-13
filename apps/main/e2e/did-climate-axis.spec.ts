@@ -121,6 +121,12 @@ test("climate futures axis fetches each hydroclimate variant and goes live", asy
   ]) {
     await expect(page.getByText(label, { exact: true }).first()).toBeVisible()
   }
+  // Every compared hydroclimate drew its own served series: no member is
+  // left waiting, failed, or without data.
+  const card = page.locator('[data-did-chart-state="drawn"]')
+  for (const chip of ["loading", "could not load", "no data"]) {
+    await expect(card.getByText(chip, { exact: true })).toHaveCount(0)
+  }
   await expect
     .poll(() => new Set(fetchedIds).size, { timeout: 10_000 })
     .toBe(HC_VARIANTS.length)

@@ -324,7 +324,10 @@ export function useVariableData(): VariableData {
   const heldMapping = resolvedAll[heldClimate]?.idMapping
   // Every climate's mapping comes from the one scenario list: while it is
   // loading, no member can resolve yet, which is loading, not "no variant".
-  const { isLoading: mappingUnloaded } = useScenarioList()
+  const { isLoading: mappingUnloaded, error: listError } = useScenarioList()
+  // The scenario list itself failed: no member can be resolved, which is a
+  // load failure, not "not modeled".
+  const listFailed = !mappingUnloaded && listError != null
   const liveEligible =
     domain != null &&
     (isLocationsAxis
@@ -760,12 +763,15 @@ export function useVariableData(): VariableData {
       // No model results to show. The site never draws the sample engine's
       // stand-in: a member without a live series (not modeled, no variant
       // under the held hydroclimate, a failed request, a derived total that
-      // failed closed) is reported as "no data" instead of drawn.
+      // failed closed) is reported as "no data" instead of drawn. A failed
+      // request, for the member's data or for the scenario list it resolves
+      // through, is reported as a load failure instead.
       const loadFailed =
         !adoptedLive &&
         !pending &&
-        spec.slotIndex != null &&
-        activeSlots[spec.slotIndex]?.error != null
+        ((liveEligible && listFailed) ||
+          (spec.slotIndex != null &&
+            activeSlots[spec.slotIndex]?.error != null))
       const liveDataMissing = !adoptedLive && !pending && !loadFailed
 
       return {
@@ -846,6 +852,7 @@ export function useVariableData(): VariableData {
     loadingSignature,
     errorSignature,
     mappingUnloaded,
+    listFailed,
     wytJoined,
     unavailableReason,
     locationRequestSignature,
