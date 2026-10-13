@@ -24,3 +24,25 @@ export function mapPaintKey(input: MapPaintKeyInput): string {
   if (!input.outcomeCode) return ""
   return `tiers|${input.outcomeCode}|${input.scenarioId ?? ""}`
 }
+
+/** The fields of Distribution's painted-marker snapshot a paint key uses */
+export interface DistributionPaintSource {
+  locationKeys: string[]
+  scenarioId: string
+  comparedWithBaseline: boolean
+}
+
+/** The map paint key a Distribution snapshot stands for ("" for none).
+ *  Pure. */
+export function getDistributionPaintKey(
+  snapshot: DistributionPaintSource | null,
+): string {
+  return snapshot
+    ? mapPaintKey({
+        mode: "equity",
+        mappedLocationKeys: snapshot.locationKeys,
+        focusScenario: snapshot.scenarioId,
+        compared: snapshot.comparedWithBaseline,
+      })
+    : ""
+}

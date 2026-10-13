@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   getMapFigureInput,
+  getMapSaveRequest,
   mapFigureSpec,
   type MapFigureState,
 } from "../app/features/scenarioExplorer/explorer/tools/chrome/layout/mapFigureSpec"
@@ -150,4 +151,70 @@ test("Distribution describes its painted markers, not the current controls", () 
     ["Hydroclimate", "Moderate stress"],
   ])
   expect(rowsFor({ ...state, distribution: null })).toBeNull()
+})
+
+test("a saved map carries what the caption says, for the drawn variant", () => {
+  const request = getMapSaveRequest({
+    mode: "bar",
+    active: {
+      outcomeCode: "CWS_DEL",
+      scenarioId: "v-ecv",
+      siblingGroupId: "s0020",
+    },
+    distribution: null,
+    scenarios: SCENARIOS,
+  })
+  expect(request).toEqual({
+    key: "tiers|CWS_DEL|v-ecv",
+    tool: "bar",
+    outcomeCodes: ["CWS_DEL"],
+    scenarioId: "s0020",
+    hydroclimate: "ecv",
+    comparedWithBaseline: false,
+    captionText:
+      "Community surface water | Current Operations | Moderate stress",
+  })
+  // An unknown drawn variant has no hydroclimate, so it cannot be saved.
+  expect(
+    getMapSaveRequest({
+      mode: "bar",
+      active: { outcomeCode: "CWS_DEL", scenarioId: "v-unknown" },
+      distribution: null,
+      scenarios: SCENARIOS,
+    }).hydroclimate,
+  ).toBeNull()
+  expect(
+    getMapSaveRequest({
+      mode: "radar",
+      active: null,
+      distribution: null,
+      scenarios: SCENARIOS,
+    }).key,
+  ).toBe("")
+})
+
+test("a saved Distribution map carries its painted snapshot", () => {
+  const request = getMapSaveRequest({
+    mode: "equity",
+    active: null,
+    distribution: {
+      outcomeCodes: ["CWS_DEL"],
+      scenarioId: "s9999",
+      hydroclimate: "cc95",
+      comparedWithBaseline: true,
+      locationKeys: ["CWS_DEL:02_PU"],
+    },
+    scenarios: SCENARIOS,
+  })
+  expect(request).toMatchObject({
+    key: "equity|CWS_DEL:02_PU|s9999|1",
+    tool: "equity",
+    outcomeCodes: ["CWS_DEL"],
+    scenarioId: "s9999",
+    hydroclimate: "cc95",
+    comparedWithBaseline: true,
+  })
+  expect(request.captionText).toBe(
+    "Community surface water | A Strategy, Compared with Current Operations | High stress",
+  )
 })

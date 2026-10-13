@@ -6,6 +6,8 @@ type SaveSnapshotButtonProps = {
   disabled?: boolean
   onClick: () => void
   sx?: SxProps<Theme>
+  /** Text and accessible name; defaults to "save snapshot" */
+  label?: string
 }
 
 /** Toolbar control that stages the main chart in view for sharing */
@@ -13,6 +15,7 @@ export function SaveSnapshotButton({
   disabled = false,
   onClick,
   sx,
+  label = "save snapshot",
 }: SaveSnapshotButtonProps) {
   const theme = useTheme()
 
@@ -22,7 +25,7 @@ export function SaveSnapshotButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      aria-label="save snapshot"
+      aria-label={label}
       sx={{
         display: "inline-flex",
         alignItems: "center",
@@ -50,7 +53,7 @@ export function SaveSnapshotButton({
       }}
     >
       <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
-      save snapshot
+      {label}
     </Box>
   )
 }

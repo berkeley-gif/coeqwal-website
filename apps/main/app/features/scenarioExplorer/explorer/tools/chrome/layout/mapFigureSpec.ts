@@ -4,12 +4,17 @@
  * renders it. Pure module.
  *
  * Exports: MapFigureInput, mapFigureSpec, MAP_TOOL_LABELS, MapFigureState,
- * MapScenarioInfo, getMapFigureInput.
+ * MapScenarioInfo, getMapFigureInput, MapSaveRequest, getMapSaveRequest.
  */
 
 import type { ExploreMode } from "../../../store/types"
 import type { FigureTemplateSpec } from "../../../share/figureTemplate"
+import { buildFigureTemplate } from "../../../share/figureTemplate"
 import { titleCaseLabel } from "../../../share/figureTitle"
+import {
+  getDistributionPaintKey,
+  mapPaintKey,
+} from "../../../../../map/config/mapPaintKey"
 import type {
   DistributionMapSnapshot,
   OutcomeVisualization,
@@ -128,5 +133,63 @@ export function getMapFigureInput(state: MapFigureState): MapFigureInput {
       ? hydroclimateLabel(mappedHydroclimate)
       : null,
     comparedWithBaseline: false,
+  }
+}
+
+/** What saving the map stores: the share item's description, the paint
+ *  key the saved picture must match, and the one-line caption drawn into
+ *  the image. Fields mirror the map caption, so the saved card and the
+ *  caption cannot disagree. */
+export interface MapSaveRequest {
+  /** Paint key of what the map draws; "" when nothing is mapped */
+  key: string
+  tool: ExploreMode
+  outcomeCodes: string[]
+  /** Sibling-group id of the drawn scenario; "" when unknown */
+  scenarioId: string
+  /** Hydroclimate value of the drawn data; null when unknown (no save) */
+  hydroclimate: string | null
+  comparedWithBaseline: boolean
+  captionText: string
+}
+
+/** Save request for what the map draws. Pure. */
+export function getMapSaveRequest(state: MapFigureState): MapSaveRequest {
+  const spec = mapFigureSpec(getMapFigureInput(state))
+  const captionText = spec
+    ? buildFigureTemplate(spec)
+        .rows.map((r) => r.value)
+        .join(" | ")
+    : ""
+  if (state.mode === "equity") {
+    const d = state.distribution
+    return {
+      key: getDistributionPaintKey(d),
+      tool: state.mode,
+      outcomeCodes: d?.outcomeCodes ?? [],
+      scenarioId: d?.scenarioId ?? "",
+      hydroclimate: d?.hydroclimate ?? null,
+      comparedWithBaseline: d?.comparedWithBaseline ?? false,
+      captionText,
+    }
+  }
+  const active = state.active
+  const variant = active
+    ? state.scenarios.find((s) => s.scenarioId === active.scenarioId)
+    : undefined
+  return {
+    key: mapPaintKey({
+      mode: "tiers",
+      outcomeCode: active?.outcomeCode ?? null,
+      scenarioId: active?.scenarioId ?? null,
+    }),
+    tool: state.mode,
+    outcomeCodes: active ? [active.outcomeCode] : [],
+    scenarioId: active?.siblingGroupId ?? active?.scenarioId ?? "",
+    hydroclimate: variant
+      ? (HYDROCLIMATE_LABEL_MAP[variant.hydroclimateId] ?? null)
+      : null,
+    comparedWithBaseline: false,
+    captionText,
   }
 }

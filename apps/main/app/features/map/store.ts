@@ -12,7 +12,7 @@ import {
   type LearnNavSection,
 } from "./config/sectionLayers"
 import { MAP_THEME_URLS } from "@repo/map"
-import { mapPaintKey } from "./config/mapPaintKey"
+import { getDistributionPaintKey } from "./config/mapPaintKey"
 
 // ============================================================================
 // Types
@@ -35,21 +35,6 @@ export interface DistributionMapSnapshot {
   comparedWithBaseline: boolean
   /** Painted `tierCode:locationId` keys */
   locationKeys: string[]
-}
-
-/** The map paint key a Distribution snapshot stands for ("" for none).
- *  Pure. */
-export function getDistributionPaintKey(
-  snapshot: DistributionMapSnapshot | null,
-) {
-  return snapshot
-    ? mapPaintKey({
-        mode: "equity",
-        mappedLocationKeys: snapshot.locationKeys,
-        focusScenario: snapshot.scenarioId,
-        compared: snapshot.comparedWithBaseline,
-      })
-    : ""
 }
 
 export interface OutcomeVisualization {

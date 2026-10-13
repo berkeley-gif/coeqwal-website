@@ -29,11 +29,11 @@ import { TierGrid, type TierGridProps } from "@repo/viz"
 import { useWorkspaceSlice, useEquitySlice } from "../../../store"
 import { BASELINE_SCENARIO_ID } from "../../../../constants"
 import {
-  getDistributionPaintKey,
   mapActions,
   useMapStore,
   type DistributionMapSnapshot,
 } from "../../../../../map/store"
+import { getDistributionPaintKey } from "../../../../../map/config/mapPaintKey"
 import { getTierColorsFromTheme } from "../../../../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../../../../map/config/outcomeLocations"
 import { useEquityObjectives } from "./useEquityObjectives"
