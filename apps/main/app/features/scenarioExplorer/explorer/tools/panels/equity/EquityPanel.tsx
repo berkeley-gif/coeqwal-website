@@ -317,6 +317,7 @@ export default function EquityPanel({
   // than the shared multi-select, so entering/leaving Distribution
   // does not disturb List/Radar/Resilience/Comparison selections.
   const { equityFocusScenario, showMap, setShowMap } = useWorkspaceSlice()
+  const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
   const tourTool = useWorkspaceSlice((s) => s.tour.tool)
   const promptShown = needsScenarioPrompt({
     mode: "equity",
@@ -583,7 +584,7 @@ export default function EquityPanel({
 
       if (objectivesToShow.length === 0) {
         setMotionChildren?.(null)
-        mapActions.setMappedOutcomeCodes([])
+        mapActions.setDistributionMapSnapshot(null)
         return
       }
 
@@ -868,7 +869,9 @@ export default function EquityPanel({
         )
       })
 
-      // Tell the map caption which outcomes the painted markers show.
+      // Tell the map caption what the painted markers show: their outcomes,
+      // and the scenario, hydroclimate and comparison mode they were built
+      // from (objectives always belong to the current focus scenario).
       const paintedCodes = Array.from(
         new Set(
           objectivesToShow
@@ -877,7 +880,16 @@ export default function EquityPanel({
             .filter((c): c is string => Boolean(c)),
         ),
       )
-      mapActions.setMappedOutcomeCodes(paintedCodes)
+      mapActions.setDistributionMapSnapshot(
+        paintedCodes.length > 0
+          ? {
+              outcomeCodes: paintedCodes,
+              scenarioId: equityFocusScenario ?? BASELINE_SCENARIO_ID,
+              hydroclimate,
+              comparedWithBaseline: showEquityComparison,
+            }
+          : null,
+      )
 
       // Set markers on the map
       setMotionChildren?.(<>{markerElements}</>)
@@ -888,6 +900,8 @@ export default function EquityPanel({
     [
       objectives,
       showEquityComparison,
+      equityFocusScenario,
+      hydroclimate,
       tierColors,
       mapRef,
       setMotionChildren,
@@ -922,7 +936,7 @@ export default function EquityPanel({
       handleShowOnMap(selectedTierLocationCodes)
     } else if (setMotionChildren) {
       setMotionChildren(null)
-      mapActions.setMappedOutcomeCodes([])
+      mapActions.setDistributionMapSnapshot(null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedObjectives, handleShowOnMap, promptShown])
@@ -956,7 +970,7 @@ export default function EquityPanel({
       if (setMotionChildren) {
         setMotionChildren(null)
       }
-      mapActions.setMappedOutcomeCodes([])
+      mapActions.setDistributionMapSnapshot(null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

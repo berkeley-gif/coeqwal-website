@@ -235,12 +235,20 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
   ] as const) {
     await expect(tiers).toContainText(`${n}${tier}`)
   }
+  // A hydroclimate switch with the caption up: the map re-resolves to the
+  // historical variant and the caption follows it.
+  await page.getByRole("button", { name: "Historical", exact: true }).click()
+  await expect(squares).toHaveCount(74)
+  await expect(caption.getByText("Historical", { exact: true })).toBeVisible()
+  await expect(
+    caption.getByText("Moderate stress", { exact: true }),
+  ).toHaveCount(0)
   // Clearing the map takes the caption away and brings the badge back.
   await glyph.click()
   await expect(squares).toHaveCount(0)
   await expect(caption).toHaveCount(0)
   await expect(
-    mapPanel.getByText("Moderate climate stress hydroclimate", { exact: true }),
+    mapPanel.getByText("Historical hydroclimate", { exact: true }),
   ).toBeVisible()
 
   expect(apiFailures).toEqual([])

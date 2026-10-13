@@ -21,6 +21,19 @@ import { MAP_THEME_URLS } from "@repo/map"
 export type MapMode = "hidden" | "learn" | "explore"
 
 /** Outcome visualization state used by both Learn and Explore modes */
+/** The data behind Distribution's map markers at the moment they were
+ *  painted, so the map caption describes the markers, not the controls. */
+export interface DistributionMapSnapshot {
+  /** Outcome short codes with at least one painted marker */
+  outcomeCodes: string[]
+  /** Logical scenario (sibling-group) id the markers were built from */
+  scenarioId: string
+  /** Workspace hydroclimate value the markers were built under */
+  hydroclimate: string
+  /** Markers encode the change from current operations */
+  comparedWithBaseline: boolean
+}
+
 export interface OutcomeVisualization {
   /** Outcome short code (e.g., "CWS_DEL", "AG_REV") */
   outcomeCode: string
@@ -74,10 +87,10 @@ interface MapState {
 
   // Visualization
   activeOutcomeVisualization: OutcomeVisualization | null
-  /** Outcome codes Distribution currently paints as markers (it draws its
-   *  own markers, so activeOutcomeVisualization stays null there). Read by
-   *  the map caption. */
-  mappedOutcomeCodes: string[]
+  /** What Distribution's painted markers show (it draws its own markers,
+   *  so activeOutcomeVisualization stays null there), captured when the
+   *  markers are built. Read by the map caption. */
+  distributionMapSnapshot: DistributionMapSnapshot | null
 
   // Tooltip control signal (incrementing triggers clearAllPinned in VisualizationLayers)
   clearTooltipsSignal: number
@@ -120,7 +133,7 @@ const initialState: MapState = {
   isVertNavExpanded: false,
   explorePanelWidth: 50,
   activeOutcomeVisualization: null,
-  mappedOutcomeCodes: [],
+  distributionMapSnapshot: null,
   clearTooltipsSignal: 0,
   locationHighlights: [],
   showHoverHighlightsOnMap: false,
@@ -260,8 +273,8 @@ export const mapActions = {
     })
   },
 
-  setMappedOutcomeCodes: (codes: string[]) =>
-    useMapStore.setState({ mappedOutcomeCodes: codes }),
+  setDistributionMapSnapshot: (snapshot: DistributionMapSnapshot | null) =>
+    useMapStore.setState({ distributionMapSnapshot: snapshot }),
 
   // Tooltips
   clearMapTooltips: () =>
@@ -359,8 +372,8 @@ export const useActiveOutcomeVisualization = () =>
 export const useIsOutcomeVisualizationActive = () =>
   useMapStore((s) => s.activeOutcomeVisualization !== null)
 
-export const useMappedOutcomeCodes = () =>
-  useMapStore((s) => s.mappedOutcomeCodes)
+export const useDistributionMapSnapshot = () =>
+  useMapStore((s) => s.distributionMapSnapshot)
 
 // Tooltips
 export const useClearTooltipsSignal = () =>

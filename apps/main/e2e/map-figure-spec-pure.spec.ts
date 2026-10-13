@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test"
-import { mapFigureSpec } from "../app/features/scenarioExplorer/explorer/tools/chrome/layout/mapFigureSpec"
+import {
+  getMapFigureInput,
+  mapFigureSpec,
+  type MapFigureState,
+} from "../app/features/scenarioExplorer/explorer/tools/chrome/layout/mapFigureSpec"
 import { buildFigureTemplate } from "../app/features/scenarioExplorer/explorer/share/figureTemplate"
 
 test("nothing on the map means no caption", () => {
@@ -61,4 +65,90 @@ test("unknown scenario label is omitted, not printed as null", () => {
     })!,
   )
   expect(t.rows.map((r) => r.label)).toEqual(["Outcome"])
+})
+
+// Scenario list rows: s0020 is the historical variant (API hydroclimate 2),
+// s0020_ecv-like ids stand for its other variants. "s9999" has no local
+// metadata, so its label comes from the list.
+const SCENARIOS: MapFigureState["scenarios"] = [
+  { scenarioId: "s0020", hydroclimateId: 2, shortLabel: "Current operations" },
+  { scenarioId: "v-ecv", hydroclimateId: 7, shortLabel: "Current operations" },
+  { scenarioId: "s9999", hydroclimateId: 2, shortLabel: "A strategy" },
+]
+
+function rowsFor(state: MapFigureState) {
+  const spec = mapFigureSpec(getMapFigureInput(state))
+  return spec
+    ? buildFigureTemplate(spec).rows.map((r) => [r.label, r.value])
+    : null
+}
+
+test("the caption names the hydroclimate of the variant the map draws", () => {
+  const base: MapFigureState = {
+    mode: "bar",
+    active: {
+      outcomeCode: "CWS_DEL",
+      scenarioId: "v-ecv",
+      siblingGroupId: "s0020",
+    },
+    distribution: null,
+    workspaceHydroclimate: "ecv",
+    scenarios: SCENARIOS,
+  }
+  expect(rowsFor(base)).toEqual([
+    ["Outcome", "Community surface water"],
+    ["Strategy", "Current Operations"],
+    ["Hydroclimate", "Moderate stress"],
+  ])
+  // The workspace moved on (a switch in flight, or a hydroclimate with no
+  // variant) but the map still draws the historical variant: say so.
+  expect(
+    rowsFor({
+      ...base,
+      active: { ...base.active!, scenarioId: "s0020" },
+      workspaceHydroclimate: "cc95",
+    })?.at(-1),
+  ).toEqual(["Hydroclimate", "Historical"])
+  // Before the scenario list loads, the workspace hydroclimate stands in.
+  expect(
+    rowsFor({ ...base, scenarios: [], workspaceHydroclimate: "cc95" })?.at(-1),
+  ).toEqual(["Hydroclimate", "High stress"])
+})
+
+test("a scenario without local metadata is named from the scenario list", () => {
+  expect(
+    rowsFor({
+      mode: "radar",
+      active: {
+        outcomeCode: "AG_REV",
+        scenarioId: "s9999",
+        siblingGroupId: "s9999",
+      },
+      distribution: null,
+      workspaceHydroclimate: "historical",
+      scenarios: SCENARIOS,
+    })?.[1],
+  ).toEqual(["Strategy", "A Strategy"])
+})
+
+test("Distribution describes its painted markers, not the current controls", () => {
+  const state: MapFigureState = {
+    mode: "equity",
+    // A leftover Bar visualization must not leak into Distribution.
+    active: { outcomeCode: "RES_STOR", scenarioId: "s0020" },
+    distribution: {
+      outcomeCodes: ["CWS_DEL", "AG_REV"],
+      scenarioId: "s0020",
+      hydroclimate: "ecv",
+      comparedWithBaseline: true,
+    },
+    workspaceHydroclimate: "cc95",
+    scenarios: SCENARIOS,
+  }
+  expect(rowsFor(state)).toEqual([
+    ["Outcome", "Community surface water, Agricultural revenue"],
+    ["Strategy", "Current Operations, Compared with Current Operations"],
+    ["Hydroclimate", "Moderate stress"],
+  ])
+  expect(rowsFor({ ...state, distribution: null })).toBeNull()
 })
