@@ -149,10 +149,11 @@ export interface VariableData {
   unitLabel: string
   /** Whether the variable's scope is still under discussion */
   provisional: boolean
-  /** Data provenance for the card label */
+  /** Data provenance recorded on saved figures ("live" = model results).
+   *  Not shown on the card. */
   source: "live" | "mock"
-  /** True when some members are live and others are not, so a single
-   *  chart-level provenance badge would misdescribe part of the figure */
+  /** True when a member would draw something other than model results.
+   *  Recorded on saved figures, which are then not restored. */
   mixedSource: boolean
   /** Held-constant location name (scenarios / climates axes) */
   locationName: string

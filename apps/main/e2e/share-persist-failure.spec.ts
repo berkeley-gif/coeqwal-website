@@ -53,6 +53,7 @@ test("a populated tray keeps every card and note across a reload", async ({
       hydroclimate: "historical",
       note: `Seed note ${n}`,
       cachedSvg: svg,
+      cachedChartData: { members: [{ isLive: true }] },
     }))
     localStorage.setItem(
       "coeqwal-share-v2",

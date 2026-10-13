@@ -36,11 +36,13 @@ test("legacy and template data items render from storage", async ({ page }) => {
           "April Reservoir Storage (Shasta Reservoir), Current Operations, 2 Hydroclimates, All Water Years",
         waterYearTypesLabel: "All years",
         unitLabel: "thousand acre-feet",
+        members: [{ isLive: true }, { isLive: true }],
       },
     }
     const templated = {
       ...base,
       id: "data-new-1",
+      cachedChartData: { members: [{ isLive: true }, { isLive: true }] },
       figureSpec: {
         toolLabel: "Data in depth",
         chartKindLabel: "Box plot",
@@ -132,9 +134,22 @@ test("stored sample and mixed data figures are dropped on load", async ({
       cachedSvg: svg,
     })
     const items = [
-      item("data-live", "live", "Model results note"),
+      {
+        ...item("data-live", "live", "Model results note"),
+        cachedChartData: {
+          members: [{ isLive: true }, { isLive: false, liveDataMissing: true }],
+        },
+      },
       item("data-mock", "mock", "Sample note"),
       item("data-mixed", "mixed", "Mixed note"),
+      // Saved before mixed figures were tagged: "live" with a stand-in
+      // member drawn beside a served one.
+      {
+        ...item("data-old-live", "live", "Old mixed note"),
+        cachedChartData: { members: [{ isLive: true }, { isLive: false }] },
+      },
+      // Saved before captures recorded per-member provenance.
+      item("data-unverified", "live", "Unverified note"),
     ]
     window.localStorage.setItem(
       "coeqwal-share-v2",
@@ -150,6 +165,8 @@ test("stored sample and mixed data figures are dropped on load", async ({
   await expect(canvas.getByText("Model results note")).toBeVisible()
   await expect(canvas.getByText("Sample note")).toHaveCount(0)
   await expect(canvas.getByText("Mixed note")).toHaveCount(0)
+  await expect(canvas.getByText("Old mixed note")).toHaveCount(0)
+  await expect(canvas.getByText("Unverified note")).toHaveCount(0)
   await expect(page.getByText(/sample data/i)).toHaveCount(0)
   expect(errors).toEqual([])
 })

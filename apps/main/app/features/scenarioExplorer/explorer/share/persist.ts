@@ -102,6 +102,43 @@ function toPersisted(item: ShareItem): PersistedShareItem {
 }
 
 /**
+ * True when a stored share item may still be shown. Every non-data item is
+ * kept. A data item is kept only when it is model results: its source is
+ * "live" and, when it carries a captured image or payload, every captured
+ * member is either model results or an explicitly blank member (not
+ * modeled, failed to load). Figures saved before captures recorded
+ * per-member provenance, or before a figure mixing model results with
+ * sample curves was tagged "mixed", cannot be verified and are dropped.
+ *
+ * @param item - one stored share item
+ * @returns whether the item may be restored
+ */
+export function getIsRestorableShareItem(item: ShareItem): boolean {
+  if (item.type !== "data") return true
+  if (item.source !== "live") return false
+  const hasCapture =
+    item.cachedSvg != null ||
+    item.cachedImageDataUrl != null ||
+    item.cachedChartData != null
+  if (!hasCapture) return true
+  const members = (
+    item.cachedChartData as
+      | {
+          members?: Array<{
+            isLive?: boolean
+            liveDataMissing?: boolean
+            loadFailed?: boolean
+          }>
+        }
+      | undefined
+  )?.members
+  if (!Array.isArray(members) || members.length === 0) return false
+  return members.every(
+    (m) => m.isLive === true || m.liveDataMissing === true || m.loadFailed,
+  )
+}
+
+/**
  * Load the persisted share state on store hydration. Tolerant of
  * a missing or corrupt envelope. Returns an empty state in that
  * case so the app still boots.
@@ -120,13 +157,13 @@ export function loadShareState(): {
     const migrated = migrateEnvelope(parsed)
     if (!migrated) return { shareItems: [], storyItemIds: [] }
     // The site shows model results only. Data figures saved while Data in
-    // Depth could still draw sample data (source "mock" or "mixed") are
-    // dropped, along with their story slots.
+    // Depth could still draw sample data are dropped, along with their
+    // story slots (see getIsRestorableShareItem).
     const shareItems = (
       Array.isArray(migrated.shareItems)
         ? (migrated.shareItems as ShareItem[])
         : []
-    ).filter((item) => item.type !== "data" || item.source === "live")
+    ).filter(getIsRestorableShareItem)
     const kept = new Set(shareItems.map((item) => item.id))
     return {
       shareItems,
