@@ -17,6 +17,8 @@ export interface ShareFigureFooter {
 }
 
 const SOURCE_MODEL = "COEQWAL, coeqwal.org. CalSim3 model results."
+const SOURCE_MAP =
+  "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome tiers. Basemap © Mapbox © OpenStreetMap."
 const SOURCE_TIERS =
   "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome tiers."
 
@@ -43,6 +45,9 @@ export function shareFigureFooter(item: ShareItem): ShareFigureFooter {
           ? "Live data from api.coeqwal.org for some series; the data download names each series' source."
           : "Sample data, not model results."
     return { source: SOURCE_MODEL, provenance, capturedAt }
+  }
+  if (item.type === "map") {
+    return { source: SOURCE_MAP, capturedAt }
   }
   return { source: SOURCE_TIERS, capturedAt }
 }

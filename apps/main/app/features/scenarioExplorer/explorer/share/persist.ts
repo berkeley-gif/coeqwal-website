@@ -134,9 +134,10 @@ export function loadShareState(): {
 
 /**
  * Persist the current share state. Strips runtime-only fields per
- * `toPersisted` and silently swallows quota or unavailability
- * errors. The store calls this from a subscribe hook every time
- * `shareItems` or `storyItemIds` changes.
+ * `toPersisted`. Returns false when the write throws (quota or storage
+ * unavailable) so the caller can warn; true otherwise. The store calls
+ * this from a subscribe hook every time `shareItems` or `storyItemIds`
+ * changes. Side effect: writes localStorage.
  */
 export function saveShareState(
   shareItems: ShareItem[],
