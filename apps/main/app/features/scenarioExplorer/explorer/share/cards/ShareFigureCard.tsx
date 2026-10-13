@@ -34,6 +34,9 @@ export interface ShareFigureCardProps {
   /** Additional key under the tier legend, e.g. the comparison-marker
    *  legend on saved Distribution maps */
   extraLegend?: React.ReactNode
+  /** Largest displayed size of a raster image (saved maps are tall and
+   *  narrow; without a cap a wide story card blows them up) */
+  imageMaxSize?: { width: number; height: number }
   figureFooter?: ShareFigureFooter
   /** Shown instead of a blank box when there is no image (URL-restored) */
   emptyImageText?: string
@@ -53,6 +56,7 @@ export default function ShareFigureCard({
   legend,
   showTierLegend = false,
   extraLegend,
+  imageMaxSize,
   figureFooter,
   emptyImageText,
   note,
@@ -152,6 +156,7 @@ export default function ShareFigureCard({
           ariaLabel={ariaLabel}
           variant="bordered"
           aspectRatio={thumbnailAspectRatio}
+          imageMaxSize={imageMaxSize}
         />
       ) : (
         <Typography

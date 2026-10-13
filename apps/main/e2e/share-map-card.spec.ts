@@ -11,11 +11,12 @@ test("stored comparison map card", async ({ page }) => {
   await setupNetwork(page)
   const pixel = await page.evaluate(() => {
     const c = document.createElement("canvas")
-    c.width = 4
-    c.height = 3
+    // A saved map's shape: tall and narrow, as wide as the map panel was.
+    c.width = 720
+    c.height = 1500
     const x = c.getContext("2d")!
     x.fillStyle = "#3a7"
-    x.fillRect(0, 0, 4, 3)
+    x.fillRect(0, 0, 720, 1500)
     return c.toDataURL("image/jpeg")
   })
   await page.addInitScript((img) => {
@@ -27,7 +28,7 @@ test("stored comparison map card", async ({ page }) => {
       scenarioId: "s0020",
       hydroclimate: "historical",
       comparedWithBaseline: true,
-      imageAspect: 4 / 3,
+      imageAspect: 720 / 1500,
       capturedAt: "2026-10-05T12:00:00Z",
       cachedImageDataUrl: img,
     }
@@ -57,6 +58,15 @@ test("stored comparison map card", async ({ page }) => {
   await expect(
     canvas.getByText(/Basemap © Mapbox © OpenStreetMap\./),
   ).toBeVisible()
+
+  // The wide story card shows the map at most export-card width and 720 px
+  // tall, not stretched across the whole story.
+  const image = canvas.locator("img").first()
+  await expect(image).toBeVisible()
+  const box = (await image.boundingBox())!
+  expect(box.width).toBeLessThanOrEqual(480.5)
+  expect(box.height).toBeLessThanOrEqual(720.5)
+  expect(box.width / box.height).toBeCloseTo(720 / 1500, 2)
 
   const png = page.waitForEvent("download")
   await canvas.getByRole("button", { name: "Download as PNG" }).first().click()

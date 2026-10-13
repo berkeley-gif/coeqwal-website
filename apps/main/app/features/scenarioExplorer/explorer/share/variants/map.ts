@@ -53,6 +53,10 @@ const mapHandler: VariantHandler<MapItem> = {
       template: buildFigureTemplate(spec),
       cachedImageDataUrl: item.cachedImageDataUrl,
       thumbnailAspectRatio: thumbnailAspectRatioFor(item),
+      // The saved map is a raster about as wide as the map panel was; shown
+      // at most export-card width and a screen tall, it stays sharp in the
+      // wide story view.
+      imageMaxSize: { width: 480, height: 720 },
       showTierLegend: true,
       extraLegend: item.comparedWithBaseline
         ? React.createElement(MapDirectionLegend)
