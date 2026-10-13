@@ -74,6 +74,10 @@ interface MapState {
 
   // Visualization
   activeOutcomeVisualization: OutcomeVisualization | null
+  /** Outcome codes Distribution currently paints as markers (it draws its
+   *  own markers, so activeOutcomeVisualization stays null there). Read by
+   *  the map caption. */
+  mappedOutcomeCodes: string[]
 
   // Tooltip control signal (incrementing triggers clearAllPinned in VisualizationLayers)
   clearTooltipsSignal: number
@@ -116,6 +120,7 @@ const initialState: MapState = {
   isVertNavExpanded: false,
   explorePanelWidth: 50,
   activeOutcomeVisualization: null,
+  mappedOutcomeCodes: [],
   clearTooltipsSignal: 0,
   locationHighlights: [],
   showHoverHighlightsOnMap: false,
@@ -255,6 +260,9 @@ export const mapActions = {
     })
   },
 
+  setMappedOutcomeCodes: (codes: string[]) =>
+    useMapStore.setState({ mappedOutcomeCodes: codes }),
+
   // Tooltips
   clearMapTooltips: () =>
     useMapStore.setState((state) => ({
@@ -350,6 +358,9 @@ export const useActiveOutcomeVisualization = () =>
 
 export const useIsOutcomeVisualizationActive = () =>
   useMapStore((s) => s.activeOutcomeVisualization !== null)
+
+export const useMappedOutcomeCodes = () =>
+  useMapStore((s) => s.mappedOutcomeCodes)
 
 // Tooltips
 export const useClearTooltipsSignal = () =>

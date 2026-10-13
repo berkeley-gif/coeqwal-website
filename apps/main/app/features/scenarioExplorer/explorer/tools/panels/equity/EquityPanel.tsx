@@ -583,6 +583,7 @@ export default function EquityPanel({
 
       if (objectivesToShow.length === 0) {
         setMotionChildren?.(null)
+        mapActions.setMappedOutcomeCodes([])
         return
       }
 
@@ -867,6 +868,17 @@ export default function EquityPanel({
         )
       })
 
+      // Tell the map caption which outcomes the painted markers show.
+      const paintedCodes = Array.from(
+        new Set(
+          objectivesToShow
+            .filter((_, i) => markerElements[i] !== null)
+            .map((obj) => obj.tierCode)
+            .filter((c): c is string => Boolean(c)),
+        ),
+      )
+      mapActions.setMappedOutcomeCodes(paintedCodes)
+
       // Set markers on the map
       setMotionChildren?.(<>{markerElements}</>)
 
@@ -910,6 +922,7 @@ export default function EquityPanel({
       handleShowOnMap(selectedTierLocationCodes)
     } else if (setMotionChildren) {
       setMotionChildren(null)
+      mapActions.setMappedOutcomeCodes([])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedObjectives, handleShowOnMap, promptShown])
@@ -943,6 +956,7 @@ export default function EquityPanel({
       if (setMotionChildren) {
         setMotionChildren(null)
       }
+      mapActions.setMappedOutcomeCodes([])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

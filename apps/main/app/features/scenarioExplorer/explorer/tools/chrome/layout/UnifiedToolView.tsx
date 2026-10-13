@@ -95,6 +95,7 @@ export default function UnifiedToolView({
     return () => {
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
+      mapActions.setMappedOutcomeCodes([])
       mapActions.setExplorePanelWidth(50)
     }
   }, [])
@@ -103,6 +104,7 @@ export default function UnifiedToolView({
   // outcome highlights from a previous tool don't persist.
   useEffect(() => {
     mapActions.clearOutcomeVisualization()
+    mapActions.setMappedOutcomeCodes([])
     mapActions.clearMapTooltips()
   }, [exploreMode])
 
