@@ -5,6 +5,7 @@ import {
   collectConsoleErrors,
   setupNetwork,
 } from "./support/network"
+import { TOUR_EXAMPLE_NOTE } from "../app/features/scenarioExplorer/explorer/tools/components/scenarioPrompt"
 
 // The Bar tour with nothing selected. Its steps anchor on a card's glyphs,
 // pin and share controls, which only exist while a card is drawn, so the
@@ -69,6 +70,10 @@ test("the bar tour draws a card to anchor on, then the prompt returns", async ({
     .click()
   const tour = page.getByRole("dialog")
   await expect(tour).toBeVisible()
+  // The card says the drawn results are an example for the tour.
+  await expect(tour.getByTestId("tour-example-note")).toHaveText(
+    TOUR_EXAMPLE_NOTE,
+  )
   // The prompt gives way to the current-operations card...
   await expect(page.locator("[data-select-scenario-prompt]")).toHaveCount(0)
   await expect(outcomeLabel.first()).toBeVisible()

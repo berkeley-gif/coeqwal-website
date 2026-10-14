@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
 import { DATA_TOUR } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/tour/steps"
 import { selectCurrentOperations } from "./support/scenarioSelection"
+import { TOUR_EXAMPLE_NOTE } from "../app/features/scenarioExplorer/explorer/tools/components/scenarioPrompt"
 
 // The Data in Depth tour auto-starts on the tool's first visit. The shared
 // network setup marks it seen for every other spec, so this one clears the
@@ -35,11 +36,39 @@ test("the data in depth tour auto-starts, walks every step, and closes", async (
   // (the save-snapshot step does), which would otherwise match two elements.
   const card = page.getByRole("dialog")
   await expect(card.getByText(first!.title)).toBeVisible()
+  // The drawn chart goes away when the tour ends, so every card says it is
+  // an example, and the dialog's description includes that note.
+  const note = card.getByTestId("tour-example-note")
+  await expect(note).toHaveText(TOUR_EXAMPLE_NOTE)
+  await expect(card).toHaveAccessibleDescription(
+    new RegExp(TOUR_EXAMPLE_NOTE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+  )
+
+  // The note must be readable. Axe cannot judge contrast under the tour's
+  // scrim, so compute the WCAG ratio from the note's own colors (it paints
+  // its own background).
+  const ratio = await note.evaluate((el) => {
+    const cs = getComputedStyle(el)
+    const lum = (rgb: string) => {
+      const [r, g, b] = (rgb.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number)
+      const lin = (c: number) => {
+        const v = c / 255
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4
+      }
+      return 0.2126 * lin(r!) + 0.7152 * lin(g!) + 0.0722 * lin(b!)
+    }
+    const [hi, lo] = [lum(cs.color), lum(cs.backgroundColor)].sort(
+      (a, b) => b - a,
+    )
+    return (hi! + 0.05) / (lo! + 0.05)
+  })
+  expect(ratio).toBeGreaterThanOrEqual(4.5)
 
   // Every step renders its own card, in order, without throwing.
   for (let i = 1; i < DATA_TOUR.length; i++) {
     await page.getByRole("button", { name: "Next" }).click()
     await expect(card.getByText(DATA_TOUR[i]!.title)).toBeVisible()
+    await expect(note).toBeVisible()
   }
 
   // The last step finishes rather than advancing.
@@ -85,5 +114,7 @@ test("every anchored tour step resolves to an element on the tool", async ({
     await expect(page.locator("[data-tour-highlight]")).toHaveCount(
       step.anchorId ? 1 : 0,
     )
+    // The chart is the user's own selection, so no example note.
+    await expect(card.getByTestId("tour-example-note")).toHaveCount(0)
   }
 })
