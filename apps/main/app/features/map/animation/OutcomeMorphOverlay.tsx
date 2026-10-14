@@ -1775,10 +1775,16 @@ export default function OutcomeMorphOverlay({
                   activeLocationSet != null &&
                   activeLocationSet.has(locKey)) ||
                 demoHighlightedLocationKey === locKey
+              // Step 5 demo: fade every other square so the one highlighted
+              // location is easy to find among ~130 neighbours.
+              const isDemoDimmed =
+                demoHighlightedLocationKey != null && !isLocationActive
               const isDimmed =
-                interactive &&
-                spotlightedTier != null &&
-                shape.tier !== spotlightedTier
+                isDemoDimmed ||
+                (interactive &&
+                  spotlightedTier != null &&
+                  shape.tier !== spotlightedTier)
+
               const isBarMode = encodingMode === "bar"
               const isAvgMode = encodingMode === "average"
               const isBarOrAvg = isBarMode || isAvgMode
@@ -1821,7 +1827,7 @@ export default function OutcomeMorphOverlay({
                     isBarOrAvg
                       ? 0
                       : isLocationActive
-                        ? 2
+                        ? 3
                         : spotlightedTier === shape.tier
                           ? 1.5
                           : 0.5
