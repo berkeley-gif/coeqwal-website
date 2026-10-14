@@ -433,7 +433,10 @@ export default function CompareControls() {
                   color: theme.palette.grey[600],
                 }}
               >
-                {group.label}s (up to {MAX_COMPARE_LOCATIONS})
+                {group.label}s
+                {group.items.length > MAX_COMPARE_LOCATIONS
+                  ? ` (up to ${MAX_COMPARE_LOCATIONS})`
+                  : ""}
               </Typography>
               {picker ? (
                 <>
@@ -497,6 +500,9 @@ export default function CompareControls() {
                       <Tooltip
                         key={l.id}
                         title={l.aggregate ? "Aggregate rollup" : ""}
+                        // The tooltip describes the chip; it must not
+                        // replace the location name as its accessible name.
+                        describeChild
                       >
                         <Chip
                           size="small"

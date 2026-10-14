@@ -15,7 +15,7 @@
  * cleared, so it revives on variables the filter applies to.
  */
 
-import React from "react"
+import React, { useId } from "react"
 import { Box, Chip, Typography, useTheme } from "@repo/ui/mui"
 import { useDataSlice } from "../../../../store"
 import { useTourAnchor } from "../../../tour"
@@ -32,11 +32,22 @@ export default function WytFilterChips() {
     toggleWaterYearType,
     clearWaterYearTypes,
   } = useDataSlice()
+  const unavailableNoteId = useId()
 
   if (view === "value") return null
 
   const wytApplicable = getVariable(selectedVariableId)?.wytApplicable !== false
   const anySelected = wytApplicable && selectedWaterYearTypes.length > 0
+
+  // When the filter does not apply, the chips read as disabled buttons
+  // that say why, rather than as unpressed toggles.
+  const unavailableProps = wytApplicable
+    ? {}
+    : {
+        role: "button",
+        "aria-disabled": true,
+        "aria-describedby": unavailableNoteId,
+      }
 
   return (
     <Box
@@ -60,6 +71,7 @@ export default function WytFilterChips() {
         size="small"
         clickable={wytApplicable}
         disabled={!wytApplicable}
+        {...unavailableProps}
         label="All years"
         color={!wytApplicable || anySelected ? "default" : "primary"}
         variant={!wytApplicable || anySelected ? "outlined" : "filled"}
@@ -74,16 +86,18 @@ export default function WytFilterChips() {
             size="small"
             clickable={wytApplicable}
             disabled={!wytApplicable}
+            {...unavailableProps}
             label={WYT_LABELS[wyt]}
             color={selected ? "primary" : "default"}
             variant={selected ? "filled" : "outlined"}
-            aria-pressed={selected}
+            aria-pressed={wytApplicable ? selected : undefined}
             onClick={wytApplicable ? () => toggleWaterYearType(wyt) : undefined}
           />
         )
       })}
       {!wytApplicable && (
         <Typography
+          id={unavailableNoteId}
           variant="caption"
           sx={{ color: theme.palette.grey[600], fontStyle: "italic" }}
         >

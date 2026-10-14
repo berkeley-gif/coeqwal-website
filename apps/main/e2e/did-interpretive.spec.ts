@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test"
 import {
   formatValue,
   howToReadText,
+  percentDelta,
   summarySentence,
   type SummaryContext,
   type SummaryMember,
@@ -160,7 +161,7 @@ test("salmon sentence never quotes a value for a scenario with no data", () => {
   expect(s).toContain("45% of suitable spawning habitat")
 })
 
-test("salmon sentence marks a sample-backed comparison member as sample", () => {
+test("salmon sentence never quotes a member that is not live", () => {
   const s = summarySentence(
     [
       { ...member("Current Operations", [0.4, 0.5], true), isLive: true },
@@ -168,7 +169,10 @@ test("salmon sentence marks a sample-backed comparison member as sample", () => 
     ],
     salmonCtx,
   )
-  expect(s).toContain("Winter-run refuge flows 60% (sample)")
+  expect(s).toContain("45% of suitable spawning habitat")
+  expect(s).not.toContain("Winter-run refuge flows")
+  expect(s).not.toContain("60%")
+  expect(s).not.toContain("sample")
 })
 
 // Ted's n128: the box plot draws a dashed tick at the mean inside each box
@@ -210,7 +214,7 @@ test("stats sentence on the scenarios axis reports mean then CV per compared sce
     statsCtx,
   )
   expect(s).toBe(
-    "Mean M&I deliveries of the State Water Project for Current Operations under the Historical hydroclimate is 4.00 TAF. Mean M&I deliveries of the State Water Project for the Winter-run refuge flows scenario is 8.00 TAF: a difference of +100%. The annual variation in M&I deliveries of the State Water Project for Current Operations under the Historical hydroclimate is 1.06 (CV). The annual variation in M&I deliveries of the State Water Project for the Winter-run refuge flows scenario is 1.06 (CV): a difference of +0%.",
+    "Mean M&I deliveries of the State Water Project for Current Operations under the Historical hydroclimate is 4.00 TAF. Mean M&I deliveries of the State Water Project for the Winter-run refuge flows scenario is 8.00 TAF: a difference of +100%. The annual variation in M&I deliveries of the State Water Project for Current Operations under the Historical hydroclimate is 1.06 (CV). The annual variation in M&I deliveries of the State Water Project for the Winter-run refuge flows scenario is 1.06 (CV): a difference of 0%.",
   )
   expect(s).not.toMatch(/median/i)
   // CV is a ratio: no unit token follows a CV value.
@@ -234,7 +238,7 @@ test("stats sentence uses the X2 wording for the Delta salinity variables", () =
     },
   )
   expect(s).toBe(
-    "The mean X2 location in April for Current Operations under the Historical hydroclimate is 4.0 km. The mean April X2 location for the Winter-run refuge flows scenario is 8.0 km: a difference of +100%. The annual variation in X2 location in April for Current Operations under the Historical hydroclimate is 1.06 (CV). The annual variation in April X2 location for the Winter-run refuge flows scenario is 1.06 (CV): a difference of +0%.",
+    "The mean X2 location in April for Current Operations under the Historical hydroclimate is 4.0 km. The mean April X2 location for the Winter-run refuge flows scenario is 8.0 km: a difference of +100%. The annual variation in X2 location in April for Current Operations under the Historical hydroclimate is 1.06 (CV). The annual variation in April X2 location for the Winter-run refuge flows scenario is 1.06 (CV): a difference of 0%.",
   )
 })
 
@@ -252,7 +256,7 @@ test("stats sentence on the climates axis ranges the mean and the CV across the 
     },
   )
   expect(s).toBe(
-    "At Shasta Reservoir under Current Operations, mean April reservoir storage ranges from 4.00 TAF (Historical) to 8.00 TAF (Extreme stress): a change of +100%. At Shasta Reservoir under Current Operations, the coefficient of variation (CV) of annual April reservoir storage is 1.06 (Historical) to 1.06 (Extreme stress): a change of +0%.",
+    "At Shasta Reservoir under Current Operations, mean April reservoir storage goes from 4.00 TAF (Historical) to 8.00 TAF (Extreme stress): a change of +100%. At Shasta Reservoir under Current Operations, the coefficient of variation (CV) of annual April reservoir storage changes from 1.06 (Historical) to 1.06 (Extreme stress): a change of 0%.",
   )
 })
 
@@ -287,7 +291,7 @@ test("stats sentence skips a member with no model results and names it", () => {
   expect(s).toContain("no data available for Delta Conveyance Project")
 })
 
-test("stats sentence renders a dash, not a division, when the reference mean is zero", () => {
+test("stats sentence says n/a, not a division, when the reference mean is zero", () => {
   const s = summarySentence(
     [
       member("Current Operations", [0, 0, 0], true),
@@ -295,7 +299,12 @@ test("stats sentence renders a dash, not a division, when the reference mean is 
     ],
     statsCtx,
   )
-  expect(s).toContain("a difference of -")
+  expect(s).toContain("a difference of n/a")
+  // A series that is zero every year has no CV, and no CV change.
+  expect(s).toContain("is n/a (CV).")
+  expect(s).toContain(
+    "for the Other scenario is 1.06 (CV): a difference of n/a.",
+  )
   expect(s).not.toContain("Infinity")
   expect(s).not.toContain("NaN")
 })
@@ -580,6 +589,177 @@ test("surface water delivery shortage sentence reports the no-shortage year coun
     scenarioName: "Current Operations",
   })
   expect(s).toBe(
-    "At All North of Delta under the Historical hydroclimate, Current Operations has no surface water delivery shortage in 3 of 4 years and a mean annual shortage of 1.0 %; Winter-run refuge flows has no shortage in 2 of 4 years and a mean annual shortage of 4.0 % (+300%).",
+    "At All North of Delta under the Historical hydroclimate, Current Operations has no surface water delivery shortage in 3 of 4 years and a mean annual shortage of 1.0%; Winter-run refuge flows has no shortage in 2 of 4 years and a mean annual shortage of 4.0% (+300%).",
   )
+})
+
+// Percent changes never print a signed zero, and a zero reference never
+// prints a bare dash.
+test("percent changes round to 0% and say n/a against a zero reference", () => {
+  expect(percentDelta(100, 112)).toBe("+12%")
+  expect(percentDelta(100, 96)).toBe("-4%")
+  expect(percentDelta(100, 99.8)).toBe("0%")
+  expect(percentDelta(100, 100.3)).toBe("0%")
+  expect(percentDelta(0, 0)).toBe("0%")
+  expect(percentDelta(0, 5)).toBe("n/a")
+  // Half-percent changes round alike in both directions.
+  expect(percentDelta(200, 199)).toBe("-1%")
+  expect(percentDelta(200, 201)).toBe("+1%")
+})
+
+// Shortages are zero in most years: their sentence counts the years with
+// none and quotes the mean, never a median of 0 with "-" comparisons.
+test("agricultural and municipal shortages use the zero-aware sentence", () => {
+  for (const [variableId, noun] of [
+    ["ag_short", "agricultural water shortage"],
+    ["cws_short", "municipal supply shortage"],
+  ] as const) {
+    for (const view of ["dist", "pct_demand"] as const) {
+      const s = summarySentence(
+        [
+          member("Current Operations", [0, 0, 0, 4], true),
+          member("Other", [0, 0, 2, 6]),
+        ],
+        templateCtx({
+          variableId,
+          variableName: "Water shortage",
+          proseName: noun,
+          view,
+          unit: view === "dist" ? "TAF" : "%",
+        }),
+      )
+      expect(s, `${variableId} ${view}`).toContain(
+        `Current Operations has no ${noun} in 3 of 4 years`,
+      )
+      expect(s).toContain("Other has no shortage in 2 of 4 years")
+      expect(s).not.toMatch(/ -[.;,]/)
+    }
+  }
+})
+
+test("the groundwater level view is described as level, not storage", () => {
+  const s = summarySentence(
+    [member("Current Operations", [200, 210, 220], true)],
+    {
+      ...statsCtx,
+      variableId: "gw_stor",
+      proseName: "groundwater storage",
+      view: "level",
+      unit: "ft",
+    },
+  )
+  expect(s).toContain("Mean groundwater level for Current Operations")
+  expect(s).not.toContain("groundwater storage")
+})
+
+test("a single compared location reads as one value, not a range", () => {
+  const ctx = templateCtx({
+    compareBy: "locations",
+    variableName: "River flows",
+    variableId: "riv_flow",
+  })
+  const only = [member("System-wide", [4, 8])]
+  expect(summarySentence(only, ctx)).toBe(
+    "Under Current Operations (Historical), median river flows at System-wide is 6.00 TAF.",
+  )
+  const stats = summarySentence(only, { ...ctx, distKind: "stats" })
+  expect(stats).toContain("mean river flows at System-wide is 6.00 TAF")
+  expect(stats).not.toContain("ranges from")
+})
+
+test("both CVs undefined: the CV change is n/a, not 0%", () => {
+  const s = summarySentence(
+    [member("Current Operations", [0, 0, 0], true), member("Other", [0, 0, 0])],
+    statsCtx,
+  )
+  expect(s).toContain(
+    "for the Other scenario is n/a (CV): a difference of n/a.",
+  )
+  expect(s).not.toContain("NaN")
+})
+
+test("no view quotes a member that is not live", () => {
+  const notLive = { isLive: false }
+  const bands = (v: number) =>
+    Array.from({ length: 12 }, () => ({ p10: v, p50: v, p90: v }))
+  const monthly = summarySentence(
+    [
+      { ...member("Current Operations", [1], true), bands: bands(1) },
+      { ...member("Stand-in", [2]), bands: bands(2), ...notLive },
+    ],
+    templateCtx({ view: "monthly", variableName: "Delta outflow volume" }),
+  )
+  expect(monthly).not.toContain("Stand-in")
+  for (const view of ["cv", "value"] as const) {
+    const s = summarySentence(
+      [
+        { ...member("Current Operations", [1], true), value: 0.2 },
+        { ...member("Stand-in", [1]), value: 0.5, ...notLive },
+      ],
+      templateCtx({ view, variableName: "River flows" }),
+    )
+    expect(s, view).not.toContain("Stand-in")
+    expect(s, view).not.toContain("0.50")
+  }
+})
+
+test("reservoir comparisons that round to zero say about the same", () => {
+  const s = summarySentence(
+    [
+      member("Current Operations", [100, 100], true),
+      member("Other", [99.8, 99.8]),
+    ],
+    templateCtx({
+      variableId: "res_apr",
+      variableName: "April reservoir storage",
+    }),
+  )
+  expect(s).toContain(
+    "The Other scenario has about the same median April reservoir storage.",
+  )
+  expect(s).not.toMatch(/0% (higher|lower)/)
+})
+
+test("a monthly chart without monthly bands has no summary", () => {
+  const s = summarySentence(
+    [member("Current Operations", [4, 8], true)],
+    templateCtx({ view: "monthly", variableName: "Delta outflow volume" }),
+  )
+  expect(s).toBe("")
+})
+
+test("the CV view ranks only defined CVs", () => {
+  const ctx = templateCtx({ view: "cv", variableName: "River flows" })
+  const s = summarySentence(
+    [
+      { ...member("Zero mean", [0, 0, 0], true), value: 0 },
+      { ...member("Not finite", [1, 2]), value: Number.NaN },
+      { ...member("Constant", [4, 4]), value: 0 },
+      { ...member("Variable", [2, 6]), value: 0.5 },
+    ],
+    ctx,
+  )
+  expect(s).toBe(
+    "Year-to-year swings are largest for Variable (CV 0.50) and smallest for Constant (CV 0.00). Higher CV = less predictable from year to year.",
+  )
+})
+
+test("the climates sentences compare the first and last climates, not a range", () => {
+  const s = summarySentence(
+    [
+      member("Historical", [4, 4]),
+      member("Intermediate", [8, 8]),
+      member("Extreme stress", [4, 4]),
+    ],
+    {
+      ...statsCtx,
+      compareBy: "climates",
+      variableId: "res_apr",
+      proseName: "April reservoir storage",
+    },
+  )
+  expect(s).toContain(
+    "goes from 4.00 TAF (Historical) to 4.00 TAF (Extreme stress)",
+  )
+  expect(s).not.toContain("ranges from")
 })

@@ -184,6 +184,43 @@ test("reservoirs compare live in one request, each member by its own subject", a
   await expect(page.getByText(/3,000 TAF at Shasta/)).toBeVisible()
   await expect(page.getByText(/1,000 TAF at Trinity/)).toBeVisible()
   await expect(page.getByText(/^Sample data$/)).toHaveCount(0)
+  // The aggregate chips keep their location names as accessible names; the
+  // "Aggregate rollup" tooltip describes them instead of replacing the name.
+  for (const name of ["All North of Delta", "All South of Delta"]) {
+    const chip = page.getByRole("button", { name, exact: true })
+    await expect(chip).toBeVisible()
+    await expect(chip).toHaveAccessibleDescription("Aggregate rollup")
+  }
+  await expect(
+    page.getByRole("button", { name: "Aggregate rollup" }),
+  ).toHaveCount(0)
+  // With the tooltip open from the keyboard, the description points at it
+  // and the name is still the location's.
+  const nod = page.getByRole("button", {
+    name: "All North of Delta",
+    exact: true,
+  })
+  await nod.focus()
+  await page.keyboard.press("Shift+Tab")
+  await page.keyboard.press("Tab")
+  await expect(
+    page.getByRole("tooltip", { name: "Aggregate rollup" }),
+  ).toBeVisible()
+  const describedBy = (await nod.getAttribute("aria-describedby")) ?? ""
+  expect(describedBy).not.toBe("")
+  for (const id of describedBy.split(/\s+/)) {
+    await expect(page.locator(`[id="${id}"]`)).toHaveCount(1)
+  }
+  await expect(nod).toHaveAccessibleDescription("Aggregate rollup")
+  await page.keyboard.press("Escape")
+  await expect(
+    page.getByRole("tooltip", { name: "Aggregate rollup" }),
+  ).toHaveCount(0)
+  await expect(nod).toBeFocused()
+  await expect(nod).toHaveAccessibleName("All North of Delta")
+  await expect(nod).toHaveAccessibleDescription("Aggregate rollup")
+  // Ten reservoirs, so the caption states the cap of six.
+  await expect(page.getByText(/s \(up to 6\)$/)).toBeVisible()
 
   // Percent of capacity: one request in pct_capacity, served values shown.
   await page.getByRole("button", { name: /capacity/i }).click()
@@ -197,8 +234,8 @@ test("reservoirs compare live in one request, each member by its own subject", a
       ),
     )
     .toBe(true)
-  await expect(page.getByText(/66 % at Shasta/)).toBeVisible()
-  await expect(page.getByText(/41 % at Trinity/)).toBeVisible()
+  await expect(page.getByText(/66% at Shasta/)).toBeVisible()
+  await expect(page.getByText(/41% at Trinity/)).toBeVisible()
 
   // Adding a reservoir re-requests once with four subjects.
   await page.getByRole("button", { name: "Folsom" }).click()

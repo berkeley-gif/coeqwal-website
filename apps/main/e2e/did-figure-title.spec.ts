@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test"
-import { buildFigureTitle } from "../app/features/scenarioExplorer/explorer/share/figureTitle"
+import {
+  buildFigureTitle,
+  titleCaseLabel,
+} from "../app/features/scenarioExplorer/explorer/share/figureTitle"
 import {
   getLocationTitle,
   getVariable,
@@ -129,4 +132,12 @@ test("dataFigureTitle keeps the standard head for other variables", () => {
   ).toBe(
     "Total Delta Exports (Delta (NDO Node)), 2 Scenarios, Historical Hydroclimate, All Water Years",
   )
+})
+
+test("title case keeps via lowercase and cases a word after a parenthesis", () => {
+  expect(
+    titleCaseLabel("Groundwater pumping limits via reduced crop acreage"),
+  ).toBe("Groundwater Pumping Limits via Reduced Crop Acreage")
+  expect(titleCaseLabel("All routes (total)")).toBe("All Routes (Total)")
+  expect(titleCaseLabel("Via the Delta")).toBe("Via the Delta")
 })

@@ -107,7 +107,7 @@ test("Stats view sentence reports the mean and CV, not the median", async ({
   await page.getByRole("button", { name: "Hydroclimates", exact: true }).click()
   await expect(
     page.getByText(
-      /^At Shasta Reservoir under .+, mean April reservoir storage ranges from [\d,.]+ TAF \(/,
+      /^At Shasta Reservoir under .+, mean April reservoir storage goes from [\d,.]+ TAF \(/,
     ),
   ).toBeVisible()
 })

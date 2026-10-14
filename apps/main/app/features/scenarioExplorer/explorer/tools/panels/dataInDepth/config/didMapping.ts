@@ -221,10 +221,10 @@ const GW_AGGREGATE_SUBJECTS: Record<string, string> = {
  * /api/data-in-depth/groundwater-storage, 44 subjects including the two
  * aggregates). Basin location ids ARE these codes, so resolution is an
  * allowlisted pass-through (codes verified against the endpoint at
- * implementation time): an id outside the set falls back to mock instead of
- * issuing a dead request. Every basin entity serves level and volume
- * (verified per subject); the aggregates serve volume only, so an
- * aggregate's level view falls back to sample per member.
+ * implementation time): an id outside the set is reported as having no data
+ * instead of issuing a dead request. Every basin entity serves level and
+ * volume (verified per subject); the aggregates serve volume only, so an
+ * aggregate's level view is unavailable and the tool shows why.
  * Exported so the registry parity spec can assert exact set equality with
  * the basins location list (either list drifting fails the test).
  */
@@ -796,8 +796,8 @@ export function pickLiveSeriesPoints(
  * only when every input has a non-empty series with verifiable, identical
  * water years (equal length, same year at every index). Anything less -
  * a missing route, a length mismatch, misaligned or unverifiable years -
- * returns null so the caller falls back to sample labeling instead of ever
- * drawing a partial total. Used by the synthetic SSJV all-routes location.
+ * returns null so the caller reports the total as having no data instead of
+ * ever drawing a partial total. Used by the synthetic SSJV all-routes location.
  */
 export function sumAlignedSeriesPoints(
   pointsList: readonly SeriesPoints[],
