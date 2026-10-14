@@ -492,8 +492,10 @@ function proseList(items: string[]): string {
  * specified per axis (scenarios: "Mean <variable> for <reference> under the
  * <hydroclimate> hydroclimate is <mean> <unit>. Mean <variable> for the
  * <scenario> scenario is <mean> <unit>: a difference of <%>." and the CV
- * twin; climates: "At <location> under <scenario>, mean <variable> ranges
- * from ... (<first>) to ... (<last>): a change of <%>." and the CV twin).
+ * twin; climates: "At <location> under <scenario>, mean <variable> goes
+ * from ... (<first>) to ... (<last>): a change of <%>." and the CV twin,
+ * worded as a change between the first and last climates, which is what
+ * they compare, not as a range over every climate).
  * The X2 variables use the lead's X2 phrasing. On the level view a third
  * sentence reports the linear trend the third panel draws. Members without
  * model results contribute no number and are named.
@@ -564,7 +566,7 @@ function statsSentence(
     const b = rows[rows.length - 1] as (typeof rows)[0]
     const where = ctx.locationTitleName || ctx.locationName
     sentences.push(
-      `At ${where} under ${ctx.scenarioName}, mean ${vn} ranges from ${fmt(a.mean)} (${a.m.label}) to ${fmt(b.mean)} (${b.m.label}): a change of ${percentDelta(a.mean, b.mean)}.`,
+      `At ${where} under ${ctx.scenarioName}, mean ${vn} goes from ${fmt(a.mean)} (${a.m.label}) to ${fmt(b.mean)} (${b.m.label}): a change of ${percentDelta(a.mean, b.mean)}.`,
     )
     sentences.push(
       `At ${where} under ${ctx.scenarioName}, the coefficient of variation (CV) of annual ${vn} changes from ${formatCv(a.cv, a.mean)} (${a.m.label}) to ${formatCv(b.cv, b.mean)} (${b.m.label}): a change of ${cvDelta(a, b)}.`,

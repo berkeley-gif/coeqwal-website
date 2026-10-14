@@ -256,7 +256,7 @@ test("stats sentence on the climates axis ranges the mean and the CV across the 
     },
   )
   expect(s).toBe(
-    "At Shasta Reservoir under Current Operations, mean April reservoir storage ranges from 4.00 TAF (Historical) to 8.00 TAF (Extreme stress): a change of +100%. At Shasta Reservoir under Current Operations, the coefficient of variation (CV) of annual April reservoir storage changes from 1.06 (Historical) to 1.06 (Extreme stress): a change of 0%.",
+    "At Shasta Reservoir under Current Operations, mean April reservoir storage goes from 4.00 TAF (Historical) to 8.00 TAF (Extreme stress): a change of +100%. At Shasta Reservoir under Current Operations, the coefficient of variation (CV) of annual April reservoir storage changes from 1.06 (Historical) to 1.06 (Extreme stress): a change of 0%.",
   )
 })
 
@@ -742,4 +742,24 @@ test("the CV view ranks only defined CVs", () => {
   expect(s).toBe(
     "Year-to-year swings are largest for Variable (CV 0.50) and smallest for Constant (CV 0.00). Higher CV = less predictable from year to year.",
   )
+})
+
+test("the climates sentences compare the first and last climates, not a range", () => {
+  const s = summarySentence(
+    [
+      member("Historical", [4, 4]),
+      member("Intermediate", [8, 8]),
+      member("Extreme stress", [4, 4]),
+    ],
+    {
+      ...statsCtx,
+      compareBy: "climates",
+      variableId: "res_apr",
+      proseName: "April reservoir storage",
+    },
+  )
+  expect(s).toContain(
+    "goes from 4.00 TAF (Historical) to 4.00 TAF (Extreme stress)",
+  )
+  expect(s).not.toContain("ranges from")
 })
