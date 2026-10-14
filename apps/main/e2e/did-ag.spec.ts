@@ -262,7 +262,7 @@ test("ag shortage derives its percent-of-demand view from two served measures", 
     .toBe(true)
   // 400 / (3,600 + 400) x 100 = 10 percent, a value that appears nowhere in
   // the fixture's inputs.
-  await expect(page.getByText(/10(\.0+)? %/).first()).toBeVisible()
+  await expect(page.getByText(/10(\.0+)?%/).first()).toBeVisible()
 
   expect(errors).toEqual([])
 })

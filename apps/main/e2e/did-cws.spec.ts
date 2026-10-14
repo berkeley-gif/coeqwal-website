@@ -259,7 +259,7 @@ test("cws variables fetch their per-variable measures and go live", async ({
       ),
     )
     .toBe(true)
-  await expect(page.getByText(/12(\.0+)? %/).first()).toBeVisible()
+  await expect(page.getByText(/12(\.0+)?%/).first()).toBeVisible()
 
   expect(errors).toEqual([])
 })
@@ -310,9 +310,13 @@ test("cws variables disable the water-year-type row and never send wyt", async (
       "Dry",
       "Critical",
     ]) {
-      await expect(
-        page.getByRole("button", { name: label, exact: true }),
-      ).toHaveCount(0)
+      // Each chip reads as a disabled button that says why.
+      const chip = page.getByRole("button", { name: label, exact: true })
+      await expect(chip).toHaveAttribute("aria-disabled", "true")
+      await expect(chip).not.toHaveAttribute("aria-pressed")
+      await expect(chip).toHaveAccessibleDescription(
+        "Not applicable to this variable",
+      )
     }
   }
 
@@ -632,7 +636,7 @@ test("surface water delivery shortage derives 100 minus percent met from the ser
     )
     .toBe(true)
   // NOD aggregate: 100 - 93.5 = 6.5, printed with one decimal under 10.
-  await expect(page.getByText(/6\.5 %/).first()).toBeVisible()
+  await expect(page.getByText(/6\.5%/).first()).toBeVisible()
   await expect(
     page.getByText(/key outcome: Community surface water/),
   ).toBeVisible()

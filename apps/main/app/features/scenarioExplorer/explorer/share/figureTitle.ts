@@ -29,10 +29,15 @@ const MINOR_WORDS = new Set([
   "per",
   "the",
   "to",
+  "via",
   "vs",
 ])
 
-/** Title-case a display label, keeping minor words and symbols intact. */
+/**
+ * Title-case a display label, keeping minor words and symbols intact. A
+ * word opening with a parenthesis is cased after it ("(total)" ->
+ * "(Total)").
+ */
 export function titleCaseLabel(label: string): string {
   return label
     .split(" ")
@@ -40,9 +45,11 @@ export function titleCaseLabel(label: string): string {
       if (i > 0 && MINOR_WORDS.has(word.toLowerCase())) {
         return word.toLowerCase()
       }
-      const first = word.charAt(0)
+      const lead = word.startsWith("(") ? "(" : ""
+      const rest = word.slice(lead.length)
+      const first = rest.charAt(0)
       return first === first.toLowerCase()
-        ? first.toUpperCase() + word.slice(1)
+        ? lead + first.toUpperCase() + rest.slice(1)
         : word
     })
     .join(" ")

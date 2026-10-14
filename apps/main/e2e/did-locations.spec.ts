@@ -184,6 +184,18 @@ test("reservoirs compare live in one request, each member by its own subject", a
   await expect(page.getByText(/3,000 TAF at Shasta/)).toBeVisible()
   await expect(page.getByText(/1,000 TAF at Trinity/)).toBeVisible()
   await expect(page.getByText(/^Sample data$/)).toHaveCount(0)
+  // The aggregate chips keep their location names as accessible names; the
+  // "Aggregate rollup" tooltip describes them instead of replacing the name.
+  for (const name of ["All North of Delta", "All South of Delta"]) {
+    const chip = page.getByRole("button", { name, exact: true })
+    await expect(chip).toBeVisible()
+    await expect(chip).toHaveAccessibleDescription("Aggregate rollup")
+  }
+  await expect(
+    page.getByRole("button", { name: "Aggregate rollup" }),
+  ).toHaveCount(0)
+  // Ten reservoirs, so the caption states the cap of six.
+  await expect(page.getByText(/s \(up to 6\)$/)).toBeVisible()
 
   // Percent of capacity: one request in pct_capacity, served values shown.
   await page.getByRole("button", { name: /capacity/i }).click()
@@ -197,8 +209,8 @@ test("reservoirs compare live in one request, each member by its own subject", a
       ),
     )
     .toBe(true)
-  await expect(page.getByText(/66 % at Shasta/)).toBeVisible()
-  await expect(page.getByText(/41 % at Trinity/)).toBeVisible()
+  await expect(page.getByText(/66% at Shasta/)).toBeVisible()
+  await expect(page.getByText(/41% at Trinity/)).toBeVisible()
 
   // Adding a reservoir re-requests once with four subjects.
   await page.getByRole("button", { name: "Folsom" }).click()

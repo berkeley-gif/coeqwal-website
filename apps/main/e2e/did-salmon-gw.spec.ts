@@ -174,10 +174,12 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
     .poll(() => salmonRequests.includes("WRLCM_ADULT_FEMALES"))
     .toBe(true)
   await expect(page.getByText("Not applicable to this variable")).toBeVisible()
-  // Disabled chips drop out of the button role.
-  await expect(
-    page.getByRole("button", { name: "Wet", exact: true }),
-  ).toHaveCount(0)
+  // The chips read as disabled buttons that say why.
+  const wetChip = page.getByRole("button", { name: "Wet", exact: true })
+  await expect(wetChip).toHaveAttribute("aria-disabled", "true")
+  await expect(wetChip).toHaveAccessibleDescription(
+    "Not applicable to this variable",
+  )
   // The figure title carries no water-years clause for an opted-out variable.
   await expect(
     page.getByRole("heading", { name: /Winter-run Abundance/ }),
