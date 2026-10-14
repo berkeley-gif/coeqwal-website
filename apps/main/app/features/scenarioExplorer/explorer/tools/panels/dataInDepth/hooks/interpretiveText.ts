@@ -57,18 +57,18 @@ export interface SummaryMember {
 }
 
 /**
- * A member whose series is model results, so a sentence may quote it. A
- * member known not to be live is never quoted, whatever series it carries.
+ * A member a sentence may quote at all: model results that have arrived. A
+ * member known not to be live, without data, still loading or failed is
+ * never quoted, whatever it carries. Every view checks this first, then the
+ * payload it reads (series, monthly bands or a single value).
  */
+function isQuotable(m: SummaryMember): boolean {
+  return m.isLive !== false && !m.liveDataMissing && !m.pending && !m.loadFailed
+}
+
+/** A quotable member with a series to compute from. */
 function hasUsableSeries(m: SummaryMember): boolean {
-  return (
-    m.isLive !== false &&
-    !m.liveDataMissing &&
-    !m.pending &&
-    !m.loadFailed &&
-    !!m.series &&
-    m.series.length > 0
-  )
+  return isQuotable(m) && !!m.series && m.series.length > 0
 }
 
 export interface SummaryContext {
@@ -178,7 +178,6 @@ export function summarySentence(
     ctx.variableId === "gw_stor" && ctx.view === "level"
       ? "groundwater level"
       : (ctx.proseName ?? ctx.variableName.toLowerCase())
-  const first = members[0] as SummaryMember
 
   // Welfare loss and the shortages are zero in most years, so their
   // distribution sentence names the share of years with none and the mean;
@@ -207,24 +206,28 @@ export function summarySentence(
     return statsSentence(members, ctx, vn)
   }
 
-  if (ctx.view === "monthly" && first.bands && first.bands.length === 12) {
-    const bands = first.bands
+  const withBands = members.filter(
+    (m) => isQuotable(m) && m.bands && m.bands.length === 12,
+  )
+  const firstBanded = withBands[0]
+  if (ctx.view === "monthly" && firstBanded?.bands) {
+    const bands = firstBanded.bands
     let peak = 0
     bands.forEach((b, i) => {
       if (b.p50 > (bands[peak] as MonthlyBand).p50) peak = i
     })
-    let s = `Median ${vn} peaks in ${WATER_MONTHS[peak]} for ${first.label}`
-    const last = members[members.length - 1] as SummaryMember
-    if (members.length > 1 && last.bands) {
+    let s = `Median ${vn} peaks in ${WATER_MONTHS[peak]} for ${firstBanded.label}`
+    const last = withBands[withBands.length - 1] as SummaryMember
+    if (withBands.length > 1 && last.bands) {
       const a = bands.reduce((t, b) => t + b.p50, 0)
       const b = last.bands.reduce((t, band) => t + band.p50, 0)
-      s += `; across the year, ${last.label} runs ${percentDelta(a, b)} vs ${first.label}`
+      s += `; across the year, ${last.label} runs ${percentDelta(a, b)} vs ${firstBanded.label}`
     }
     return `${s}.`
   }
 
   if (ctx.view === "cv") {
-    const withValues = members.filter((m) => m.value != null)
+    const withValues = members.filter((m) => isQuotable(m) && m.value != null)
     if (withValues.length === 0) return ""
     const mx = withValues.reduce((a, b) =>
       (b.value ?? 0) > (a.value ?? 0) ? b : a,
@@ -236,7 +239,7 @@ export function summarySentence(
   }
 
   if (ctx.view === "value") {
-    const withValues = members.filter((m) => m.value != null)
+    const withValues = members.filter((m) => isQuotable(m) && m.value != null)
     if (withValues.length === 0) return ""
     const mx = withValues.reduce((a, b) =>
       (b.value ?? 0) > (a.value ?? 0) ? b : a,
@@ -387,9 +390,11 @@ function templateSentence(
       `At ${where}, median ${month} reservoir storage for ${ref.m.label} under the ${held} is ${val(ref.med)}.`,
     )
     for (const x of others) {
-      const d = ((x.med - ref.med) / Math.abs(ref.med)) * 100
+      const d = Math.round(((x.med - ref.med) / Math.abs(ref.med)) * 100)
       sentences.push(
-        `The ${x.m.label} scenario has ${Math.abs(d).toFixed(0)}% ${d >= 0 ? "higher" : "lower"} median ${month} reservoir storage.`,
+        d === 0
+          ? `The ${x.m.label} scenario has about the same median ${month} reservoir storage.`
+          : `The ${x.m.label} scenario has ${Math.abs(d)}% ${d > 0 ? "higher" : "lower"} median ${month} reservoir storage.`,
       )
     }
   } else if (family === "x2") {
@@ -439,6 +444,19 @@ function heldClimateOf(ctx: SummaryContext): string {
  */
 function formatCv(cv: number, mean: number): string {
   return mean === 0 || !Number.isFinite(cv) ? "n/a" : cv.toFixed(2)
+}
+
+/**
+ * The change between two members' CVs, or "n/a" when either has no CV (a
+ * zero mean or a non-finite value).
+ */
+function cvDelta(
+  a: { cv: number; mean: number },
+  b: { cv: number; mean: number },
+): string {
+  const defined = (r: { cv: number; mean: number }) =>
+    r.mean !== 0 && Number.isFinite(r.cv)
+  return defined(a) && defined(b) ? percentDelta(a.cv, b.cv) : "n/a"
 }
 
 /** Prose list: "a", "a and b", "a, b, and c". */
@@ -499,7 +517,7 @@ function statsSentence(
       )
       for (const r of others) {
         sentences.push(
-          `The annual variation in ${x2Month} X2 location for the ${r.m.label} scenario is ${formatCv(r.cv, r.mean)} (CV): a difference of ${percentDelta(ref.cv, r.cv)}.`,
+          `The annual variation in ${x2Month} X2 location for the ${r.m.label} scenario is ${formatCv(r.cv, r.mean)} (CV): a difference of ${cvDelta(ref, r)}.`,
         )
       }
     } else {
@@ -516,7 +534,7 @@ function statsSentence(
       )
       for (const r of others) {
         sentences.push(
-          `The annual variation in ${vn} for the ${r.m.label} scenario is ${formatCv(r.cv, r.mean)} (CV): a difference of ${percentDelta(ref.cv, r.cv)}.`,
+          `The annual variation in ${vn} for the ${r.m.label} scenario is ${formatCv(r.cv, r.mean)} (CV): a difference of ${cvDelta(ref, r)}.`,
         )
       }
     }
@@ -528,7 +546,7 @@ function statsSentence(
       `At ${where} under ${ctx.scenarioName}, mean ${vn} ranges from ${fmt(a.mean)} (${a.m.label}) to ${fmt(b.mean)} (${b.m.label}): a change of ${percentDelta(a.mean, b.mean)}.`,
     )
     sentences.push(
-      `At ${where} under ${ctx.scenarioName}, the coefficient of variation (CV) of annual ${vn} ranges from ${formatCv(a.cv, a.mean)} (${a.m.label}) to ${formatCv(b.cv, b.mean)} (${b.m.label}): a change of ${percentDelta(a.cv, b.cv)}.`,
+      `At ${where} under ${ctx.scenarioName}, the coefficient of variation (CV) of annual ${vn} changes from ${formatCv(a.cv, a.mean)} (${a.m.label}) to ${formatCv(b.cv, b.mean)} (${b.m.label}): a change of ${cvDelta(a, b)}.`,
     )
   } else if (rows.length === 1) {
     const only = rows[0] as (typeof rows)[0]

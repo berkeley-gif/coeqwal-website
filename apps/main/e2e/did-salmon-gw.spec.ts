@@ -177,6 +177,7 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
   // The chips read as disabled buttons that say why.
   const wetChip = page.getByRole("button", { name: "Wet", exact: true })
   await expect(wetChip).toHaveAttribute("aria-disabled", "true")
+  await expect(wetChip).not.toHaveAttribute("aria-pressed")
   await expect(wetChip).toHaveAccessibleDescription(
     "Not applicable to this variable",
   )

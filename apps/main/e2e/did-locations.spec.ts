@@ -194,6 +194,26 @@ test("reservoirs compare live in one request, each member by its own subject", a
   await expect(
     page.getByRole("button", { name: "Aggregate rollup" }),
   ).toHaveCount(0)
+  // With the tooltip open from the keyboard, the description points at it
+  // and the name is still the location's.
+  const nod = page.getByRole("button", {
+    name: "All North of Delta",
+    exact: true,
+  })
+  await nod.focus()
+  await page.keyboard.press("Shift+Tab")
+  await page.keyboard.press("Tab")
+  await expect(
+    page.getByRole("tooltip", { name: "Aggregate rollup" }),
+  ).toBeVisible()
+  const describedBy = (await nod.getAttribute("aria-describedby")) ?? ""
+  expect(describedBy).not.toBe("")
+  for (const id of describedBy.split(/\s+/)) {
+    await expect(page.locator(`[id="${id}"]`)).toHaveCount(1)
+  }
+  await expect(nod).toHaveAccessibleDescription("Aggregate rollup")
+  await page.keyboard.press("Escape")
+  await expect(nod).toHaveAccessibleName("All North of Delta")
   // Ten reservoirs, so the caption states the cap of six.
   await expect(page.getByText(/s \(up to 6\)$/)).toBeVisible()
 

@@ -256,7 +256,7 @@ test("stats sentence on the climates axis ranges the mean and the CV across the 
     },
   )
   expect(s).toBe(
-    "At Shasta Reservoir under Current Operations, mean April reservoir storage ranges from 4.00 TAF (Historical) to 8.00 TAF (Extreme stress): a change of +100%. At Shasta Reservoir under Current Operations, the coefficient of variation (CV) of annual April reservoir storage ranges from 1.06 (Historical) to 1.06 (Extreme stress): a change of 0%.",
+    "At Shasta Reservoir under Current Operations, mean April reservoir storage ranges from 4.00 TAF (Historical) to 8.00 TAF (Extreme stress): a change of +100%. At Shasta Reservoir under Current Operations, the coefficient of variation (CV) of annual April reservoir storage changes from 1.06 (Historical) to 1.06 (Extreme stress): a change of 0%.",
   )
 })
 
@@ -300,8 +300,11 @@ test("stats sentence says n/a, not a division, when the reference mean is zero",
     statsCtx,
   )
   expect(s).toContain("a difference of n/a")
-  // A series that is zero every year has no CV.
+  // A series that is zero every year has no CV, and no CV change.
   expect(s).toContain("is n/a (CV).")
+  expect(s).toContain(
+    "for the Other scenario is 1.06 (CV): a difference of n/a.",
+  )
   expect(s).not.toContain("Infinity")
   expect(s).not.toContain("NaN")
 })
@@ -604,7 +607,10 @@ test("percent changes round to 0% and say n/a against a zero reference", () => {
 // Shortages are zero in most years: their sentence counts the years with
 // none and quotes the mean, never a median of 0 with "-" comparisons.
 test("agricultural and municipal shortages use the zero-aware sentence", () => {
-  for (const variableId of ["ag_short", "cws_short"]) {
+  for (const [variableId, noun] of [
+    ["ag_short", "agricultural water shortage"],
+    ["cws_short", "municipal supply shortage"],
+  ] as const) {
     for (const view of ["dist", "pct_demand"] as const) {
       const s = summarySentence(
         [
@@ -614,13 +620,13 @@ test("agricultural and municipal shortages use the zero-aware sentence", () => {
         templateCtx({
           variableId,
           variableName: "Water shortage",
-          proseName: "agricultural water shortage",
+          proseName: noun,
           view,
           unit: view === "dist" ? "TAF" : "%",
         }),
       )
       expect(s, `${variableId} ${view}`).toContain(
-        "Current Operations has no agricultural water shortage in 3 of 4 years",
+        `Current Operations has no ${noun} in 3 of 4 years`,
       )
       expect(s).toContain("Other has no shortage in 2 of 4 years")
       expect(s).not.toMatch(/ -[.;,]/)
@@ -656,4 +662,57 @@ test("a single compared location reads as one value, not a range", () => {
   const stats = summarySentence(only, { ...ctx, distKind: "stats" })
   expect(stats).toContain("mean river flows at System-wide is 6.00 TAF")
   expect(stats).not.toContain("ranges from")
+})
+
+test("both CVs undefined: the CV change is n/a, not 0%", () => {
+  const s = summarySentence(
+    [member("Current Operations", [0, 0, 0], true), member("Other", [0, 0, 0])],
+    statsCtx,
+  )
+  expect(s).toContain(
+    "for the Other scenario is n/a (CV): a difference of n/a.",
+  )
+  expect(s).not.toContain("NaN")
+})
+
+test("no view quotes a member that is not live", () => {
+  const notLive = { isLive: false }
+  const bands = (v: number) =>
+    Array.from({ length: 12 }, () => ({ p10: v, p50: v, p90: v }))
+  const monthly = summarySentence(
+    [
+      { ...member("Current Operations", [1], true), bands: bands(1) },
+      { ...member("Stand-in", [2]), bands: bands(2), ...notLive },
+    ],
+    templateCtx({ view: "monthly", variableName: "Delta outflow volume" }),
+  )
+  expect(monthly).not.toContain("Stand-in")
+  for (const view of ["cv", "value"] as const) {
+    const s = summarySentence(
+      [
+        { ...member("Current Operations", [1], true), value: 0.2 },
+        { ...member("Stand-in", [1]), value: 0.5, ...notLive },
+      ],
+      templateCtx({ view, variableName: "River flows" }),
+    )
+    expect(s, view).not.toContain("Stand-in")
+    expect(s, view).not.toContain("0.50")
+  }
+})
+
+test("reservoir comparisons that round to zero say about the same", () => {
+  const s = summarySentence(
+    [
+      member("Current Operations", [100, 100], true),
+      member("Other", [99.8, 99.8]),
+    ],
+    templateCtx({
+      variableId: "res_apr",
+      variableName: "April reservoir storage",
+    }),
+  )
+  expect(s).toContain(
+    "The Other scenario has about the same median April reservoir storage.",
+  )
+  expect(s).not.toMatch(/0% (higher|lower)/)
 })
