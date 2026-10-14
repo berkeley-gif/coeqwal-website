@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Exports are laid out at 480 CSS px and rasterized at a fixed 3x, so a
 // high-density screen downloads the same 1,440 px figure as a standard one.
@@ -12,6 +13,7 @@ test("export width is independent of device pixel ratio", async ({ page }) => {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await page.getByRole("button", { name: "save snapshot" }).click()
   await page.getByRole("button", { name: "Go to Share" }).dispatchEvent("click")
   await page.getByRole("button", { name: "Add to story" }).click()

@@ -4,11 +4,11 @@
  * MapFigureCaption - the map panel's header: when an outcome is mapped, a
  * compact figure-template card (Outcome, Strategy, Hydroclimate) plus a
  * tier-color legend and a "save map" button that stages the map in the
- * Share tray; otherwise the hydroclimate badge alone, as before.
+ * Share tray. With nothing mapped it renders nothing: the toolbar already
+ * names the hydroclimate, and a caption over an empty map describes nothing.
  */
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { HydroclimateBadge } from "@repo/ui"
 import { buildFigureTemplate } from "../../../share/figureTemplate"
 import FigureRows from "../../../share/cards/FigureRows"
 import ShareCardTierLegend from "../../../share/cards/ShareCardTierLegend"
@@ -16,26 +16,12 @@ import { useMapFigureSpec } from "./useMapFigureSpec"
 import { SaveSnapshotButton } from "../actions/SaveSnapshotButton"
 import { useMapShareCapture } from "../../hooks/useMapShareCapture"
 
-export interface MapFigureCaptionProps {
-  hydroBadge: { title: string; accentColor: string } | null
-}
-
-export default function MapFigureCaption({
-  hydroBadge,
-}: MapFigureCaptionProps) {
+export default function MapFigureCaption() {
   const theme = useTheme()
   const spec = useMapFigureSpec()
   const { saveMap, canSave, error, clearError } = useMapShareCapture()
 
-  if (!spec) {
-    return hydroBadge ? (
-      <HydroclimateBadge
-        title={hydroBadge.title}
-        accentColor={hydroBadge.accentColor}
-        surface="solid"
-      />
-    ) : null
-  }
+  if (!spec) return null
 
   const template = buildFigureTemplate(spec)
   return (

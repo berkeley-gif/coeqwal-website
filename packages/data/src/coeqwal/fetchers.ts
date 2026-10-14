@@ -197,7 +197,7 @@ export async function fetchTierLocationAssignments(
     throw new Error("Scenario ID is required")
   }
   if (!tierCode) {
-    throw new Error("Tier code is required")
+    throw new Error("Outcome code is required")
   }
 
   const batch = await apiFetcher<TierLocationAssignmentsBatchResponse>(
@@ -208,7 +208,7 @@ export async function fetchTierLocationAssignments(
   const entry = batch.results?.[tierCode]
   if (!entry) {
     throw new Error(
-      `No tier data found for scenario '${scenarioId}' and tier '${tierCode}'`,
+      `No outcome level data found for scenario '${scenarioId}' and outcome '${tierCode}'`,
     )
   }
   return entry

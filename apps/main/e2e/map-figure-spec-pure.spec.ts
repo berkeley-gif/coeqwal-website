@@ -35,7 +35,7 @@ test("one outcome from Bar names outcome, strategy, hydroclimate", () => {
     ["Strategy", "Current Operations"],
     ["Hydroclimate", "Moderate stress"],
   ])
-  expect(t.legendHeading).toBe("Tier")
+  expect(t.legendHeading).toBe("Outcome level")
 })
 
 test("distribution comparison names the baseline", () => {

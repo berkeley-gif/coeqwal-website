@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
 import { DATA_TOUR } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/tour/steps"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // The Data in Depth tour auto-starts on the tool's first visit. The shared
 // network setup marks it seen for every other spec, so this one clears the
@@ -18,7 +19,12 @@ test("the data in depth tour auto-starts, walks every step, and closes", async (
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  // Nothing is selected: the tour draws current operations for its steps
+  // to point at, and the selection itself stays empty.
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
+  await expect(
+    page.getByRole("checkbox", { name: "Select Current operations scenario" }),
+  ).not.toBeChecked()
 
   const first = DATA_TOUR[0]
   const last = DATA_TOUR[DATA_TOUR.length - 1]
@@ -39,6 +45,8 @@ test("the data in depth tour auto-starts, walks every step, and closes", async (
   // The last step finishes rather than advancing.
   await page.getByRole("button", { name: "Finish" }).click()
   await expect(card).toHaveCount(0)
+  // With the tour over and nothing selected, the tool asks for a scenario.
+  await expect(page.locator("[data-select-scenario-prompt]")).toBeVisible()
 
   // The journey strip offers the tour again for a second run.
   await page
@@ -59,6 +67,7 @@ test("every anchored tour step resolves to an element on the tool", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await page
     .getByRole("button", { name: "Take the tour for this chart" })

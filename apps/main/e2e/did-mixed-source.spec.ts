@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Mixed live/sample provenance, end to end and offline.
 //
@@ -174,6 +175,7 @@ test("a scenario with no served block is detected from its response, not its id"
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
@@ -251,6 +253,7 @@ test("switching the workspace hydroclimate keeps the scenarios axis live", async
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await page
@@ -318,6 +321,7 @@ test("a member whose live request is still in flight is shown as loading, not dr
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 

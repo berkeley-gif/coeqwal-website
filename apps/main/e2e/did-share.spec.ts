@@ -1,6 +1,7 @@
 import JSZip from "jszip"
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Core export flow: save a Data-in-Depth chart snapshot, see it as a share
 // card, and download its image and underlying data. Runs offline: the chart
@@ -15,6 +16,7 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   // The chart draws recorded model results before anything is saved.
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
@@ -165,6 +167,7 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await page.getByRole("button", { name: "save snapshot" }).click()
   await page.getByRole("button", { name: "Go to Share" }).dispatchEvent("click")
   await page.getByRole("button", { name: "Add to story" }).first().click()

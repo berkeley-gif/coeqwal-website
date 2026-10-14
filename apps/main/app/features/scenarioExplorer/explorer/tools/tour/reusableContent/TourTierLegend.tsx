@@ -36,13 +36,13 @@ export interface TourTierLegendProps {
    *  the legend is composed inside another framed block (e.g. the bar
    *  illustration's two-column grid). */
   bare?: boolean
-  /** Compact drops the per-tier description, keeping swatch + "Tier N" +
-   *  short label. */
+  /** Compact drops the per-level description, keeping swatch + level
+   *  number + short label. */
   compact?: boolean
 }
 
 export default function TourTierLegend({
-  title = "Tier legend",
+  title = "Outcome levels",
   bare = false,
   compact = false,
 }: TourTierLegendProps) {
@@ -92,7 +92,7 @@ export default function TourTierLegend({
               fontVariantNumeric: "tabular-nums",
             }}
           >
-            Tier {item.level}
+            {item.level}
           </Typography>
           <Box component="dd" sx={{ m: 0, minWidth: 0 }}>
             <Typography

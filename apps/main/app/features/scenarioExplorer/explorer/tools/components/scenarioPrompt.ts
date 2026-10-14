@@ -4,14 +4,14 @@
  *
  * With nothing selected, a tool draws nothing and asks for a selection,
  * rather than silently falling back to current operations or to the whole
- * scenario library. Exceptions:
- *   - Data in depth: current operations is its built-in reference series.
+ * scenario library. This holds for every tool, Data in depth included.
+ * Exceptions:
  *   - "Show all scenarios" (radar) or the all-scenarios heatmap view: the
  *     user asked for every scenario, so there is something to draw.
  *   - A running tour of that tool: tour steps anchor on chart elements, so
  *     the chart stays up until the tour ends. Radar, Heatmap and
- *     Distribution keep their old fallback for it; Bar, which never had one,
- *     draws the current-operations card.
+ *     Distribution keep their old fallback for it; Bar and Data in depth,
+ *     which never had one, draw current operations for the tour only.
  *
  * Exports: needsScenarioPrompt, SCENARIO_PROMPT_TEXT, ScenarioPromptInput,
  * PromptTool.
@@ -35,6 +35,7 @@ export interface ScenarioPromptInput {
 export function needsScenarioPrompt(input: ScenarioPromptInput): boolean {
   switch (input.mode) {
     case "bar":
+    case "data":
       if (input.tourActive) return false
       return input.selectedScenarioCount === 0
     case "radar":
@@ -49,7 +50,7 @@ export function needsScenarioPrompt(input: ScenarioPromptInput): boolean {
   }
 }
 
-export type PromptTool = "bar" | "radar" | "equity" | "resilience"
+export type PromptTool = "bar" | "radar" | "equity" | "resilience" | "data"
 
 /** The prompt sentence per tool. Bar keeps its existing wording. */
 export const SCENARIO_PROMPT_TEXT: Record<PromptTool, string> = {
@@ -59,4 +60,5 @@ export const SCENARIO_PROMPT_TEXT: Record<PromptTool, string> = {
     "Select a scenario in the sidebar to see how its outcomes are distributed across locations.",
   resilience:
     "Select scenarios in the sidebar to see how they perform across hydroclimates.",
+  data: "Select scenarios in the sidebar to explore their model results here.",
 }

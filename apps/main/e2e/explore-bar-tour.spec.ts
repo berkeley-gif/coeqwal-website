@@ -79,10 +79,12 @@ test("the bar tour draws a card to anchor on, then the prompt returns", async ({
   ).toHaveCount(0)
 
   // The stand-in card draws real results: a glyph with data is labelled
-  // "<outcome> tier distribution: ...", one without "<outcome>: No data
+  // "<outcome> outcome level distribution: ...", one without "<outcome>: No data
   // available".
   const baselineGlyph = panel
-    .getByRole("img", { name: /^Community surface water tier distribution: / })
+    .getByRole("img", {
+      name: /^Community surface water outcome level distribution: /,
+    })
     .first()
   await expect(baselineGlyph).toBeVisible()
 

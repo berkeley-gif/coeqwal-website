@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // When the browser refuses to store the share tray (quota), the user is
 // told, instead of losing the tray silently on reload.
@@ -19,6 +20,7 @@ test("a tray that cannot be saved shows a warning", async ({ page }) => {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await page.getByRole("button", { name: "save snapshot" }).click()
   await expect(
     page
@@ -64,6 +66,7 @@ test("a populated tray keeps every card and note across a reload", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   const readTray = () =>
     page.evaluate(
       () =>

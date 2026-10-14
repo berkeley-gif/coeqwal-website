@@ -319,9 +319,9 @@ export function useMultipleScenarioTiers(
         scenarioTiersError instanceof Error
           ? scenarioTiersError.message
           : String(scenarioTiersError)
-      return `Failed to load scenario tier data: ${msg}`
+      return `Failed to load scenario outcome levels: ${msg}`
     }
-    if (tiersError) return `Failed to load tier list: ${tiersError}`
+    if (tiersError) return `Failed to load the outcome list: ${tiersError}`
     return null
   }, [scenariosError, scenarioTiersError, tiersError])
 

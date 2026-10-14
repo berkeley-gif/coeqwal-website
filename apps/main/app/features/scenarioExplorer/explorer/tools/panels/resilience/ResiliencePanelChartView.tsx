@@ -84,6 +84,11 @@ export interface ResiliencePanelChartViewProps {
    * undefined so the responsive grid behaves as before.
    */
   captureMode?: boolean
+  /**
+   * The cell drawn as selected (the one on the map), by tile id and
+   * `${rowKey}|${colKey}`. Live mounts only; captures leave it unset.
+   */
+  selectedCell?: { tileId: string; cellKey: string } | null
 }
 
 /** Inter-tile gap (matches the live grid's `gap: 16`). */
@@ -191,6 +196,7 @@ export default function ResiliencePanelChartView({
   distributionMode,
   handlers,
   captureMode = false,
+  selectedCell = null,
 }: ResiliencePanelChartViewProps) {
   if (state.kind === "noColumns") {
     return (
@@ -243,6 +249,7 @@ export default function ResiliencePanelChartView({
       highlightedTileIds={state.highlightedTileIds ?? null}
       highlightedRowKeys={state.highlightedRowKeys ?? null}
       highlightedColKeys={state.highlightedColKeys ?? null}
+      selectedCell={selectedCell}
       onRowKeyHover={handlers?.onRowKeyHover}
       onColKeyHover={handlers?.onColKeyHover}
       onCellClick={handlers?.onCellClick}

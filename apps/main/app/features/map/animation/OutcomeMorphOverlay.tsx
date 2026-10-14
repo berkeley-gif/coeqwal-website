@@ -2008,7 +2008,7 @@ export default function OutcomeMorphOverlay({
               flexShrink: 0,
             }}
           />
-          Tier {tip.tierLevel}: {tip.tier}
+          {tip.tier}
         </span>
       </div>,
       document.body,

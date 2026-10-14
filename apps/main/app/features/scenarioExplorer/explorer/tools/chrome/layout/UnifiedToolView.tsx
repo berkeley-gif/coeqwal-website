@@ -18,7 +18,6 @@ import {
   mapActions,
   useDistributionMapSnapshot,
 } from "../../../../../map/store"
-import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import ToolJourneyStrip from "./ToolJourneyStrip"
 import MapFigureCaption from "./MapFigureCaption"
 import MapDirectionLegend from "../../../share/cards/MapDirectionLegend"
@@ -55,10 +54,7 @@ export default function UnifiedToolView({
   const [isDragging, setIsDragging] = useState(false)
   const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
   const showKeyOperations = useWorkspaceSlice((s) => s.showKeyOperations)
-  const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
   const distributionSnapshot = useDistributionMapSnapshot()
-
-  const mapHydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
   // The map panel opens only for tools that pair with the map: Data in
   // depth ignores the shared showMap flag entirely (no map, full width).
@@ -280,7 +276,7 @@ export default function UnifiedToolView({
               pointerEvents: "none",
             }}
           >
-            <MapFigureCaption hydroBadge={mapHydroBadge} />
+            <MapFigureCaption />
           </Box>
         )}
         {showComparisonLegend && (

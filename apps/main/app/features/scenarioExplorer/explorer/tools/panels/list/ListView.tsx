@@ -22,6 +22,7 @@ import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
 import VisualizeRail from "./VisualizeRail"
 import { useListVisualizeRailSync } from "./tour/useListVisualizeRailSync"
+import { MODEL_RESULTS_LOAD_ERROR } from "../../components/loadErrorText"
 
 interface ListViewProps {
   highlightedIds?: Set<string> | null
@@ -154,7 +155,7 @@ export default function ListView({ highlightedIds }: ListViewProps) {
     return (
       <Box sx={{ p: theme.spacing(3) }}>
         <Typography variant="body2" color="error">
-          Error loading data: {error}
+          {MODEL_RESULTS_LOAD_ERROR}
         </Typography>
       </Box>
     )

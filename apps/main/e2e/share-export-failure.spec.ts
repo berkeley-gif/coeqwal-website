@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Image exports fail closed: a figure is exported as the full card or not
 // at all. When the capture fails, the user must be told rather than left
@@ -16,6 +17,7 @@ test("a failed image export tells the user instead of doing nothing", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await page.getByRole("button", { name: "save snapshot" }).click()
   await page.getByRole("button", { name: "Go to Share" }).dispatchEvent("click")

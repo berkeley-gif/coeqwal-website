@@ -38,7 +38,7 @@ export default function ShareCardTierLegend({ sx }: ShareCardTierLegendProps) {
   return (
     <Box
       role="group"
-      aria-label="Tier color legend"
+      aria-label="Outcome level color legend"
       sx={{
         display: "flex",
         flexWrap: "wrap",
@@ -59,7 +59,7 @@ export default function ShareCardTierLegend({ sx }: ShareCardTierLegendProps) {
           color: theme.palette.grey[500],
         }}
       >
-        Tier scale
+        Outcome levels
       </Typography>
       {TIER_LEVELS.map((level) => (
         <Box

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Water-year-type filter, end to end and offline, on recorded model results
 // (see the API cache in support/network.ts): the chips render and toggle,
@@ -18,6 +19,7 @@ test("wyt chips filter the model results and persist across reload", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // The chip row renders with "All years" as the selected default.
@@ -66,6 +68,7 @@ test("wyt chips filter the model results and persist across reload", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await expect(
     page.getByRole("button", { name: "Critical", exact: true, pressed: true }),
   ).toBeVisible()

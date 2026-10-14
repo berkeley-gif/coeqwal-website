@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Compare by Locations, live: one request per chart carrying every selected
 // location's subject for the held scenario, each member picking its own
@@ -152,6 +153,7 @@ async function openDataInDepth(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 

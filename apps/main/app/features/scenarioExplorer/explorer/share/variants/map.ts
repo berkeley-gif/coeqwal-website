@@ -46,7 +46,7 @@ const mapHandler: VariantHandler<MapItem> = {
       toolLabel: "Map",
       chartKindLabel: "Map",
       values: {},
-      legendHeading: "Tier",
+      legendHeading: "Outcome level",
     }
     return React.createElement(ShareFigureCard, {
       id: item.id,

@@ -4,6 +4,12 @@ import {
   SCENARIO_PROMPT_TEXT,
   type ScenarioPromptInput,
 } from "../app/features/scenarioExplorer/explorer/tools/components/scenarioPrompt"
+import {
+  getCompareScenarioIds,
+  getDataScenarioSelection,
+  getHeldScenarioId,
+  MAX_DATA_IN_DEPTH_SCENARIOS,
+} from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/scenarioLimit"
 
 // Pure rule behind the "select a scenario" prompt the sidebar tools show
 // instead of a chart. Node-side spec (no browser).
@@ -70,9 +76,43 @@ test("another tool's tour does not lift the prompt", () => {
   )
 })
 
-test("list and data in depth never prompt", () => {
+test("list never prompts", () => {
   expect(needsScenarioPrompt({ ...base, mode: "list" })).toBe(false)
-  expect(needsScenarioPrompt({ ...base, mode: "data" })).toBe(false)
+})
+
+test("data in depth prompts like the other tools, except during its tour", () => {
+  expect(needsScenarioPrompt({ ...base, mode: "data" })).toBe(true)
+  expect(
+    needsScenarioPrompt({ ...base, mode: "data", selectedScenarioCount: 1 }),
+  ).toBe(false)
+  expect(needsScenarioPrompt({ ...base, mode: "data", tourActive: true })).toBe(
+    false,
+  )
+})
+
+test("data in depth compares exactly the selection", () => {
+  // Nothing selected: nothing compared (the prompt shows), unless the
+  // tool's own tour runs, which draws current operations.
+  expect(getDataScenarioSelection([], false, "s0020")).toEqual([])
+  expect(getDataScenarioSelection([], true, "s0020")).toEqual(["s0020"])
+  expect(getDataScenarioSelection(["s0011"], true, "s0020")).toEqual(["s0011"])
+  // Current operations is never added; it leads when selected.
+  expect(getCompareScenarioIds(["s0011", "s0012"], "s0020")).toEqual([
+    "s0011",
+    "s0012",
+  ])
+  expect(getCompareScenarioIds(["s0011", "s0020"], "s0020")).toEqual([
+    "s0020",
+    "s0011",
+  ])
+  const many = Array.from({ length: 9 }, (_, i) => `s00${30 + i}`)
+  expect(getCompareScenarioIds(many, "s0020")).toHaveLength(
+    MAX_DATA_IN_DEPTH_SCENARIOS,
+  )
+  // The held scenario is the pin while it is compared, else the first.
+  expect(getHeldScenarioId("s0012", ["s0011", "s0012"], "s0020")).toBe("s0012")
+  expect(getHeldScenarioId("s0020", ["s0011"], "s0020")).toBe("s0011")
+  expect(getHeldScenarioId(null, [], "s0020")).toBe("s0020")
 })
 
 test("every prompt tool has one sentence of text", () => {

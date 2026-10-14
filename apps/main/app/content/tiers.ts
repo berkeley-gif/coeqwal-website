@@ -21,6 +21,19 @@ export function getTierLabel(tierLevel: number): string {
   return "Unknown"
 }
 
+/**
+ * The name to show for a level label. Share items saved before levels were
+ * shown by name carry labels like "Tier 2"; those read as the level name
+ * ("Acceptable"). Any other label is returned unchanged.
+ *
+ * @param label - a stored or computed level label
+ * @returns the label to display
+ */
+export function getLevelName(label: string): string {
+  const match = /^Tier ([1-4])$/.exec(label.trim())
+  return match ? TIER_LABELS[Number(match[1]) as TierLevel] : label
+}
+
 // Minimal theme type for tier colors
 type TierTheme = { palette: { tiers: TierColors } }
 

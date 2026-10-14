@@ -27,10 +27,10 @@ const StickChart: React.FC<StickChartProps> = React.memo(
   ({ size = 80, tiers, seed }) => {
     // Default tier configuration: red -> orange -> blue -> green
     const defaultTiers = [
-      { label: "Tier 1", color: "#f96262" }, // red
-      { label: "Tier 2", color: "#f89740" }, // orange
-      { label: "Tier 3", color: "#2064d4" }, // blue
-      { label: "Tier 4", color: "#2cc83b" }, // green
+      { label: "Optimal", color: "#f96262" }, // red
+      { label: "Acceptable", color: "#f89740" }, // orange
+      { label: "At-risk", color: "#2064d4" }, // blue
+      { label: "Critical", color: "#2cc83b" }, // green
     ]
 
     const chartTiers = tiers || defaultTiers

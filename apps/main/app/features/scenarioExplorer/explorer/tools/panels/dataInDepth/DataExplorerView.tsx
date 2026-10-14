@@ -4,8 +4,8 @@
  * DataExplorerView - Explore data in depth for the user's selected scenarios.
  *
  * Hosts the by-variable explorer (sector rail -> variable -> view), which
- * works from the Current Operations reference even before any scenario is
- * selected. The tool header above it is the shared ToolJourneyStrip; the
+ * compares exactly the scenarios selected in the sidebar and, like every
+ * Explore tool, asks for a selection while none is made. The tool header above it is the shared ToolJourneyStrip; the
  * legacy "By category" accordions were retired from this surface with the
  * 2026-07-30 content review (CategoryView remains in the tree for reference).
  */

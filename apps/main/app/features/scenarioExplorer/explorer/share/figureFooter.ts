@@ -18,9 +18,9 @@ export interface ShareFigureFooter {
 
 const SOURCE_MODEL = "COEQWAL, coeqwal.org. CalSim3 model results."
 const SOURCE_MAP =
-  "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome tiers. Basemap © Mapbox © OpenStreetMap."
+  "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome levels. Basemap © Mapbox © OpenStreetMap."
 const SOURCE_TIERS =
-  "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome tiers."
+  "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome levels."
 
 function capturedLine(iso: string | undefined): string | undefined {
   if (!iso) return undefined

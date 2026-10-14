@@ -260,7 +260,7 @@ export default function CategoryView() {
                           letterSpacing: "0.06em",
                         }}
                       >
-                        Outcome Tiers
+                        Outcome levels
                       </Typography>
                       {tierMetrics.map((metric) => (
                         <MetricCard

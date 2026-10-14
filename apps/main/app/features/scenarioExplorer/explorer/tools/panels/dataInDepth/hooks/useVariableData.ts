@@ -101,7 +101,11 @@ import {
   viewHasLiveSource,
   hasEmptyScenariosResponse,
 } from "../config/didMapping"
-import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
+import {
+  getCompareScenarioIds,
+  getDataScenarioSelection,
+  getHeldScenarioId,
+} from "../config/scenarioLimit"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 
 /** Default count of locations seeded into a "compare by locations" set. */
@@ -213,7 +217,17 @@ export function useVariableData(): VariableData {
     selectedLocationsByGroup,
     selectedWaterYearTypes,
   } = useDataSlice()
-  const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
+  const workspaceSelection = useWorkspaceSlice((s) => s.selectedScenarios)
+  const tourActive = useWorkspaceSlice((s) => s.tour.tool === "data")
+  const selectedScenarios = useMemo(
+    () =>
+      getDataScenarioSelection(
+        workspaceSelection,
+        tourActive,
+        BASELINE_SCENARIO_ID,
+      ),
+    [workspaceSelection, tourActive],
+  )
   const workspaceHydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
 
   const variable = getVariable(selectedVariableId)
@@ -221,15 +235,6 @@ export function useVariableData(): VariableData {
   const group = groupId ? LOCATION_GROUPS[groupId] : undefined
   const firstLocationId = group?.items[0]?.id ?? ""
 
-  // Held-constant members for the two axes that are not being compared.
-  // Clamp the pinned scenario to a still-available one (reference, or a current
-  // workspace selection) so it self-heals if the selection later shrinks.
-  const heldScenario =
-    pinnedScenario &&
-    (pinnedScenario === BASELINE_SCENARIO_ID ||
-      selectedScenarios.includes(pinnedScenario))
-      ? pinnedScenario
-      : BASELINE_SCENARIO_ID
   // The tool has no climate pin: the workspace value, set by the shared
   // "View by hydroclimate" control, is the only hydroclimate input.
   const heldClimate = resolveClimate(workspaceHydroclimate)
@@ -245,15 +250,20 @@ export function useVariableData(): VariableData {
   const scenarioIdsJoined = selectedScenarios.join(",")
   const wytJoined = selectedWaterYearTypes.join(",")
 
-  // Scenario comparison set (reference first), shared by the fan-out and specs.
+  // Scenario comparison set: exactly the sidebar selection (current
+  // operations first when it is selected), shared by the fan-out and specs.
   const compareScenarioIds = useMemo(
-    () =>
-      [
-        BASELINE_SCENARIO_ID,
-        ...selectedScenarios.filter((id) => id !== BASELINE_SCENARIO_ID),
-      ].slice(0, MAX_DATA_IN_DEPTH_SCENARIOS),
+    () => getCompareScenarioIds(selectedScenarios, BASELINE_SCENARIO_ID),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- scenarioIdsJoined captures selectedScenarios
     [scenarioIdsJoined],
+  )
+  // Held-constant scenario for the hydroclimates and locations axes: the
+  // pin while it is still compared, otherwise the first compared scenario,
+  // so it self-heals when the selection shrinks.
+  const heldScenario = getHeldScenarioId(
+    pinnedScenario,
+    compareScenarioIds,
+    BASELINE_SCENARIO_ID,
   )
 
   // A groundwater total on the Level view cannot be shown: no request goes
