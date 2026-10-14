@@ -192,8 +192,10 @@ test("explore tools ask for a scenario before drawing", async ({ page }) => {
   // No tool or tour step says "tier": outcome levels go by name. The tour
   // is walked step by step, checking each populated card.
   // Walk until the last step, which offers Finish instead of Next.
+  // Each card also notes that the grid is an example for the tour.
   for (;;) {
     expect(await getTierWording(page)).toEqual([])
+    await expect(page.getByTestId("tour-example-note")).toBeVisible()
     const next = page.getByRole("button", { name: "Next" })
     if ((await next.count()) === 0) break
     await next.click()

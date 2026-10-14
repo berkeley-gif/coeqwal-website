@@ -122,6 +122,14 @@ test("the tour card notes example results only when the tour lifts the prompt", 
   expect(
     getIsTourExample({
       ...base,
+      mode: "resilience",
+      showAll: true,
+      tourActive: true,
+    }),
+  ).toBe(false)
+  expect(
+    getIsTourExample({
+      ...base,
       mode: "equity",
       equityFocusScenario: "s0020",
       tourActive: true,

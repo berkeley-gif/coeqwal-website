@@ -40,9 +40,10 @@ test("the data in depth tour auto-starts, walks every step, and closes", async (
   // an example, and the dialog's description includes that note.
   const note = card.getByTestId("tour-example-note")
   await expect(note).toHaveText(TOUR_EXAMPLE_NOTE)
-  await expect(card).toHaveAccessibleDescription(
-    new RegExp(TOUR_EXAMPLE_NOTE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+  const noteInDescription = new RegExp(
+    TOUR_EXAMPLE_NOTE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
   )
+  await expect(card).toHaveAccessibleDescription(noteInDescription)
 
   // The note must be readable. Axe cannot judge contrast under the tour's
   // scrim, so compute the WCAG ratio from the note's own colors (it paints
@@ -64,11 +65,39 @@ test("the data in depth tour auto-starts, walks every step, and closes", async (
   })
   expect(ratio).toBeGreaterThanOrEqual(4.5)
 
-  // Every step renders its own card, in order, without throwing.
+  // Ticking a scenario mid-tour draws the user's own choice, so the note
+  // goes; unticking brings it back. The step does not change.
+  const currentOps = page.getByRole("checkbox", {
+    name: "Select Current operations scenario",
+  })
+  await currentOps.check()
+  await expect(note).toHaveCount(0)
+  await currentOps.uncheck()
+  await expect(note).toBeVisible()
+  await expect(card.getByText(first!.title)).toBeVisible()
+
+  // Every step renders its own card, in order, without throwing. The note
+  // makes cards taller, so each card, note included, must stay on screen
+  // and keep the note in its description.
+  const viewport = page.viewportSize()!
+  const isOnScreen = async (
+    box: Awaited<ReturnType<typeof note.boundingBox>>,
+  ) =>
+    !!box &&
+    box.x >= 0 &&
+    box.y >= 0 &&
+    box.x + box.width <= viewport.width &&
+    box.y + box.height <= viewport.height
   for (let i = 1; i < DATA_TOUR.length; i++) {
     await page.getByRole("button", { name: "Next" }).click()
     await expect(card.getByText(DATA_TOUR[i]!.title)).toBeVisible()
     await expect(note).toBeVisible()
+    await expect(card).toHaveAccessibleDescription(noteInDescription)
+    await expect
+      .poll(async () => isOnScreen(await card.boundingBox()), {
+        message: `step ${i} card stays on screen`,
+      })
+      .toBe(true)
   }
 
   // The last step finishes rather than advancing.
