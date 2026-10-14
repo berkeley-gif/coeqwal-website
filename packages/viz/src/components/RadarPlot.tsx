@@ -1,7 +1,17 @@
 "use client"
 
 import React, { useRef, useEffect, useCallback, useMemo } from "react"
-import { scaleLinear, select, line, type Selection } from "d3"
+import {
+  scaleLinear,
+  select,
+  line,
+  zoom,
+  zoomIdentity,
+  zoomTransform,
+  type Selection,
+  type ZoomBehavior,
+  type D3ZoomEvent,
+} from "d3"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
 import {
   type RadarPlotAxisLabelDetailStyle,
@@ -22,6 +32,19 @@ import {
 export type { RadarPlotAxisLabelDetailStyle } from "./radarAxisLabelDetail"
 export type { RadarAxisLabelDetailChromeOptions } from "./radarAxisLabelDetail"
 
+/** Current zoom state: translate (px) and scale factor. */
+export interface RadarPlotZoomTransform {
+  x: number
+  y: number
+  k: number
+}
+
+/** Imperative zoom commands the plot exposes to an external toolbar. */
+export interface RadarPlotZoomControls {
+  zoomIn: () => void
+  zoomOut: () => void
+  reset: () => void
+}
 export interface RadarPlotProps {
   data: VerticalParallelLineData[]
   axes: string[]
@@ -77,6 +100,13 @@ export interface RadarPlotProps {
       x: number
       y: number
       anchor: "start" | "end" | "middle"
+      /**
+       * Right edge and vertical centre of the label's last text line, for
+       * placing an inline icon after the last word. Absent if the label
+       * could not be measured; fall back to `x` / `y`.
+       */
+      labelEndX?: number
+      labelMidY?: number
     }[],
   ) => void
   /** External ref to access the rendered SVG element (e.g. for capture/export) */
@@ -124,6 +154,29 @@ export interface RadarPlotProps {
    * serialize.
    */
   onReady?: () => void
+  /**
+   * Enables wheel/pinch zoom and drag-to-pan. Off by default so capture
+   * renders and small embeds keep their static layout. Ignored when
+   * `interactive` is false.
+   */
+  zoomable?: boolean
+  /**
+   * Filled with zoom commands while the plot is mounted and zoomable.
+   * The buttons live in the consumer because this package has no UI kit.
+   */
+  zoomControlsRef?: React.MutableRefObject<RadarPlotZoomControls | null>
+  /**
+   * Fires on every zoom/pan frame. Consumers with HTML overlays positioned
+   * in SVG coordinates must apply the same transform to stay aligned.
+   * Called per frame: write to the DOM, do not setState.
+   */
+  onZoomChange?: (transform: RadarPlotZoomTransform) => void
+  /**
+   * Fires when the hover detail panel opens (with its axis) or closes
+   * (null). Unlike `onDotHover`, this follows the panel that is actually on
+   * screen, so use it for anything that must not overlap the panel.
+   */
+  onAxisDetailChange?: (axis: string | null) => void
 }
 
 /**
@@ -292,6 +345,18 @@ const RADAR_HOVER_HIGHLIGHT_STROKE_WIDTH = 1.65
 const RADAR_PIN_DOT_DELTA = 1.45
 const RADAR_HOVER_DOT_RADIUS_BUMP = 1.45
 
+// Zoom limits. Min is 1 so the chart can never be shrunk below its fitted size.
+const RADAR_ZOOM_MIN = 1
+const RADAR_ZOOM_MAX = 4
+/** Scale multiplier per button press. */
+const RADAR_ZOOM_STEP = 1.5
+const RADAR_ZOOM_BUTTON_MS = 250
+const RADAR_ZOOM_CLICK_DISTANCE_PX = 4
+/** Gap kept between the hover panel and the frame edge when zoomed. */
+const RADAR_DETAIL_VIEWPORT_MARGIN_PX = 8
+/** Gap between a hovered dot's edge and the hover panel when zoomed. */
+const RADAR_DETAIL_DOT_GAP_PX = 6
+
 interface RadarScenarioVisuals {
   dotR: number
   opacity: number
@@ -415,6 +480,8 @@ type AxisPosition = {
   x: number
   y: number
   anchor: "start" | "end" | "middle"
+  labelEndX?: number
+  labelMidY?: number
 }
 
 function axisPositionsEqual(
@@ -431,7 +498,9 @@ function axisPositionsEqual(
       x.axis !== y.axis ||
       x.x !== y.x ||
       x.y !== y.y ||
-      x.anchor !== y.anchor
+      x.anchor !== y.anchor ||
+      x.labelEndX !== y.labelEndX ||
+      x.labelMidY !== y.labelMidY
     ) {
       return false
     }
@@ -502,6 +571,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     interactive = true,
     animate = true,
     onReady,
+    zoomable = false,
+    zoomControlsRef,
+    onZoomChange,
+    onAxisDetailChange,
   }) => {
     const axisLabelDetailStyle = useMemo(
       () => mergeRadarAxisLabelDetailStyle(axisLabelDetailStyleProp),
@@ -589,6 +662,29 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       onReadyRef.current = onReady
     }, [onReady])
     const hasFiredOnReadyRef = useRef(false)
+    const onAxisDetailChangeRef = useRef(onAxisDetailChange)
+    useEffect(() => {
+      onAxisDetailChangeRef.current = onAxisDetailChange
+    }, [onAxisDetailChange])
+    // Last value sent through onAxisDetailChange, so repeats are not re-sent.
+    const reportedDetailAxisRef = useRef<string | null>(null)
+    const reportOpenAxisDetail = useCallback((axis: string | null) => {
+      if (reportedDetailAxisRef.current === axis) return
+      reportedDetailAxisRef.current = axis
+      onAxisDetailChangeRef.current?.(axis)
+    }, [])
+    const onZoomChangeRef = useRef(onZoomChange)
+    useEffect(() => {
+      onZoomChangeRef.current = onZoomChange
+    }, [onZoomChange])
+    // Held in a ref so updateChart can refresh the pan limits on resize
+    // without the behaviour being one of its dependencies.
+    // Re-fits the open hover panel to the current zoom. Set by each rebuild,
+    // called by the zoom handler on every zoom/pan frame.
+    const fitOpenAxisDetailRef = useRef<(() => void) | null>(null)
+    const zoomBehaviorRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(
+      null,
+    )
     const activeMapDotRef = useRef(activeMapDot)
     useEffect(() => {
       activeMapDotRef.current = activeMapDot
@@ -634,6 +730,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     // visual-only effect reads it to preserve focus emphasis when a
     // sidebar/highlight prop change runs while a dot is hovered.
     const focusedScenarioIdRef = useRef<string | null>(null)
+    // True between a dot's mouseenter and mouseleave. A rebuild removes the
+    // dot without a mouseleave, so the rebuild uses this to send the missing
+    // onDotHover(null) and keep the consumer's hover state from sticking.
+    const isDotHoverReportedRef = useRef(false)
 
     const axisLabelDetailChromeRef = useRef(axisLabelDetailChrome)
     useEffect(() => {
@@ -647,6 +747,19 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         })
       }
     }, [])
+
+    // Unmounting removes the dots and the hover panel without any mouse
+    // event, so close out both hover signals here or the consumer keeps
+    // believing a dot is hovered and a panel is open.
+    useEffect(() => {
+      return () => {
+        if (isDotHoverReportedRef.current) {
+          isDotHoverReportedRef.current = false
+          onDotHoverRef.current?.(null)
+        }
+        reportOpenAxisDetail(null)
+      }
+    }, [reportOpenAxisDetail])
 
     useEffect(() => {
       let raf = 0
@@ -742,6 +855,17 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         const continueFullRebuild = () => {
           svg.selectAll("*").remove()
           axisDetailInnerHitRef.current = null
+          fitOpenAxisDetailRef.current = null
+          // The wipe above removed any open hover panel. If it is reopened
+          // further down, that reports the axis again in the same tick.
+          reportOpenAxisDetail(null)
+          // Removed nodes never fire mouseleave. If a dot was hovered, tell
+          // the consumer the hover ended; the replacement dot re-reports it
+          // on the next pointer move if the cursor is still over it.
+          if (isDotHoverReportedRef.current) {
+            isDotHoverReportedRef.current = false
+            onDotHoverRef.current?.(null)
+          }
           if (w <= 0 || h <= 0) {
             // Off-screen capture awaits onReady before serializing. Fire it
             // here too so a zero-dim render does not deadlock the host.
@@ -816,6 +940,18 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           }
 
           const g = svg.append("g").attr("class", "radar-chart-root")
+
+          // The rebuild above destroyed the previous root group, but d3-zoom
+          // keeps its transform on the <svg> node, so restore it here.
+          // Guarded by `zoomable` so capture renders get no transform attr.
+          const svgNode = svgRef.current
+          if (zoomable && svgNode) {
+            zoomBehaviorRef.current?.translateExtent([
+              [0, 0],
+              [w, h],
+            ])
+            g.attr("transform", zoomTransform(svgNode).toString())
+          }
 
           const axisTitleFontWeightDefault =
             axisLabelDetailStyle.scenarioFontWeight
@@ -1153,6 +1289,103 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             axisDetailInnerHitRef.current = innerG
           }
 
+          // The hover panel lives inside the zoomed root group, so on its own
+          // it would grow with the zoom and, because it is anchored to an
+          // axis label on the rim, slide out of the frame. When zoomed this
+          // cancels the zoom on the panel (scale 1/k), moves it beside the
+          // hovered dot, and keeps it inside the visible frame. At 1x it does
+          // nothing, so the unzoomed layout (panel under its label) is
+          // exactly as before.
+          const fitOpenAxisDetailToZoom = () => {
+            const svgNode = svgRef.current
+            if (!zoomable || !svgNode) return
+            const { x: zoomX, y: zoomY, k } = zoomTransform(svgNode)
+            g.selectAll<SVGGElement, unknown>("g.axis-label-detail").each(
+              function () {
+                const panel = this.querySelector("rect.axis-label-detail-panel")
+                const labelEl = this.parentElement
+                if (k === RADAR_ZOOM_MIN || !panel || !labelEl) {
+                  this.removeAttribute("transform")
+                  return
+                }
+                const panelX = Number(panel.getAttribute("x"))
+                const panelY = Number(panel.getAttribute("y"))
+                const panelW = Number(panel.getAttribute("width"))
+                const panelH = Number(panel.getAttribute("height"))
+                const labelX = Number(labelEl.getAttribute("data-label-x"))
+                if (![panelX, panelY, panelW, panelH, labelX].every(isFinite)) {
+                  this.removeAttribute("transform")
+                  return
+                }
+
+                const margin = RADAR_DETAIL_VIEWPORT_MARGIN_PX
+                // Where the normal-size panel's top-left should land on
+                // screen, before it is kept inside the frame below.
+                let screenX: number
+                let screenY: number
+                const open = lastOpenAxisDetailRef.current
+                const dotNode = open
+                  ? g
+                      .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
+                      .filter(function () {
+                        return (
+                          this.getAttribute("data-scenario-id") ===
+                            open.detail.scenarioId &&
+                          this.getAttribute("data-axis") === open.axis
+                        )
+                      })
+                      .node()
+                  : null
+                const dotX = Number(dotNode?.getAttribute("data-final-cx"))
+                const dotY = Number(dotNode?.getAttribute("data-final-cy"))
+                if (dotNode && isFinite(dotX) && isFinite(dotY)) {
+                  // Zoomed in, the axis label is usually far from the dot or
+                  // off-screen, so the panel sits beside the hovered dot:
+                  // to its right, or to its left when the right has no room.
+                  const dotScreenX = k * dotX + zoomX
+                  const dotScreenY = k * dotY + zoomY
+                  const offset =
+                    k * (RADAR_DOT_R + RADAR_HOVER_DOT_RADIUS_BUMP) +
+                    RADAR_DETAIL_DOT_GAP_PX
+                  const hasRoomOnRight =
+                    dotScreenX + offset + panelW <= w - margin
+                  screenX = hasRoomOnRight
+                    ? dotScreenX + offset
+                    : dotScreenX - offset - panelW
+                  screenY = dotScreenY - panelH / 2
+                } else {
+                  // No dot to attach to: stay attached to the label, using
+                  // the point on the panel's top edge closest to it.
+                  const anchorX = Math.min(
+                    Math.max(labelX, panelX),
+                    panelX + panelW,
+                  )
+                  screenX = k * anchorX + zoomX - (anchorX - panelX)
+                  screenY = k * panelY + zoomY
+                }
+                const fittedX = Math.min(
+                  Math.max(screenX, margin),
+                  Math.max(margin, w - panelW - margin),
+                )
+                const fittedY = Math.min(
+                  Math.max(screenY, margin),
+                  Math.max(margin, h - panelH - margin),
+                )
+                // Convert the on-screen target back into the zoomed group's
+                // coordinates: screen = k * (local / k + t) + zoom offset.
+                const translateX = (fittedX - zoomX - panelX) / k
+                const translateY = (fittedY - zoomY - panelY) / k
+                this.setAttribute(
+                  "transform",
+                  `translate(${translateX},${translateY}) scale(${1 / k})`,
+                )
+              },
+            )
+          }
+          // The zoom handler lives outside this rebuild, so it reaches the
+          // current build's fitter through a ref.
+          fitOpenAxisDetailRef.current = fitOpenAxisDetailToZoom
+
           const showAxisLabelDetail = (
             axisKey: string,
             detail: RadarAxisLabelDetailPayload | null,
@@ -1177,6 +1410,16 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               axisLabelDetailStyle,
               axisLabelDetailChromeRef.current,
               pointerBridge,
+            )
+            fitOpenAxisDetailToZoom()
+            // Report from the DOM rather than from the arguments: the panel
+            // rect only exists while a panel is really on screen.
+            const openPanel = g
+              .select<SVGRectElement>("rect.axis-label-detail-panel")
+              .node()
+            reportOpenAxisDetail(
+              openPanel?.closest("g.axis-label")?.getAttribute("data-axis") ??
+                null,
             )
           }
 
@@ -1290,6 +1533,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     hoverNotifyTimerRef.current = null
                   }
 
+                  isDotHoverReportedRef.current = true
                   onDotHoverRef.current?.({
                     scenarioId: scenario.id,
                     axis,
@@ -1317,6 +1561,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     clearTimeout(hoverNotifyTimerRef.current)
                     hoverNotifyTimerRef.current = null
                   }
+                  isDotHoverReportedRef.current = false
                   onDotHoverRef.current?.(null)
 
                   scheduleAxisDetailDismiss(axis)
@@ -1729,12 +1974,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           }
 
           // 9. Axis labels (outside ring)
-          const axisPositions: {
-            axis: string
-            x: number
-            y: number
-            anchor: "start" | "end" | "middle"
-          }[] = []
+          const axisPositions: AxisPosition[] = []
           axes.forEach((axis, i) => {
             const angle = getAngle(i)
             const labelR = radius
@@ -1830,6 +2070,33 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             })
           })
 
+          // Measure where each label's last line ends, so a consumer can put
+          // an icon right after the last word. Measured here, against the
+          // labels just built, so the numbers can never describe a different
+          // build than the positions they travel with. One read pass after
+          // all the writes above keeps it to a single layout.
+          g.selectAll<SVGGElement, unknown>("g.axis-label").each(
+            function (_, i) {
+              const position = axisPositions[i]
+              const titles = this.querySelectorAll<SVGTextElement>(
+                "text.axis-label-title",
+              )
+              // Two-line labels have two titles; the last is the bottom line.
+              const lastTitle = titles[titles.length - 1]
+              if (!position || !lastTitle) return
+              try {
+                const box = lastTitle.getBBox()
+                if (box.width > 0 && box.height > 0) {
+                  position.labelEndX = box.x + box.width
+                  position.labelMidY = box.y + box.height / 2
+                }
+              } catch {
+                // getBBox can throw when the SVG is not rendered (hidden
+                // ancestor). The consumer falls back to the anchor point.
+              }
+            },
+          )
+
           if (
             !axisPositionsEqual(
               lastReportedAxisPositionsRef.current,
@@ -1918,8 +2185,109 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         interactive,
         animate,
         labelBreaks,
+        zoomable,
+        reportOpenAxisDetail,
       ],
     )
+
+    // Zoom + pan. Bound to the <svg> (which survives rebuilds) and applied
+    // to the root group (which does not, see continueFullRebuild).
+    useEffect(() => {
+      const svgEl = svgRef.current
+      if (!svgEl || !zoomable || !interactive) return
+
+      const svgSel = select(svgEl)
+
+      // Hand cursor: open hand when the chart can be panned, closed hand
+      // while panning. At 1x nothing can move, so the default arrow stays.
+      // Dots carry their own cursor="pointer" attribute, which would win
+      // over the <svg> style, so they are switched for the drag's duration.
+      let isDragging = false
+      let dotsShowGrabbing = false
+      const syncCursor = () => {
+        const canPan = zoomTransform(svgEl).k > RADAR_ZOOM_MIN
+        svgEl.style.cursor = !canPan ? "" : isDragging ? "grabbing" : "grab"
+        const shouldDotsGrab = canPan && isDragging
+        // Guarded so the per-frame "zoom" event does not walk every dot.
+        if (shouldDotsGrab === dotsShowGrabbing) return
+        dotsShowGrabbing = shouldDotsGrab
+        svgSel
+          .selectAll("circle.radar-dot")
+          .attr("cursor", shouldDotsGrab ? "grabbing" : "pointer")
+      }
+
+      const behavior = zoom<SVGSVGElement, unknown>()
+        .scaleExtent([RADAR_ZOOM_MIN, RADAR_ZOOM_MAX])
+        // A press that moves less than this still counts as a click, so a
+        // slightly shaky click on a dot is not swallowed as a drag.
+        .clickDistance(RADAR_ZOOM_CLICK_DISTANCE_PX)
+        .on("start", (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
+          // Wheel and button zooms also fire "start"; only a press is a drag.
+          if (event.sourceEvent?.type !== "mousedown") return
+          isDragging = true
+          syncCursor()
+        })
+        .on("zoom", (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
+          const { x, y, k } = event.transform
+          svgSel
+            .select("g.radar-chart-root")
+            .attr("transform", event.transform.toString())
+          onZoomChangeRef.current?.({ x, y, k })
+          fitOpenAxisDetailRef.current?.()
+          syncCursor()
+        })
+        .on("end", () => {
+          isDragging = false
+          syncCursor()
+        })
+
+      // Pan limits equal the viewport, so the chart cannot be dragged
+      // off-screen and cannot move at all at 1x.
+      const { width: w, height: h } = lastDimsRef.current
+      if (w > 0 && h > 0) {
+        behavior.translateExtent([
+          [0, 0],
+          [w, h],
+        ])
+      }
+
+      // Double-click is dropped: dots already use click, and a fast double
+      // click on one would zoom unexpectedly.
+      svgSel.call(behavior).on("dblclick.zoom", null)
+      zoomBehaviorRef.current = behavior
+
+      // Tell the consumer where we are now. On a fresh mount this is the
+      // identity, which clears any transform left over from a previous mount.
+      const initial = zoomTransform(svgEl)
+      onZoomChangeRef.current?.({ x: initial.x, y: initial.y, k: initial.k })
+
+      if (zoomControlsRef) {
+        zoomControlsRef.current = {
+          zoomIn: () =>
+            svgSel
+              .transition()
+              .duration(RADAR_ZOOM_BUTTON_MS)
+              .call(behavior.scaleBy, RADAR_ZOOM_STEP),
+          zoomOut: () =>
+            svgSel
+              .transition()
+              .duration(RADAR_ZOOM_BUTTON_MS)
+              .call(behavior.scaleBy, 1 / RADAR_ZOOM_STEP),
+          reset: () =>
+            svgSel
+              .transition()
+              .duration(RADAR_ZOOM_BUTTON_MS)
+              .call(behavior.transform, zoomIdentity),
+        }
+      }
+
+      return () => {
+        svgSel.on(".zoom", null)
+        svgEl.style.cursor = ""
+        zoomBehaviorRef.current = null
+        if (zoomControlsRef) zoomControlsRef.current = null
+      }
+    }, [zoomable, interactive, zoomControlsRef])
 
     // Keep a ref to updateChart so the ResizeObserver can call it without
     // going through React state (which would create a feedback loop).
