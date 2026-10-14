@@ -1028,7 +1028,6 @@ export default function TierAnimationSection() {
     hoveredAgDuId,
   ])
 
-
   const visibleDemoLocationKey = isDemoDismissed ? null : demoLocationKey
   const visibleDemoHoveredLocation = isDemoDismissed
     ? null
@@ -1342,10 +1341,10 @@ export default function TierAnimationSection() {
                 onBarClick={
                   isInteractive
                     ? (code: string, tier: number) => {
-                      setSpotlightedTier((prev) =>
-                        prev === tier ? null : tier,
-                      )
-                    }
+                        setSpotlightedTier((prev) =>
+                          prev === tier ? null : tier,
+                        )
+                      }
                     : undefined
                 }
               />

@@ -181,7 +181,6 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     )
   }
 
-
   // Paint sequences
 
   /** Write the `basemap-dim-overlay` fill-opacity for the current `v`. */
