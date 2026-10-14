@@ -1193,7 +1193,7 @@ export default function TierAnimationSection() {
         }}
       >
         <Typography variant="body1" color="text.secondary">
-          Could not load tier animation data.
+          Could not load the outcome level animation.
         </Typography>
       </Box>
     )

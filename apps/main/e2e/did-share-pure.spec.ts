@@ -360,7 +360,7 @@ test("shareFigureFooter names the source and the capture date, never sample data
   }
 })
 
-test("shareFigureFooter covers the other tools with the tiers wording", () => {
+test("shareFigureFooter covers the other tools with the outcome levels wording", () => {
   const radar = shareFigureFooter({
     id: "r",
     type: "radar",
@@ -372,7 +372,7 @@ test("shareFigureFooter covers the other tools with the tiers wording", () => {
     capturedAt: "2026-08-24T19:00:00.000Z",
   } as never)
   expect(radar.source).toBe(
-    "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome tiers.",
+    "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome levels.",
   )
   expect(radar.provenance).toBeUndefined()
   expect(radar.capturedAt).toBe("Captured Aug 24, 2026.")

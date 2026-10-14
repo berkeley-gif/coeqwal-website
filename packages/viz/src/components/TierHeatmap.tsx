@@ -33,7 +33,7 @@ export interface TierHeatmapProps {
 
 const MARGIN = { top: 10, right: 20, bottom: 100, left: 160 }
 const TIER_COLOR_SCALE = ["#08519c", "#3182bd", "#9ecae1", "#deebf7"] as const
-const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]
+const TIER_LABELS = ["Optimal", "Acceptable", "At-risk", "Critical"]
 
 interface TooltipState {
   x: number

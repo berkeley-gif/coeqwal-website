@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test"
 import { setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // The Data in Depth tool's two option columns (scenario library sidebar and
 // the variables rail) collapse to slim labeled strips so the chart gets the
@@ -15,6 +16,7 @@ async function openDataTool(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 

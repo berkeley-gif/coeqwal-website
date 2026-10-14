@@ -49,7 +49,11 @@ import {
 import { CompactSelect } from "@repo/ui"
 import { InlineTourAnchor } from "../../../tour"
 import { getVariable, LOCATION_GROUPS } from "../config/variableRegistry"
-import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
+import {
+  getCompareScenarioIds,
+  getDataScenarioSelection,
+  getHeldScenarioId,
+} from "../config/scenarioLimit"
 import { getStableSeriesColors } from "../config/seriesColorAssignment"
 import { AddEntityPicker } from "../components/shared/AddEntityPicker"
 import {
@@ -88,6 +92,7 @@ export default function CompareControls() {
     setSelectedLocations,
   } = useDataSlice()
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
+  const tourActive = useWorkspaceSlice((s) => s.tour.tool === "data")
   // The location queued in the add-location control on the Locations axis
   // (picker groups only); cleared once added.
   const [pendingLocation, setPendingLocation] = React.useState("")
@@ -113,18 +118,23 @@ export default function CompareControls() {
       </Typography>
     ) : null
 
-  // Comparison scenario set: reference first, then the workspace selection.
-  const compareScenarios = [
+  // Comparison scenario set: exactly the workspace selection, capped.
+  const compareScenarios = getCompareScenarioIds(
+    getDataScenarioSelection(
+      selectedScenarios,
+      tourActive,
+      BASELINE_SCENARIO_ID,
+    ),
     BASELINE_SCENARIO_ID,
-    ...selectedScenarios.filter((id) => id !== BASELINE_SCENARIO_ID),
-  ].slice(0, MAX_DATA_IN_DEPTH_SCENARIOS)
+  )
 
   // Clamp to a scenario still in the comparison set so the Select never holds
   // an out-of-range value after the workspace selection shrinks.
-  const heldScenario =
-    pinnedScenario && compareScenarios.includes(pinnedScenario)
-      ? pinnedScenario
-      : BASELINE_SCENARIO_ID
+  const heldScenario = getHeldScenarioId(
+    pinnedScenario,
+    compareScenarios,
+    BASELINE_SCENARIO_ID,
+  )
   const heldLocation =
     pinnedLocationByGroup[groupId] ?? group.items[0]?.id ?? ""
 

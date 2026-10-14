@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import {
+  seedSelectedScenarios,
+  selectCurrentOperations,
+} from "./support/scenarioSelection"
 
 // System-deliveries live path, end to end and offline. Same technique as
 // did-climate-axis.spec.ts: inline route fixtures layered over the HAR
@@ -117,6 +121,7 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
 
   // CVP deliveries: default region is System-wide -> DEL_CVP_TOTAL.
   await page
@@ -266,6 +271,7 @@ test("ssjv all-routes total fails closed to no data when a route series is missi
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await page
     .getByRole("button", { name: "Southern San Joaquin Valley deliveries" })
     .click()
@@ -282,6 +288,9 @@ test("a failed scenario list reads as a load failure, not as no data", async ({
   await page.route("**/api/scenarios", (route) =>
     route.fulfill({ status: 500, json: { detail: "down" } }),
   )
+  // The sidebar cannot list scenarios without the list, so the selection
+  // comes from a saved session.
+  await seedSelectedScenarios(page, ["s0020"])
   await page.goto("/explore")
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })

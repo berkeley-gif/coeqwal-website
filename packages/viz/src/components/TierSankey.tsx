@@ -50,10 +50,10 @@ const TIER_LABELS: Record<string, string> = {
   tier4: "T4",
 }
 const TIER_LABELS_FULL: Record<string, string> = {
-  tier1: "Tier 1",
-  tier2: "Tier 2",
-  tier3: "Tier 3",
-  tier4: "Tier 4",
+  tier1: "Optimal",
+  tier2: "Acceptable",
+  tier3: "At-risk",
+  tier4: "Critical",
 }
 const TIER_ORDER = ["tier1", "tier2", "tier3", "tier4"] as const
 

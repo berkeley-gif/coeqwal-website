@@ -250,7 +250,7 @@ export function useTierData(
   const error = swrErr
     ? swrErr.message
     : missingSingleValue
-      ? `No tier data for ${config?.tierCode}`
+      ? `No outcome level data for ${config?.tierCode}`
       : null
 
   return {

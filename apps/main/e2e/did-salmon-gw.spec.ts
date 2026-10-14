@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
 import { LOCATION_GROUPS } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Exact served groundwater subjects, derived from the registry (the parity
 // spec keeps registry and mapping in agreement, so this mirrors production).
@@ -162,6 +163,7 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
 
   // Salmon: sector is unlocked, the variable goes live, and the WYT row is
   // disabled with the not-applicable note (first real wytApplicable: false
@@ -302,6 +304,7 @@ test("a restored session with a groundwater total on the Level view shows the re
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await expect(
     page
       .getByText(

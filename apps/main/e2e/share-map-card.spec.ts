@@ -53,7 +53,7 @@ test("stored comparison map card", async ({ page }) => {
     canvas.getByRole("group", { name: "Comparison marker legend" }),
   ).toBeVisible()
   await expect(
-    canvas.getByRole("group", { name: "Tier color legend" }),
+    canvas.getByRole("group", { name: "Outcome level color legend" }),
   ).toBeVisible()
   await expect(
     canvas.getByText(/Basemap © Mapbox © OpenStreetMap\./),

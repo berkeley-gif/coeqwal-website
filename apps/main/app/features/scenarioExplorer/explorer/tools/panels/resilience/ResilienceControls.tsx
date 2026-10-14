@@ -486,8 +486,8 @@ export default function ResilienceControls({
             onClick={() => writeChange({ showCellNumbers: !showCellNumbers })}
             ariaLabel={
               showCellNumbers
-                ? "Cell values: shown. Click to hide the tier numbers inside cells."
-                : "Cell values: hidden. Click to show the tier number inside each cell."
+                ? "Cell values: shown. Click to hide the outcome level numbers inside cells."
+                : "Cell values: hidden. Click to show the outcome level number inside each cell."
             }
           />
         </InlineTourAnchor>

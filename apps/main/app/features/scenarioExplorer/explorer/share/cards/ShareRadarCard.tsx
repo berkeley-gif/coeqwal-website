@@ -72,7 +72,7 @@ export default function ShareRadarCard({
 
   const toggleLabels: string[] = []
   if (showRange) toggleLabels.push("Range shown")
-  if (showTierZones === false) toggleLabels.push("Tier bands off")
+  if (showTierZones === false) toggleLabels.push("Outcome level bands off")
   if (highlightBaseline) toggleLabels.push("Baseline highlighted")
   if (showDotsOnly) toggleLabels.push("Dots only")
 

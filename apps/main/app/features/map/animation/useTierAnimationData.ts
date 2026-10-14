@@ -132,7 +132,11 @@ export function useTierAnimationData(): TierAnimationData {
         }
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Failed to fetch tier data")
+          setError(
+            e instanceof Error
+              ? e.message
+              : "Failed to fetch outcome level data",
+          )
           setIsLoading(false)
         }
       }

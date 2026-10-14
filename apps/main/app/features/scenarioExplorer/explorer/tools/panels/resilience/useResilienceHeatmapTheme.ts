@@ -46,6 +46,8 @@ export function useResilienceHeatmapTheme(): ResilienceHeatmapThemeTokens {
   const grey400 = theme.palette.grey[400]
   const grey600 = theme.palette.grey[600]
   const grey700 = theme.palette.grey[700]
+  // The selected (mapped) cell's outline matches Bar's selected glyph.
+  const blueBright = theme.palette.blue.bright
   const divNegStrong = theme.palette.tierDiverging.negStrong
   const divNegWeak = theme.palette.tierDiverging.negWeak
   const divZero = theme.palette.tierDiverging.zero
@@ -61,6 +63,7 @@ export function useResilienceHeatmapTheme(): ResilienceHeatmapThemeTokens {
       text: textPrimary,
       textMuted: grey700,
       hoverStroke: textPrimary,
+      selectedStroke: blueBright,
       onDarkTier: commonWhite,
       onLightTier: textPrimary,
       unavailableFill: grey100,
@@ -88,6 +91,7 @@ export function useResilienceHeatmapTheme(): ResilienceHeatmapThemeTokens {
       grey400,
       grey600,
       grey700,
+      blueBright,
       divNegStrong,
       divNegWeak,
       divZero,

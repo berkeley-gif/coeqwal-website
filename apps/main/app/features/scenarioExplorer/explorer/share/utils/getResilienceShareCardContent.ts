@@ -120,7 +120,7 @@ export function getResilienceShareCardContent(
     (item.view !== "aggregate" || item.cellEncoding !== "tier")
 
   const thumbnailDisclaimer = needsDisclaimer
-    ? "Preview: summary aggregate tier heatmap for this scope. Layout and encoding may differ from what you saved."
+    ? "Preview: summary aggregate heatmap for this scope. Layout and encoding may differ from what you saved."
     : undefined
 
   const hydroChip = buildHydroChip(item.hydroclimates, lookups.hydroShortLabel)

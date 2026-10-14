@@ -66,7 +66,7 @@ export function mapFigureSpec(
       strategy,
       hydroclimate: input.hydroclimateLabel ?? undefined,
     },
-    legendHeading: "Tier",
+    legendHeading: "Outcome level",
   }
 }
 

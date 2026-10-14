@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { seedSelectedScenarios } from "./support/scenarioSelection"
 
 // Climate-futures axis, live path, end to end and offline. The rest of the
 // suite rides the committed HAR, whose empty /api/scenarios body keeps id
@@ -95,6 +96,9 @@ test("climate futures axis fetches each hydroclimate variant and goes live", asy
     return route.fulfill({ json: { scenario: id, results: {}, missing: [] } })
   })
 
+  // This spec's own scenario list renames the scenarios, so the selection
+  // comes from a saved session rather than the sidebar.
+  await seedSelectedScenarios(page, ["s0020"])
   await page.goto("/explore")
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })

@@ -45,7 +45,7 @@ export function resilienceHeatmapDataToCSV(
   header: CsvHeaderInput,
 ): string | null {
   if (!Array.isArray(data.rows) || data.rows.length === 0) return null
-  const tableHeader = ["Row", "Column", "Tier", "Value"]
+  const tableHeader = ["Row", "Column", "Outcome level", "Value"]
   const lines: string[] = []
   lines.push(...buildCsvHeaderBlock(header))
   lines.push("")

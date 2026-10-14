@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Agriculture live path, end to end and offline. Same technique as
 // did-cws.spec.ts: inline route fixtures layered over the HAR harness (later
@@ -140,6 +141,7 @@ test("ag variables fetch their per-variable measures and go live", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
 
   // "Surface water deliveries" also exists in the community-water-systems
   // sector, so scope to the list that carries the unique "Groundwater
@@ -224,6 +226,7 @@ test("ag shortage derives its percent-of-demand view from two served measures", 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
 
   const agList = page
     .getByRole("list")
@@ -279,6 +282,7 @@ test("ag demand units are pickable and fetch their own subject", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   const agList = page
     .getByRole("list")
     .filter({ has: page.getByRole("button", { name: "Groundwater pumping" }) })
@@ -364,6 +368,7 @@ test("gross crop revenues reads the revenue measure and displays millions of dol
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   const agList = page
     .getByRole("list")
     .filter({ has: page.getByRole("button", { name: "Groundwater pumping" }) })

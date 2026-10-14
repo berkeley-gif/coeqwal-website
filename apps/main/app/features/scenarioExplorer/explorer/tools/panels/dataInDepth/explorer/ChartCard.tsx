@@ -38,6 +38,7 @@ import {
 import { SaveSnapshotButton } from "../../../chrome/actions/SaveSnapshotButton"
 import { InlineTourAnchor, useTourAnchor } from "../../../tour"
 import { useDataShareCapture } from "../hooks/useDataShareCapture"
+import { MODEL_RESULTS_LOAD_ERROR } from "../../../components/loadErrorText"
 
 const CHART_HEIGHT = 340
 
@@ -203,9 +204,7 @@ export default function ChartCard() {
           textAlign: "center",
         }}
       >
-        <Typography variant="body2">
-          Model results could not be loaded. Try again in a moment.
-        </Typography>
+        <Typography variant="body2">{MODEL_RESULTS_LOAD_ERROR}</Typography>
       </Box>
     )
   } else if (!hasMembers || !hasPlotted) {

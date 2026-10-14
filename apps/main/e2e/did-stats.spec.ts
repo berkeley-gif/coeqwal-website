@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test"
 import { setupNetwork } from "./support/network"
 import { linearTrendPerYear } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/mockDataEngine"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // The Stats chart style shows side-by-side bar plots of summary statistics
 // for the currently selected quantity view: mean and CV everywhere, plus the
@@ -22,6 +23,7 @@ async function openDataTool(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 

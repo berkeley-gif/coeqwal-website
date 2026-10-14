@@ -8,6 +8,7 @@ import {
   csvEscape,
   type CsvHeaderInput,
 } from "./csvFormat"
+import { getLevelName } from "../../../../../../content/tiers"
 
 export type BarTierEntry = {
   label?: string
@@ -40,7 +41,7 @@ export function barChartDataToCSV(
   if (outcomes.length === 0) return ""
 
   const firstTiers = data[outcomes[0]!]!
-  const tierNames = firstTiers.map((t) => t.label ?? "")
+  const tierNames = firstTiers.map((t) => getLevelName(t.label ?? ""))
 
   const tableHeader = [
     "Outcome",

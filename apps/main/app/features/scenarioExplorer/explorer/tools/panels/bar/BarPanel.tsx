@@ -43,6 +43,7 @@ import {
   SCENARIO_PROMPT_TEXT,
 } from "../../components/scenarioPrompt"
 import { BASELINE_SCENARIO_ID } from "../../../../constants"
+import { MODEL_RESULTS_LOAD_ERROR } from "../../components/loadErrorText"
 
 /** Fixed column width so header cells and every card's glyph cells line up. */
 const OUTCOME_COLUMN_WIDTH = 90
@@ -350,7 +351,7 @@ export default function BarPanel() {
     return (
       <Box sx={{ p: theme.spacing(3) }}>
         <Typography variant="body2" color="error">
-          Error loading data: {error}
+          {MODEL_RESULTS_LOAD_ERROR}
         </Typography>
       </Box>
     )

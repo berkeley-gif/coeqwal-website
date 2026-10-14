@@ -33,6 +33,7 @@ import {
   getSingleValueLocationCount,
   OUTCOME_LABEL_BREAKS,
 } from "../../../../content/outcomes"
+import { getLevelName } from "../../../../content/tiers"
 
 /**
  * Generate accessible description of chart data for screen readers
@@ -49,16 +50,16 @@ function generateChartAriaLabel(
   if (isSingleValueTier(chartData)) {
     // Single-value tier: find the active tier (value > 0)
     const activeTier = chartData.find((t) => t.value > 0)
-    return `${displayName}: ${activeTier?.label || "Unknown"} tier`
+    return `${displayName}: ${activeTier?.label ? getLevelName(activeTier.label) : "Unknown"}`
   }
 
   // Multi-value: describe distribution
   const tierDescriptions = chartData
     .filter((t) => t.value > 0)
-    .map((t) => `${Math.round(t.value)}% ${t.label}`)
+    .map((t) => `${Math.round(t.value)}% ${getLevelName(t.label)}`)
     .join(", ")
 
-  return `${displayName} tier distribution: ${tierDescriptions}`
+  return `${displayName} outcome level distribution: ${tierDescriptions}`
 }
 
 /**

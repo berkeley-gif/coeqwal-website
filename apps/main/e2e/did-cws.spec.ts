@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Community-water-systems live path, end to end and offline. Same technique
 // as did-sysdel.spec.ts: inline route fixtures layered over the HAR harness
@@ -190,6 +191,7 @@ test("cws variables fetch their per-variable measures and go live", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
 
   // "Surface water deliveries" also exists in the Agricultural water sector,
   // so scope to the list that carries the unique "Municipal supply shortages".
@@ -279,6 +281,7 @@ test("cws variables disable the water-year-type row and never send wyt", async (
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
 
   // Select a class on the default variable (April reservoir storage), which
   // the filter applies to. The stored selection stays inert, not cleared,
@@ -363,6 +366,7 @@ test("cws systems are pickable per measure family and pins carry over only when 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   const cwsList = page.getByRole("list").filter({
     has: page.getByRole("button", { name: "Municipal supply shortages" }),
   })
@@ -469,6 +473,7 @@ test("cws deliveries drop the partial calendar years and export calendar-year ro
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   const cwsList = page.getByRole("list").filter({
     has: page.getByRole("button", { name: "Municipal supply shortages" }),
   })
@@ -520,6 +525,7 @@ test("a subject absent from a served block is reported as no data, not sample", 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   const cwsList = page.getByRole("list").filter({
     has: page.getByRole("button", { name: "Municipal supply shortages" }),
   })
@@ -549,6 +555,7 @@ test("welfare loss reads the welfare_loss measure and displays millions of dolla
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   const cwsList = page.getByRole("list").filter({
     has: page.getByRole("button", { name: "Municipal supply shortages" }),
   })
@@ -608,6 +615,7 @@ test("surface water delivery shortage derives 100 minus percent met from the ser
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   const cwsList = page.getByRole("list").filter({
     has: page.getByRole("button", { name: "Municipal supply shortages" }),
   })

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // A figure of a distribution view other than the plain one names that view
 // after the chart style, because the variable row's unit alone cannot tell
@@ -14,6 +15,7 @@ test("a percent-of-capacity figure names its view on the card", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   // The reservoir variables offer the plain volume view and percent of
   // capacity; the toggle group is labelled "Data view".

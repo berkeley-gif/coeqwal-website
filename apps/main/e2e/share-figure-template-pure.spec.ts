@@ -42,7 +42,7 @@ test("blank values are dropped and an explicit legend heading wins", () => {
     toolLabel: "Map",
     chartKindLabel: "Bar tool",
     values: { outcome: "Reservoir storage", strategy: "  ", hydroclimate: "" },
-    legendHeading: "Tier",
+    legendHeading: "Outcome level",
   })
   expect(t.rows).toEqual([
     {
@@ -51,7 +51,7 @@ test("blank values are dropped and an explicit legend heading wins", () => {
       value: "Reservoir storage",
     },
   ])
-  expect(t.legendHeading).toBe("Tier")
+  expect(t.legendHeading).toBe("Outcome level")
 })
 
 test("no compared dimension and no heading means no legend heading", () => {

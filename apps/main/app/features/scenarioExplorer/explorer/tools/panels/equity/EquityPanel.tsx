@@ -34,7 +34,10 @@ import {
   type DistributionMapSnapshot,
 } from "../../../../../map/store"
 import { getDistributionPaintKey } from "../../../../../map/config/mapPaintKey"
-import { getTierColorsFromTheme } from "../../../../../../content/tiers"
+import {
+  getTierColorsFromTheme,
+  getTierLabel,
+} from "../../../../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../../../../map/config/outcomeLocations"
 import { useEquityObjectives } from "./useEquityObjectives"
 import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
@@ -814,13 +817,13 @@ export default function EquityPanel({
                 }}
               >
                 <Box component="span" sx={{ color: "#718096" }}>
-                  Tier:
+                  Outcome level:
                 </Box>
                 <Box
                   component="span"
                   sx={{ fontWeight: 600, color: "#2d3748" }}
                 >
-                  {obj.tier}
+                  {getTierLabel(parseInt(obj.tier.replace("Tier ", ""), 10))}
                 </Box>
               </Box>
             </Box>
