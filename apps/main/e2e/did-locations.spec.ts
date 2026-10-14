@@ -213,7 +213,12 @@ test("reservoirs compare live in one request, each member by its own subject", a
   }
   await expect(nod).toHaveAccessibleDescription("Aggregate rollup")
   await page.keyboard.press("Escape")
+  await expect(
+    page.getByRole("tooltip", { name: "Aggregate rollup" }),
+  ).toHaveCount(0)
+  await expect(nod).toBeFocused()
   await expect(nod).toHaveAccessibleName("All North of Delta")
+  await expect(nod).toHaveAccessibleDescription("Aggregate rollup")
   // Ten reservoirs, so the caption states the cap of six.
   await expect(page.getByText(/s \(up to 6\)$/)).toBeVisible()
 

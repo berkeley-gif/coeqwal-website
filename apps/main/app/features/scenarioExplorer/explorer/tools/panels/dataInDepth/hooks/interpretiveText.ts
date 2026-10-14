@@ -136,9 +136,20 @@ export function formatWithUnit(v: number, unit: string): string {
  */
 export function percentDelta(reference: number, other: number): string {
   if (!reference) return other ? "n/a" : "0%"
-  const d = Math.round(((other - reference) / Math.abs(reference)) * 100)
-  if (d === 0) return "0%"
-  return `${d > 0 ? "+" : ""}${d}%`
+  const change = roundedPercentChange(reference, other)
+  if (change === 0) return "0%"
+  return `${change > 0 ? "+" : "-"}${Math.abs(change)}%`
+}
+
+/**
+ * The percent change from a nonzero `reference` to `other`, rounded to a
+ * whole number by magnitude so equal rises and falls round alike (a 0.5%
+ * fall reads -1%, as a 0.5% rise reads +1%). Never returns -0.
+ */
+function roundedPercentChange(reference: number, other: number): number {
+  const raw = ((other - reference) / Math.abs(reference)) * 100
+  const magnitude = Math.round(Math.abs(raw))
+  return magnitude === 0 ? 0 : Math.sign(raw) * magnitude
 }
 
 /**
@@ -210,7 +221,10 @@ export function summarySentence(
     (m) => isQuotable(m) && m.bands && m.bands.length === 12,
   )
   const firstBanded = withBands[0]
-  if (ctx.view === "monthly" && firstBanded?.bands) {
+  if (ctx.view === "monthly") {
+    // A monthly chart is summarized only from monthly bands, never from an
+    // annual series.
+    if (!firstBanded?.bands) return ""
     const bands = firstBanded.bands
     let peak = 0
     bands.forEach((b, i) => {
@@ -227,7 +241,14 @@ export function summarySentence(
   }
 
   if (ctx.view === "cv") {
-    const withValues = members.filter((m) => isQuotable(m) && m.value != null)
+    // Only defined CVs are ranked: finite, from a series whose mean is not 0.
+    const withValues = members.filter(
+      (m) =>
+        isQuotable(m) &&
+        m.value != null &&
+        Number.isFinite(m.value) &&
+        !(m.series && m.series.length > 0 && seriesStats(m.series).mean === 0),
+    )
     if (withValues.length === 0) return ""
     const mx = withValues.reduce((a, b) =>
       (b.value ?? 0) > (a.value ?? 0) ? b : a,
@@ -390,7 +411,7 @@ function templateSentence(
       `At ${where}, median ${month} reservoir storage for ${ref.m.label} under the ${held} is ${val(ref.med)}.`,
     )
     for (const x of others) {
-      const d = Math.round(((x.med - ref.med) / Math.abs(ref.med)) * 100)
+      const d = roundedPercentChange(ref.med, x.med)
       sentences.push(
         d === 0
           ? `The ${x.m.label} scenario has about the same median ${month} reservoir storage.`

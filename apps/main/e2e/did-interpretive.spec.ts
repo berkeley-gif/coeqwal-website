@@ -602,6 +602,9 @@ test("percent changes round to 0% and say n/a against a zero reference", () => {
   expect(percentDelta(100, 100.3)).toBe("0%")
   expect(percentDelta(0, 0)).toBe("0%")
   expect(percentDelta(0, 5)).toBe("n/a")
+  // Half-percent changes round alike in both directions.
+  expect(percentDelta(200, 199)).toBe("-1%")
+  expect(percentDelta(200, 201)).toBe("+1%")
 })
 
 // Shortages are zero in most years: their sentence counts the years with
@@ -715,4 +718,28 @@ test("reservoir comparisons that round to zero say about the same", () => {
     "The Other scenario has about the same median April reservoir storage.",
   )
   expect(s).not.toMatch(/0% (higher|lower)/)
+})
+
+test("a monthly chart without monthly bands has no summary", () => {
+  const s = summarySentence(
+    [member("Current Operations", [4, 8], true)],
+    templateCtx({ view: "monthly", variableName: "Delta outflow volume" }),
+  )
+  expect(s).toBe("")
+})
+
+test("the CV view ranks only defined CVs", () => {
+  const ctx = templateCtx({ view: "cv", variableName: "River flows" })
+  const s = summarySentence(
+    [
+      { ...member("Zero mean", [0, 0, 0], true), value: 0 },
+      { ...member("Not finite", [1, 2]), value: Number.NaN },
+      { ...member("Constant", [4, 4]), value: 0 },
+      { ...member("Variable", [2, 6]), value: 0.5 },
+    ],
+    ctx,
+  )
+  expect(s).toBe(
+    "Year-to-year swings are largest for Variable (CV 0.50) and smallest for Constant (CV 0.00). Higher CV = less predictable from year to year.",
+  )
 })
