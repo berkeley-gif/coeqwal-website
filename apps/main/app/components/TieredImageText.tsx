@@ -166,7 +166,7 @@ export function TieredImageText({
             inset: 0,
             height: { xs: "130%", md: "150%", lg: "215%" },
             objectFit: "cover",
-            objectPosition: "center-bottom",
+            objectPosition: "center top",
             position: "absolute",
           }}
         />
