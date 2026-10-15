@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
+  getIsTourExample,
   needsScenarioPrompt,
   SCENARIO_PROMPT_TEXT,
   type ScenarioPromptInput,
@@ -86,6 +87,56 @@ test("data in depth prompts like the other tools, except during its tour", () =>
     needsScenarioPrompt({ ...base, mode: "data", selectedScenarioCount: 1 }),
   ).toBe(false)
   expect(needsScenarioPrompt({ ...base, mode: "data", tourActive: true })).toBe(
+    false,
+  )
+})
+
+test("the tour card notes example results only when the tour lifts the prompt", () => {
+  // Every prompt tool draws something during its tour with nothing selected.
+  for (const mode of [
+    "radar",
+    "resilience",
+    "equity",
+    "bar",
+    "data",
+  ] as const) {
+    expect(getIsTourExample({ ...base, mode, tourActive: true })).toBe(true)
+  }
+  // Not when the user's own choice is drawn, and never outside the tour.
+  expect(
+    getIsTourExample({
+      ...base,
+      mode: "data",
+      selectedScenarioCount: 1,
+      tourActive: true,
+    }),
+  ).toBe(false)
+  expect(
+    getIsTourExample({
+      ...base,
+      mode: "radar",
+      showAll: true,
+      tourActive: true,
+    }),
+  ).toBe(false)
+  expect(
+    getIsTourExample({
+      ...base,
+      mode: "resilience",
+      showAll: true,
+      tourActive: true,
+    }),
+  ).toBe(false)
+  expect(
+    getIsTourExample({
+      ...base,
+      mode: "equity",
+      equityFocusScenario: "s0020",
+      tourActive: true,
+    }),
+  ).toBe(false)
+  expect(getIsTourExample({ ...base, mode: "data" })).toBe(false)
+  expect(getIsTourExample({ ...base, mode: "list", tourActive: true })).toBe(
     false,
   )
 })

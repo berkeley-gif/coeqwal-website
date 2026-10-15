@@ -13,8 +13,8 @@
  *     Distribution keep their old fallback for it; Bar and Data in depth,
  *     which never had one, draw current operations for the tour only.
  *
- * Exports: needsScenarioPrompt, SCENARIO_PROMPT_TEXT, ScenarioPromptInput,
- * PromptTool.
+ * Exports: needsScenarioPrompt, getIsTourExample, TOUR_EXAMPLE_NOTE,
+ * SCENARIO_PROMPT_TEXT, ScenarioPromptInput, PromptTool.
  */
 
 import type { ExploreMode } from "../../store/types"
@@ -49,6 +49,21 @@ export function needsScenarioPrompt(input: ScenarioPromptInput): boolean {
       return false
   }
 }
+
+/**
+ * Whether the tool is drawing a chart only because its own tour is running:
+ * outside the tour it would show the prompt. The tour card then says so,
+ * because the chart goes away when the tour ends. Pure.
+ */
+export function getIsTourExample(input: ScenarioPromptInput): boolean {
+  return (
+    input.tourActive && needsScenarioPrompt({ ...input, tourActive: false })
+  )
+}
+
+/** The tour card note shown while `getIsTourExample` holds. */
+export const TOUR_EXAMPLE_NOTE =
+  "No scenarios are selected, so the tour shows example results. They go away when the tour ends. Select scenarios in the sidebar to see your own."
 
 export type PromptTool = "bar" | "radar" | "equity" | "resilience" | "data"
 

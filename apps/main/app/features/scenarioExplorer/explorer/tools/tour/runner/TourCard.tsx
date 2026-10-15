@@ -31,6 +31,8 @@ export interface TourCardProps {
   isFirst: boolean
   isLast: boolean
   illustration: ReactNode
+  /** Extra line under the body, e.g. that the chart is a tour example. */
+  note?: string
   onBack: () => void
   onNext: () => void
   onSkip: () => void
@@ -48,6 +50,7 @@ export function TourCard({
   isFirst,
   isLast,
   illustration,
+  note,
   onBack,
   onNext,
   onSkip,
@@ -61,7 +64,7 @@ export function TourCard({
 
   const hasTitle = Boolean(step.title.trim())
   const hasBody = Boolean((step.body?.trim() ?? "").length > 0)
-  const hasMainBlock = hasBody || Boolean(illustration)
+  const hasMainBlock = hasBody || Boolean(illustration) || Boolean(note)
 
   return (
     <Paper
@@ -157,6 +160,23 @@ export function TourCard({
                 body={step.body ?? ""}
                 infoIconColor={theme.palette.grey[700]}
               />
+            </Typography>
+          ) : null}
+          {note ? (
+            <Typography
+              variant="dashboard"
+              component="p"
+              data-testid="tour-example-note"
+              sx={{
+                m: 0,
+                px: 1.25,
+                py: 0.75,
+                borderRadius: 1,
+                backgroundColor: theme.palette.grey[100],
+                color: theme.palette.grey[700],
+              }}
+            >
+              {note}
             </Typography>
           ) : null}
         </Box>
