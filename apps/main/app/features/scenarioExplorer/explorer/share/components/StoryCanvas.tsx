@@ -30,6 +30,7 @@ interface StoryCanvasProps extends ShareCardRenderProps {
   onDelete: (id: string) => void
   onDownloadData: (item: ShareItem) => void
   onRegisterContentRef: (id: string, el: HTMLDivElement | null) => void
+  onExportFailed?: (message: string) => void
   onNoteChange: (id: string, note: string) => void
   csvLookups: CsvLookups
 }
@@ -48,6 +49,7 @@ export default function StoryCanvas({
   onDelete,
   onDownloadData,
   onRegisterContentRef,
+  onExportFailed,
   onNoteChange,
   outcomeNames,
   scenarioLookup,
@@ -140,6 +142,7 @@ export default function StoryCanvas({
                 onDelete={onDelete}
                 onDownloadData={onDownloadData}
                 onRegisterContentRef={onRegisterContentRef}
+                onExportFailed={onExportFailed}
                 onNoteChange={onNoteChange}
                 outcomeNames={outcomeNames}
                 scenarioLookup={scenarioLookup}

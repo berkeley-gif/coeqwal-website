@@ -7,4 +7,6 @@ export {
   getMapLinkBlockedMessage,
   resolveScenarioIdFromCell,
   hoverPayloadFromCell,
+  getIsCellMapped,
+  getMappedCell,
 } from "./cellUtils"

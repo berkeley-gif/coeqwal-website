@@ -100,7 +100,7 @@ export function buildCsvHeaderBlock(input: CsvHeaderInput): string[] {
   }
 
   if (input.includeTierScale) {
-    rows.push(`Tier scale,${csvEscape(TIER_SCALE_TEXT)}`)
+    rows.push(`Outcome levels,${csvEscape(TIER_SCALE_TEXT)}`)
   }
 
   return rows

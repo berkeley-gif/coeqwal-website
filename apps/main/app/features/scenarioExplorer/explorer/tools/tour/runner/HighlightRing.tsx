@@ -44,6 +44,8 @@ export function HighlightRing({ anchorEl }: { anchorEl: Element | null }) {
     <Portal>
       <Box
         aria-hidden
+        // Lets a test tell an anchored step from a centered one.
+        data-tour-highlight-ring=""
         sx={{
           position: "fixed",
           top: rect.top - pad,

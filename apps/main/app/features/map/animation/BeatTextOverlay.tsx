@@ -434,9 +434,13 @@ export default function BeatTextOverlay({
                                   <Typography
                                     component="span"
                                     sx={{
+                                      // Inline spans can't shrink a line below the parent's line height,
+                                      // so `lineHeight: 1.3` is ignored without this.
+                                      display: "block",
                                       fontSize: 11,
                                       lineHeight: 1.3,
                                       color: theme.palette.grey[700],
+                                      mt: "12px",
                                     }}
                                   >
                                     {item.locationDescription}

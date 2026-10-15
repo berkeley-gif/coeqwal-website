@@ -46,8 +46,9 @@ export const SHARE_URL_VERSION = 1
  * Build a full share URL string for a set of share items, the
  * current hydroclimate, and the optional story arrangement.
  *
- * The URL is anchored at `window.location.origin` and always
- * pins `tab=share`. Climate is omitted when it equals
+ * The URL is anchored at `window.location.origin` on the /share route,
+ * where the Share tab and its link rehydration mount, and always pins
+ * `tab=share`. Climate is omitted when it equals
  * `"historical"`. The URL version (`v=`) is always emitted so
  * future readers can detect mismatches.
  */
@@ -67,7 +68,7 @@ export function encodeShareItems(
       .filter((i): i is number => i != null)
     if (indices.length > 0) parts.push(`story=${indices.join(",")}`)
   }
-  return `${window.location.origin}/?${parts.join("&")}`
+  return `${window.location.origin}/share?${parts.join("&")}`
 }
 
 /**

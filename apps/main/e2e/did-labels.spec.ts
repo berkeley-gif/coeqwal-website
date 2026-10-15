@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
 import { getScenarioShortLabel } from "../app/content/scenarios"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Browser contract for the label edits from the project lead's Aug 23 board
 // review: the key-outcome chips read "used in calculation of key outcome:
@@ -19,7 +20,8 @@ async function openDataInDepth(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await selectCurrentOperations(page)
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 
 function variableButton(page: Page, name: string) {

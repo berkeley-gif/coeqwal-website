@@ -18,15 +18,15 @@
  * (per-scenario parallel fan-out), and every derived value the chart needs
  * (exceedance curve, box, mean, CV) is computed on the frontend from that
  * series via `seriesStats` and `toExceedancePoints` - the same path the mock
- * engine feeds. So the live and mock members are shaped identically; only the
- * origin of `series` differs.
+ * engine feeds. The sample engine still fills `series` for members without a
+ * live one, but such members are never drawn, quoted or exported: the site
+ * shows model results only.
  *
  * The locations axis is live too: ONE request for the held scenario carries
  * every selected location's subject, and each member picks its own series by
- * subject id (`locationAxisRequest`). Any variable not served by a
- * data-in-depth endpoint uses the deterministic sample-data engine. Each
- * member falls back to mock individually if its live series is absent, and the
- * card is labeled per the resolved `source`.
+ * subject id (`locationAxisRequest`). Each member ends in exactly one state:
+ * live (`isLive`), still loading (`pending`), failed to load (`loadFailed`),
+ * or without model results (`liveDataMissing`).
  *
  * Member ids resolve to concrete scenario short_codes before fetching:
  * - scenarios axis: each compared scenario through the PINNED
@@ -50,7 +50,10 @@ import {
 } from "@repo/data/coeqwal/hooks"
 import type { DidAgMeasure } from "@repo/data/coeqwal"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
-import { useResolvedIdMappings } from "../../../../../../scenarios/hooks"
+import {
+  useResolvedIdMappings,
+  useScenarioList,
+} from "../../../../../../scenarios/hooks"
 import { BASELINE_SCENARIO_ID } from "../../../../../constants"
 import {
   getScenarioShortLabel,
@@ -70,8 +73,6 @@ import {
   shortagePctOfDemand,
   gwLevelFromStorage,
   mockAnnualSeries,
-  mockMonthlyBands,
-  mockSummaryValue,
   mockWaterYearType,
   seriesStats,
   type MonthlyBand,
@@ -93,7 +94,6 @@ import {
   includeForView,
   pickLiveSeriesPoints,
   sumAlignedSeriesPoints,
-  blockHasSubject,
   trimPointsToYearRange,
   locationAxisRequest,
   SSJV_ALL_ROUTES_LOCATION,
@@ -101,7 +101,11 @@ import {
   viewHasLiveSource,
   hasEmptyScenariosResponse,
 } from "../config/didMapping"
-import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
+import {
+  getCompareScenarioIds,
+  getDataScenarioSelection,
+  getHeldScenarioId,
+} from "../config/scenarioLimit"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 
 /** Default count of locations seeded into a "compare by locations" set. */
@@ -121,19 +125,20 @@ export interface VariableMember {
   waterYears?: number[]
   /** True when this member's series came from the live API (mock fallback = false) */
   isLive?: boolean
-  /** True when the variable IS live-eligible and this member's request
-   *  resolved, but the endpoint served no block for the scenario: the
-   *  scenario is not modeled for this variable (salmon under the Delta
-   *  Conveyance Project). Distinct from a plain mock fallback, which means
-   *  "not wired yet" rather than "does not exist". `isLive` stays false. */
+  /** No model results to show: not modeled for this variable (salmon under
+   *  the Delta Conveyance Project), no variant under the held hydroclimate,
+   *  or a derived total that failed closed. Never drawn; reads "no data". */
   liveDataMissing?: boolean
-  /** True while this member's own live request is still in flight. Its
-   *  series is the sample engine's stand-in until the answer lands, so it
-   *  is neither drawn nor quoted; the card shows it as loading. */
+  /** True while this member's own live request (or the scenario list it
+   *  resolves through) is still in flight. Never drawn; reads "loading". */
   pending?: boolean
+  /** The member's live request failed. Never drawn; reads as a load error,
+   *  not as missing model results. */
+  loadFailed?: boolean
   /** Summary stats of `series` */
   stats: SeriesStats
-  /** Monthly p10/p50/p90 bands (populated only for the "monthly" view) */
+  /** Monthly p10/p50/p90 bands. Always empty: no monthly bands are served,
+   *  and the site never shows the sample engine's bands. */
   bands: MonthlyBand[]
   /** Single value for the "cv" and "value" views */
   value: number
@@ -148,10 +153,11 @@ export interface VariableData {
   unitLabel: string
   /** Whether the variable's scope is still under discussion */
   provisional: boolean
-  /** Data provenance for the card label */
+  /** Data provenance recorded on saved figures ("live" = model results).
+   *  Not shown on the card. */
   source: "live" | "mock"
-  /** True when some members are live and others are not, so a single
-   *  chart-level provenance badge would misdescribe part of the figure */
+  /** True when a member would draw something other than model results.
+   *  Recorded on saved figures, which are then not restored. */
   mixedSource: boolean
   /** Held-constant location name (scenarios / climates axes) */
   locationName: string
@@ -182,7 +188,7 @@ interface MemberSpec {
   /** Index into the per-scenario live fan-out slots (every axis) */
   slotIndex?: number
   /** Locations axis: this member's subject in the shared block, the SSJV
-   *  route list for the synthetic total, or null when unmapped (sample). */
+   *  route list for the synthetic total, or null when unmapped (no data). */
   subject?: string | readonly string[] | null
 }
 
@@ -211,7 +217,17 @@ export function useVariableData(): VariableData {
     selectedLocationsByGroup,
     selectedWaterYearTypes,
   } = useDataSlice()
-  const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
+  const workspaceSelection = useWorkspaceSlice((s) => s.selectedScenarios)
+  const tourActive = useWorkspaceSlice((s) => s.tour.tool === "data")
+  const selectedScenarios = useMemo(
+    () =>
+      getDataScenarioSelection(
+        workspaceSelection,
+        tourActive,
+        BASELINE_SCENARIO_ID,
+      ),
+    [workspaceSelection, tourActive],
+  )
   const workspaceHydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
 
   const variable = getVariable(selectedVariableId)
@@ -219,15 +235,6 @@ export function useVariableData(): VariableData {
   const group = groupId ? LOCATION_GROUPS[groupId] : undefined
   const firstLocationId = group?.items[0]?.id ?? ""
 
-  // Held-constant members for the two axes that are not being compared.
-  // Clamp the pinned scenario to a still-available one (reference, or a current
-  // workspace selection) so it self-heals if the selection later shrinks.
-  const heldScenario =
-    pinnedScenario &&
-    (pinnedScenario === BASELINE_SCENARIO_ID ||
-      selectedScenarios.includes(pinnedScenario))
-      ? pinnedScenario
-      : BASELINE_SCENARIO_ID
   // The tool has no climate pin: the workspace value, set by the shared
   // "View by hydroclimate" control, is the only hydroclimate input.
   const heldClimate = resolveClimate(workspaceHydroclimate)
@@ -243,15 +250,20 @@ export function useVariableData(): VariableData {
   const scenarioIdsJoined = selectedScenarios.join(",")
   const wytJoined = selectedWaterYearTypes.join(",")
 
-  // Scenario comparison set (reference first), shared by the fan-out and specs.
+  // Scenario comparison set: exactly the sidebar selection (current
+  // operations first when it is selected), shared by the fan-out and specs.
   const compareScenarioIds = useMemo(
-    () =>
-      [
-        BASELINE_SCENARIO_ID,
-        ...selectedScenarios.filter((id) => id !== BASELINE_SCENARIO_ID),
-      ].slice(0, MAX_DATA_IN_DEPTH_SCENARIOS),
+    () => getCompareScenarioIds(selectedScenarios, BASELINE_SCENARIO_ID),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- scenarioIdsJoined captures selectedScenarios
     [scenarioIdsJoined],
+  )
+  // Held-constant scenario for the hydroclimates and locations axes: the
+  // pin while it is still compared, otherwise the first compared scenario,
+  // so it self-heals when the selection shrinks.
+  const heldScenario = getHeldScenarioId(
+    pinnedScenario,
+    compareScenarioIds,
+    BASELINE_SCENARIO_ID,
   )
 
   // A groundwater total on the Level view cannot be shown: no request goes
@@ -317,10 +329,16 @@ export function useVariableData(): VariableData {
   // scenario's variant under the held climate. Climates axis: the held
   // scenario through every compared climate, one variant id per member. A
   // climate whose scenario list has not loaded, or a scenario with no variant
-  // under it, yields null, which keeps that member on labeled sample data
-  // rather than borrowing another climate's series.
+  // under it, yields null, which leaves that member without data (or
+  // loading) rather than borrowing another climate's series.
   const resolvedAll = useResolvedIdMappings()
   const heldMapping = resolvedAll[heldClimate]?.idMapping
+  // Every climate's mapping comes from the one scenario list: while it is
+  // loading, no member can resolve yet, which is loading, not "no variant".
+  const { isLoading: mappingUnloaded, error: listError } = useScenarioList()
+  // The scenario list itself failed: no member can be resolved, which is a
+  // load failure, not "not modeled".
+  const listFailed = !mappingUnloaded && listError != null
   const liveEligible =
     domain != null &&
     (isLocationsAxis
@@ -523,6 +541,10 @@ export function useVariableData(): VariableData {
   const loadingSignature = activeSlots
     .map((r) => (r?.isLoading ? "1" : "0"))
     .join("")
+  // Per-slot failure state, so a failed member reads as a load error.
+  const errorSignature = activeSlots
+    .map((r) => (r?.error != null ? "1" : "0"))
+    .join("")
 
   return useMemo<VariableData>(() => {
     const emptyContext = {
@@ -653,9 +675,6 @@ export function useVariableData(): VariableData {
       }
       let waterYears: number[] | undefined
       let adoptedLive = false
-      // The served block exists but lacks this member's subject: not
-      // modeled for this scenario, reported like an empty response.
-      let subjectAbsent = false
 
       // Live override: the endpoint already returns the requested unit
       // (TAF / PCT_CAP / km), so no capacity math is applied to live series.
@@ -671,12 +690,6 @@ export function useVariableData(): VariableData {
             : subject
         const memberSingle =
           typeof memberSubject === "string" ? memberSubject : null
-        subjectAbsent =
-          !!block &&
-          !!slot?.hasData &&
-          !slot.isLoading &&
-          memberSingle != null &&
-          !blockHasSubject(block, domain, memberSingle)
         // Served stub years (the CWS delivery family) are dropped before
         // anything is computed from the series.
         const range = variable.servedYearRange
@@ -685,8 +698,8 @@ export function useVariableData(): VariableData {
           return range ? trimPointsToYearRange(p, range) : p
         }
         // The synthetic SSJV total sums the three served route series,
-        // FAIL-CLOSED: a null sum (missing route, misaligned years) falls
-        // back to sample labeling, never a partial total.
+        // FAIL-CLOSED: a null sum (missing route, misaligned years) reads as
+        // no data, never a partial total.
         const points =
           memberSubject == null
             ? null
@@ -698,7 +711,7 @@ export function useVariableData(): VariableData {
         // The ag percent-of-demand view has no served percent measure, so it
         // is derived from the primary shortage series and the companion
         // net_diversion series in the SAME response block. If either is
-        // missing the member falls back to sample data rather than showing a
+        // missing the member reads as no data rather than showing a
         // half-derived number.
         if (isPctDemand && companionTokens.length > 0 && memberSingle) {
           const companion = pick(
@@ -741,43 +754,36 @@ export function useVariableData(): VariableData {
       }
 
       const stats = seriesStats(series)
-      const bands =
-        view === "monthly"
-          ? mockMonthlyBands(
-              variable.id,
-              spec.scenarioId,
-              spec.climateKey,
-              spec.locationId,
-            )
-          : []
-      let value: number
-      if (view === "cv") value = stats.cv
-      else if (view === "value")
-        value = mockSummaryValue(
-          variable.id,
-          spec.scenarioId,
-          spec.climateKey,
-          spec.locationId,
-        )
-      else value = stats.p50
-
-      // "Not modeled for this scenario", as distinct from "not wired yet".
-      // Only meaningful when the variable IS live-eligible and this member's
-      // own request resolved; adoptedLive / anyLive / source semantics are
-      // deliberately unchanged.
-      const liveDataMissing =
-        liveEligible &&
-        spec.slotIndex != null &&
-        (emptyResponseBySlot[spec.slotIndex] === true || subjectAbsent)
+      const bands: MonthlyBand[] = []
+      // Summary values come from the member's own series (the "value" view
+      // is retired, and a sample value would never be shown anyway).
+      const value: number = view === "cv" ? stats.cv : stats.p50
 
       // In flight: this member's own request has not answered yet, so the
       // series it carries is the sample engine's stand-in. It is flagged so
       // the card neither draws nor quotes it until the answer lands.
+      // The scenario list has not loaded yet, so no member can be resolved:
+      // that is loading, not "no variant".
       const pending =
         liveEligible &&
         !adoptedLive &&
-        spec.slotIndex != null &&
-        activeSlots[spec.slotIndex]?.isLoading === true
+        (mappingUnloaded ||
+          (spec.slotIndex != null &&
+            activeSlots[spec.slotIndex]?.isLoading === true))
+
+      // No model results to show. The site never draws the sample engine's
+      // stand-in: a member without a live series (not modeled, no variant
+      // under the held hydroclimate, a failed request, a derived total that
+      // failed closed) is reported as "no data" instead of drawn. A failed
+      // request, for the member's data or for the scenario list it resolves
+      // through, is reported as a load failure instead.
+      const loadFailed =
+        !adoptedLive &&
+        !pending &&
+        ((liveEligible && listFailed) ||
+          (spec.slotIndex != null &&
+            activeSlots[spec.slotIndex]?.error != null))
+      const liveDataMissing = !adoptedLive && !pending && !loadFailed
 
       return {
         id: spec.id,
@@ -788,6 +794,7 @@ export function useVariableData(): VariableData {
         isLive: adoptedLive,
         ...(liveDataMissing ? { liveDataMissing: true } : {}),
         ...(pending ? { pending: true } : {}),
+        ...(loadFailed ? { loadFailed: true } : {}),
         stats,
         bands,
         value,
@@ -813,18 +820,18 @@ export function useVariableData(): VariableData {
       unit,
       unitLabel,
       provisional: variable.provisional ?? false,
-      // A live request that served nothing for every member (the scenario, or
-      // the subject, is not modeled) is still a live answer: the card shows
-      // the no-data notice under a "Live data" badge rather than a "Sample
-      // data" badge over an empty chart.
+      // Only live series are ever drawn (members without one are "no data"),
+      // so a figure is live whenever it shows anything.
       source:
         anyLive ||
         (members.length > 0 && members.every((m) => m.liveDataMissing))
           ? "live"
           : "mock",
-      // A single chart-level badge misdescribes the figure the moment one
-      // series is live and another is not.
-      mixedSource: anyLive && members.some((m) => !m.isLive),
+      // A drawn series that is not live: none, now that sample stand-ins
+      // are never drawn. Kept so saved items keep their meaning.
+      mixedSource: members.some(
+        (m) => !m.isLive && !m.liveDataMissing && !m.pending,
+      ),
       ...emptyContext,
       wytApplicable,
       ...(unavailableReason ? { unavailableReason } : {}),
@@ -854,6 +861,9 @@ export function useVariableData(): VariableData {
     emptyResponseSignature,
     liveLoading,
     loadingSignature,
+    errorSignature,
+    mappingUnloaded,
+    listFailed,
     wytJoined,
     unavailableReason,
     locationRequestSignature,

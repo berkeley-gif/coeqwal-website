@@ -93,7 +93,7 @@ export default function MapLegend() {
         }}
       >
         <Typography component="span" variant="outcomeHeader" sx={eyebrowSx}>
-          Tiers
+          Outcome levels
         </Typography>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <Box sx={{ display: "inline-block" }}>

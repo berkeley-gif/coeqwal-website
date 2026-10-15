@@ -96,12 +96,15 @@ import ResiliencePanelChartView, {
 } from "./ResiliencePanelChartView"
 import type { HoveredInteraction } from "../../../useExploreHoverCoordination"
 import { useResilienceHeatmapTheme } from "./useResilienceHeatmapTheme"
+import { useResolvedIdMappings } from "../../../../../scenarios/hooks/useResolvedIdMapping"
 import {
   transposeTile,
   resolveCellRender,
   getMapLinkBlockedMessage,
   resolveScenarioIdFromCell,
   hoverPayloadFromCell,
+  getIsCellMapped,
+  getMappedCell,
 } from "./heatmap"
 import OutcomeChooserPanel from "../../components/OutcomeChooserPanel"
 import { ResiliencePanelTitle } from "./ResiliencePanelTitle"
@@ -125,6 +128,12 @@ import type {
 } from "../../../share/capture/types"
 
 import { useTourAnchor } from "../../tour/anchors/TourAnchorContext"
+import SelectScenarioPrompt from "../../components/SelectScenarioPrompt"
+import {
+  needsScenarioPrompt,
+  SCENARIO_PROMPT_TEXT,
+} from "../../components/scenarioPrompt"
+import { MODEL_RESULTS_LOAD_ERROR } from "../../components/loadErrorText"
 interface ResiliencePanelProps {
   highlightedIds?: Set<string> | null
   onChartHover?: (info: HoveredInteraction | null) => void
@@ -194,7 +203,8 @@ export default function ResiliencePanel({
     setResilienceVisibleOutcomes,
     resilienceDistributionMode: distributionMode,
   } = useResilienceSlice()
-  const { selectedScenarios, setHydroclimate } = useWorkspaceSlice()
+  const { selectedScenarios, hydroclimate, setHydroclimate, tour } =
+    useWorkspaceSlice()
   const heatmapGridAnchorRef = useTourAnchor("resilience.heatmapGrid")
   // ============================================================
   // Store-derived scope, columns, and rows
@@ -253,8 +263,13 @@ export default function ResiliencePanel({
     [scenarios, getDisplayName],
   )
 
-  const { showOutcomeOnMap, isOutcomeActive, isMapVisible, activeOutcome } =
-    useOutcomeMapAction()
+  const {
+    showOutcomeOnMap,
+    clearMap,
+    isOutcomeActive,
+    isMapVisible,
+    activeOutcome,
+  } = useOutcomeMapAction()
 
   // Tier colors, labels, and heatmap chrome palette shared with the
   // Share-tab live thumbnails so the viz stays theme-agnostic without
@@ -1016,6 +1031,47 @@ export default function ResiliencePanel({
     [],
   )
 
+  // The outcome on the map and the resolved scenario id it shows. Cells
+  // match against that id (see getIsCellMapped), so the outline always
+  // names what the map draws, however the mapping was made.
+  const mappedOutcome = useMemo(
+    () =>
+      isMapVisible && activeOutcome
+        ? {
+            outcomeCode: activeOutcome.outcomeCode,
+            scenarioId: activeOutcome.scenarioId,
+          }
+        : null,
+    [isMapVisible, activeOutcome],
+  )
+  const idMappingsByHydroclimate = useResolvedIdMappings()
+  const getResolvedId = useCallback(
+    (groupId: string, hc: string): string | undefined =>
+      idMappingsByHydroclimate[hc]?.idMapping[groupId] ?? undefined,
+    [idMappingsByHydroclimate],
+  )
+
+  // Whether a cell is the one on the map. Only cells that drive the map
+  // count, so a derived-metric cell is never drawn as selected.
+  const isCellOnMap = useCallback(
+    (cell: ResilienceHeatmapCell) =>
+      cellMapsCleanly(cell) &&
+      getIsCellMapped(
+        cell,
+        mappedOutcome,
+        getResolvedId,
+        mapScenarioFallback,
+        hydroclimate,
+      ),
+    [
+      cellMapsCleanly,
+      mappedOutcome,
+      getResolvedId,
+      mapScenarioFallback,
+      hydroclimate,
+    ],
+  )
+
   const handleCellClick = useCallback(
     (cell: ResilienceHeatmapCell) => {
       if (!isMapVisible) return
@@ -1025,6 +1081,13 @@ export default function ResiliencePanel({
       }
       if (!cellMapsCleanly(cell)) {
         openMapBlockedMessage(getMapLinkBlockedMessage(cellEncoding, true))
+        return
+      }
+      // A second click on the mapped cell takes it off the map, as a
+      // second click on a Bar glyph does. It clears outright rather than
+      // toggling, so it never depends on resolving the scenario again.
+      if (isCellOnMap(cell)) {
+        clearMap()
         return
       }
       // Align the toolbar HC with the clicked column so the sibling-
@@ -1041,6 +1104,8 @@ export default function ResiliencePanel({
       cellMapsCleanly,
       openMapBlockedMessage,
       cellEncoding,
+      isCellOnMap,
+      clearMap,
       setHydroclimate,
       triggerMapForOutcome,
     ],
@@ -1838,6 +1903,16 @@ export default function ResiliencePanel({
     highlightedTileIdsFromSidebar,
   ])
 
+  // The heatmap outlines the cell on the map, on the live chart only
+  // (shared and captured figures carry no selection).
+  const mappedCell = useMemo(
+    () =>
+      chartViewState.kind === "smallMultiples"
+        ? getMappedCell(chartViewState.tiles, isCellOnMap)
+        : null,
+    [chartViewState, isCellOnMap],
+  )
+
   const chartViewVisuals = useMemo<
     Omit<ResiliencePanelChartViewProps, "state" | "handlers">
   >(
@@ -1894,7 +1969,7 @@ export default function ResiliencePanel({
         }}
       >
         <Typography variant="body2" color="error">
-          {error}
+          {MODEL_RESULTS_LOAD_ERROR}
         </Typography>
       </Box>
     )
@@ -1933,6 +2008,18 @@ export default function ResiliencePanel({
     onSquareHover: handleSquareHover,
     onSquareClick: handleSquareClick,
     renderTileActions: renderTileShareAction,
+  }
+
+  if (
+    needsScenarioPrompt({
+      mode: "resilience",
+      selectedScenarioCount: selectedScenarios.length,
+      showAll: showAllScenarios,
+      equityFocusScenario: null,
+      tourActive: tour.tool === "resilience",
+    })
+  ) {
+    return <SelectScenarioPrompt message={SCENARIO_PROMPT_TEXT.resilience} />
   }
 
   return (
@@ -2023,6 +2110,7 @@ export default function ResiliencePanel({
                   state={chartViewState}
                   {...chartViewVisuals}
                   handlers={liveHandlers}
+                  selectedCell={mappedCell}
                 />
               </motion.div>
             </AnimatePresence>

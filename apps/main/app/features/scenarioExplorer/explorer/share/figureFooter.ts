@@ -17,8 +17,10 @@ export interface ShareFigureFooter {
 }
 
 const SOURCE_MODEL = "COEQWAL, coeqwal.org. CalSim3 model results."
+const SOURCE_MAP =
+  "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome levels. Basemap © Mapbox © OpenStreetMap."
 const SOURCE_TIERS =
-  "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome tiers."
+  "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome levels."
 
 function capturedLine(iso: string | undefined): string | undefined {
   if (!iso) return undefined
@@ -36,13 +38,12 @@ function capturedLine(iso: string | undefined): string | undefined {
 export function shareFigureFooter(item: ShareItem): ShareFigureFooter {
   const capturedAt = capturedLine(item.capturedAt)
   if (item.type === "data") {
-    const provenance =
-      item.source === "live"
-        ? "Live data from api.coeqwal.org."
-        : item.source === "mixed"
-          ? "Live data from api.coeqwal.org for some series; see the legend."
-          : "Sample data, not model results."
-    return { source: SOURCE_MODEL, provenance, capturedAt }
+    // Data figures are model results only (sample-data items are dropped
+    // when the tray loads), so no provenance note is needed.
+    return { source: SOURCE_MODEL, capturedAt }
+  }
+  if (item.type === "map") {
+    return { source: SOURCE_MAP, capturedAt }
   }
   return { source: SOURCE_TIERS, capturedAt }
 }

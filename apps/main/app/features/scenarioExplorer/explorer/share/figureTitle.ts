@@ -29,10 +29,15 @@ const MINOR_WORDS = new Set([
   "per",
   "the",
   "to",
+  "via",
   "vs",
 ])
 
-/** Title-case a display label, keeping minor words and symbols intact. */
+/**
+ * Title-case a display label, keeping minor words and symbols intact. A
+ * word opening with a parenthesis is cased after it ("(total)" ->
+ * "(Total)").
+ */
 export function titleCaseLabel(label: string): string {
   return label
     .split(" ")
@@ -40,9 +45,11 @@ export function titleCaseLabel(label: string): string {
       if (i > 0 && MINOR_WORDS.has(word.toLowerCase())) {
         return word.toLowerCase()
       }
-      const first = word.charAt(0)
+      const lead = word.startsWith("(") ? "(" : ""
+      const rest = word.slice(lead.length)
+      const first = rest.charAt(0)
       return first === first.toLowerCase()
-        ? first.toUpperCase() + word.slice(1)
+        ? lead + first.toUpperCase() + rest.slice(1)
         : word
     })
     .join(" ")
@@ -52,6 +59,16 @@ export function titleCaseLabel(label: string): string {
 function joinAsProse(labels: readonly string[]): string {
   if (labels.length <= 1) return labels[0] ?? ""
   return `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`
+}
+
+/** "All Water Years", "Dry and Critical Water Years", or undefined when
+ *  water-year typing does not apply (`null`). Pure. */
+export function waterYearsPhrase(
+  labels: readonly string[] | null,
+): string | undefined {
+  if (labels === null) return undefined
+  if (labels.length === 0) return "All Water Years"
+  return `${joinAsProse(labels.map(titleCaseLabel))} Water Years`
 }
 
 export interface FigureTitleParts {
@@ -83,12 +100,7 @@ export function buildFigureTitle(parts: FigureTitleParts): string {
     (parts.locationName
       ? `${titleCaseLabel(parts.variableName)} (${titleCaseLabel(parts.locationName)})`
       : titleCaseLabel(parts.variableName))
-  const waterYears =
-    parts.waterYearTypeLabels === null
-      ? undefined
-      : parts.waterYearTypeLabels.length === 0
-        ? "All Water Years"
-        : `${joinAsProse(parts.waterYearTypeLabels.map(titleCaseLabel))} Water Years`
+  const waterYears = waterYearsPhrase(parts.waterYearTypeLabels)
   const segments = [
     head,
     titleCaseLabel(parts.memberSummary),

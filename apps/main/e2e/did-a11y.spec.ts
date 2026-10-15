@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test"
 import { AxeBuilder } from "@axe-core/playwright"
 import { setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Automated accessibility checks on the Data in Depth key flows, offline.
 // axe-core runs in-page against the WCAG 2.1 A/AA rule tags; the offline
@@ -39,7 +40,8 @@ async function openDataInDepth(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await selectCurrentOperations(page)
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 
 test("explore landing has no blocking a11y violations", async ({ page }) => {

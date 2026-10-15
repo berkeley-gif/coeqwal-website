@@ -15,19 +15,22 @@ export interface OutcomeDotsGlyphProps {
  * OutcomeDotsGlyph: small multiple 4-row rounded-square display for single-value tier metrics.
  * Shows 4 rounded squares stacked vertically where only the active tier (value=1) is filled with color.
  */
+/** Outcome level names, best first. */
+const LEVEL_NAMES = ["Optimal", "Acceptable", "At-risk", "Critical"] as const
+
 const OutcomeDotsGlyph: React.FC<OutcomeDotsGlyphProps> = React.memo(
   ({ values, size = 60, tierColors }) => {
     const tiers = values
       ? values.map((value, idx) => ({
-          label: `Tier ${idx + 1}`,
+          label: LEVEL_NAMES[idx] ?? "",
           color: tierColors[idx]!,
           value: value,
         }))
       : [
-          { label: "Tier 1", color: tierColors[0]!, value: 0 },
-          { label: "Tier 2", color: tierColors[1]!, value: 0 },
-          { label: "Tier 3", color: tierColors[2]!, value: 0 },
-          { label: "Tier 4", color: tierColors[3]!, value: 0 },
+          { label: LEVEL_NAMES[0], color: tierColors[0]!, value: 0 },
+          { label: LEVEL_NAMES[1], color: tierColors[1]!, value: 0 },
+          { label: LEVEL_NAMES[2], color: tierColors[2]!, value: 0 },
+          { label: LEVEL_NAMES[3], color: tierColors[3]!, value: 0 },
         ]
 
     const numTiers = tiers.length

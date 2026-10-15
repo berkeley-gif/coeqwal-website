@@ -15,9 +15,12 @@ import { useTabNavigation } from "../../../../hooks/useTabNavigation"
 import ShareItemView from "./ShareItemView"
 import { useShareRenderContext } from "./hooks/useShareRenderContext"
 import { ShareRadarLiveProvider } from "./ShareRadarLiveProvider"
+import SharePersistWarning from "./components/SharePersistWarning"
 
 const DRAWER_WIDTH = 360
-const TAB_WIDTH = 36
+/** Width of the Share tab pinned to the window's right edge; overlays
+ *  near that edge (the map caption) keep clear of it. */
+export const TAB_WIDTH = 36
 
 function ShareTab({
   count,
@@ -209,6 +212,7 @@ function ShareDrawerContent() {
             <icons.Close sx={{ fontSize: "1.125rem" }} />
           </IconButton>
         </Box>
+        <SharePersistWarning />
 
         {/* Action chips */}
         {shareItems.length > 0 && (

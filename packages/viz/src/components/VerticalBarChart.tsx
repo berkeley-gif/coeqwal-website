@@ -21,10 +21,10 @@ export interface VerticalBarChartProps {
 const VerticalBarChart: React.FC<VerticalBarChartProps> = React.memo(
   ({ size = 80, tiers, seed }) => {
     const defaultTiers = [
-      { label: "Tier 1", color: "#2cc83b" }, // green
-      { label: "Tier 2", color: "#2064d4" }, // blue
-      { label: "Tier 3", color: "#f89740" }, // orange
-      { label: "Tier 4", color: "#f96262" }, // red
+      { label: "Optimal", color: "#2cc83b" }, // green
+      { label: "Acceptable", color: "#2064d4" }, // blue
+      { label: "At-risk", color: "#f89740" }, // orange
+      { label: "Critical", color: "#f96262" }, // red
     ]
 
     const chartTiers = tiers || defaultTiers

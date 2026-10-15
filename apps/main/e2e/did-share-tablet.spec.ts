@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Share-tab layout at tablet widths (GitHub issue #253: card visualizations
 // get cut off below desktop).
@@ -36,7 +37,8 @@ async function stageTwoCards(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await selectCurrentOperations(page)
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   await page.getByRole("button", { name: "save snapshot" }).click()
   // The share drawer auto-opens over the chart card and covers the save

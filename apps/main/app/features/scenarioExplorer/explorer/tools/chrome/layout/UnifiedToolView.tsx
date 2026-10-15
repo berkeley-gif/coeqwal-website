@@ -13,15 +13,19 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import { Box, useTheme, DragIndicatorIcon } from "@repo/ui/mui"
-import { HydroclimateBadge } from "@repo/ui"
+import { useWorkspaceSlice, isMapPairedMode } from "../../../store"
 import {
-  useWorkspaceSlice,
-  useEquitySlice,
-  isMapPairedMode,
-} from "../../../store"
-import { mapActions } from "../../../../../map/store"
-import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
+  mapActions,
+  useDistributionMapSnapshot,
+} from "../../../../../map/store"
 import ToolJourneyStrip from "./ToolJourneyStrip"
+import MapFigureCaption from "./MapFigureCaption"
+import MapDirectionLegend from "../../../share/cards/MapDirectionLegend"
+import {
+  BASEMAP_PICKER_BOTTOM_PX,
+  BASEMAP_PICKER_HEIGHT_PX,
+} from "../../../../../map/controls/BasemapPicker"
+import { TAB_WIDTH as SHARE_TAB_WIDTH } from "../../../share/ShareDrawer"
 
 const SIDEBAR_WIDTH_COLLAPSED = 320
 const SIDEBAR_WIDTH_EXPANDED = 480
@@ -50,19 +54,21 @@ export default function UnifiedToolView({
   const [isDragging, setIsDragging] = useState(false)
   const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
   const showKeyOperations = useWorkspaceSlice((s) => s.showKeyOperations)
-  const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
-  const showEquityComparison = useEquitySlice((s) => s.showEquityComparison)
-
-  const mapHydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
+  const distributionSnapshot = useDistributionMapSnapshot()
 
   // The map panel opens only for tools that pair with the map: Data in
   // depth ignores the shared showMap flag entirely (no map, full width).
   const mapActive = showMap && isMapPairedMode(exploreMode)
 
-  // Distribution's comparison-mode pins use triangle-up/circle/triangle-down
+  // Distribution's comparison-mode pins use triangle-up/square/triangle-down
   // to encode improved/no-change/worsened (see EquityPanel's handleShowOnMap).
+  // The key follows the painted markers: it shows once markers carry a
+  // comparison, not while the baseline is still loading or nothing is
+  // selected.
   const showComparisonLegend =
-    mapActive && exploreMode === "equity" && showEquityComparison
+    mapActive &&
+    exploreMode === "equity" &&
+    !!distributionSnapshot?.comparedWithBaseline
 
   const sidebarWidth =
     sidebarWidthOverride ??
@@ -94,6 +100,7 @@ export default function UnifiedToolView({
     return () => {
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
+      mapActions.setDistributionMapSnapshot(null)
       mapActions.setExplorePanelWidth(50)
     }
   }, [])
@@ -102,6 +109,7 @@ export default function UnifiedToolView({
   // outcome highlights from a previous tool don't persist.
   useEffect(() => {
     mapActions.clearOutcomeVisualization()
+    mapActions.setDistributionMapSnapshot(null)
     mapActions.clearMapTooltips()
   }, [exploreMode])
 
@@ -200,6 +208,7 @@ export default function UnifiedToolView({
       </Box>
 
       <Box
+        data-explore-map-panel=""
         sx={{
           position: "relative",
           width: mapActive ? (mapWidthPx ?? `${MAP_WIDTH_PERCENT}%`) : 0,
@@ -252,31 +261,30 @@ export default function UnifiedToolView({
             </Box>
           </Box>
         )}
-        {mapActive && mapHydroBadge && (
+        {mapActive && (
           <Box
             sx={{
               position: "absolute",
               top: theme.spacing(1),
-              left: theme.spacing(1),
-              right: theme.spacing(1),
+              // Clear the 16 px drag handle on the panel's left edge and the
+              // Share tab pinned to the window's right edge.
+              left: theme.spacing(3),
+              right: `calc(${SHARE_TAB_WIDTH}px + ${theme.spacing(1)})`,
               zIndex: 2,
               display: "flex",
               justifyContent: "center",
               pointerEvents: "none",
             }}
           >
-            <HydroclimateBadge
-              title={mapHydroBadge.title}
-              accentColor={mapHydroBadge.accentColor}
-              surface="solid"
-            />
+            <MapFigureCaption />
           </Box>
         )}
         {showComparisonLegend && (
           <Box
             sx={{
               position: "absolute",
-              bottom: theme.spacing(1),
+              // Sit above the basemap picker at the bottom of the map.
+              bottom: `calc(${BASEMAP_PICKER_BOTTOM_PX + BASEMAP_PICKER_HEIGHT_PX}px + ${theme.spacing(1)})`,
               left: theme.spacing(1),
               zIndex: 2,
               display: "flex",
@@ -291,75 +299,7 @@ export default function UnifiedToolView({
               pointerEvents: "none",
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                style={{ flexShrink: 0 }}
-              >
-                <polygon
-                  points="7,2 2,12 12,12"
-                  fill="#999"
-                  stroke="#fff"
-                  strokeWidth="1"
-                />
-              </svg>
-              <Box
-                component="span"
-                sx={{
-                  fontSize: "0.75rem",
-                  color: theme.palette.text.primary,
-                }}
-              >
-                Improved from baseline
-              </Box>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  flexShrink: 0,
-                  borderRadius: "50%",
-                  backgroundColor: "#999",
-                  border: "1px solid #fff",
-                }}
-              />
-              <Box
-                component="span"
-                sx={{
-                  fontSize: "0.75rem",
-                  color: theme.palette.text.primary,
-                }}
-              >
-                No change
-              </Box>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                style={{ flexShrink: 0 }}
-              >
-                <polygon
-                  points="7,12 2,2 12,2"
-                  fill="#999"
-                  stroke="#fff"
-                  strokeWidth="1"
-                />
-              </svg>
-              <Box
-                component="span"
-                sx={{
-                  fontSize: "0.75rem",
-                  color: theme.palette.text.primary,
-                }}
-              >
-                Worsened from baseline
-              </Box>
-            </Box>
+            <MapDirectionLegend />
           </Box>
         )}
       </Box>

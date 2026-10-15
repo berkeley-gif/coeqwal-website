@@ -14,6 +14,7 @@
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { NavArrow, ScrollToButton, resolveCssLengthPx } from "@repo/ui"
 import { StickyScrollSection } from "@repo/scrollytelling"
+import CtaLink from "../../components/CtaLink"
 
 export function AboutCoeqwalPanel() {
   const theme = useTheme()
@@ -128,9 +129,9 @@ export function AboutCoeqwalPanel() {
                 alternative pathways, and share your vision for California’s
                 water future.
               </Typography>
-              <AboutCtaLink href="/about">
+              <CtaLink href="/about" icon={<NavArrow />}>
                 Learn more about COEQWAL
-              </AboutCtaLink>
+              </CtaLink>
             </Box>
           </Box>
         </Box>
@@ -166,42 +167,5 @@ export function AboutCoeqwalPanel() {
         </Box>
       </StickyScrollSection>
     </div>
-  )
-}
-
-/** Pill-style CTA for the About COEQWAL panel. */
-function AboutCtaLink({
-  children,
-  href,
-}: {
-  children: React.ReactNode
-  href: string
-}) {
-  return (
-    <a href={href} style={{ textDecoration: "none", color: "inherit" }}>
-      <Box
-        sx={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 1,
-          py: 1,
-          "&:hover .about-arrow": { transform: "translateX(4px)" },
-        }}
-      >
-        <Typography
-          component="span"
-          sx={(theme) => ({
-            ...theme.typography.overline,
-            fontWeight: 600,
-            letterSpacing: "0.2em",
-            lineHeight: 1.2,
-            color: "inherit",
-          })}
-        >
-          {children}
-        </Typography>
-        <NavArrow className="about-arrow" />
-      </Box>
-    </a>
   )
 }

@@ -129,7 +129,7 @@ export const TierSummaryCell = React.memo(function TierSummaryCell({
                 whiteSpace: "nowrap",
               }}
             >
-              avg tier
+              avg level
             </Typography>
           </Box>
         ) : (

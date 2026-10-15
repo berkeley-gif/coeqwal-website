@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Compare by Locations, live: one request per chart carrying every selected
 // location's subject for the held scenario, each member picking its own
@@ -152,7 +153,8 @@ async function openDataInDepth(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await selectCurrentOperations(page)
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 
 const sameSet = (a: string[], b: string[]) =>
@@ -166,7 +168,7 @@ test("reservoirs compare live in one request, each member by its own subject", a
   const log = await setupRoutes(page)
   await openDataInDepth(page)
   await page.getByRole("button", { name: "Locations", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   // Exactly one reservoir request carried the three seeded reservoirs.
   await expect
     .poll(
@@ -182,6 +184,43 @@ test("reservoirs compare live in one request, each member by its own subject", a
   await expect(page.getByText(/3,000 TAF at Shasta/)).toBeVisible()
   await expect(page.getByText(/1,000 TAF at Trinity/)).toBeVisible()
   await expect(page.getByText(/^Sample data$/)).toHaveCount(0)
+  // The aggregate chips keep their location names as accessible names; the
+  // "Aggregate rollup" tooltip describes them instead of replacing the name.
+  for (const name of ["All North of Delta", "All South of Delta"]) {
+    const chip = page.getByRole("button", { name, exact: true })
+    await expect(chip).toBeVisible()
+    await expect(chip).toHaveAccessibleDescription("Aggregate rollup")
+  }
+  await expect(
+    page.getByRole("button", { name: "Aggregate rollup" }),
+  ).toHaveCount(0)
+  // With the tooltip open from the keyboard, the description points at it
+  // and the name is still the location's.
+  const nod = page.getByRole("button", {
+    name: "All North of Delta",
+    exact: true,
+  })
+  await nod.focus()
+  await page.keyboard.press("Shift+Tab")
+  await page.keyboard.press("Tab")
+  await expect(
+    page.getByRole("tooltip", { name: "Aggregate rollup" }),
+  ).toBeVisible()
+  const describedBy = (await nod.getAttribute("aria-describedby")) ?? ""
+  expect(describedBy).not.toBe("")
+  for (const id of describedBy.split(/\s+/)) {
+    await expect(page.locator(`[id="${id}"]`)).toHaveCount(1)
+  }
+  await expect(nod).toHaveAccessibleDescription("Aggregate rollup")
+  await page.keyboard.press("Escape")
+  await expect(
+    page.getByRole("tooltip", { name: "Aggregate rollup" }),
+  ).toHaveCount(0)
+  await expect(nod).toBeFocused()
+  await expect(nod).toHaveAccessibleName("All North of Delta")
+  await expect(nod).toHaveAccessibleDescription("Aggregate rollup")
+  // Ten reservoirs, so the caption states the cap of six.
+  await expect(page.getByText(/s \(up to 6\)$/)).toBeVisible()
 
   // Percent of capacity: one request in pct_capacity, served values shown.
   await page.getByRole("button", { name: /capacity/i }).click()
@@ -195,8 +234,8 @@ test("reservoirs compare live in one request, each member by its own subject", a
       ),
     )
     .toBe(true)
-  await expect(page.getByText(/66 % at Shasta/)).toBeVisible()
-  await expect(page.getByText(/41 % at Trinity/)).toBeVisible()
+  await expect(page.getByText(/66% at Shasta/)).toBeVisible()
+  await expect(page.getByText(/41% at Trinity/)).toBeVisible()
 
   // Adding a reservoir re-requests once with four subjects.
   await page.getByRole("button", { name: "Folsom" }).click()
@@ -210,7 +249,7 @@ test("reservoirs compare live in one request, each member by its own subject", a
         ).length,
     )
     .toBe(1)
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   expect(errors).toEqual([])
 })
 
@@ -226,7 +265,7 @@ test("groundwater basins and totals compare live through the picker", async ({
     .getByRole("button", { name: "Groundwater storage" })
     .click()
   await page.getByRole("button", { name: "Locations", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       log.some(
@@ -258,7 +297,7 @@ test("groundwater basins and totals compare live through the picker", async ({
       ),
     )
     .toBe(true)
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   expect(errors).toEqual([])
 })
 
@@ -274,7 +313,7 @@ test("the SSJV total sums its routes in the shared request and fails closed when
     .first()
     .click()
   await page.getByRole("button", { name: "Locations", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   // The seeded members are the total, Cross Valley Canal and Friant; the
   // request carries the three route subjects once each.
   await expect
@@ -298,7 +337,7 @@ test("the SSJV total sums its routes in the shared request and fails closed when
   expect(errors).toEqual([])
 })
 
-test("a missing route makes the SSJV total sample, labeled, while the route members stay live", async ({
+test("a missing route leaves the SSJV total without data, while the route members stay live", async ({
   page,
 }) => {
   const errors = collectConsoleErrors(page)
@@ -310,9 +349,11 @@ test("a missing route makes the SSJV total sample, labeled, while the route memb
     .first()
     .click()
   await page.getByRole("button", { name: "Locations", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
-  // The per-member "sample" chip marks the total; the canal is live.
-  await expect(page.getByText("sample", { exact: true }).first()).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
+  // The total refuses a partial sum: it reads "no data" (never a stand-in
+  // series); the canal is live.
+  await expect(page.getByText("no data", { exact: true }).first()).toBeVisible()
+  await expect(page.getByText("sample", { exact: true })).toHaveCount(0)
   await expect(page.getByText(/100 TAF at Cross Valley Canal/)).toBeVisible()
   await expect(page.getByText(/1,300 TAF/)).toHaveCount(0)
   expect(errors).toEqual([])
@@ -326,7 +367,7 @@ test("switching the workspace climate re-resolves the locations axis", async ({
   await setupRoutes(page)
   await openDataInDepth(page)
   await page.getByRole("button", { name: "Locations", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // The per-tool climate pin was removed: the shared "View by hydroclimate"
   // control in the toolbar is the only hydroclimate input for this tool.
@@ -334,12 +375,14 @@ test("switching the workspace climate re-resolves the locations axis", async ({
     page.getByRole("combobox", { name: "Hydroclimate" }),
   ).toHaveCount(0)
 
-  // Driving that control moves the whole chart off the historical fixture,
-  // so the offline suite falls back to the sample engine for every member.
+  // Driving that control re-resolves every member to the moderate-high
+  // variants. This spec's scenario list holds historical variants only, so
+  // nothing resolves and the chart reads "no data" instead of drawing a
+  // stand-in or keeping the historical curves.
   await page
     .getByRole("button", { name: /Moderate-high climate stress/ })
     .first()
     .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="no-data"]')).toBeVisible()
   expect(errors).toEqual([])
 })

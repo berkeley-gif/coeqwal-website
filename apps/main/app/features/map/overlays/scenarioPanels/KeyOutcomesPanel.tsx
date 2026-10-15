@@ -62,7 +62,7 @@ export function KeyOutcomesPanel({
       if (!variantId) continue
       preload(CACHE_KEYS.scenarioTiers(variantId), () =>
         fetchScenarioTiers(variantId),
-      )
+      ).catch(() => {})
     }
   }, [scenarioId, allMappings])
 
@@ -140,6 +140,7 @@ export function KeyOutcomesPanel({
             chartData={chartData[code]}
             isActive={!isLoading && isActive}
             isSelected={selectedOutcomeCode === code}
+            actionLabel={`Show ${displayName} on the map`}
             isTooltipActive={openTooltip === code}
             size={glyphSize}
             showLabel={true}

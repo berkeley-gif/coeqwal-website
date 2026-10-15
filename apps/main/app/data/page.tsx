@@ -19,7 +19,6 @@ import {
   Alert,
   useTheme,
   icons,
-  Link,
 } from "@repo/ui/mui"
 import { CircularArrowButton, ScenarioBadge } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
@@ -49,18 +48,8 @@ import {
   WATER_ISSUE_DOCUMENTS,
   getWaterIssueDocumentUrl,
 } from "../content/waterIssues"
-import {
-  RESULT_SUMMARY_LOI_DOCUMENTS,
-  getResultSummaryLOIDocumentUrl,
-} from "../content/resultSummaryLOI"
-import {
-  RESULT_SUMMARY_STRATEGY_DOCUMENTS,
-  getResultSummaryStrategyDocumentUrl,
-} from "../content/resultSummaryStrategy"
-import {
-  RESULT_SUMMARY_OUTCOME_DOCUMENTS,
-  getResultSummaryOutcomeDocumentUrl,
-} from "../content/resultSummaryOutcome"
+import CtaLink from "../components/CtaLink"
+
 const { OpenInNew: OpenInNewIcon } = icons
 
 const THEME_ORDER: ScenarioTheme[] = [
@@ -417,189 +406,6 @@ function BackgroundBriefDocumentSelect({
 }
 
 /**
- * Flat (non-grouped) Select for the strategy brief documents.
- * Options are just {id, label} pairs — no theme grouping needed since these
- * PDFs aren't scenario-resolved.
- */
-function StrategyBriefDocumentSelect({
-  id,
-  value,
-  onChange,
-}: {
-  id: string
-  value: string
-  onChange: (event: SelectChangeEvent<string>) => void
-}) {
-  const theme = useTheme()
-  const menuProps = {
-    PaperProps: {
-      sx: {
-        mt: 0.5,
-        backgroundColor: "common.white",
-        boxShadow: theme.shadow.sm,
-        border: `1px solid ${theme.palette.grey[200]}`,
-        borderRadius: theme.borderRadius.md,
-        "& .MuiMenuItem-root": {
-          py: 1,
-          whiteSpace: "normal" as const,
-          wordBreak: "break-word" as const,
-          "&:hover": { backgroundColor: theme.palette.grey[50] },
-          "&.Mui-selected": {
-            backgroundColor: theme.palette.grey[100],
-            "&:hover": { backgroundColor: theme.palette.grey[100] },
-          },
-        },
-      },
-    },
-  }
-
-  return (
-    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
-      <Select
-        id={id}
-        value={value}
-        onChange={onChange}
-        displayEmpty
-        sx={SELECT_SX}
-        MenuProps={menuProps}
-        renderValue={(v) => {
-          const doc = RESULT_SUMMARY_STRATEGY_DOCUMENTS.find((d) => d.id === v)
-          return doc ? doc.label : "Choose a strategy brief"
-        }}
-      >
-        {RESULT_SUMMARY_STRATEGY_DOCUMENTS.map((doc) => (
-          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
-            {doc.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  )
-}
-
-/**
- * Flat (non-grouped) Select for the Outcome documents.
- * Options are just {id, label} pairs — no theme grouping needed since these
- * PDFs aren't scenario-resolved.
- */
-function OutcomeBriefDocumentSelect({
-  id,
-  value,
-  onChange,
-}: {
-  id: string
-  value: string
-  onChange: (event: SelectChangeEvent<string>) => void
-}) {
-  const theme = useTheme()
-  const menuProps = {
-    PaperProps: {
-      sx: {
-        mt: 0.5,
-        backgroundColor: "common.white",
-        boxShadow: theme.shadow.sm,
-        border: `1px solid ${theme.palette.grey[200]}`,
-        borderRadius: theme.borderRadius.md,
-        "& .MuiMenuItem-root": {
-          py: 1,
-          whiteSpace: "normal" as const,
-          wordBreak: "break-word" as const,
-          "&:hover": { backgroundColor: theme.palette.grey[50] },
-          "&.Mui-selected": {
-            backgroundColor: theme.palette.grey[100],
-            "&:hover": { backgroundColor: theme.palette.grey[100] },
-          },
-        },
-      },
-    },
-  }
-
-  return (
-    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
-      <Select
-        id={id}
-        value={value}
-        onChange={onChange}
-        displayEmpty
-        sx={SELECT_SX}
-        MenuProps={menuProps}
-        renderValue={(v) => {
-          const doc = RESULT_SUMMARY_OUTCOME_DOCUMENTS.find((d) => d.id === v)
-          return doc ? doc.label : "Choose an outcome brief"
-        }}
-      >
-        {RESULT_SUMMARY_OUTCOME_DOCUMENTS.map((doc) => (
-          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
-            {doc.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  )
-}
-
-/**
- * Flat (non-grouped) Select for the LOI documents.
- * Options are just {id, label} pairs — no theme grouping needed since these
- * PDFs aren't scenario-resolved.
- */
-function LOIDocumentSelect({
-  id,
-  value,
-  onChange,
-}: {
-  id: string
-  value: string
-  onChange: (event: SelectChangeEvent<string>) => void
-}) {
-  const theme = useTheme()
-  const menuProps = {
-    PaperProps: {
-      sx: {
-        mt: 0.5,
-        backgroundColor: "common.white",
-        boxShadow: theme.shadow.sm,
-        border: `1px solid ${theme.palette.grey[200]}`,
-        borderRadius: theme.borderRadius.md,
-        "& .MuiMenuItem-root": {
-          py: 1,
-          whiteSpace: "normal" as const,
-          wordBreak: "break-word" as const,
-          "&:hover": { backgroundColor: theme.palette.grey[50] },
-          "&.Mui-selected": {
-            backgroundColor: theme.palette.grey[100],
-            "&:hover": { backgroundColor: theme.palette.grey[100] },
-          },
-        },
-      },
-    },
-  }
-
-  return (
-    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
-      <Select
-        id={id}
-        value={value}
-        onChange={onChange}
-        displayEmpty
-        sx={SELECT_SX}
-        MenuProps={menuProps}
-        renderValue={(v) => {
-          const doc = RESULT_SUMMARY_LOI_DOCUMENTS.find((d) => d.id === v)
-          return doc ? doc.label : "Choose a location of interest (LOI) brief"
-        }}
-      >
-        {RESULT_SUMMARY_LOI_DOCUMENTS.map((doc) => (
-          <MenuItem key={doc.id} value={doc.id} sx={{ py: 1 }}>
-            {doc.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  )
-}
-
-/**
  * Flat (non-grouped) Select for the water issues documents.
  * Options are just {id, label} pairs — no theme grouping needed since these
  * PDFs aren't scenario-resolved.
@@ -678,13 +484,10 @@ export default function DataPage() {
   const [selectedZipDataset, setSelectedZipDataset] = useState("")
   const [selectedCsvDataset, setSelectedCsvDataset] = useState("")
   const [selectedStrategyDoc, setSelectedStrategyDoc] = useState("")
-  const [selectedLOIDoc, setSelectedLOIDoc] = useState("")
-  const [selectedOutcomeBriefDoc, setSelectedOutcomeBriefDoc] = useState("")
   const [selectedOutcomeLevelDoc, setSelectedOutcomeLevelDoc] = useState("")
   const [selectedBackgroundBriefDoc, setSelectedBackgroundBriefDoc] =
     useState("")
   const [selectedWaterIssueDoc, setSelectedWaterIssueDoc] = useState("")
-  const [selectedStrategyBriefDoc, setSelectedStrategyBriefDoc] = useState("")
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -748,18 +551,6 @@ export default function DataPage() {
     setSelectedWaterIssueDoc(event.target.value)
   }
 
-  const handleLOIDocChange = (event: SelectChangeEvent<string>) => {
-    setSelectedLOIDoc(event.target.value)
-  }
-
-  const handleStrategyBriefDocChange = (event: SelectChangeEvent<string>) => {
-    setSelectedStrategyBriefDoc(event.target.value)
-  }
-
-  const handleOutcomeBriefDocChange = (event: SelectChangeEvent<string>) => {
-    setSelectedOutcomeBriefDoc(event.target.value)
-  }
-
   // Filter scenarios that have zip files
   const zipScenarios = scenarios.filter((scenario) => scenario.files.zip)
 
@@ -813,15 +604,7 @@ export default function DataPage() {
   const selectedWaterIssueDocument = WATER_ISSUE_DOCUMENTS.find(
     (d) => d.id === selectedWaterIssueDoc,
   )
-  const selectedOutcomeBriefDocument = RESULT_SUMMARY_OUTCOME_DOCUMENTS.find(
-    (d) => d.id === selectedOutcomeBriefDoc,
-  )
-  const selectedLOIDocument = RESULT_SUMMARY_LOI_DOCUMENTS.find(
-    (d) => d.id === selectedLOIDoc,
-  )
-  const selectedStrategyBriefDocument = RESULT_SUMMARY_STRATEGY_DOCUMENTS.find(
-    (d) => d.id === selectedStrategyBriefDoc,
-  )
+
   return (
     <>
       {/* Main content wrapper */}
@@ -960,6 +743,7 @@ export default function DataPage() {
                               selectedZipDataset,
                               "zip",
                             )}
+                            variant="outlined"
                           />
                         </Box>
                       )}
@@ -1071,16 +855,14 @@ export default function DataPage() {
                     outputs, and other COEQWAL resources programmatically.
                   </Typography>
 
-                  <DownloadButton
-                    fileId="api-docs"
-                    filename="api-docs"
-                    downloadUrl="https://api.coeqwal.org/docs"
+                  <CtaLink
+                    href="https://api.coeqwal.org/docs"
                     target="_blank"
                     rel="noopener noreferrer"
                     icon={<OpenInNewIcon />}
                   >
                     COEQWAL API
-                  </DownloadButton>
+                  </CtaLink>
                 </Box>
               </Grid>
 
@@ -1118,10 +900,8 @@ export default function DataPage() {
 
                   {selectedBackgroundBriefDocument && (
                     <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedBackgroundBriefDocument.id}
-                        filename={selectedBackgroundBriefDocument.file}
-                        downloadUrl={getBackgroundBriefDocumentUrl(
+                      <CtaLink
+                        href={getBackgroundBriefDocumentUrl(
                           selectedBackgroundBriefDocument.file,
                         )}
                         target="_blank"
@@ -1129,7 +909,7 @@ export default function DataPage() {
                         icon={<OpenInNewIcon />}
                       >
                         View {selectedBackgroundBriefDocument.label}
-                      </DownloadButton>
+                      </CtaLink>
                     </Box>
                   )}
                 </Box>
@@ -1163,17 +943,15 @@ export default function DataPage() {
                     }}
                   >
                     {BACKGROUND_BRIEF_STANDALONE_DOCUMENTS.map((doc) => (
-                      <DownloadButton
+                      <CtaLink
                         key={doc.id}
-                        fileId={doc.id}
-                        filename={doc.file}
-                        downloadUrl={getBackgroundBriefDocumentUrl(doc.file)}
+                        href={getBackgroundBriefDocumentUrl(doc.file)}
                         target="_blank"
                         rel="noopener noreferrer"
                         icon={<OpenInNewIcon />}
                       >
                         View {doc.label}
-                      </DownloadButton>
+                      </CtaLink>
                     ))}
                   </Box>
 
@@ -1185,10 +963,8 @@ export default function DataPage() {
 
                   {selectedStrategyDocument && (
                     <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedStrategyDocument.id}
-                        filename={selectedStrategyDocument.file}
-                        downloadUrl={getStrategyDocumentUrl(
+                      <CtaLink
+                        href={getStrategyDocumentUrl(
                           selectedStrategyDocument.file,
                         )}
                         target="_blank"
@@ -1196,7 +972,7 @@ export default function DataPage() {
                         icon={<OpenInNewIcon />}
                       >
                         View {selectedStrategyDocument.label}
-                      </DownloadButton>
+                      </CtaLink>
                     </Box>
                   )}
                 </Box>
@@ -1227,10 +1003,8 @@ export default function DataPage() {
 
                   {selectedOutcomeLevelDocument && (
                     <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedOutcomeLevelDocument.id}
-                        filename={selectedOutcomeLevelDocument.file}
-                        downloadUrl={getOutcomeLevelDocumentUrl(
+                      <CtaLink
+                        href={getOutcomeLevelDocumentUrl(
                           selectedOutcomeLevelDocument.file,
                         )}
                         target="_blank"
@@ -1238,7 +1012,7 @@ export default function DataPage() {
                         icon={<OpenInNewIcon />}
                       >
                         View {selectedOutcomeLevelDocument.label}
-                      </DownloadButton>
+                      </CtaLink>
                     </Box>
                   )}
                 </Box>
@@ -1251,106 +1025,6 @@ export default function DataPage() {
                   >
                     Summaries
                   </Typography>
-
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.space.section.sm,
-                    }}
-                  >
-                    Briefs that summarize strategies explored by the COEQWAL
-                    project.
-                  </Typography>
-
-                  <StrategyBriefDocumentSelect
-                    id="strategy-brief-doc-select"
-                    value={selectedStrategyBriefDoc}
-                    onChange={handleStrategyBriefDocChange}
-                  />
-
-                  {selectedStrategyBriefDocument && (
-                    <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedStrategyBriefDocument.id}
-                        filename={selectedStrategyBriefDocument.file}
-                        downloadUrl={getResultSummaryStrategyDocumentUrl(
-                          selectedStrategyBriefDocument.file,
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        icon={<OpenInNewIcon />}
-                      >
-                        View {selectedStrategyBriefDocument.label}
-                      </DownloadButton>
-                    </Box>
-                  )}
-
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.space.section.sm,
-                    }}
-                  >
-                    Briefs that summarize outcomes explored by the COEQWAL
-                    project.
-                  </Typography>
-
-                  <OutcomeBriefDocumentSelect
-                    id="outcome-brief-doc-select"
-                    value={selectedOutcomeBriefDoc}
-                    onChange={handleOutcomeBriefDocChange}
-                  />
-
-                  {selectedOutcomeBriefDocument && (
-                    <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedOutcomeBriefDocument.id}
-                        filename={selectedOutcomeBriefDocument.file}
-                        downloadUrl={getResultSummaryOutcomeDocumentUrl(
-                          selectedOutcomeBriefDocument.file,
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        icon={<OpenInNewIcon />}
-                      >
-                        View {selectedOutcomeBriefDocument.label}
-                      </DownloadButton>
-                    </Box>
-                  )}
-
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.space.section.sm,
-                    }}
-                  >
-                    Briefs that summarize locations of interest explored by the
-                    COEQWAL project.
-                  </Typography>
-
-                  <LOIDocumentSelect
-                    id="loi-doc-select"
-                    value={selectedLOIDoc}
-                    onChange={handleLOIDocChange}
-                  />
-
-                  {selectedLOIDocument && (
-                    <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedLOIDocument.id}
-                        filename={selectedLOIDocument.file}
-                        downloadUrl={getResultSummaryLOIDocumentUrl(
-                          selectedLOIDocument.file,
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        icon={<OpenInNewIcon />}
-                      >
-                        View {selectedLOIDocument.label}
-                      </DownloadButton>
-                    </Box>
-                  )}
-
                   <Typography
                     variant="body1"
                     sx={{
@@ -1369,10 +1043,8 @@ export default function DataPage() {
 
                   {selectedWaterIssueDocument && (
                     <Box sx={{ mb: (theme) => theme.space.section.xs }}>
-                      <DownloadButton
-                        fileId={selectedWaterIssueDocument.id}
-                        filename={selectedWaterIssueDocument.file}
-                        downloadUrl={getWaterIssueDocumentUrl(
+                      <CtaLink
+                        href={getWaterIssueDocumentUrl(
                           selectedWaterIssueDocument.file,
                         )}
                         target="_blank"
@@ -1380,7 +1052,7 @@ export default function DataPage() {
                         icon={<OpenInNewIcon />}
                       >
                         View {selectedWaterIssueDocument.label}
-                      </DownloadButton>
+                      </CtaLink>
                     </Box>
                   )}
                 </Box>
@@ -1388,18 +1060,16 @@ export default function DataPage() {
                 {/* Plain HTML directory of every document above, so search
                     engines can discover pages that would otherwise only be
                     reachable through the dropdowns' client-side state. */}
-                <Typography
-                  variant="body2"
-                  sx={{ mt: (theme) => theme.space.section.lg }}
-                >
-                  <Link
+                <Box sx={{ mt: (theme) => theme.space.section.lg }}>
+                  <CtaLink
                     href="/documents/index.html"
                     target="_blank"
                     rel="noopener noreferrer"
+                    icon={<OpenInNewIcon />}
                   >
                     Browse the full document library
-                  </Link>
-                </Typography>
+                  </CtaLink>
+                </Box>
               </Grid>
             </Grid>
           </Container>

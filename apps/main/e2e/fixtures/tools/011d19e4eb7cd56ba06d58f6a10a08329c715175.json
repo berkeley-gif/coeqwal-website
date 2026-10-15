@@ -1,0 +1,83 @@
+{
+  "scenario": "s0020",
+  "results": {
+    "RES_STOR": {
+      "scenario": "s0020",
+      "tier_code": "RES_STOR",
+      "tier_name": "Reservoir storage",
+      "tier_type": "multi_value",
+      "locations": [
+        {
+          "location_id": "SHSTA",
+          "location_name": "Shasta",
+          "location_type": "reservoir",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.843"
+        },
+        {
+          "location_id": "TRNTY",
+          "location_name": "Trinity",
+          "location_type": "reservoir",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.971"
+        },
+        {
+          "location_id": "OROVL",
+          "location_name": "Oroville",
+          "location_type": "reservoir",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.943"
+        },
+        {
+          "location_id": "FOLSM",
+          "location_name": "Folsom",
+          "location_type": "reservoir",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.629"
+        },
+        {
+          "location_id": "MELON",
+          "location_name": "New Melones",
+          "location_type": "reservoir",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.443"
+        },
+        {
+          "location_id": "MLRTN",
+          "location_name": "Millerton",
+          "location_type": "reservoir",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.043"
+        },
+        {
+          "location_id": "SLUIS_CVP",
+          "location_name": "San Luis CVP",
+          "location_type": "reservoir",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.682"
+        },
+        {
+          "location_id": "SLUIS_SWP",
+          "location_name": "San Luis SWP",
+          "location_type": "reservoir",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.054"
+        }
+      ],
+      "metadata": {
+        "total_locations": 8,
+        "location_types": ["reservoir"],
+        "tier_counts": { "1": 5, "2": 1, "3": 0, "4": 2 }
+      }
+    }
+  },
+  "missing": []
+}

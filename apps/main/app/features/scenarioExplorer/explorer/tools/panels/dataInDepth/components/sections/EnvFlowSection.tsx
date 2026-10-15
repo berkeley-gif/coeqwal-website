@@ -81,7 +81,7 @@ const CHANNEL_FILTER_DESCRIPTIONS: Record<ChannelFilter, string> = {
   streams:
     "All CalSim stream reaches. Excludes reservoir releases (e.g. below Shasta, Oroville) and conveyance canals.",
   eflows_only:
-    "17 streams with prescribed functional flow (EFLOWS) targets in the model SV input. These are the reaches used for tier results and the California Environmental Flows Framework analysis.",
+    "17 streams with prescribed functional flow (EFLOWS) targets in the model SV input. These are the reaches used for outcome level results and the California Environmental Flows Framework analysis.",
   mif_only:
     "20 stream reaches with a binding minimum instream flow (MIF) companion variable (C_reach_MIF) in the model DV output. These are the primary environmental monitoring locations.",
   all: "All 59 CalSim channel reaches including stream reaches, reservoir releases (e.g. below dams), and conveyance canals (e.g. Delta Cross Channel, Clifton Court).",

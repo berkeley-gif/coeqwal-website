@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test"
 import { setupNetwork } from "./support/network"
 import { linearTrendPerYear } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/mockDataEngine"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // The Stats chart style shows side-by-side bar plots of summary statistics
 // for the currently selected quantity view: mean and CV everywhere, plus the
@@ -22,7 +23,8 @@ async function openDataTool(page: Page) {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await selectCurrentOperations(page)
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 }
 
 test("Stats style shows mean and CV bar plots for the volume view", async ({
@@ -105,7 +107,7 @@ test("Stats view sentence reports the mean and CV, not the median", async ({
   await page.getByRole("button", { name: "Hydroclimates", exact: true }).click()
   await expect(
     page.getByText(
-      /^At Shasta Reservoir under .+, mean April reservoir storage ranges from [\d,.]+ TAF \(/,
+      /^At Shasta Reservoir under .+, mean April reservoir storage goes from [\d,.]+ TAF \(/,
     ),
   ).toBeVisible()
 })
@@ -119,12 +121,16 @@ test("Stats style saves a composed snapshot to the share drawer", async ({
 
   await page.getByRole("button", { name: "save snapshot" }).click()
 
-  // The staged card carries the standardized title and a stitched thumbnail
-  // (compose mode wraps every panel chart in one SVG).
+  // The staged card carries the figure-template rows (variable with its
+  // unit, held location) and a stitched thumbnail (compose mode wraps every
+  // panel chart in one SVG).
   const drawer = page.locator(".MuiDrawer-root")
   await expect(
-    drawer.getByText(/April Reservoir Storage \(Shasta Reservoir\)/),
+    drawer.getByText("April Reservoir Storage (TAF)", { exact: true }),
   ).toBeVisible({ timeout: 20_000 })
+  await expect(
+    drawer.getByText("Shasta Reservoir", { exact: true }),
+  ).toBeVisible()
   // The captured thumbnail itself, not just any svg: the drawer chrome has
   // its own close icons, and a failed capture stages the card anyway (the
   // staging helper swallows capture errors), so a bare svg match would pass

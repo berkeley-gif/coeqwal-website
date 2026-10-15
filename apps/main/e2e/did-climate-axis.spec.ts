@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { seedSelectedScenarios } from "./support/scenarioSelection"
 
 // Climate-futures axis, live path, end to end and offline. The rest of the
 // suite rides the committed HAR, whose empty /api/scenarios body keeps id
@@ -95,6 +96,9 @@ test("climate futures axis fetches each hydroclimate variant and goes live", asy
     return route.fulfill({ json: { scenario: id, results: {}, missing: [] } })
   })
 
+  // This spec's own scenario list renames the scenarios, so the selection
+  // comes from a saved session rather than the sidebar.
+  await seedSelectedScenarios(page, ["s0020"])
   await page.goto("/explore")
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
@@ -103,14 +107,14 @@ test("climate futures axis fetches each hydroclimate variant and goes live", asy
   // Sanity precondition: with a real scenario list, the default scenarios
   // axis already serves live data (baseline resolves to s0020). This half
   // holds before the climates-axis change and pins the fixture wiring.
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   expect(fetchedIds).toContain("s0020")
 
   // The behavior under test: switching to the climate-futures axis keeps the
   // card live, renders one member per hydroclimate, and fetches every
   // variant id exactly as resolved from the sibling group.
   await page.getByRole("button", { name: "Hydroclimates", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect(page.getByText(/^Sample data$/)).not.toBeVisible()
   for (const label of [
     "Historical",
@@ -120,6 +124,12 @@ test("climate futures axis fetches each hydroclimate variant and goes live", asy
     "Extreme stress",
   ]) {
     await expect(page.getByText(label, { exact: true }).first()).toBeVisible()
+  }
+  // Every compared hydroclimate drew its own served series: no member is
+  // left waiting, failed, or without data.
+  const card = page.locator('[data-did-chart-state="drawn"]')
+  for (const chip of ["loading", "could not load", "no data"]) {
+    await expect(card.getByText(chip, { exact: true })).toHaveCount(0)
   }
   await expect
     .poll(() => new Set(fetchedIds).size, { timeout: 10_000 })

@@ -17,12 +17,18 @@ import {
   useTheme,
   CircularProgress,
   InfoOutlinedIcon,
+  IconButton,
+  AddIcon,
+  RemoveIcon,
+  ReplayIcon,
 } from "@repo/ui/mui"
 import {
   RadarPlot,
   mergeRadarAxisLabelDetailStyle,
   type RadarPlotAxisLabelDetailStyle,
   type RadarAxisLabelDetailChromeOptions,
+  type RadarPlotZoomControls,
+  type RadarPlotZoomTransform,
   type VerticalParallelLineData,
 } from "@repo/viz"
 import { ChartToast, InfoPopover } from "@repo/ui"
@@ -53,6 +59,11 @@ import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
 import { useTourAnchor } from "../../tour"
 import { useRadarInfoIconSync } from "./tour"
+import SelectScenarioPrompt from "../../components/SelectScenarioPrompt"
+import {
+  needsScenarioPrompt,
+  SCENARIO_PROMPT_TEXT,
+} from "../../components/scenarioPrompt"
 
 import { OUTCOME_LABEL_BREAKS } from "../../../../../../content/outcomes"
 
@@ -61,9 +72,11 @@ type AxisPosition = {
   x: number
   y: number
   anchor: "start" | "end" | "middle"
+  // Right edge and vertical centre of the label's last text line, measured
+  // by RadarPlot when it builds the label. Absent if it could not measure.
+  labelEndX?: number
+  labelMidY?: number
 }
-
-type AxisLabelRect = { x: number; y: number; width: number; height: number }
 
 function axisPositionsEqual(
   a: AxisPosition[] | null,
@@ -79,35 +92,9 @@ function axisPositionsEqual(
       x.axis !== y.axis ||
       x.x !== y.x ||
       x.y !== y.y ||
-      x.anchor !== y.anchor
-    ) {
-      return false
-    }
-  }
-  return true
-}
-
-// Stable identity for the "no rects yet" state. Using a single shared
-// object avoids a fresh setState every render when axisPositions is empty.
-const EMPTY_RECTS: Record<string, AxisLabelRect> = {}
-
-function rectsShallowEqual(
-  a: Record<string, AxisLabelRect>,
-  b: Record<string, AxisLabelRect>,
-): boolean {
-  if (a === b) return true
-  const aKeys = Object.keys(a)
-  const bKeys = Object.keys(b)
-  if (aKeys.length !== bKeys.length) return false
-  for (const key of aKeys) {
-    const av = a[key]
-    const bv = b[key]
-    if (!bv) return false
-    if (
-      av!.x !== bv.x ||
-      av!.y !== bv.y ||
-      av!.width !== bv.width ||
-      av!.height !== bv.height
+      x.anchor !== y.anchor ||
+      x.labelEndX !== y.labelEndX ||
+      x.labelMidY !== y.labelMidY
     ) {
       return false
     }
@@ -208,6 +195,7 @@ export default function RadarPanel({
     showTierZones,
     hydroclimate,
     addShareItem,
+    tour,
   } = useWorkspaceSlice()
   const {
     radarVisibleAxes,
@@ -220,13 +208,51 @@ export default function RadarPanel({
     setShowAxisSelector,
   } = useRadarSlice()
 
+  // With nothing selected the radar asks for a selection instead of drawing
+  // the whole library (see tools/components/scenarioPrompt.ts).
+  const showSelectPrompt = needsScenarioPrompt({
+    mode: "radar",
+    selectedScenarioCount: selectedScenarios.length,
+    showAll: radarShowAll,
+    equityFocusScenario: null,
+    tourActive: tour.tool === "radar",
+  })
+
   const { getDisplayName } = useScenarioList()
   const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
 
-  const radarSvgRef = useRef<SVGSVGElement | null>(null)
-  const handleSvgRef = useCallback((svg: SVGSVGElement | null) => {
-    radarSvgRef.current = svg
+  // Zoom state is kept in refs, not React state: it changes every frame
+  // during a pan, and nothing in this component's render output depends on it.
+  const zoomControlsRef = useRef<RadarPlotZoomControls | null>(null)
+  const zoomTransformRef = useRef<RadarPlotZoomTransform>({ x: 0, y: 0, k: 1 })
+  const infoIconOverlayElRef = useRef<HTMLDivElement | null>(null)
+
+  // The info icons are HTML positioned in SVG coordinates, so they need the
+  // same transform as the chart's root group to stay beside their labels.
+  const applyOverlayZoom = useCallback(() => {
+    const overlayEl = infoIconOverlayElRef.current
+    if (!overlayEl) return
+    const { x, y, k } = zoomTransformRef.current
+    overlayEl.style.transform = `translate(${x}px, ${y}px) scale(${k})`
   }, [])
+
+  const handleZoomChange = useCallback(
+    (transform: RadarPlotZoomTransform) => {
+      zoomTransformRef.current = transform
+      applyOverlayZoom()
+    },
+    [applyOverlayZoom],
+  )
+
+  // Callback ref: the overlay mounts conditionally, possibly after the chart
+  // is already zoomed, so it must pick up the stored transform on mount.
+  const handleInfoIconOverlayRef = useCallback(
+    (overlayEl: HTMLDivElement | null) => {
+      infoIconOverlayElRef.current = overlayEl
+      applyOverlayZoom()
+    },
+    [applyOverlayZoom],
+  )
 
   const activeMapDot = useMemo(
     () =>
@@ -245,13 +271,15 @@ export default function RadarPanel({
     [selectedScenarios],
   )
 
+  // Axis whose hover detail panel is open in the chart, or null. Driven by
+  // the panel actually opening and closing (not by dot hover), so the info
+  // icons it hides can never stay hidden after the panel has gone.
   const [hoveredDetailAxis, setHoveredDetailAxis] = useState<string | null>(
     null,
   )
 
   const handleDotHover = useCallback(
     (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
-      setHoveredDetailAxis(info ? info.axis : null)
       onChartHover?.(
         info
           ? {
@@ -271,7 +299,7 @@ export default function RadarPanel({
   // map-column width transition the ResizeObserver fires every
   // frame, and each tick produces genuinely different pixel positions
   // (different widths), so we'd commit a setState per frame, each
-  // triggering an axisLabelRects commit, and the cumulative depth would
+  // triggering another commit, and the cumulative depth would
   // trip React's #185 guard. Throttle to at most one commit per 50ms so
   // the info-icon overlay still moves smoothly during the transition
   // (~14 commits over 700ms) without overwhelming React.
@@ -301,53 +329,13 @@ export default function RadarPanel({
     }
   }, [])
 
-  // Measured bounding boxes of each axis label group in the SVG, keyed by
-  // axis display name. Used to place the info icon flush against the
-  // rendered text. Re-measured
-  // whenever the chart re-renders (new axisPositions array).
-  const [axisLabelRects, setAxisLabelRects] =
-    useState<Record<string, AxisLabelRect>>(EMPTY_RECTS)
-
-  useEffect(() => {
-    const svg = radarSvgRef.current
-    if (!svg || axisPositions.length === 0) {
-      setAxisLabelRects((prev) => (prev === EMPTY_RECTS ? prev : EMPTY_RECTS))
-      return
-    }
-    const rects: Record<string, AxisLabelRect> = {}
-    svg.querySelectorAll<SVGGElement>("g.axis-label").forEach((g) => {
-      const axis = g.getAttribute("data-axis")
-      if (!axis) return
-      // For two-line labels the group contains two <text> title
-      // elements. The last appended one is the bottom line. We want the
-      // icon to land after the last word of that last line, so we measure
-      // the last <text class="axis-label-title"> specifically rather than
-      // the whole group's bbox (which would center across both lines and
-      // right-align to the widest line).
-      const titles = g.querySelectorAll<SVGTextElement>("text.axis-label-title")
-      const last = titles[titles.length - 1]
-      if (!last) return
-      try {
-        const bb = last.getBBox()
-        if (bb.width > 0 && bb.height > 0) {
-          rects[axis] = {
-            x: bb.x,
-            y: bb.y,
-            width: bb.width,
-            height: bb.height,
-          }
-        }
-      } catch {
-        // getBBox can throw on detached nodes. Ignore and skip.
-      }
-    })
-    setAxisLabelRects((prev) => (rectsShallowEqual(prev, rects) ? prev : rects))
-  }, [axisPositions])
-
   // Which axis label's info popover is currently open (by display name).
   // Only one open at a time. Clicking another closes the previous.
   const [openInfoAxis, setOpenInfoAxis] = useState<string | null>(null)
   const closeInfoTooltip = useCallback(() => setOpenInfoAxis(null), [])
+  useEffect(() => {
+    if (showSelectPrompt) setOpenInfoAxis(null)
+  }, [showSelectPrompt])
 
   // Tour sync: open the first axis's info popover during the radar
   // tour's "Outcome summary" step. Lives in panels/radar/tour/ so the
@@ -470,11 +458,12 @@ export default function RadarPanel({
 
   const filteredData = useMemo(() => {
     let base: typeof comparisonData
-    // With nothing selected, fall back to showing the full library
-    // instead of an empty chart. The radar is most useful as a quick
-    // overview on first landing, and a blank canvas could read as broken or otherwise be confusing.
+    // With nothing selected the panel shows the select-a-scenario prompt,
+    // so there is nothing to draw. During the radar tour the full library
+    // stays up instead, because tour steps anchor on the drawn polygons.
     if (radarShowAll) base = comparisonData
-    else if (selectedScenarios.length === 0) base = comparisonData
+    else if (selectedScenarios.length === 0)
+      base = showSelectPrompt ? [] : comparisonData
     else base = comparisonData.filter((d) => selectedSet.has(d.id))
 
     if (highlightedIds == null || highlightedIds.size === 0) return base
@@ -496,6 +485,7 @@ export default function RadarPanel({
     selectedScenarios.length,
     radarShowAll,
     highlightedIds,
+    showSelectPrompt,
   ])
 
   const filteredLineColors = useMemo(
@@ -656,7 +646,8 @@ export default function RadarPanel({
   // The toolbar "save snapshot" button needs both data AND at
   // least one axis to draw. Zero axes means a blank wireframe with
   // no spokes. Capturing that would produce a useless share card.
-  const canCaptureRadar = hasRadarTraceData && visibleAxisNames.length > 0
+  const canCaptureRadar =
+    hasRadarTraceData && visibleAxisNames.length > 0 && !showSelectPrompt
   useEffect(() => {
     onCanCaptureChange?.(canCaptureRadar)
   }, [canCaptureRadar, onCanCaptureChange])
@@ -798,7 +789,8 @@ export default function RadarPanel({
     visibleAxisNames,
   ])
 
-  if (isLoading && !hasData) {
+  // The prompt needs no chart data, so it never waits on loading.
+  if (isLoading && !hasData && !showSelectPrompt) {
     return (
       <Box
         sx={{
@@ -860,9 +852,18 @@ export default function RadarPanel({
               p: 0,
               // Nudge chart + in-SVG axis detail up so bottom hovers clear the viewport
               transform: "translateY(-10px)",
+              // The info-icon overlay is scaled with the zoom. Unclipped, it
+              // grows past this box and makes the scroll area think there is
+              // content to scroll to. Clipping here also hides icons whose
+              // labels have been zoomed out of the frame, matching the SVG.
+              // "clip" rather than "hidden": a hidden box can still be
+              // scrolled when keyboard focus lands on an off-frame icon.
+              overflow: "clip",
             }}
           >
-            {showUnavailableBlock ? (
+            {showSelectPrompt ? (
+              <SelectScenarioPrompt message={SCENARIO_PROMPT_TEXT.radar} />
+            ) : showUnavailableBlock ? (
               <HydroclimateUnavailablePlaceholder
                 hydroclimate={hydroclimate}
                 variant="block"
@@ -888,12 +889,15 @@ export default function RadarPanel({
                 showAllPaths
                 showDotsOnly={showDotsOnly}
                 dimUnselected={radarShowAll && selectedScenarios.length > 0}
-                svgRefCallback={handleSvgRef}
                 onDotHover={handleDotHover}
                 onAxisPositions={handleAxisPositions}
                 axisLabelDetailStyle={radarAxisLabelDetailStyle}
                 axisLabelDetailChrome={axisLabelDetailChrome}
                 palette={radarPalette}
+                zoomable
+                zoomControlsRef={zoomControlsRef}
+                onZoomChange={handleZoomChange}
+                onAxisDetailChange={setHoveredDetailAxis}
               />
             )}
 
@@ -903,158 +907,166 @@ export default function RadarPanel({
               container's pixel size, so SVG user units == DOM pixels here,
               and this overlay shares the same bounds and transform as the
               chart wrapper). */}
-            {axisPositions.length > 0 && (
+            {!showSelectPrompt && axisPositions.length > 0 && (
               <Box
+                ref={handleInfoIconOverlayRef}
                 sx={{
                   position: "absolute",
                   inset: 0,
                   pointerEvents: "none",
                   zIndex: 1,
+                  // SVG transforms scale from the top-left; CSS defaults to
+                  // the centre. Without this the icons drift as you zoom.
+                  transformOrigin: "0 0",
                 }}
               >
-                {axisPositions.map(({ axis, x, y }, idx) => {
-                  const definition = resolveAxisDefinition(axis)
-                  if (!definition) return null
+                {axisPositions.map(
+                  ({ axis, x, y, labelEndX, labelMidY }, idx) => {
+                    const definition = resolveAxisDefinition(axis)
+                    if (!definition) return null
 
-                  // Always place the icon inline after the last word of the
-                  // label (i.e. flush against the right edge of the rendered
-                  // text), vertically centered. When we haven't measured the
-                  // label's bbox yet, fall back to a rough offset from the
-                  // anchor point so the icon still appears on first paint.
-                  const rect = axisLabelRects[axis]
-                  const GAP = 3
-                  const iconLeft = rect ? rect.x + rect.width + GAP : x + GAP
-                  const iconTop = rect ? rect.y + rect.height / 2 : y
+                    // Always place the icon inline after the last word of the
+                    // label (i.e. flush against the right edge of the rendered
+                    // text), vertically centered. If RadarPlot could not
+                    // measure the label, fall back to a rough offset from the
+                    // anchor point so the icon still appears.
+                    const GAP = 3
+                    const iconLeft = (labelEndX ?? x) + GAP
+                    const iconTop = labelMidY ?? y
 
-                  const isOpen = openInfoAxis === axis
+                    const isOpen = openInfoAxis === axis
 
-                  const isObscuredByDetailPanel =
-                    hoveredDetailAxis != null && hoveredDetailAxis !== axis
+                    const isObscuredByDetailPanel =
+                      hoveredDetailAxis != null && hoveredDetailAxis !== axis
 
-                  // Register the first axis info icon as both the
-                  // axis-label and info-icon tour anchors so the radar
-                  // tour can speak about either without changing target.
-                  const isFirst = idx === 0
-                  const setRefs = (el: HTMLElement | null) => {
-                    if (!isFirst) return
-                    axisLabelAnchorRef(el)
-                    infoIconAnchorRef(el)
-                  }
+                    // Register the first axis info icon as both the
+                    // axis-label and info-icon tour anchors so the radar
+                    // tour can speak about either without changing target.
+                    const isFirst = idx === 0
+                    const setRefs = (el: HTMLElement | null) => {
+                      if (!isFirst) return
+                      axisLabelAnchorRef(el)
+                      infoIconAnchorRef(el)
+                    }
 
-                  return (
-                    <Box
-                      key={axis}
-                      ref={setRefs}
-                      sx={{
-                        position: "absolute",
-                        left: iconLeft,
-                        top: iconTop,
-                        transform: "translate(0, -50%)",
-                        pointerEvents: "auto",
-                        lineHeight: 0,
-                        ...(isObscuredByDetailPanel && {
-                          visibility: "hidden",
-                          pointerEvents: "none",
-                        }),
-                      }}
-                    >
-                      <InfoPopover
-                        open={isOpen}
-                        onClose={closeInfoTooltip}
-                        placement="top"
-                        maxWidth="320px"
-                        content={
-                          <Box sx={{ pr: theme.space.component.md }}>
-                            <Typography
-                              variant="compactSubtitle"
+                    return (
+                      <Box
+                        key={axis}
+                        ref={setRefs}
+                        sx={{
+                          position: "absolute",
+                          left: iconLeft,
+                          top: iconTop,
+                          transform: "translate(0, -50%)",
+                          pointerEvents: "auto",
+                          lineHeight: 0,
+                          ...(isObscuredByDetailPanel && {
+                            visibility: "hidden",
+                            pointerEvents: "none",
+                          }),
+                        }}
+                      >
+                        <InfoPopover
+                          open={isOpen}
+                          onClose={closeInfoTooltip}
+                          placement="top"
+                          maxWidth="320px"
+                          content={
+                            <Box sx={{ pr: theme.space.component.md }}>
+                              <Typography
+                                variant="compactSubtitle"
+                                sx={{
+                                  fontWeight: 700,
+                                  display: "block",
+                                  mb: theme.space.component.sm,
+                                }}
+                              >
+                                {axis}
+                              </Typography>
+                              <Typography
+                                variant="compactCaption"
+                                sx={{ display: "block" }}
+                              >
+                                {definition}
+                              </Typography>
+                            </Box>
+                          }
+                        >
+                          {/* span wrapper: gives MUI Tooltip a native element it
+                          can attach its ref and extra ARIA props to. */}
+                          <span style={{ display: "inline-flex" }}>
+                            <Box
+                              component="button"
+                              type="button"
+                              aria-label={`About ${axis}`}
+                              aria-expanded={isOpen}
+                              onClick={(e: React.MouseEvent) => {
+                                e.stopPropagation()
+                                setOpenInfoAxis(isOpen ? null : axis)
+                              }}
                               sx={{
-                                fontWeight: 700,
-                                display: "block",
-                                mb: theme.space.component.sm,
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                padding: "2px",
+                                borderRadius: "50%",
+                                color: isOpen
+                                  ? theme.palette.primary.main
+                                  : theme.palette.text.primary,
+                                transition:
+                                  "color 120ms ease, background-color 120ms ease",
+                                "&:hover": {
+                                  color: theme.palette.primary.main,
+                                },
+                                "&:focus-visible": {
+                                  outline: `2px solid ${theme.palette.primary.main}`,
+                                  outlineOffset: "1px",
+                                },
                               }}
                             >
-                              {axis}
-                            </Typography>
-                            <Typography
-                              variant="compactCaption"
-                              sx={{ display: "block" }}
-                            >
-                              {definition}
-                            </Typography>
-                          </Box>
-                        }
-                      >
-                        {/* span wrapper: gives MUI Tooltip a native element it
-                          can attach its ref and extra ARIA props to. */}
-                        <span style={{ display: "inline-flex" }}>
-                          <Box
-                            component="button"
-                            type="button"
-                            aria-label={`About ${axis}`}
-                            aria-expanded={isOpen}
-                            onClick={(e: React.MouseEvent) => {
-                              e.stopPropagation()
-                              setOpenInfoAxis(isOpen ? null : axis)
-                            }}
-                            sx={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              padding: "2px",
-                              borderRadius: "50%",
-                              color: isOpen
-                                ? theme.palette.primary.main
-                                : theme.palette.text.primary,
-                              transition:
-                                "color 120ms ease, background-color 120ms ease",
-                              "&:hover": {
-                                color: theme.palette.primary.main,
-                              },
-                              "&:focus-visible": {
-                                outline: `2px solid ${theme.palette.primary.main}`,
-                                outlineOffset: "1px",
-                              },
-                            }}
-                          >
-                            <InfoOutlinedIcon
-                              sx={{ fontSize: 14, display: "block" }}
-                            />
-                          </Box>
-                        </span>
-                      </InfoPopover>
-                    </Box>
-                  )
-                })}
+                              <InfoOutlinedIcon
+                                sx={{ fontSize: 14, display: "block" }}
+                              />
+                            </Box>
+                          </span>
+                        </InfoPopover>
+                      </Box>
+                    )
+                  },
+                )}
               </Box>
             )}
           </Box>
 
-          {hasRadarTraceData && !isLoading && visibleAxisNames.length <= 2 && (
-            <ChartToast maxWidth={440}>
-              <Box
-                sx={{
-                  pointerEvents: "auto",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1,
-                }}
-              >
-                <Box component="span">To show data, use</Box>
-                <InlineToggleChip
-                  label="choose outcome axes"
-                  active={showAxisSelector}
-                  onClick={() => setShowAxisSelector(!showAxisSelector)}
-                  onDarkBackground
-                />
-                <Box component="span">in the chart controls above.</Box>
-              </Box>
-            </ChartToast>
-          )}
+          {!showSelectPrompt &&
+            hasRadarTraceData &&
+            !isLoading &&
+            visibleAxisNames.length <= 2 && (
+              <ChartToast maxWidth={440}>
+                <Box
+                  sx={{
+                    pointerEvents: "auto",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 1,
+                  }}
+                >
+                  <Box component="span">To show data, use</Box>
+                  <InlineToggleChip
+                    label="choose outcome axes"
+                    active={showAxisSelector}
+                    onClick={() => setShowAxisSelector(!showAxisSelector)}
+                    onDarkBackground
+                  />
+                  <Box component="span">in the chart controls above.</Box>
+                </Box>
+              </ChartToast>
+            )}
         </Box>
       </Box>
 
@@ -1062,6 +1074,44 @@ export default function RadarPanel({
         visible={canScrollRight}
         fadeColor={theme.palette.grey[100]}
       />
+
+      {!showSelectPrompt && !showUnavailableBlock && (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 16,
+            right: 16,
+            zIndex: 10,
+            display: "flex",
+            flexDirection: "column",
+            bgcolor: theme.palette.common.white,
+            borderRadius: theme.borderRadius.sm,
+            boxShadow: theme.shadows[1],
+          }}
+        >
+          <IconButton
+            size="small"
+            aria-label="Zoom in"
+            onClick={() => zoomControlsRef.current?.zoomIn()}
+          >
+            <AddIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            aria-label="Zoom out"
+            onClick={() => zoomControlsRef.current?.zoomOut()}
+          >
+            <RemoveIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            aria-label="Reset zoom"
+            onClick={() => zoomControlsRef.current?.reset()}
+          >
+            <ReplayIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      )}
 
       {isLoading && hasData && (
         <CircularProgress

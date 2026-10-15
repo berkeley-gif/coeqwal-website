@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Agriculture live path, end to end and offline. Same technique as
 // did-cws.spec.ts: inline route fixtures layered over the HAR harness (later
@@ -140,6 +141,7 @@ test("ag variables fetch their per-variable measures and go live", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
 
   // "Surface water deliveries" also exists in the community-water-systems
   // sector, so scope to the list that carries the unique "Groundwater
@@ -151,7 +153,7 @@ test("ag variables fetch their per-variable measures and go live", async ({
   // Deliveries: the default pinned location is the group's first entry
   // (All North of Delta) -> subject NOD_Agriculture, measure net_diversion.
   await agList.getByRole("button", { name: "Surface water deliveries" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -172,7 +174,7 @@ test("ag variables fetch their per-variable measures and go live", async ({
     .filter({ hasText: "All North of Delta" })
     .click()
   await page.getByRole("option", { name: "All South of Delta" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -186,7 +188,7 @@ test("ag variables fetch their per-variable measures and go live", async ({
   // Pumping: the SAME endpoint serves a different measure for this variable,
   // and the location pin persists per group.
   await agList.getByRole("button", { name: "Groundwater pumping" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -224,6 +226,7 @@ test("ag shortage derives its percent-of-demand view from two served measures", 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
 
   const agList = page
     .getByRole("list")
@@ -231,7 +234,7 @@ test("ag shortage derives its percent-of-demand view from two served measures", 
 
   // Volume view first: one measure, the served shortage series in TAF.
   await agList.getByRole("button", { name: "Water shortage" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -246,7 +249,7 @@ test("ag shortage derives its percent-of-demand view from two served measures", 
   // Percent view: BOTH measures in one request, and the rendered value is the
   // derived percent, not either input.
   await page.getByRole("button", { name: "% of demand", exact: true }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -259,7 +262,7 @@ test("ag shortage derives its percent-of-demand view from two served measures", 
     .toBe(true)
   // 400 / (3,600 + 400) x 100 = 10 percent, a value that appears nowhere in
   // the fixture's inputs.
-  await expect(page.getByText(/10(\.0+)? %/).first()).toBeVisible()
+  await expect(page.getByText(/10(\.0+)?%/).first()).toBeVisible()
 
   expect(errors).toEqual([])
 })
@@ -279,11 +282,12 @@ test("ag demand units are pickable and fetch their own subject", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   const agList = page
     .getByRole("list")
     .filter({ has: page.getByRole("button", { name: "Groundwater pumping" }) })
   await agList.getByRole("button", { name: "Surface water deliveries" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // The pin is a grouped select: aggregates, then North of Delta, then
   // South of Delta. Pick a North of Delta demand unit.
@@ -301,7 +305,7 @@ test("ag demand units are pickable and fetch their own subject", async ({
   await listbox
     .getByRole("option", { name: "08N_SA2 - Glenn-Colusa ID (55% of total)" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(
@@ -364,11 +368,12 @@ test("gross crop revenues reads the revenue measure and displays millions of dol
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   const agList = page
     .getByRole("list")
     .filter({ has: page.getByRole("button", { name: "Groundwater pumping" }) })
   await agList.getByRole("button", { name: "Gross crop revenues" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() =>
       requested.some(

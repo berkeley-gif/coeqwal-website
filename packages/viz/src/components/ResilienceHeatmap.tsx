@@ -120,6 +120,11 @@ export interface ResilienceHeatmapPalette {
   textMuted: string
   /** Hover outline color applied to the focused cell. */
   hoverStroke: string
+  /**
+   * Outline color for the selected cell (see `selectedCellKey`). Falls
+   * back to `hoverStroke` when omitted.
+   */
+  selectedStroke?: string
   /** Text color painted on top of tier 1 / tier 2 (dark) swatches. */
   onDarkTier: string
   /** Text color painted on top of tier 3 / tier 4 (light) swatches. */
@@ -209,6 +214,12 @@ export interface ResilienceHeatmapProps {
    * by-hydroclimate view, aggregate over hydroclimates).
    */
   highlightedColKeys?: Set<string> | null
+  /**
+   * Key (`${rowKey}|${colKey}`) of the cell drawn as selected, e.g. the
+   * cell whose outcome is on the map. The cell keeps a colored outline
+   * and carries `data-selected="true"`. `null` selects nothing.
+   */
+  selectedCellKey?: string | null
   /** Emitted when the pointer enters or leaves a row axis tick label. */
   onRowKeyHover?: (rowKey: string | null) => void
   /** Emitted when the pointer enters or leaves a column axis tick label. */
@@ -300,6 +311,13 @@ const X_AXIS_LABEL_RESERVE = 32
 /** Extra top band when column tick labels are rotated (e.g. scenario codes). */
 const X_AXIS_LABEL_RESERVE_ROTATED = 58
 const HATCH_ID = "resilience-unavailable-hatch"
+/** Row and column steps for the arrow keys on a focused cell. */
+const ARROW_STEPS: Record<string, readonly [number, number]> = {
+  ArrowUp: [-1, 0],
+  ArrowDown: [1, 0],
+  ArrowLeft: [0, -1],
+  ArrowRight: [0, 1],
+}
 
 /**
  * Truncate an axis tick's text so it fits `maxWidth`, preserving a
@@ -421,6 +439,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     onSquareClick,
     highlightedRowKeys = null,
     highlightedColKeys = null,
+    selectedCellKey = null,
     onRowKeyHover,
     onColKeyHover,
     formatRowTick = defaultRowTick,
@@ -517,6 +536,14 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       highlightedRowKeysRef.current = highlightedRowKeys
     }, [highlightedRowKeys])
 
+    // The selected cell's key, read by updateChart at draw time and by
+    // the hover handlers when the pointer leaves; the visual-only effect
+    // below restyles cells when it changes.
+    const selectedCellKeyRef = useRef(selectedCellKey)
+    useEffect(() => {
+      selectedCellKeyRef.current = selectedCellKey
+    }, [selectedCellKey])
+
     const highlightedColKeysRef = useRef(highlightedColKeys)
     useEffect(() => {
       highlightedColKeysRef.current = highlightedColKeys
@@ -555,11 +582,47 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       text: paletteText,
       textMuted: paletteTextMuted,
       hoverStroke: paletteHoverStroke,
+      selectedStroke: paletteSelectedStroke = paletteHoverStroke,
       unavailableFill: paletteUnavailFill,
       unavailableStroke: paletteUnavailStroke,
       unavailableHatch: paletteUnavailHatch,
       axisHintUnderline: paletteAxisHint,
     } = palette
+
+    // A cell's outline and selection state, set in one place so draw,
+    // pointer, focus and selection changes never undo one another:
+    //  - the selected cell keeps the selected outline, thicker while the
+    //    pointer or focus is on it, so a click shows its effect at once;
+    //  - otherwise the hover outline while the pointer or focus is on it
+    //    (`data-hovered` / `data-focused`);
+    //  - otherwise the unavailable border on hatched cells, else none.
+    // `data-selected` and, on cells that are buttons, `aria-pressed`
+    // carry the selection. Reads `data-available`, written at draw time.
+    const applyCellStroke = useCallback(
+      (el: SVGRectElement, isSelected: boolean) => {
+        const cellEl = select(el)
+        const isAvailable = el.getAttribute("data-available") === "true"
+        const selected = isAvailable && isSelected
+        const isActive =
+          el.hasAttribute("data-hovered") || el.hasAttribute("data-focused")
+        cellEl.attr("data-selected", selected ? "true" : null)
+        if (el.getAttribute("role") === "button") {
+          cellEl.attr("aria-pressed", selected ? "true" : "false")
+        }
+        if (selected) {
+          cellEl
+            .attr("stroke", paletteSelectedStroke)
+            .attr("stroke-width", isActive ? 3 : 2)
+        } else if (isActive) {
+          cellEl.attr("stroke", paletteHoverStroke).attr("stroke-width", 2)
+        } else if (!isAvailable) {
+          cellEl.attr("stroke", paletteUnavailStroke).attr("stroke-width", 1)
+        } else {
+          cellEl.attr("stroke", "transparent").attr("stroke-width", 2)
+        }
+      },
+      [paletteHoverStroke, paletteUnavailStroke, paletteSelectedStroke],
+    )
 
     // Resolve the primary fill + inner-label text for a cell under the
     // active cellRender mode. Returns null fill when the cell should be
@@ -665,6 +728,13 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       el.style.top = `${top}px`
     }, [])
 
+    // A level's name from the legend labels (e.g. "At-risk"), so copy
+    // never needs a numbered label.
+    const getLevelName = useCallback(
+      (level: number) => tierLabels[level - 1] ?? `Outcome level ${level}`,
+      [tierLabels],
+    )
+
     const showCellTooltip = useCallback(
       (event: MouseEvent, cell: ResilienceHeatmapCell) => {
         const el = cellTooltipRef.current
@@ -676,11 +746,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         } else if (!cell.available) {
           valueText = cell.unavailableReason ?? "No data"
         } else if (cellRender === "delta" && cell.divergingValue != null) {
-          valueText = `Δ tier ${formatDelta(cell.divergingValue)}`
+          valueText = `Δ outcome level ${formatDelta(cell.divergingValue)}`
         } else if (cellRender === "density_opp" && cell.densityValue != null) {
-          valueText = `${formatPercent(cell.densityValue)} at Tier 2 or better`
+          valueText = `${formatPercent(cell.densityValue)} at ${getLevelName(2)} or better`
         } else if (cellRender === "leverage" && cell.leverageValue != null) {
-          valueText = `Operational leverage ${formatLeverage(cell.leverageValue)} tiers`
+          valueText = `Operational leverage ${formatLeverage(cell.leverageValue)} outcome levels`
         } else if (
           cellRender === "distribution" &&
           cell.distribution &&
@@ -696,12 +766,12 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .map((c, i) => {
               if (c === 0) return null
               const pct = Math.round((c / total) * 100)
-              return `Tier ${i + 1}: ${c} (${pct}%)`
+              return `${getLevelName(i + 1)}: ${c} (${pct}%)`
             })
             .filter((s): s is string => s != null)
           valueText = parts.length > 0 ? parts.join(" · ") : "No data"
         } else if (cell.tierLevel != null) {
-          valueText = `Tier ${cell.tierLevel}${
+          valueText = `${getLevelName(cell.tierLevel)}${
             cell.continuousValue != null
               ? ` (${cell.continuousValue.toFixed(2)})`
               : ""
@@ -719,7 +789,13 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         el.style.display = "block"
         positionCellTooltip(event)
       },
-      [positionCellTooltip, paletteText, paletteTextMuted, cellRender],
+      [
+        positionCellTooltip,
+        paletteText,
+        paletteTextMuted,
+        cellRender,
+        getLevelName,
+      ],
     )
 
     const hideCellTooltip = useCallback(() => {
@@ -741,7 +817,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         const tierLevel = entry.tierLevel
         const tierText =
           tierLevel != null
-            ? `Tier ${tierLevel}${
+            ? `${getLevelName(tierLevel)}${
                 entry.tierValue != null && entry.tierValue !== tierLevel
                   ? ` (${entry.tierValue.toFixed(2)})`
                   : ""
@@ -764,7 +840,13 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         el.style.display = "block"
         positionCellTooltip(event)
       },
-      [positionCellTooltip, paletteText, paletteTextMuted, distributionMode],
+      [
+        positionCellTooltip,
+        paletteText,
+        paletteTextMuted,
+        distributionMode,
+        getLevelName,
+      ],
     )
 
     const positionAxisTooltip = useCallback((event: MouseEvent) => {
@@ -851,11 +933,62 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     const showMarginalColStrip =
       showMarginals && !!marginalCol && marginalCol.length > 0
 
+    // Whether cells act on click; a change rebuilds the cells so their
+    // button semantics follow.
+    const hasCellClick = !!onCellClick
+
+    // Roving tab stop: `el` becomes the chart's only cell with tabindex 0.
+    const setRovingCell = useCallback((el: SVGRectElement) => {
+      const svgEl = el.ownerSVGElement
+      if (!svgEl) return
+      for (const other of svgEl.querySelectorAll<SVGRectElement>(
+        'rect.resilience-cell[role="button"]',
+      )) {
+        other.setAttribute("tabindex", other === el ? "0" : "-1")
+      }
+    }, [])
+
+    // Move focus from `el` to the nearest button cell `rowStep` rows and
+    // `colStep` columns away, skipping cells that are not buttons and
+    // stopping at the grid's edge (sizes written on the svg at draw time).
+    const focusNeighborCell = useCallback(
+      (el: SVGRectElement, rowStep: number, colStep: number) => {
+        const svgEl = el.ownerSVGElement
+        if (!svgEl) return
+        const rowCount = Number(svgEl.getAttribute("data-row-count"))
+        const colCount = Number(svgEl.getAttribute("data-col-count"))
+        let row = Number(el.getAttribute("data-row-index")) + rowStep
+        let col = Number(el.getAttribute("data-col-index")) + colStep
+        while (row >= 0 && col >= 0 && row < rowCount && col < colCount) {
+          const next = svgEl.querySelector<SVGRectElement>(
+            `rect.resilience-cell[role="button"][data-row-index="${row}"][data-col-index="${col}"]`,
+          )
+          if (next) {
+            next.focus()
+            return
+          }
+          row += rowStep
+          col += colStep
+        }
+      },
+      [],
+    )
+
     const updateChart = useCallback(
       (w: number, h: number) => {
         if (!svgRef.current) return
         const svg = select(svgRef.current)
+        // A redraw replaces every cell; remember which one had keyboard
+        // focus so it can take focus back afterwards.
+        const focusedKey =
+          document.activeElement instanceof SVGRectElement &&
+          svgRef.current.contains(document.activeElement)
+            ? `${document.activeElement.getAttribute("data-row") ?? ""}|${document.activeElement.getAttribute("data-col") ?? ""}`
+            : null
         svg.selectAll("*").remove()
+        svg
+          .attr("data-row-count", rows.length)
+          .attr("data-col-count", columns.length)
         if (rows.length === 0 || columns.length === 0 || w <= 0 || h <= 0) {
           // Off-screen capture awaits onReady before serializing. Fire it
           // here too so an empty-data render does not deadlock the host.
@@ -955,7 +1088,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
 
         // Cells
         let firstCellEl: SVGRectElement | null = null
-        rows.forEach((row) => {
+        rows.forEach((row, rowIndex) => {
           const y = yScale(row.key) ?? 0
           const rowOpacity = computeRowOpacity(row.key)
 
@@ -966,19 +1099,24 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .attr("data-row", row.key)
             .attr("opacity", rowOpacity)
 
-          columns.forEach((col) => {
+          columns.forEach((col, colIndex) => {
             const cell = cellIndex.get(`${row.key}|${col.key}`)
             if (!cell) return
             const x = xScale(col.key) ?? 0
             const cellOpacity = computeColOpacity(col.key)
 
             const resolved = resolveCellFill(cell)
+            const cellKey = `${row.key}|${col.key}`
 
             const rect = rowGroup
               .append("rect")
               .attr("class", "resilience-cell")
               .attr("data-row", row.key)
               .attr("data-col", col.key)
+              .attr(
+                "data-available",
+                cell.available && resolved.fill ? "true" : "false",
+              )
               .attr("x", x)
               .attr("y", y)
               .attr("width", bandW)
@@ -1001,6 +1139,10 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 .attr("stroke", paletteUnavailStroke)
                 .attr("stroke-width", 1)
             }
+            applyCellStroke(
+              rect.node() as SVGRectElement,
+              selectedCellKeyRef.current === cellKey,
+            )
 
             // Distribution overlay: a grid of rounded squares, one per
             // distribution entry (e.g. one per scenario in aggregate view),
@@ -1154,12 +1296,65 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               }
             }
 
+            // Cells that act on click are buttons: reachable from the
+            // keyboard (one tab stop per chart, arrow keys move between
+            // cells), activated with Enter or Space, and announced with
+            // their pressed (selected) state.
+            const isButton =
+              interactiveRef.current &&
+              hasCellClick &&
+              rect.attr("data-available") === "true"
+            if (isButton) {
+              rect
+                .attr("role", "button")
+                .attr("tabindex", -1)
+                .attr("data-row-index", rowIndex)
+                .attr("data-col-index", colIndex)
+                .attr(
+                  "aria-label",
+                  `${cell.subjectLabel}, ${cell.rowLabel}, ${cell.colLabel}: ${
+                    cell.tierLevel != null
+                      ? getLevelName(cell.tierLevel)
+                      : "No data"
+                  }`,
+                )
+                .on("focus", function () {
+                  // Keyboard focus only: a pointer click also focuses
+                  // the cell, and the hover outline already covers it.
+                  if (this.matches(":focus-visible")) {
+                    this.setAttribute("data-focused", "")
+                  }
+                  setRovingCell(this)
+                  applyCellStroke(this, selectedCellKeyRef.current === cellKey)
+                })
+                .on("blur", function () {
+                  this.removeAttribute("data-focused")
+                  applyCellStroke(this, selectedCellKeyRef.current === cellKey)
+                })
+                .on("keydown", function (event: KeyboardEvent) {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    onCellClickRef.current?.(cell)
+                    return
+                  }
+                  const step = ARROW_STEPS[event.key]
+                  if (!step) return
+                  event.preventDefault()
+                  focusNeighborCell(this, step[0], step[1])
+                })
+              // A redraw rebuilds the cell after its first styling: set its
+              // pressed state now that it is a button.
+              applyCellStroke(
+                rect.node() as SVGRectElement,
+                selectedCellKeyRef.current === cellKey,
+              )
+            }
+
             if (interactiveRef.current) {
               rect
                 .on("mouseenter", function (event: MouseEvent) {
-                  select(this)
-                    .attr("stroke", paletteHoverStroke)
-                    .attr("stroke-width", 2)
+                  this.setAttribute("data-hovered", "")
+                  applyCellStroke(this, selectedCellKeyRef.current === cellKey)
                   showCellTooltipRef.current(event, cell)
                   onCellHoverRef.current?.(cell)
                 })
@@ -1167,11 +1362,8 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                   positionCellTooltipRef.current(event)
                 })
                 .on("mouseleave", function () {
-                  if (cell.available) {
-                    select(this).attr("stroke", "transparent")
-                  } else {
-                    select(this).attr("stroke", paletteUnavailStroke)
-                  }
+                  this.removeAttribute("data-hovered")
+                  applyCellStroke(this, selectedCellKeyRef.current === cellKey)
                   hideCellTooltipRef.current()
                   onCellHoverRef.current?.(null)
                 })
@@ -1223,6 +1415,28 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         // one is attached.
         firstCellRefCb.current?.(null)
         firstCellRefCb.current?.(firstCellEl)
+
+        // One tab stop: the selected cell when it is a button, else the
+        // first button. A cell that had focus before the redraw gets it
+        // back.
+        const buttons = svg
+          .selectAll<
+            SVGRectElement,
+            unknown
+          >('rect.resilience-cell[role="button"]')
+          .nodes()
+        const keyOf = (el: SVGRectElement) =>
+          `${el.getAttribute("data-row") ?? ""}|${el.getAttribute("data-col") ?? ""}`
+        const refocus =
+          focusedKey != null
+            ? buttons.find((el) => keyOf(el) === focusedKey)
+            : undefined
+        const rovingCell =
+          refocus ??
+          buttons.find((el) => keyOf(el) === selectedCellKeyRef.current) ??
+          buttons[0]
+        if (rovingCell) setRovingCell(rovingCell)
+        refocus?.focus()
 
         // Marginal strips (row-summary on the right, col-summary below).
         if (showMarginalRowStrip && marginalRow) {
@@ -1690,7 +1904,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .attr("y", -2)
             .attr("font-size", 10)
             .attr("fill", paletteTextMuted)
-            .text("improving  ←  Δ tier  →  worsening")
+            .text("improving  ←  Δ outcome level  →  worsening")
 
           const unavailableOx = barW + 240
           legendG
@@ -1733,7 +1947,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .attr("rx", 2)
             .attr("fill", `url(#${gradId})`)
 
-          const labelText = "fraction at Tier 2 or better"
+          const labelText = `fraction at ${tierLabels[1]} or better`
           const ticks: [number, string][] = [
             [0, "0%"],
             [barW / 2, "50%"],
@@ -1812,7 +2026,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .attr("y", -2)
             .attr("font-size", 10)
             .attr("fill", paletteTextMuted)
-            .text("tier range across operations")
+            .text("outcome level range across operations")
 
           const unavailableOx = barW + 220
           legendG
@@ -1843,6 +2057,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         tierLabels,
         tierTextColor,
         resolveCellFill,
+        applyCellStroke,
+        getLevelName,
+        hasCellClick,
+        setRovingCell,
+        focusNeighborCell,
         cellRender,
         showCellNumbers,
         // `palette` itself is read for its diverging / density /
@@ -1957,6 +2176,19 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         this.setAttribute("opacity", String(op))
       })
     }, [highlightedRowKeys])
+
+    // Visual-only effect for `selectedCellKey`: restyle each cell's
+    // outline in place, without a rebuild.
+    useEffect(() => {
+      const svg = select(svgRef.current)
+      if (svg.empty()) return
+      svg
+        .selectAll<SVGRectElement, unknown>("rect.resilience-cell")
+        .each(function () {
+          const key = `${this.getAttribute("data-row") ?? ""}|${this.getAttribute("data-col") ?? ""}`
+          applyCellStroke(this, key === selectedCellKey)
+        })
+    }, [selectedCellKey, applyCellStroke])
 
     useEffect(() => {
       const svg = select(svgRef.current)

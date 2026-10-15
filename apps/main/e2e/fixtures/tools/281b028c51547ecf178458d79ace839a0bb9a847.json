@@ -1,0 +1,1122 @@
+[
+  {
+    "short_code": "s0011",
+    "name": "Current operations with historical land use",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with historical (2004-2013) land use and TUCPs.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0011",
+    "is_active": true
+  },
+  {
+    "short_code": "s0020",
+    "name": "Current operations",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023. Strategy also represents recent (2020) land use and allows for TUCPs. This strategy serves as the baseline for comparison with other scenarios.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0020",
+    "is_active": true
+  },
+  {
+    "short_code": "s0020-R",
+    "name": "Current operations with reintroduction",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with  recent (2020) land use and TUCP actions. Strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0020-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0021",
+    "name": "Current operations without TUCPs",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with recent (2020) land use but without TUCPs.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0021",
+    "is_active": true
+  },
+  {
+    "short_code": "s0023",
+    "name": "Current USBR operations without TUCPs",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by USBR (Alt2V1) in 2024. Strategy represents the latest federal biological opinions, recent (2020) land use, but without TUCPs.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0023",
+    "is_active": true
+  },
+  {
+    "short_code": "s0024",
+    "name": "Current USBR operations",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by USBR (Alt2V1) in 2024. Strategy represents the latest federal biological opinions, recent (2020) land use, and TUCPs.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0024",
+    "is_active": true
+  },
+  {
+    "short_code": "s0025",
+    "name": "Groundwater pumping limits in the San Joaquin Valley",
+    "short_description": "Groundwater pumping limits applied to farms in the San Joaquin Valley region to reflect compliance with SGMA.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0025",
+    "is_active": true
+  },
+  {
+    "short_code": "s0026",
+    "name": "Groundwater pumping limits via reduced crop acreage in the San Joaquin Valley",
+    "short_description": "Groundwater pumping limits in the San Joaquin Valley, achieved through reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0026",
+    "is_active": true
+  },
+  {
+    "short_code": "s0027",
+    "name": "Groundwater pumping limits in the Central Valley",
+    "short_description": "Groundwater pumping limits applied throughout the Sacramento and San Joaquin Valley to reflect compliance with SGMA.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0027",
+    "is_active": true
+  },
+  {
+    "short_code": "s0028",
+    "name": "Groundwater pumping limits via reduced crop acreage in the Central Valley",
+    "short_description": "Groundwater pumping limits in the Sacramento and San Joaquin Valley, achieved through reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0028",
+    "is_active": true
+  },
+  {
+    "short_code": "s0030",
+    "name": "No flow requirements",
+    "short_description": "Current operations without minimum flow requirements on Central Valley rivers.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0030",
+    "is_active": true
+  },
+  {
+    "short_code": "s0031",
+    "name": "Winter-run refuge flows",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0031",
+    "is_active": true
+  },
+  {
+    "short_code": "s0031-R",
+    "name": "Winter-run refuge flows with reintroduction",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs. This strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta).",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0031-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0032",
+    "name": "Functional environmental flows with reduced crop acreage",
+    "short_description": "Functional flow requirements implemented on Central Valley rivers, with reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0032",
+    "is_active": true
+  },
+  {
+    "short_code": "s0032-R",
+    "name": "Functional environmental flows with reduced crop acreage and reintroduction",
+    "short_description": "Functional flow requirements implemented on Central Valley rivers, with reductions in irrigated crop acreage to reflect compliance with SGMA. Strategy also includes the  reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0032-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0033",
+    "name": "Winter-run refuge flows with reduced crop acreage",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter- run Chinook salmon life cycle needs, combined with reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0033",
+    "is_active": true
+  },
+  {
+    "short_code": "s0033-R",
+    "name": "Winter-run refuge flows with reduced crop acreage and reintroduction",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs, combined with reductions in irrigated crop acreage to reflect compliance with SGMA. This strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta).",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0033-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0035",
+    "name": "Prioritizing human health water deliveries to community water systems",
+    "short_description": "Water deliveries to satisfy human health and safety needs of community water systems (55 gallons per person per day) are prioritized.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0035",
+    "is_active": true
+  },
+  {
+    "short_code": "s0037",
+    "name": "Prioritizing full demands of community water systems",
+    "short_description": "Water deliveries to satisfy full contract or demand levels of community water systems are prioritized.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0037",
+    "is_active": true
+  },
+  {
+    "short_code": "s0039",
+    "name": "Increase Delta outflows (65% unimpaired flow target)",
+    "short_description": "Increases Delta outflow requirements (from approximately 45% to 65% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0039",
+    "is_active": true
+  },
+  {
+    "short_code": "s0040",
+    "name": "Reduce Delta outflows (35% unimpaired flow target)",
+    "short_description": "Reduces Delta outflow requirements (from approximately 45% to 35% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0040",
+    "is_active": true
+  },
+  {
+    "short_code": "s0041",
+    "name": "Maintain Delta outflows (45% unimpaired flow target)",
+    "short_description": "Maintains Delta outflow requirements near current volumes, consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0041",
+    "is_active": true
+  },
+  {
+    "short_code": "s0042",
+    "name": "Increase Delta outflows (55% unimpaired flow target)",
+    "short_description": "Increases Delta outflow requirements (from approximately 45% to 55% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0042",
+    "is_active": true
+  },
+  {
+    "short_code": "s0044",
+    "name": "Increase Shasta carry-over storage",
+    "short_description": "Increases the year-to-year storage carry-over target by 20%.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0044",
+    "is_active": true
+  },
+  {
+    "short_code": "s0045",
+    "name": "Relax Delta salinity standards",
+    "short_description": "Removes the fall (X2) salinity standard in the Delta.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0045",
+    "is_active": true
+  },
+  {
+    "short_code": "s0046",
+    "name": "Functional environmental flows",
+    "short_description": "Current operations with functional flow requirements implemented on Central Valley rivers.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0046",
+    "is_active": true
+  },
+  {
+    "short_code": "s0046-R",
+    "name": "Functional environmental flows with reintroduction",
+    "short_description": "Current operations with functional flow requirements implemented on Central Valley rivers, with the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0046-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0047",
+    "name": "Current operations",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023. Strategy also represents recent (2020) land use and allows for TUCPs. This strategy serves as the baseline for comparison with other scenarios.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0020",
+    "is_active": true
+  },
+  {
+    "short_code": "s0047-R",
+    "name": "Current operations with reintroduction",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with  recent (2020) land use and TUCP actions. Strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0020-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0048",
+    "name": "Current operations with historical land use",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with historical (2004-2013) land use and TUCPs.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0011",
+    "is_active": true
+  },
+  {
+    "short_code": "s0049",
+    "name": "Current operations without TUCPs",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with recent (2020) land use but without TUCPs.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0021",
+    "is_active": true
+  },
+  {
+    "short_code": "s0050",
+    "name": "Current USBR operations",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by USBR (Alt2V1) in 2024. Strategy represents the latest federal biological opinions, recent (2020) land use, and TUCPs.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0024",
+    "is_active": true
+  },
+  {
+    "short_code": "s0051",
+    "name": "Current USBR operations without TUCPs",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by USBR (Alt2V1) in 2024. Strategy represents the latest federal biological opinions, recent (2020) land use, but without TUCPs.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0023",
+    "is_active": true
+  },
+  {
+    "short_code": "s0056",
+    "name": "Current operations",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023. Strategy also represents recent (2020) land use and allows for TUCPs. This strategy serves as the baseline for comparison with other scenarios.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0020",
+    "is_active": true
+  },
+  {
+    "short_code": "s0056-R",
+    "name": "Current operations with reintroduction",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with  recent (2020) land use and TUCP actions. Strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0020-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0057",
+    "name": "Current operations with historical land use",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with historical (2004-2013) land use and TUCPs.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0011",
+    "is_active": true
+  },
+  {
+    "short_code": "s0058",
+    "name": "Current operations without TUCPs",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with recent (2020) land use but without TUCPs.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0021",
+    "is_active": true
+  },
+  {
+    "short_code": "s0059",
+    "name": "Current USBR operations",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by USBR (Alt2V1) in 2024. Strategy represents the latest federal biological opinions, recent (2020) land use, and TUCPs.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0024",
+    "is_active": true
+  },
+  {
+    "short_code": "s0060",
+    "name": "Current USBR operations without TUCPs",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by USBR (Alt2V1) in 2024. Strategy represents the latest federal biological opinions, recent (2020) land use, but without TUCPs.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0023",
+    "is_active": true
+  },
+  {
+    "short_code": "s0062",
+    "name": "Groundwater pumping limits in the Central Valley",
+    "short_description": "Groundwater pumping limits applied throughout the Sacramento and San Joaquin Valley to reflect compliance with SGMA.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0027",
+    "is_active": true
+  },
+  {
+    "short_code": "s0063",
+    "name": "Groundwater pumping limits in the Central Valley",
+    "short_description": "Groundwater pumping limits applied throughout the Sacramento and San Joaquin Valley to reflect compliance with SGMA.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0027",
+    "is_active": true
+  },
+  {
+    "short_code": "s0065",
+    "name": "Delta Conveyance Project",
+    "short_description": "DWR's 2025 Delta Conveyance Project scenario, with current land use.",
+    "hydroclimate_id": 2,
+    "sibling_group": "s0065",
+    "is_active": true
+  },
+  {
+    "short_code": "s0067",
+    "name": "Groundwater pumping limits in the San Joaquin Valley",
+    "short_description": "Groundwater pumping limits applied to farms in the San Joaquin Valley region to reflect compliance with SGMA.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0025",
+    "is_active": true
+  },
+  {
+    "short_code": "s0068",
+    "name": "Groundwater pumping limits via reduced crop acreage in the San Joaquin Valley",
+    "short_description": "Groundwater pumping limits in the San Joaquin Valley, achieved through reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0026",
+    "is_active": true
+  },
+  {
+    "short_code": "s0069",
+    "name": "Groundwater pumping limits via reduced crop acreage in the Central Valley",
+    "short_description": "Groundwater pumping limits in the Sacramento and San Joaquin Valley, achieved through reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0028",
+    "is_active": true
+  },
+  {
+    "short_code": "s0071",
+    "name": "No flow requirements",
+    "short_description": "Current operations without minimum flow requirements on Central Valley rivers.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0030",
+    "is_active": true
+  },
+  {
+    "short_code": "s0072",
+    "name": "Winter-run refuge flows",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0031",
+    "is_active": true
+  },
+  {
+    "short_code": "s0072-R",
+    "name": "Winter-run refuge flows with reintroduction",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs. This strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta).",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0031-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0073",
+    "name": "Functional environmental flows with reduced crop acreage",
+    "short_description": "Functional flow requirements implemented on Central Valley rivers, with reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0032",
+    "is_active": true
+  },
+  {
+    "short_code": "s0073-R",
+    "name": "Functional environmental flows with reduced crop acreage and reintroduction",
+    "short_description": "Functional flow requirements implemented on Central Valley rivers, with reductions in irrigated crop acreage to reflect compliance with SGMA. Strategy also includes the  reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0032-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0074",
+    "name": "Winter-run refuge flows with reduced crop acreage",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter- run Chinook salmon life cycle needs, combined with reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0033",
+    "is_active": true
+  },
+  {
+    "short_code": "s0074-R",
+    "name": "Winter-run refuge flows with reduced crop acreage and reintroduction",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs, combined with reductions in irrigated crop acreage to reflect compliance with SGMA. This strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta).",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0033-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0075",
+    "name": "Prioritizing human health water deliveries to community water systems",
+    "short_description": "Water deliveries to satisfy human health and safety needs of community water systems (55 gallons per person per day) are prioritized.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0035",
+    "is_active": true
+  },
+  {
+    "short_code": "s0077",
+    "name": "Prioritizing full demands of community water systems",
+    "short_description": "Water deliveries to satisfy full contract or demand levels of community water systems are prioritized.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0037",
+    "is_active": true
+  },
+  {
+    "short_code": "s0078",
+    "name": "Increase Delta outflows (65% unimpaired flow target)",
+    "short_description": "Increases Delta outflow requirements (from approximately 45% to 65% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0039",
+    "is_active": true
+  },
+  {
+    "short_code": "s0079",
+    "name": "Reduce Delta outflows (35% unimpaired flow target)",
+    "short_description": "Reduces Delta outflow requirements (from approximately 45% to 35% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0040",
+    "is_active": true
+  },
+  {
+    "short_code": "s0080",
+    "name": "Maintain Delta outflows (45% unimpaired flow target)",
+    "short_description": "Maintains Delta outflow requirements near current volumes, consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0041",
+    "is_active": true
+  },
+  {
+    "short_code": "s0081",
+    "name": "Increase Delta outflows (55% unimpaired flow target)",
+    "short_description": "Increases Delta outflow requirements (from approximately 45% to 55% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0042",
+    "is_active": true
+  },
+  {
+    "short_code": "s0082",
+    "name": "Increase Shasta carry-over storage",
+    "short_description": "Increases the year-to-year storage carry-over target by 20%.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0044",
+    "is_active": true
+  },
+  {
+    "short_code": "s0083",
+    "name": "Relax Delta salinity standards",
+    "short_description": "Removes the fall (X2) salinity standard in the Delta.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0045",
+    "is_active": true
+  },
+  {
+    "short_code": "s0084",
+    "name": "Functional environmental flows",
+    "short_description": "Current operations with functional flow requirements implemented on Central Valley rivers.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0046",
+    "is_active": true
+  },
+  {
+    "short_code": "s0084-R",
+    "name": "Functional environmental flows with reintroduction",
+    "short_description": "Current operations with functional flow requirements implemented on Central Valley rivers, with the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0046-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0085",
+    "name": "Delta Conveyance Project",
+    "short_description": "DWR's 2025 Delta Conveyance Project scenario, with current land use.",
+    "hydroclimate_id": 3,
+    "sibling_group": "s0065",
+    "is_active": true
+  },
+  {
+    "short_code": "s0087",
+    "name": "Groundwater pumping limits in the San Joaquin Valley",
+    "short_description": "Groundwater pumping limits applied to farms in the San Joaquin Valley region to reflect compliance with SGMA.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0025",
+    "is_active": true
+  },
+  {
+    "short_code": "s0088",
+    "name": "Groundwater pumping limits via reduced crop acreage in the San Joaquin Valley",
+    "short_description": "Groundwater pumping limits in the San Joaquin Valley, achieved through reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0026",
+    "is_active": true
+  },
+  {
+    "short_code": "s0089",
+    "name": "Groundwater pumping limits via reduced crop acreage in the Central Valley",
+    "short_description": "Groundwater pumping limits in the Sacramento and San Joaquin Valley, achieved through reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0028",
+    "is_active": true
+  },
+  {
+    "short_code": "s0091",
+    "name": "No flow requirements",
+    "short_description": "Current operations without minimum flow requirements on Central Valley rivers.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0030",
+    "is_active": true
+  },
+  {
+    "short_code": "s0092",
+    "name": "Winter-run refuge flows",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0031",
+    "is_active": true
+  },
+  {
+    "short_code": "s0092-R",
+    "name": "Winter-run refuge flows with reintroduction",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs. This strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta).",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0031-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0093",
+    "name": "Functional environmental flows with reduced crop acreage",
+    "short_description": "Functional flow requirements implemented on Central Valley rivers, with reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0032",
+    "is_active": true
+  },
+  {
+    "short_code": "s0093-R",
+    "name": "Functional environmental flows with reduced crop acreage and reintroduction",
+    "short_description": "Functional flow requirements implemented on Central Valley rivers, with reductions in irrigated crop acreage to reflect compliance with SGMA. Strategy also includes the  reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0032-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0094",
+    "name": "Winter-run refuge flows with reduced crop acreage",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter- run Chinook salmon life cycle needs, combined with reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0033",
+    "is_active": true
+  },
+  {
+    "short_code": "s0094-R",
+    "name": "Winter-run refuge flows with reduced crop acreage and reintroduction",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs, combined with reductions in irrigated crop acreage to reflect compliance with SGMA. This strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta).",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0033-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0095",
+    "name": "Prioritizing human health water deliveries to community water systems",
+    "short_description": "Water deliveries to satisfy human health and safety needs of community water systems (55 gallons per person per day) are prioritized.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0035",
+    "is_active": true
+  },
+  {
+    "short_code": "s0097",
+    "name": "Prioritizing full demands of community water systems",
+    "short_description": "Water deliveries to satisfy full contract or demand levels of community water systems are prioritized.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0037",
+    "is_active": true
+  },
+  {
+    "short_code": "s0098",
+    "name": "Increase Delta outflows (65% unimpaired flow target)",
+    "short_description": "Increases Delta outflow requirements (from approximately 45% to 65% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0039",
+    "is_active": true
+  },
+  {
+    "short_code": "s0099",
+    "name": "Reduce Delta outflows (35% unimpaired flow target)",
+    "short_description": "Reduces Delta outflow requirements (from approximately 45% to 35% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0040",
+    "is_active": true
+  },
+  {
+    "short_code": "s0100",
+    "name": "Maintain Delta outflows (45% unimpaired flow target)",
+    "short_description": "Maintains Delta outflow requirements near current volumes, consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0041",
+    "is_active": true
+  },
+  {
+    "short_code": "s0101",
+    "name": "Increase Delta outflows (55% unimpaired flow target)",
+    "short_description": "Increases Delta outflow requirements (from approximately 45% to 55% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0042",
+    "is_active": true
+  },
+  {
+    "short_code": "s0102",
+    "name": "Increase Shasta carry-over storage",
+    "short_description": "Increases the year-to-year storage carry-over target by 20%.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0044",
+    "is_active": true
+  },
+  {
+    "short_code": "s0103",
+    "name": "Relax Delta salinity standards",
+    "short_description": "Removes the fall (X2) salinity standard in the Delta.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0045",
+    "is_active": true
+  },
+  {
+    "short_code": "s0104",
+    "name": "Functional environmental flows",
+    "short_description": "Current operations with functional flow requirements implemented on Central Valley rivers.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0046",
+    "is_active": true
+  },
+  {
+    "short_code": "s0104-R",
+    "name": "Functional environmental flows with reintroduction",
+    "short_description": "Current operations with functional flow requirements implemented on Central Valley rivers, with the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0046-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0105",
+    "name": "Delta Conveyance Project",
+    "short_description": "DWR's 2025 Delta Conveyance Project scenario, with current land use.",
+    "hydroclimate_id": 4,
+    "sibling_group": "s0065",
+    "is_active": true
+  },
+  {
+    "short_code": "s0107",
+    "name": "Current operations with historical land use",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with historical (2004-2013) land use and TUCPs.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0011",
+    "is_active": true
+  },
+  {
+    "short_code": "s0108",
+    "name": "Current operations",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023. Strategy also represents recent (2020) land use and allows for TUCPs. This strategy serves as the baseline for comparison with other scenarios.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0020",
+    "is_active": true
+  },
+  {
+    "short_code": "s0108-R",
+    "name": "Current operations with reintroduction",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with  recent (2020) land use and TUCP actions. Strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0020-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0109",
+    "name": "Current operations without TUCPs",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with recent (2020) land use but without TUCPs.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0021",
+    "is_active": true
+  },
+  {
+    "short_code": "s0110",
+    "name": "Current USBR operations without TUCPs",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by USBR (Alt2V1) in 2024. Strategy represents the latest federal biological opinions, recent (2020) land use, but without TUCPs.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0023",
+    "is_active": true
+  },
+  {
+    "short_code": "s0111",
+    "name": "Current USBR operations",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by USBR (Alt2V1) in 2024. Strategy represents the latest federal biological opinions, recent (2020) land use, and TUCPs.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0024",
+    "is_active": true
+  },
+  {
+    "short_code": "s0112",
+    "name": "Groundwater pumping limits in the San Joaquin Valley",
+    "short_description": "Groundwater pumping limits applied to farms in the San Joaquin Valley region to reflect compliance with SGMA.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0025",
+    "is_active": true
+  },
+  {
+    "short_code": "s0113",
+    "name": "Groundwater pumping limits via reduced crop acreage in the San Joaquin Valley",
+    "short_description": "Groundwater pumping limits in the San Joaquin Valley, achieved through reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0026",
+    "is_active": true
+  },
+  {
+    "short_code": "s0114",
+    "name": "Groundwater pumping limits in the Central Valley",
+    "short_description": "Groundwater pumping limits applied throughout the Sacramento and San Joaquin Valley to reflect compliance with SGMA.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0027",
+    "is_active": true
+  },
+  {
+    "short_code": "s0115",
+    "name": "Groundwater pumping limits via reduced crop acreage in the Central Valley",
+    "short_description": "Groundwater pumping limits in the Sacramento and San Joaquin Valley, achieved through reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0028",
+    "is_active": true
+  },
+  {
+    "short_code": "s0117",
+    "name": "No flow requirements",
+    "short_description": "Current operations without minimum flow requirements on Central Valley rivers.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0030",
+    "is_active": true
+  },
+  {
+    "short_code": "s0118",
+    "name": "Winter-run refuge flows",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0031",
+    "is_active": true
+  },
+  {
+    "short_code": "s0118-R",
+    "name": "Winter-run refuge flows with reintroduction",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs. This strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta).",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0031-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0119",
+    "name": "Functional environmental flows with reduced crop acreage",
+    "short_description": "Functional flow requirements implemented on Central Valley rivers, with reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0032",
+    "is_active": true
+  },
+  {
+    "short_code": "s0119-R",
+    "name": "Functional environmental flows with reduced crop acreage and reintroduction",
+    "short_description": "Functional flow requirements implemented on Central Valley rivers, with reductions in irrigated crop acreage to reflect compliance with SGMA. Strategy also includes the  reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0032-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0120",
+    "name": "Winter-run refuge flows with reduced crop acreage",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter- run Chinook salmon life cycle needs, combined with reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0033",
+    "is_active": true
+  },
+  {
+    "short_code": "s0120-R",
+    "name": "Winter-run refuge flows with reduced crop acreage and reintroduction",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs, combined with reductions in irrigated crop acreage to reflect compliance with SGMA. This strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta).",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0033-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0121",
+    "name": "Prioritizing human health water deliveries to community water systems",
+    "short_description": "Water deliveries to satisfy human health and safety needs of community water systems (55 gallons per person per day) are prioritized.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0035",
+    "is_active": true
+  },
+  {
+    "short_code": "s0123",
+    "name": "Prioritizing full demands of community water systems",
+    "short_description": "Water deliveries to satisfy full contract or demand levels of community water systems are prioritized.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0037",
+    "is_active": true
+  },
+  {
+    "short_code": "s0124",
+    "name": "Increase Delta outflows (65% unimpaired flow target)",
+    "short_description": "Increases Delta outflow requirements (from approximately 45% to 65% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0039",
+    "is_active": true
+  },
+  {
+    "short_code": "s0125",
+    "name": "Reduce Delta outflows (35% unimpaired flow target)",
+    "short_description": "Reduces Delta outflow requirements (from approximately 45% to 35% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0040",
+    "is_active": true
+  },
+  {
+    "short_code": "s0126",
+    "name": "Maintain Delta outflows (45% unimpaired flow target)",
+    "short_description": "Maintains Delta outflow requirements near current volumes, consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0041",
+    "is_active": true
+  },
+  {
+    "short_code": "s0127",
+    "name": "Increase Delta outflows (55% unimpaired flow target)",
+    "short_description": "Increases Delta outflow requirements (from approximately 45% to 55% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0042",
+    "is_active": true
+  },
+  {
+    "short_code": "s0128",
+    "name": "Increase Shasta carry-over storage",
+    "short_description": "Increases the year-to-year storage carry-over target by 20%.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0044",
+    "is_active": true
+  },
+  {
+    "short_code": "s0129",
+    "name": "Relax Delta salinity standards",
+    "short_description": "Removes the fall (X2) salinity standard in the Delta.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0045",
+    "is_active": true
+  },
+  {
+    "short_code": "s0130",
+    "name": "Functional environmental flows",
+    "short_description": "Current operations with functional flow requirements implemented on Central Valley rivers.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0046",
+    "is_active": true
+  },
+  {
+    "short_code": "s0130-R",
+    "name": "Functional environmental flows with reintroduction",
+    "short_description": "Current operations with functional flow requirements implemented on Central Valley rivers, with the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0046-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0131",
+    "name": "Delta Conveyance Project",
+    "short_description": "DWR's 2025 Delta Conveyance Project scenario, with current land use.",
+    "hydroclimate_id": 5,
+    "sibling_group": "s0065",
+    "is_active": true
+  },
+  {
+    "short_code": "s0133",
+    "name": "Current operations with historical land use",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with historical (2004-2013) land use and TUCPs.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0011",
+    "is_active": true
+  },
+  {
+    "short_code": "s0134",
+    "name": "Current operations",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023. Strategy also represents recent (2020) land use and allows for TUCPs. This strategy serves as the baseline for comparison with other scenarios.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0020",
+    "is_active": true
+  },
+  {
+    "short_code": "s0134-R",
+    "name": "Current operations with reintroduction",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with  recent (2020) land use and TUCP actions. Strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0020-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0135",
+    "name": "Current operations without TUCPs",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by DWR in 2023, with recent (2020) land use but without TUCPs.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0021",
+    "is_active": true
+  },
+  {
+    "short_code": "s0136",
+    "name": "Current USBR operations without TUCPs",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by USBR (Alt2V1) in 2024. Strategy represents the latest federal biological opinions, recent (2020) land use, but without TUCPs.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0023",
+    "is_active": true
+  },
+  {
+    "short_code": "s0137",
+    "name": "Current USBR operations",
+    "short_description": "Existing operational rules for Central Valley water allocations, as specified by USBR (Alt2V1) in 2024. Strategy represents the latest federal biological opinions, recent (2020) land use, and TUCPs.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0024",
+    "is_active": true
+  },
+  {
+    "short_code": "s0138",
+    "name": "Groundwater pumping limits in the San Joaquin Valley",
+    "short_description": "Groundwater pumping limits applied to farms in the San Joaquin Valley region to reflect compliance with SGMA.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0025",
+    "is_active": true
+  },
+  {
+    "short_code": "s0139",
+    "name": "Groundwater pumping limits via reduced crop acreage in the San Joaquin Valley",
+    "short_description": "Groundwater pumping limits in the San Joaquin Valley, achieved through reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0026",
+    "is_active": true
+  },
+  {
+    "short_code": "s0140",
+    "name": "Groundwater pumping limits in the Central Valley",
+    "short_description": "Groundwater pumping limits applied throughout the Sacramento and San Joaquin Valley to reflect compliance with SGMA.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0027",
+    "is_active": true
+  },
+  {
+    "short_code": "s0141",
+    "name": "Groundwater pumping limits via reduced crop acreage in the Central Valley",
+    "short_description": "Groundwater pumping limits in the Sacramento and San Joaquin Valley, achieved through reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0028",
+    "is_active": true
+  },
+  {
+    "short_code": "s0143",
+    "name": "No flow requirements",
+    "short_description": "Current operations without minimum flow requirements on Central Valley rivers.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0030",
+    "is_active": true
+  },
+  {
+    "short_code": "s0144",
+    "name": "Winter-run refuge flows",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0031",
+    "is_active": true
+  },
+  {
+    "short_code": "s0144-R",
+    "name": "Winter-run refuge flows with reintroduction",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs. This strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta).",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0031-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0145",
+    "name": "Functional environmental flows with reduced crop acreage",
+    "short_description": "Functional flow requirements implemented on Central Valley rivers, with reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0032",
+    "is_active": true
+  },
+  {
+    "short_code": "s0145-R",
+    "name": "Functional environmental flows with reduced crop acreage and reintroduction",
+    "short_description": "Functional flow requirements implemented on Central Valley rivers, with reductions in irrigated crop acreage to reflect compliance with SGMA. Strategy also includes the  reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0032-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0146",
+    "name": "Winter-run refuge flows with reduced crop acreage",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter- run Chinook salmon life cycle needs, combined with reductions in irrigated crop acreage to reflect compliance with SGMA.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0033",
+    "is_active": true
+  },
+  {
+    "short_code": "s0146-R",
+    "name": "Winter-run refuge flows with reduced crop acreage and reintroduction",
+    "short_description": "Prioritizes Shasta cold-water storage protection, and uses remaining water for functional flows to support Sacramento River winter-run Chinook salmon life cycle needs, combined with reductions in irrigated crop acreage to reflect compliance with SGMA. This strategy also includes the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta).",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0033-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0147",
+    "name": "Prioritizing human health water deliveries to community water systems",
+    "short_description": "Water deliveries to satisfy human health and safety needs of community water systems (55 gallons per person per day) are prioritized.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0035",
+    "is_active": true
+  },
+  {
+    "short_code": "s0149",
+    "name": "Prioritizing full demands of community water systems",
+    "short_description": "Water deliveries to satisfy full contract or demand levels of community water systems are prioritized.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0037",
+    "is_active": true
+  },
+  {
+    "short_code": "s0150",
+    "name": "Increase Delta outflows (65% unimpaired flow target)",
+    "short_description": "Increases Delta outflow requirements (from approximately 45% to 65% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0039",
+    "is_active": true
+  },
+  {
+    "short_code": "s0151",
+    "name": "Reduce Delta outflows (35% unimpaired flow target)",
+    "short_description": "Reduces Delta outflow requirements (from approximately 45% to 35% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0040",
+    "is_active": true
+  },
+  {
+    "short_code": "s0152",
+    "name": "Maintain Delta outflows (45% unimpaired flow target)",
+    "short_description": "Maintains Delta outflow requirements near current volumes, consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0041",
+    "is_active": true
+  },
+  {
+    "short_code": "s0153",
+    "name": "Increase Delta outflows (55% unimpaired flow target)",
+    "short_description": "Increases Delta outflow requirements (from approximately 45% to 55% of unimpaired volume), consistent with operations in USBR Alternative 3 for the Long-Term Operation (LTO) of the Central Valley Project.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0042",
+    "is_active": true
+  },
+  {
+    "short_code": "s0154",
+    "name": "Increase Shasta carry-over storage",
+    "short_description": "Increases the year-to-year storage carry-over target by 20%.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0044",
+    "is_active": true
+  },
+  {
+    "short_code": "s0155",
+    "name": "Relax Delta salinity standards",
+    "short_description": "Removes the fall (X2) salinity standard in the Delta.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0045",
+    "is_active": true
+  },
+  {
+    "short_code": "s0156",
+    "name": "Functional environmental flows",
+    "short_description": "Current operations with functional flow requirements implemented on Central Valley rivers.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0046",
+    "is_active": true
+  },
+  {
+    "short_code": "s0156-R",
+    "name": "Functional environmental flows with reintroduction",
+    "short_description": "Current operations with functional flow requirements implemented on Central Valley rivers, with the reintroduction of up to 2,000 female winter-run Chinook salmon spawners to the McCloud River (above Shasta Dam).",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0046-R",
+    "is_active": true
+  },
+  {
+    "short_code": "s0157",
+    "name": "Delta Conveyance Project",
+    "short_description": "DWR's 2025 Delta Conveyance Project scenario, with current land use.",
+    "hydroclimate_id": 7,
+    "sibling_group": "s0065",
+    "is_active": true
+  }
+]

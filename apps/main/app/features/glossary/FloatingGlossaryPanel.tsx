@@ -279,7 +279,7 @@ export function FloatingGlossaryPanel({
                   fontWeight="semibold"
                   sx={{ mb: theme.space.component.sm }}
                 >
-                  Tiers:
+                  Outcome levels:
                 </Typography>
                 <Stack spacing={1}>
                   {term.tiers.map((tier, tierIndex) => (

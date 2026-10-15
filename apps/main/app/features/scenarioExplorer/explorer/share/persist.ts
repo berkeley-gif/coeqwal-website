@@ -102,6 +102,43 @@ function toPersisted(item: ShareItem): PersistedShareItem {
 }
 
 /**
+ * True when a stored share item may still be shown. Every non-data item is
+ * kept. A data item is kept only when it is model results: its source is
+ * "live" and, when it carries a captured image or payload, every captured
+ * member is either model results or an explicitly blank member (not
+ * modeled, failed to load). Figures saved before captures recorded
+ * per-member provenance, or before a figure mixing model results with
+ * sample curves was tagged "mixed", cannot be verified and are dropped.
+ *
+ * @param item - one stored share item
+ * @returns whether the item may be restored
+ */
+export function getIsRestorableShareItem(item: ShareItem): boolean {
+  if (item.type !== "data") return true
+  if (item.source !== "live") return false
+  const hasCapture =
+    item.cachedSvg != null ||
+    item.cachedImageDataUrl != null ||
+    item.cachedChartData != null
+  if (!hasCapture) return true
+  const members = (
+    item.cachedChartData as
+      | {
+          members?: Array<{
+            isLive?: boolean
+            liveDataMissing?: boolean
+            loadFailed?: boolean
+          }>
+        }
+      | undefined
+  )?.members
+  if (!Array.isArray(members) || members.length === 0) return false
+  return members.every(
+    (m) => m.isLive === true || m.liveDataMissing === true || m.loadFailed,
+  )
+}
+
+/**
  * Load the persisted share state on store hydration. Tolerant of
  * a missing or corrupt envelope. Returns an empty state in that
  * case so the app still boots.
@@ -119,12 +156,19 @@ export function loadShareState(): {
     const parsed = JSON.parse(raw) as unknown
     const migrated = migrateEnvelope(parsed)
     if (!migrated) return { shareItems: [], storyItemIds: [] }
-    return {
-      shareItems: Array.isArray(migrated.shareItems)
+    // The site shows model results only. Data figures saved while Data in
+    // Depth could still draw sample data are dropped, along with their
+    // story slots (see getIsRestorableShareItem).
+    const shareItems = (
+      Array.isArray(migrated.shareItems)
         ? (migrated.shareItems as ShareItem[])
-        : [],
+        : []
+    ).filter(getIsRestorableShareItem)
+    const kept = new Set(shareItems.map((item) => item.id))
+    return {
+      shareItems,
       storyItemIds: Array.isArray(migrated.storyItemIds)
-        ? migrated.storyItemIds
+        ? migrated.storyItemIds.filter((id) => kept.has(id))
         : [],
     }
   } catch {
@@ -134,23 +178,26 @@ export function loadShareState(): {
 
 /**
  * Persist the current share state. Strips runtime-only fields per
- * `toPersisted` and silently swallows quota or unavailability
- * errors. The store calls this from a subscribe hook every time
- * `shareItems` or `storyItemIds` changes.
+ * `toPersisted`. Returns false when the write throws (quota or storage
+ * unavailable) so the caller can warn; true otherwise. The store calls
+ * this from a subscribe hook every time `shareItems` or `storyItemIds`
+ * changes. Side effect: writes localStorage.
  */
 export function saveShareState(
   shareItems: ShareItem[],
   storyItemIds: string[],
-): void {
+): boolean {
   try {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined") return true
     const envelope: ShareEnvelope = {
       version: SHARE_STORAGE_VERSION,
       shareItems: shareItems.map(toPersisted),
       storyItemIds,
     }
     localStorage.setItem(SHARE_STORAGE_KEY, JSON.stringify(envelope))
+    return true
   } catch {
-    // localStorage full or unavailable, silently ignore.
+    // localStorage full or unavailable: report it so the UI can warn.
+    return false
   }
 }

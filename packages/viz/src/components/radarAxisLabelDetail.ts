@@ -474,7 +474,7 @@ export function renderRadarAxisLabelDetailInto(
   const svgRoot = rootG.node()?.ownerSVGElement ?? null
   const tierIdx = Math.min(4, Math.max(1, payload.tierIndex))
   const tierColor = RADAR_TIER_SWATCH_COLORS[tierIdx] ?? "#718096"
-  const tierLevel = RADAR_TIER_LABELS[tierIdx - 1] ?? `Tier ${tierIdx}`
+  const tierLevel = RADAR_TIER_LABELS[tierIdx - 1] ?? `Outcome level ${tierIdx}`
   const tierScore = "(" + payload.average_score + ")"
   const tierText = [tierLevel, tierScore].join(" ")
 

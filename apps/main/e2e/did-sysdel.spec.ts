@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import {
+  seedSelectedScenarios,
+  selectCurrentOperations,
+} from "./support/scenarioSelection"
 
 // System-deliveries live path, end to end and offline. Same technique as
 // did-climate-axis.spec.ts: inline route fixtures layered over the HAR
@@ -117,12 +121,13 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
 
   // CVP deliveries: default region is System-wide -> DEL_CVP_TOTAL.
   await page
     .getByRole("button", { name: "Central Valley Project deliveries" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() => requestedSubjects.includes("DEL_CVP_TOTAL"))
     .toBe(true)
@@ -131,7 +136,7 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   // variable's family.
   await page.getByRole("combobox").filter({ hasText: "System-wide" }).click()
   await page.getByRole("option", { name: "North of Delta" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() => requestedSubjects.includes("DEL_CVP_TOT_N_WAMER"))
     .toBe(true)
@@ -141,14 +146,14 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   await page
     .getByRole("button", { name: "State Water Project deliveries" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() => requestedSubjects.includes("DEL_SWP_TOT_N"))
     .toBe(true)
 
   // Delta exports: single Delta location -> the combined exports metric.
   await page.getByRole("button", { name: "Total Delta exports" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() => requestedSubjects.includes("C_CVPSWP_TOTAL_EXPORTS"))
     .toBe(true)
@@ -164,7 +169,7 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   await page
     .getByRole("button", { name: "CVP agricultural deliveries" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() => requestedSubjects.includes("DEL_CVP_PAG_NOD"))
     .toBe(true)
@@ -176,7 +181,7 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   await page
     .getByRole("button", { name: "CVP wildlife refuge deliveries" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() => requestedSubjects.includes("DEL_CVP_PRF_TOTAL"))
     .toBe(true)
@@ -188,7 +193,7 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   await page
     .getByRole("button", { name: "Southern San Joaquin Valley deliveries" })
     .click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect(page.getByText(/^Provisional$/)).toHaveCount(0)
   await expect
     .poll(() =>
@@ -227,7 +232,7 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   // the North-of-Delta pin set earlier is still intact and resolves to the
   // M&I family's own NOD subject.
   await page.getByRole("button", { name: "CVP M&I deliveries" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
   await expect
     .poll(() => requestedSubjects.includes("DEL_CVP_PMI_N_WAMER"))
     .toBe(true)
@@ -235,7 +240,7 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   expect(errors).toEqual([])
 })
 
-test("ssjv all-routes total fails closed to sample when a route series is missing", async ({
+test("ssjv all-routes total fails closed to no data when a route series is missing", async ({
   page,
 }) => {
   await setupNetwork(page)
@@ -243,8 +248,8 @@ test("ssjv all-routes total fails closed to sample when a route series is missin
     route.fulfill({ json: SCENARIOS_FIXTURE }),
   )
   // Serve only two of the three requested route subjects: the client-side
-  // sum must refuse the partial total and fall back to sample labeling,
-  // never summing what is present.
+  // sum must refuse the partial total and report no data, never summing
+  // what is present and never drawing a stand-in.
   await page.route("**/api/data-in-depth/system-deliveries*", (route) => {
     const url = new URL(route.request().url())
     const served = (url.searchParams.get("subjects") ?? "")
@@ -266,8 +271,35 @@ test("ssjv all-routes total fails closed to sample when a route series is missin
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await page
     .getByRole("button", { name: "Southern San Joaquin Valley deliveries" })
     .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="no-data"]')).toBeVisible()
+  await expect(page.getByText(/^No data for /)).toBeVisible()
+})
+
+test("a failed scenario list reads as a load failure, not as no data", async ({
+  page,
+}) => {
+  await setupNetwork(page)
+  // Every attempt fails (the data provider retries twice), so no member can
+  // be resolved. That is an outage, not an unmodeled scenario.
+  await page.route("**/api/scenarios", (route) =>
+    route.fulfill({ status: 500, json: { detail: "down" } }),
+  )
+  // The sidebar cannot list scenarios without the list, so the selection
+  // comes from a saved session.
+  await seedSelectedScenarios(page, ["s0020"])
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  await expect(page.locator('[data-did-chart-state="error"]')).toBeVisible({
+    timeout: 30_000,
+  })
+  await expect(
+    page.getByText("Model results could not be loaded. Try again in a moment."),
+  ).toBeVisible()
+  await expect(page.getByText(/^No data for /)).toHaveCount(0)
 })

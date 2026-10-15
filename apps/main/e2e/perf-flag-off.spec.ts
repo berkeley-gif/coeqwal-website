@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import { setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Default builds (no NEXT_PUBLIC_PERF_LOG) must carry zero perf
 // instrumentation surface: no window global, no perf marks. The explore
@@ -13,11 +14,10 @@ test("perf instrumentation is absent from the default build", async ({
   await setupNetwork(page)
   await page.goto("/explore")
   await page.getByRole("tab", { name: /Data in depth/ }).click()
-  // Panel is mounted and hydrated once the Explorer chart card renders: the
-  // by-variable Explorer is the default mode and draws from the Current
-  // Operations reference before any scenario selection, so the data-source
-  // chip is the reliable ready marker (same wait as smoke.spec.ts).
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await selectCurrentOperations(page)
+  // Panel is mounted and hydrated once the Explorer chart card draws the
+  // selected scenario (same wait as smoke.spec.ts).
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   const hasPerfGlobal = await page.evaluate(() => "__coeqwalPerf" in window)
   expect(hasPerfGlobal).toBe(false)

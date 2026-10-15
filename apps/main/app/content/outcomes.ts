@@ -309,25 +309,25 @@ export const OUTCOME_FOOTER_PREFIXES: Partial<Record<OutcomeCode, string>> = {
 
 export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
   NOD_DW:
-    "Tiers reflect the extent to which NOD surface water deliveries to cities and towns satisfy associated drinking water demands.",
+    "Outcome levels reflect the extent to which NOD surface water deliveries to cities and towns satisfy associated drinking water demands.",
   SOD_DW:
-    "Tiers reflect the extent to which SOD surface water deliveries to cities and towns satisfy associated drinking water demands.",
+    "Outcome levels reflect the extent to which SOD surface water deliveries to cities and towns satisfy associated drinking water demands.",
   NOD_AG:
-    "Tiers reflect how average NOD agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
+    "Outcome levels reflect how average NOD agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
   SOD_AG:
-    "Tiers reflect how average SOD agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
+    "Outcome levels reflect how average SOD agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
   NOD_EFLOWS:
-    "Tiers reflect the extent to which winter and spring NOD outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
+    "Outcome levels reflect the extent to which winter and spring NOD outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
   SOD_EFLOWS:
-    "Tiers reflect the extent to which winter and spring SOD outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
+    "Outcome levels reflect the extent to which winter and spring SOD outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
   NOD_RES:
-    "Tier reflects how full NOD reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
+    "The outcome level reflects how full NOD reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
   SOD_RES:
-    "Tier reflects how full SOD reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
+    "The outcome level reflects how full SOD reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
   NOD_GW:
-    "Tier reflects trends in NOD groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
+    "The outcome level reflects trends in NOD groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
   SOD_GW:
-    "Tier reflects trends in SOD groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
+    "The outcome level reflects trends in SOD groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
 }
 
 /**

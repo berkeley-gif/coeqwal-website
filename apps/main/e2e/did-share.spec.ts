@@ -1,10 +1,11 @@
+import JSZip from "jszip"
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Core export flow: save a Data-in-Depth chart snapshot, see it as a share
-// card, and download its image and underlying data. Runs offline (HAR
-// fixture): the data-in-depth live endpoints are absent from the HAR, so
-// the chart renders from the deterministic sample-data engine.
+// card, and download its image and underlying data. Runs offline: the chart
+// draws recorded model results (see the API cache in support/network.ts).
 
 test("data-in-depth chart can be saved, shared, and exported", async ({
   page,
@@ -15,10 +16,9 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  // Offline the chart always renders sample data (the HAR fixture drives no
-  // live request); assert that up front so an unexpected live render fails
-  // here, not later at the CSV body diff.
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await selectCurrentOperations(page)
+  // The chart draws recorded model results before anything is saved.
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // Stage the snapshot from the chart card. This auto-opens the persistent
   // share drawer on the right.
@@ -65,16 +65,18 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   // contains commas).
   expect(csv).toContain("Figure title,")
   expect(csv).toContain("April Reservoir Storage (Shasta Reservoir)")
-  expect(csv).toContain("Data source,Sample data")
+  expect(csv).toContain("Data source,CalSim3 model results")
   expect(csv).toContain("Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max,Source")
-  expect(csv).toContain("Year index")
+  // Model results carry water years, so the series is keyed by year.
+  expect(csv).toContain("Water year")
+  expect(csv).not.toMatch(/sample/i)
 
   // The figure footer is part of the card, so it travels with every export:
-  // source, data provenance, capture date.
+  // source and capture date (model results need no provenance note).
   await expect(
     page
       .getByText(
-        /COEQWAL, coeqwal\.org\. CalSim3 model results\. Sample data, not model results\. Captured \w+ \d+, \d{4}\./,
+        /COEQWAL, coeqwal\.org\. CalSim3 model results\. Captured \w+ \d+, \d{4}\./,
       )
       .first(),
   ).toBeVisible()
@@ -95,37 +97,28 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   expect(
     await swatch.evaluate((el) => getComputedStyle(el).backgroundColor),
   ).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/)
+  // The card is laid out as the figure template: tool eyebrow and chart kind
+  // in the header, the held dimensions as rows, the compared dimension as
+  // the legend heading, and a SOURCE footer. The old View row is gone.
+  await expect(
+    storyCard.getByText("Data in depth", { exact: true }).first(),
+  ).toBeVisible()
+  await expect(
+    storyCard.getByText("Exceedance plot", { exact: true }),
+  ).toBeVisible()
   await expect(storyCard.getByText("Variable", { exact: true })).toBeVisible()
-  await expect(storyCard.getByText("View", { exact: true })).toBeVisible()
   await expect(
     storyCard.getByText("Water years", { exact: true }),
   ).toBeVisible()
-  // The legend row names the member the chart drew. Exact: the standardized
-  // title above it also contains the scenario name, title-cased.
+  await expect(storyCard.getByText("Strategy", { exact: true })).toBeVisible()
+  await expect(storyCard.getByText("Source", { exact: true })).toBeVisible()
+  await expect(storyCard.getByText("View", { exact: true })).toHaveCount(0)
+  // The legend row names the member the chart drew.
   await expect(
     storyCard.getByText("Current operations", { exact: true }),
   ).toBeVisible()
 
-  // The subtitle is legible on the card. It used to take a token that
-  // resolves to the card's own background color, so it rendered invisible in
-  // every export.
-  const subtitleContrast = await storyCard
-    .getByText("Volume (TAF) (Exceedance)", { exact: true })
-    .first()
-    .evaluate((el) => {
-      const color = getComputedStyle(el).color
-      let background = ""
-      let node = el.parentElement
-      while (node && (!background || background === "rgba(0, 0, 0, 0)")) {
-        background = getComputedStyle(node).backgroundColor
-        node = node.parentElement
-      }
-      return { color, background }
-    })
-  expect(subtitleContrast.color).not.toBe(subtitleContrast.background)
-
-  // Download the PNG (html-to-image path renders the live card). The raster
-  // is wide enough to read as a figure, not a thumbnail.
+  // Download the PNG (html-to-image path renders the live card).
   const pngPromise = page.waitForEvent("download")
   await page.getByRole("button", { name: "Download as PNG" }).click()
   const png = await pngPromise
@@ -138,10 +131,11 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   // PNG IHDR: width at bytes 16..19, height at 20..23 (big-endian).
   const pngWidth = pngBytes.readUInt32BE(16)
   const pngHeight = pngBytes.readUInt32BE(20)
-  expect(pngWidth).toBeGreaterThanOrEqual(1000)
-  // The chart box follows the chart's 900 x 520 shape, so the card is not
-  // taller than it is wide by much: no blank bands around the chart.
-  expect(pngHeight / pngWidth).toBeLessThan(1.15)
+  // Every export is laid out at one fixed width, so a card that sits alone
+  // in a wide story column downloads at the same size as one in the tray:
+  // 480 CSS px at the 3x raster scale (headless dpr 1) = 1,440 px.
+  expect(pngWidth).toBe(1440)
+  expect(pngHeight).toBeGreaterThan(400)
 
   // The SVG export carries the long axis label and the footer as text.
   const svgPromise = page.waitForEvent("download")
@@ -153,8 +147,48 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   }
   const svg = Buffer.concat(svgChunks).toString("utf8")
   expect(svg).toContain("thousand acre feet (TAF)")
-  expect(svg).toContain("Sample data, not model results.")
-  expect(svg).toContain("April Reservoir Storage (Shasta Reservoir)")
+  expect(svg).toContain("CalSim3 model results.")
+  expect(svg).not.toMatch(/sample data/i)
+  // The template rows survive the export of the live card.
+  expect(svg).toContain("April Reservoir Storage (TAF)")
+  expect(svg).toContain("Shasta Reservoir")
+
+  // Cleanup: the off-screen export host must be gone after downloads.
+  const hosts = () =>
+    page.evaluate(
+      () => document.querySelectorAll('body > div[aria-hidden="true"]').length,
+    )
+  const hostsBefore = await hosts()
+
+  // Two cards in the story: the grid narrows each card, but every export is
+  // still laid out at 480 CSS px, so every PNG is still exactly 1,440 px.
+  // The tray persists in localStorage across the navigation.
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  await selectCurrentOperations(page)
+  await page.getByRole("button", { name: "save snapshot" }).click()
+  await page.getByRole("button", { name: "Go to Share" }).dispatchEvent("click")
+  await page.getByRole("button", { name: "Add to story" }).first().click()
+  await expect(
+    storyCard.getByRole("button", { name: "Download as PNG" }),
+  ).toHaveCount(2)
+  const zipPromise = page.waitForEvent("download")
+  await page.getByText("Download all images", { exact: true }).click()
+  const zipDownload = await zipPromise
+  const zipChunks: Buffer[] = []
+  for await (const chunk of await zipDownload.createReadStream()) {
+    zipChunks.push(chunk as Buffer)
+  }
+  const zip = await JSZip.loadAsync(Buffer.concat(zipChunks))
+  const pngNames = Object.keys(zip.files).filter((n) => n.endsWith(".png"))
+  expect(pngNames).toHaveLength(2)
+  for (const name of pngNames) {
+    const buf = await zip.files[name]!.async("nodebuffer")
+    expect(buf.readUInt32BE(16)).toBe(1440)
+  }
+  expect(await hosts()).toBe(hostsBefore)
 
   expect(errors).toEqual([])
 })

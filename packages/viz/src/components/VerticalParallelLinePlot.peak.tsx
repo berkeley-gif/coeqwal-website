@@ -88,6 +88,8 @@ const TIER_ABSOLUTE_POSITIONS = [
   { tier: 4, pos: -1 },
 ] as const
 
+/** Outcome level names, best first. */
+const LEVEL_NAMES = ["Optimal", "Acceptable", "At-risk", "Critical"] as const
 const DEFAULT_MARGIN_VERTICAL = { top: 40, right: 60, bottom: 50, left: 100 }
 const DEFAULT_MARGIN_HORIZONTAL = { top: 30, right: 20, bottom: 90, left: 20 }
 const BASELINE_HALO_COLOR = "#C5A135"
@@ -703,15 +705,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
           const baselineTier = bv >= 2 / 3 ? 1 : bv >= 0 ? 2 : bv >= -2 / 3 ? 3 : 4
           tierTicks = TIER_ABSOLUTE_POSITIONS.map(({ tier, pos: absPos }) => ({
             value: (absPos - bv) / 2,
-            label: `Tier ${tier}`,
+            label: LEVEL_NAMES[tier - 1] ?? "",
             isBaselineTier: tier === baselineTier,
           }))
         } else if (showTierLabels && !relativeMode) {
           tierTicks = [
-            { value: -1, label: "Tier 4" },
-            { value: -1 / 3, label: "Tier 3" },
-            { value: 1 / 3, label: "Tier 2" },
-            { value: 1, label: "Tier 1" },
+            { value: -1, label: LEVEL_NAMES[3] },
+            { value: -1 / 3, label: LEVEL_NAMES[2] },
+            { value: 1 / 3, label: LEVEL_NAMES[1] },
+            { value: 1, label: LEVEL_NAMES[0] },
           ]
         } else {
           tierTicks = [

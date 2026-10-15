@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
 // Delta outflow live path, end to end and offline. Same technique as
 // did-cws.spec.ts: inline route fixtures layered over the HAR harness (later
@@ -106,9 +107,10 @@ test("delta outflow fetches the SAC000 river series and goes live on the annual 
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
 
   await page.getByRole("button", { name: "Delta outflow volume" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // The request carries the remapped subject, not the registry location id.
   await expect.poll(() => riverUrls.length).toBeGreaterThan(0)
@@ -135,7 +137,7 @@ test("delta outflow fetches the SAC000 river series and goes live on the annual 
 
   // The distribution chart styles all read the same live series.
   await page.getByRole("button", { name: "Box plot" }).click()
-  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   expect(errors).toEqual([])
 })
