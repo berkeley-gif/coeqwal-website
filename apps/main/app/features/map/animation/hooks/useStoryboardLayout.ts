@@ -21,6 +21,7 @@ import { getDemandUnitDisplayName } from "../../../map/config/demandUnitNames"
 import {
   OUTCOME_CODE_ORDER,
   getOutcomeName,
+  type OutcomeCode,
 } from "../../../../content/outcomes"
 import { BACKDROP_FADE_IN_PROGRESS } from "../animationTiming"
 import type { HideScheduleEntry } from "../engine"
@@ -51,6 +52,65 @@ interface LayoutResult {
     string,
     { x: number; y: number; maxWidth: number; slotHeight: number }
   >
+}
+
+/* ── Right-panel grid: order and column split ──────────────────────────────
+ *
+ * The nine outcomes are listed in two columns on steps 3-6.
+ *
+ * ORDER: LEADING_CODES come first, then the rest in OUTCOME_CODE_ORDER.
+ * AG_REV leads because it is the first outcome to morph (step 3), so its
+ * squares land at the top left. Don't reorder OUTCOME_CODE_ORDER itself:
+ * the radar axes and the NOD/SOD helpers depend on it.
+ *
+ * COLUMNS: balanced by hand. FIRST_COLUMN_CODES go in the left column and
+ * everything else goes in the right. We tried splitting automatically
+ * (alternating, and estimating heights) and neither came out even, because
+ * each outcome's height depends on how many location squares it has.
+ *
+ * To rebalance (for example after adding an outcome, or if the location
+ * counts change a lot):
+ *   1. Open the Learn tab and step the storyboard to 4 / 8.
+ *   2. Compare where the two columns end.
+ *   3. Move one code into or out of FIRST_COLUMN_CODES and check again.
+ * A new outcome that is not listed here lands in the right column.
+ */
+const LEADING_CODES: readonly OutcomeCode[] = ["AG_REV", "CWS_DEL"]
+
+const ORDERED_CODES: readonly OutcomeCode[] = [
+  ...LEADING_CODES,
+  ...OUTCOME_CODE_ORDER.filter((code) => !LEADING_CODES.includes(code)),
+]
+
+const FIRST_COLUMN_CODES: ReadonlySet<OutcomeCode> = new Set<OutcomeCode>([
+  "AG_REV",
+  "ENV_FLOWS",
+  "GW_STOR",
+  "FW_EXP",
+])
+
+/* computeDistributionHeight counts a gap after the last row of squares.
+ * Trim it so the caption sits directly under the grid. */
+const SQUARE_GAP_PX = 6
+
+/** Caption shown under an outcome's squares. */
+function describeLocations(code: string, count: number): string {
+  switch (code) {
+    case "ENV_FLOWS":
+      return `${count} river & tributary reaches`
+    case "RES_STOR":
+      return `${count} major California reservoirs`
+    case "DELTA_ECO":
+      return "Sacramento-San Joaquin Delta"
+    case "FW_EXP":
+      return "Banks & Jones Pumping Plants"
+    case "FW_DELTA_USES":
+      return "Emmaton & Jersey Point"
+    case "WRC_SALMON_AB":
+      return "population health along the Sacramento"
+    default:
+      return `${count} locations`
+  }
 }
 
 /** See the file header. */
@@ -185,28 +245,6 @@ export function useStoryboardLayout({
 
   const lockedHeightsRef = useRef<Map<string, number>>(new Map())
 
-  const describeLocations = useCallback(
-    (code: string, count: number): string => {
-      switch (code) {
-        case "ENV_FLOWS":
-          return `${count} river & tributary reaches`
-        case "RES_STOR":
-          return `${count} major California reservoirs`
-        case "DELTA_ECO":
-          return "Sacramento-San Joaquin Delta"
-        case "FW_EXP":
-          return "Banks & Jones Pumping Plants"
-        case "FW_DELTA_USES":
-          return "Emmaton & Jersey Point"
-        case "WRC_SALMON_AB":
-          return "population health along the Sacramento"
-        default:
-          return `${count} locations`
-      }
-    },
-    [],
-  )
-
   const outcomeLayout = useMemo<Beat2Layout | null>(() => {
     if (!panelSize) return null
     const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
@@ -215,43 +253,18 @@ export function useStoryboardLayout({
     // precise width is measured from the DOM later.
     const approxColWidth = Math.max(80, (panelSize.width * (1 / 3)) / 2 - 36)
 
-    // Left column order (AG_REV before CWS_DEL). Don't reorder
-    // OUTCOME_CODE_ORDER globally (radar axes and NOD/SOD helpers depend on
-    // it). Prepend the left-column codes and append the rest.
-    const LEFT_COLUMN_ORDER = ["AG_REV", "CWS_DEL"] as const
-    const LEFT_COLUMN_CODES = new Set<string>(LEFT_COLUMN_ORDER)
-    const orderedCodes: string[] = [
-      ...LEFT_COLUMN_ORDER,
-      ...OUTCOME_CODE_ORDER.filter((c) => !LEFT_COLUMN_CODES.has(c)),
-    ]
-
-    // Eyebrow labels share the right-panel backdrop's fade-in onset. The fade
-    // width is applied by the narration frame handler.
-    const EYEBROW_FADE_IN = BACKDROP_FADE_IN_PROGRESS
-    const eyebrows = [
-      {
-        label: "Consumptive uses",
-        x: 0,
-        y: 0,
-        columnWidth: approxColWidth,
-        animationStart: EYEBROW_FADE_IN,
-      },
-      {
-        label: "Non-consumptive uses",
-        x: 0,
-        y: 0,
-        columnWidth: approxColWidth,
-        animationStart: EYEBROW_FADE_IN,
-      },
-    ]
+    // Invisible spacers, one per column. They reserve the slot at the top of
+    // the grid that the view-mode header ("Distribution view" etc.) fades
+    // into from step 5.
+    const headerSpacer = { animationStart: BACKDROP_FADE_IN_PROGRESS }
+    const eyebrows = [headerSpacer, headerSpacer]
 
     const items: Beat2LayoutItem[] = []
 
-    for (let idx = 0; idx < orderedCodes.length; idx++) {
-      const code = orderedCodes[idx]! as (typeof OUTCOME_CODE_ORDER)[number]
+    for (const code of ORDERED_CODES) {
       const label = getOutcomeName(code)
       const isActive = activeOutcomes.has(code)
-      const col: 0 | 1 = LEFT_COLUMN_CODES.has(code) ? 0 : 1
+      const col: 0 | 1 = FIRST_COLUMN_CODES.has(code) ? 0 : 1
 
       let locationCount = 0
       let targetHeight = 0
@@ -269,7 +282,6 @@ export function useStoryboardLayout({
           const distributionHeight =
             locked !== undefined ? Math.max(locked, freshHeight) : freshHeight
           lockedHeightsRef.current.set(code, distributionHeight)
-          const SQUARE_GAP_PX = 6
           targetHeight = Math.max(0, distributionHeight - SQUARE_GAP_PX)
         }
       }
@@ -278,9 +290,7 @@ export function useStoryboardLayout({
         code,
         label,
         column: col,
-        columnWidth: approxColWidth,
         isActive,
-        locationCount,
         targetHeight,
         locationDescription: describeLocations(code, locationCount),
       })
@@ -291,7 +301,6 @@ export function useStoryboardLayout({
     panelSize,
     outcomeGroups,
     theme.scenarios.tierGrid.squaresPerRow,
-    describeLocations,
     activeOutcomes,
   ])
 

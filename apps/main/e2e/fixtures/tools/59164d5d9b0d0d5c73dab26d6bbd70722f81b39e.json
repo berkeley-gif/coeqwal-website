@@ -1,0 +1,355 @@
+{
+  "scenario": "s0020",
+  "results": {
+    "GW_STOR": {
+      "scenario": "s0020",
+      "tier_code": "GW_STOR",
+      "tier_name": "Groundwater storage",
+      "tier_type": "multi_value",
+      "locations": [
+        {
+          "location_id": "02",
+          "location_name": "WBA 02",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.056"
+        },
+        {
+          "location_id": "03",
+          "location_name": "WBA 03",
+          "location_type": "wba",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.946"
+        },
+        {
+          "location_id": "04",
+          "location_name": "WBA 04",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.047"
+        },
+        {
+          "location_id": "05",
+          "location_name": "WBA 05",
+          "location_type": "wba",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.792"
+        },
+        {
+          "location_id": "06",
+          "location_name": "WBA 06",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.001"
+        },
+        {
+          "location_id": "07N",
+          "location_name": "WBA 07N",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.117"
+        },
+        {
+          "location_id": "07S",
+          "location_name": "WBA 07S",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.218"
+        },
+        {
+          "location_id": "08N",
+          "location_name": "WBA 08N",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.737"
+        },
+        {
+          "location_id": "08S",
+          "location_name": "WBA 08S",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.213"
+        },
+        {
+          "location_id": "09",
+          "location_name": "WBA 09",
+          "location_type": "wba",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.985"
+        },
+        {
+          "location_id": "10",
+          "location_name": "WBA 10",
+          "location_type": "wba",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.927"
+        },
+        {
+          "location_id": "11",
+          "location_name": "WBA 11",
+          "location_type": "wba",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.956"
+        },
+        {
+          "location_id": "12",
+          "location_name": "WBA 12",
+          "location_type": "wba",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.976"
+        },
+        {
+          "location_id": "13",
+          "location_name": "WBA 13",
+          "location_type": "wba",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.952"
+        },
+        {
+          "location_id": "14",
+          "location_name": "WBA 14",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.002"
+        },
+        {
+          "location_id": "15N",
+          "location_name": "WBA 15N",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.069"
+        },
+        {
+          "location_id": "15S",
+          "location_name": "WBA 15S",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.190"
+        },
+        {
+          "location_id": "16",
+          "location_name": "WBA 16",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.013"
+        },
+        {
+          "location_id": "17N",
+          "location_name": "WBA 17N",
+          "location_type": "wba",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.958"
+        },
+        {
+          "location_id": "17S",
+          "location_name": "WBA 17S",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.009"
+        },
+        {
+          "location_id": "18",
+          "location_name": "WBA 18",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.011"
+        },
+        {
+          "location_id": "19",
+          "location_name": "WBA 19",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.027"
+        },
+        {
+          "location_id": "20",
+          "location_name": "WBA 20",
+          "location_type": "wba",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.811"
+        },
+        {
+          "location_id": "21",
+          "location_name": "WBA 21",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.017"
+        },
+        {
+          "location_id": "22",
+          "location_name": "WBA 22",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.096"
+        },
+        {
+          "location_id": "23",
+          "location_name": "WBA 23",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.482"
+        },
+        {
+          "location_id": "24",
+          "location_name": "WBA 24",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.615"
+        },
+        {
+          "location_id": "25",
+          "location_name": "WBA 25",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.242"
+        },
+        {
+          "location_id": "26N",
+          "location_name": "WBA 26N",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.324"
+        },
+        {
+          "location_id": "26S",
+          "location_name": "WBA 26S",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.862"
+        },
+        {
+          "location_id": "50",
+          "location_name": "WBA 50",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.357"
+        },
+        {
+          "location_id": "60N",
+          "location_name": "WBA 60N",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.966"
+        },
+        {
+          "location_id": "60S",
+          "location_name": "WBA 60S",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.052"
+        },
+        {
+          "location_id": "61",
+          "location_name": "WBA 61",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.270"
+        },
+        {
+          "location_id": "62",
+          "location_name": "WBA 62",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.216"
+        },
+        {
+          "location_id": "63",
+          "location_name": "WBA 63",
+          "location_type": "wba",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.249"
+        },
+        {
+          "location_id": "64",
+          "location_name": "WBA 64",
+          "location_type": "wba",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.418"
+        },
+        {
+          "location_id": "71",
+          "location_name": "WBA 71",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.010"
+        },
+        {
+          "location_id": "72",
+          "location_name": "WBA 72",
+          "location_type": "wba",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.265"
+        },
+        {
+          "location_id": "73",
+          "location_name": "WBA 73",
+          "location_type": "wba",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.260"
+        },
+        {
+          "location_id": "90",
+          "location_name": "WBA 90",
+          "location_type": "wba",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.691"
+        },
+        {
+          "location_id": "DETAW",
+          "location_name": "Delta-Eastside Water",
+          "location_type": "wba",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.545"
+        }
+      ],
+      "metadata": {
+        "total_locations": 42,
+        "location_types": ["wba"],
+        "tier_counts": { "1": 9, "2": 12, "3": 17, "4": 4 }
+      }
+    }
+  },
+  "missing": []
+}

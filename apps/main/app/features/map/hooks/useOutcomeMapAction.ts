@@ -15,7 +15,7 @@ import type { OutcomeVisualization } from "../store"
  * the siblingGroupId fallback logic.
  */
 export function useOutcomeMapAction() {
-  const { showOnMap, showOnMapForGroup, isMapVisible } =
+  const { showOnMap, showOnMapForGroup, clearMap, isMapVisible } =
     useMapVisualizationAction()
   const activeOutcome = useActiveMapOutcome()
 
@@ -69,6 +69,7 @@ export function useOutcomeMapAction() {
   return {
     showOutcomeOnMap,
     showOutcomeOnMapFixed,
+    clearMap,
     isOutcomeActive,
     isMapVisible,
     activeOutcome,
@@ -78,6 +79,8 @@ export function useOutcomeMapAction() {
       outcomeCodeOrName: string,
       scenarioId: string,
     ) => void
+    /** Take the active outcome off the map, whatever scenario it shows. */
+    clearMap: () => void
     isOutcomeActive: (outcomeCode: string, scenarioId: string) => boolean
     isMapVisible: boolean
     activeOutcome: OutcomeVisualization | null

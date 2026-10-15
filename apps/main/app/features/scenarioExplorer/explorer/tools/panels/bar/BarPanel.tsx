@@ -27,6 +27,7 @@ import {
 } from "../../../../../scenarios/components/shared"
 import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
+import { useScenarioList } from "../../../../../scenarios/hooks/useScenarioList"
 import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
 import ScrollRightIndicator from "../../chrome/layout/ScrollRightIndicator"
 import { useTierTooltipState } from "../../../../../tooltips/useTierTooltipState"
@@ -36,6 +37,13 @@ import type { ScenarioTheme } from "../../../../../../content/scenarios"
 import { captureBarChartRow } from "../list/grid/captureBarChartRow"
 import { InlineRowActions } from "../list/grid/InlineRowActions"
 import { stageShareItem } from "../../../share/stage"
+import SelectScenarioPrompt from "../../components/SelectScenarioPrompt"
+import {
+  needsScenarioPrompt,
+  SCENARIO_PROMPT_TEXT,
+} from "../../components/scenarioPrompt"
+import { BASELINE_SCENARIO_ID } from "../../../../constants"
+import { MODEL_RESULTS_LOAD_ERROR } from "../../components/loadErrorText"
 
 /** Fixed column width so header cells and every card's glyph cells line up. */
 const OUTCOME_COLUMN_WIDTH = 90
@@ -173,6 +181,21 @@ function BarOutcomeHeaderCell({
 export default function BarPanel() {
   const theme = useTheme()
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
+  const tourTool = useWorkspaceSlice((s) => s.tour.tool)
+  // With nothing selected the panel asks for a selection instead of drawing
+  // a card. While the Bar tour runs it draws the current-operations card
+  // instead, because the tour's steps anchor on a card's glyphs, pin and
+  // share controls (see tools/components/scenarioPrompt.ts).
+  const showSelectPrompt = needsScenarioPrompt({
+    mode: "bar",
+    selectedScenarioCount: selectedScenarios.length,
+    showAll: false,
+    equityFocusScenario: null,
+    tourActive: tourTool === "bar",
+  })
+  // The tour's stand-in card, and only then: a selection that the list
+  // filters hide must still show the prompt, never an unselected card.
+  const tourFallback = tourTool === "bar" && selectedScenarios.length === 0
   const {
     sortBy,
     sortDirection,
@@ -211,11 +234,13 @@ export default function BarPanel() {
   const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
   const addShareItem = useWorkspaceSlice((s) => s.addShareItem)
 
-  const { showOutcomeOnMap, isMapVisible } = useOutcomeMapAction()
+  const { showOutcomeOnMap, isOutcomeActive, isMapVisible } =
+    useOutcomeMapAction()
 
   const { allChartData, outcomeNames, allScoreData, isLoading, error } =
     useResolvedScenarioTiers()
   const { orderedScenarios } = useOrderedScenarios(allScoreData)
+  const { siblingGroups } = useScenarioList()
 
   const barGlyphTourRef = useTourAnchor("bar.outcome.glyph")
   const barPinTourRef = useTourAnchor("bar.row.pin")
@@ -282,10 +307,18 @@ export default function BarPanel() {
     () => new Set(pinnedScenarioIds),
     [pinnedScenarioIds],
   )
-  const cardScenarios = useMemo(
-    () => orderedScenarios.filter((s) => selectedSet.has(s.scenarioId)),
-    [orderedScenarios, selectedSet],
-  )
+  const cardScenarios = useMemo(() => {
+    if (!tourFallback) {
+      return orderedScenarios.filter((s) => selectedSet.has(s.scenarioId))
+    }
+    // Tour running with nothing selected: the baseline stands in for its
+    // steps. Taken from the unfiltered list, so a "selected only" or
+    // theme-only filter cannot leave the tour without a card.
+    const baseline = siblingGroups.find(
+      (s) => s.scenarioId === BASELINE_SCENARIO_ID,
+    )
+    return baseline ? [baseline] : []
+  }, [orderedScenarios, selectedSet, tourFallback, siblingGroups])
   const pinnedCardScenarios = useMemo(
     () => cardScenarios.filter((s) => pinnedSet.has(s.scenarioId)),
     [cardScenarios, pinnedSet],
@@ -318,28 +351,14 @@ export default function BarPanel() {
     return (
       <Box sx={{ p: theme.spacing(3) }}>
         <Typography variant="body2" color="error">
-          Error loading data: {error}
+          {MODEL_RESULTS_LOAD_ERROR}
         </Typography>
       </Box>
     )
   }
 
-  if (cardScenarios.length === 0) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          p: theme.space.component.xl,
-        }}
-      >
-        <Typography variant="body2" sx={{ color: theme.palette.grey[600] }}>
-          Select scenarios in the sidebar to compare their bar charts here.
-        </Typography>
-      </Box>
-    )
+  if (showSelectPrompt || cardScenarios.length === 0) {
+    return <SelectScenarioPrompt message={SCENARIO_PROMPT_TEXT.bar} />
   }
 
   // Bar chart scenario card
@@ -411,6 +430,11 @@ export default function BarPanel() {
                 outcomeCode={shortCode}
                 chartData={chartData[shortCode]}
                 isActive={!!chartData[shortCode]}
+                // The glyph whose outcome is on the map keeps an outline
+                // until the user clears it, so the page says what the map
+                // shows after the pointer leaves the glyph.
+                isSelected={isOutcomeActive(shortCode, scenario.scenarioId)}
+                actionLabel={`Show ${displayName} on the map`}
                 showLabel={true}
                 showInfoButton={false}
                 onGlyphClick={

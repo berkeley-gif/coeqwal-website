@@ -6,14 +6,19 @@
  * A by-variable explorer: pick a variable from the sector rail, choose a view
  * and a single comparison axis, and read one interpretive chart at a time.
  * Composes the rail, breadcrumb, comparison controls, view bar, chart card,
- * and metric explainers. Runs on the deterministic sample-data engine (labeled
- * "Sample data"); live data and per-member tier badges arrive with the
- * live-data widening PR.
+ * and metric explainers. It draws model results only, for exactly the
+ * scenarios selected in the sidebar; with none selected it shows the
+ * select-a-scenario prompt in place of the controls and chart.
  */
 
 import React from "react"
 import { Box, Chip, Typography, useTheme } from "@repo/ui/mui"
-import { useDataSlice } from "../../../../store"
+import { useDataSlice, useWorkspaceSlice } from "../../../../store"
+import SelectScenarioPrompt from "../../../components/SelectScenarioPrompt"
+import {
+  needsScenarioPrompt,
+  SCENARIO_PROMPT_TEXT,
+} from "../../../components/scenarioPrompt"
 import {
   getSector,
   getVariable,
@@ -32,6 +37,19 @@ export default function ExplorerView() {
   const variable = getVariable(selectedVariableId)
   const sector = variable ? getSector(variable.sectorId) : undefined
   const chipText = variable ? keyOutcomeChipText(variable) : null
+  const selectedScenarioCount = useWorkspaceSlice(
+    (s) => s.selectedScenarios.length,
+  )
+  const tourActive = useWorkspaceSlice((s) => s.tour.tool === "data")
+  // With nothing selected the tool asks for a selection, as every other
+  // tool does; the variable rail stays so a variable can still be picked.
+  const showSelectPrompt = needsScenarioPrompt({
+    mode: "data",
+    selectedScenarioCount,
+    showAll: false,
+    equityFocusScenario: null,
+    tourActive,
+  })
 
   return (
     <Box
@@ -87,13 +105,21 @@ export default function ExplorerView() {
           </Box>
         )}
 
-        <CompareControls />
-        <ViewBar />
-        <WytFilterChips />
-        <Box sx={{ mt: 2 }}>
-          <ChartCard />
-        </Box>
-        <MetricExplainers />
+        {showSelectPrompt ? (
+          <Box sx={{ mt: 2, minHeight: 240 }}>
+            <SelectScenarioPrompt message={SCENARIO_PROMPT_TEXT.data} />
+          </Box>
+        ) : (
+          <>
+            <CompareControls />
+            <ViewBar />
+            <WytFilterChips />
+            <Box sx={{ mt: 2 }}>
+              <ChartCard />
+            </Box>
+            <MetricExplainers />
+          </>
+        )}
       </Box>
     </Box>
   )

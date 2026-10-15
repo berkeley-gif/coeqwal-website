@@ -44,6 +44,9 @@ export interface ChartThumbnailProps {
   variant?: ChartThumbnailVariant
   /** Aspect ratio for the SVG thumbnail container. Default 1. */
   aspectRatio?: number
+  /** Largest displayed size of a cached raster image, in CSS px; the image
+   *  keeps its shape and is centered. Unset: it fills the card's width. */
+  imageMaxSize?: { width: number; height: number }
   /**
    * Copy shown when none of the cache layers nor a live chart are
    * available. Pass `null` (or omit) to render nothing in that case.
@@ -58,6 +61,7 @@ export default function ChartThumbnail({
   ariaLabel,
   variant = "bordered",
   aspectRatio = 1,
+  imageMaxSize,
   placeholderLabel = null,
 }: ChartThumbnailProps) {
   const theme = useTheme()
@@ -97,17 +101,26 @@ export default function ChartThumbnail({
           borderRadius: 1,
           overflow: "hidden",
           border: `1px solid ${theme.palette.divider}`,
+          ...(imageMaxSize
+            ? { width: "fit-content", maxWidth: "100%", mx: "auto" }
+            : {}),
         }}
       >
         <Box
           component="img"
           src={cachedImageDataUrl}
           alt={ariaLabel}
-          sx={{
-            display: "block",
-            width: "100%",
-            height: "auto",
-          }}
+          sx={
+            imageMaxSize
+              ? {
+                  display: "block",
+                  width: "auto",
+                  height: "auto",
+                  maxWidth: `min(100%, ${imageMaxSize.width}px)`,
+                  maxHeight: `${imageMaxSize.height}px`,
+                }
+              : { display: "block", width: "100%", height: "auto" }
+          }
         />
       </Box>
     )

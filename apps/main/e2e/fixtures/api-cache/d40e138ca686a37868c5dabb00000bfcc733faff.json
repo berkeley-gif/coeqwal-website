@@ -1,0 +1,9 @@
+{
+  "url": "https://api.coeqwal.org/api/tiers/scenarios/s0025/locations?codes=RES_STOR",
+  "status": 200,
+  "headers": {
+    "content-type": "application/json",
+    "access-control-allow-origin": "http://localhost:4173"
+  },
+  "body": "{\"scenario\":\"s0025\",\"results\":{\"RES_STOR\":{\"scenario\":\"s0025\",\"tier_code\":\"RES_STOR\",\"tier_name\":\"Reservoir storage\",\"tier_type\":\"multi_value\",\"locations\":[{\"location_id\":\"SHSTA\",\"location_name\":\"Shasta\",\"location_type\":\"reservoir\",\"tier_level\":1,\"tier_value\":1,\"tier_continuous\":\"1.700\"},{\"location_id\":\"TRNTY\",\"location_name\":\"Trinity\",\"location_type\":\"reservoir\",\"tier_level\":1,\"tier_value\":1,\"tier_continuous\":\"1.900\"},{\"location_id\":\"OROVL\",\"location_name\":\"Oroville\",\"location_type\":\"reservoir\",\"tier_level\":1,\"tier_value\":1,\"tier_continuous\":\"1.814\"},{\"location_id\":\"FOLSM\",\"location_name\":\"Folsom\",\"location_type\":\"reservoir\",\"tier_level\":1,\"tier_value\":1,\"tier_continuous\":\"1.586\"},{\"location_id\":\"MELON\",\"location_name\":\"New Melones\",\"location_type\":\"reservoir\",\"tier_level\":1,\"tier_value\":1,\"tier_continuous\":\"1.443\"},{\"location_id\":\"MLRTN\",\"location_name\":\"Millerton\",\"location_type\":\"reservoir\",\"tier_level\":3,\"tier_value\":1,\"tier_continuous\":\"3.875\"},{\"location_id\":\"SLUIS_CVP\",\"location_name\":\"San Luis CVP\",\"location_type\":\"reservoir\",\"tier_level\":1,\"tier_value\":1,\"tier_continuous\":\"1.943\"},{\"location_id\":\"SLUIS_SWP\",\"location_name\":\"San Luis SWP\",\"location_type\":\"reservoir\",\"tier_level\":3,\"tier_value\":1,\"tier_continuous\":\"3.812\"}],\"metadata\":{\"total_locations\":8,\"location_types\":[\"reservoir\"],\"tier_counts\":{\"1\":6,\"2\":0,\"3\":2,\"4\":0}}}},\"missing\":[]}"
+}

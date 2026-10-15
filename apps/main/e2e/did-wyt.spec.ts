@@ -1,20 +1,16 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { selectCurrentOperations } from "./support/scenarioSelection"
 
-// Water-year-type filter, end to end and offline. The HAR fixture has no
-// data-in-depth entries and id-resolution from it yields no live-eligible
-// members, so the tool never fires a live request and renders the
-// deterministic sample-data engine. That is enough to exercise the whole
-// filter surface: the chips render and toggle, the selection persists across
-// reload via the explorer session storage, and (the substance) filtering
-// actually shrinks the data - a Dry+Critical selection cuts the 100 sample
-// years down to the subset the seeded classification assigns to those
-// classes, which the exported CSV reflects. The live `wyt=` request
-// serialization is covered by the endpoint-path test in did-mapping.spec.ts
-// (plus a manual check against the real API); the request itself cannot be
-// observed under this offline harness because no live request is made.
+// Water-year-type filter, end to end and offline, on recorded model results
+// (see the API cache in support/network.ts): the chips render and toggle,
+// the selection persists across reload via the explorer session storage,
+// and (the substance) filtering actually shrinks the data: a Critical
+// selection cuts the 100 water years down to the critical years, which the
+// exported CSV reflects. The `wyt=` request serialization is covered by the
+// endpoint-path test in did-mapping.spec.ts.
 
-test("wyt chips filter the sample data and persist across reload", async ({
+test("wyt chips filter the model results and persist across reload", async ({
   page,
 }) => {
   const errors = collectConsoleErrors(page)
@@ -23,7 +19,8 @@ test("wyt chips filter the sample data and persist across reload", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
+  await selectCurrentOperations(page)
+  await expect(page.locator('[data-did-chart-state="drawn"]')).toBeVisible()
 
   // The chip row renders with "All years" as the selected default.
   await expect(page.getByText("Water year types")).toBeVisible()
@@ -71,12 +68,13 @@ test("wyt chips filter the sample data and persist across reload", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
+  await selectCurrentOperations(page)
   await expect(
     page.getByRole("button", { name: "Critical", exact: true, pressed: true }),
   ).toBeVisible()
 
   // The filter actually reduces the data: save a snapshot of the filtered
-  // chart and confirm its CSV carries fewer than the full 100 sample years.
+  // chart and confirm its CSV carries fewer than the full 100 water years.
   await page.getByRole("button", { name: "save snapshot" }).click()
   // dispatchEvent, not click: the drawer's footer button sits just below the
   // 720px headless viewport (same workaround as did-share.spec.ts).
@@ -89,11 +87,11 @@ test("wyt chips filter the sample data and persist across reload", async ({
   const chunks: Buffer[] = []
   for await (const chunk of stream) chunks.push(chunk as Buffer)
   const csv = Buffer.concat(chunks).toString("utf8")
-  expect(csv).toContain("Data source,Sample data")
-  expect(csv).toContain("Year index")
-  const yearRows = (csv.split("Year index")[1] ?? "")
+  expect(csv).toContain("Data source,CalSim3 model results")
+  expect(csv).toContain("\nWater year,")
+  const yearRows = (csv.split("\nWater year,")[1] ?? "")
     .split("\n")
-    .filter((line) => /^\d+,/.test(line)).length
+    .filter((line) => /^\d{4},/.test(line)).length
   expect(yearRows).toBeGreaterThan(0)
   expect(yearRows).toBeLessThan(100)
 

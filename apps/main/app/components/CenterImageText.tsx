@@ -84,62 +84,76 @@ export function CenterImageText({
         paddingX: {
           xs: theme.space.page.x.xs,
           sm: theme.space.page.x.sm,
-          md: "0px",
+          md: theme.space.page.x.md,
         },
         backgroundColor: backgroundColor,
       }}
     >
-      {/* Image: wrapped so it can shrink to whatever vertical space is left after text + arrow */}
+      {/* Content row: image and text side by side on desktop, stacked on mobile.
+          Grows to fill the section so the scroll arrow stays at the bottom. */}
       <Box
         sx={{
           flex: "1 1 auto",
-          minHeight: "15vh",
           width: "100%",
+          maxWidth: "1400px", // keeps the text line length readable on very wide screens
           display: "flex",
+          flexDirection: { xs: "column", md: "row" },
           justifyContent: "center",
           alignItems: "center",
+          gap: { xs: theme.spacing(4), md: theme.spacing(7) },
         }}
       >
+        {/* Image: takes 3 parts of the row to the text's 2 */}
         <Box
-          component="img"
-          src={imgSrc}
-          alt={imgAlt}
           sx={{
-            maxWidth: "100%",
-            maxHeight: "60vh",
-            width: "auto",
-            height: "auto",
-            objectFit: "contain",
-          }}
-        />
-      </Box>
-
-      {/* Text */}
-      <Box
-        component="div"
-        sx={{
-          listStyle: "none",
-          m: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          flexShrink: 0,
-          gap: { xs: 4, md: 4 },
-          textAlign: { xs: "center", md: "left" },
-          width: "100%",
-          maxWidth: { xs: "100%", sm: "85%", md: "55%", xl: "40%" },
-          paddingLeft: { xs: "0px", md: "55px" },
-        }}
-      >
-        {/* Body */}
-        <Typography
-          variant="body1"
-          sx={{
-            color: textColor,
+            // Basis 0 makes the 3:2 ratio exact; with "auto" the long paragraph's
+            // natural width would be counted first and the text would win.
+            flex: { xs: "1 1 auto", md: "3 1 0" },
+            // Flex items won't shrink below their content by default, and the
+            // image file is 1200px wide — minWidth 0 lets it scale down.
+            minWidth: 0,
+            minHeight: "15vh",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <strong>{bodyTextBold}</strong>
-          {bodyText}
-        </Typography>
+          <Box
+            component="img"
+            src={imgSrc}
+            alt={imgAlt}
+            sx={{
+              maxWidth: "100%",
+              maxHeight: "60vh",
+              width: "auto",
+              height: "auto",
+              objectFit: "contain",
+            }}
+          />
+        </Box>
+
+        {/* Text */}
+        <Box
+          component="div"
+          sx={{
+            flex: { xs: "0 0 auto", md: "2 1 0" },
+            minWidth: 0,
+            textAlign: { xs: "center", md: "left" },
+            maxWidth: { xs: "100%", sm: "85%", md: "none" },
+          }}
+        >
+          {/* Body */}
+          <Typography
+            variant="body1"
+            sx={{
+              color: textColor,
+            }}
+          >
+            <strong>{bodyTextBold}</strong>
+            {bodyText}
+          </Typography>
+        </Box>
       </Box>
 
       {/* Scroll indicator (optional) */}

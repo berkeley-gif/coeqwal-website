@@ -16,7 +16,37 @@ import { fadeIn } from "../lib/constants/motionAnimations"
 export interface GridLogo {
   src: string
   alt: string
-  width: number
+  /** Pixel width of the image file itself (not the display size) */
+  intrinsicWidth: number
+  /** Pixel height of the image file itself (not the display size) */
+  intrinsicHeight: number
+}
+
+// Single place to tune logo sizing.
+// squareHeight: display height of a 1:1 logo — the tallest any logo gets.
+// wideShrinkExponent: how much wider logos lose height.
+//   0 = every logo the same height (wide logos dominate)
+//   0.5 = every logo the same area (equal visual weight)
+//   1 = every logo the same width (wide logos become slivers)
+const LOGO_SIZING = {
+  squareHeight: { xs: 44, md: 95 },
+  wideShrinkExponent: 0.5,
+}
+
+function getLogoHeights(logo: GridLogo): { xs: string; md: string } {
+  const aspectRatio = logo.intrinsicWidth / logo.intrinsicHeight
+  // Missing or zero dimensions give NaN/Infinity; fall back to square sizing
+  // rather than rendering a 0px or NaN-height logo.
+  // Clamping at 1 also stops portrait logos from growing taller than squareHeight.
+  const safeAspectRatio = Number.isFinite(aspectRatio)
+    ? Math.max(aspectRatio, 1)
+    : 1
+  const heightFactor = safeAspectRatio ** -LOGO_SIZING.wideShrinkExponent
+
+  return {
+    xs: `${Math.round(LOGO_SIZING.squareHeight.xs * heightFactor)}px`,
+    md: `${Math.round(LOGO_SIZING.squareHeight.md * heightFactor)}px`,
+  }
 }
 
 export interface LogoGridProps {
@@ -90,7 +120,7 @@ export function LogoGrid({ id, ariaLabel, title, logos }: LogoGridProps) {
             key={logo.src}
             loading="lazy"
             sx={{
-              height: { xs: "28px", md: "55px" }, // fixed display height for every logo
+              height: getLogoHeights(logo), // shorter for wider logos so all carry similar visual weight
               width: "auto", // preserves each logo's own aspect ratio
               objectFit: "contain",
             }}

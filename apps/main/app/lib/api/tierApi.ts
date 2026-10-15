@@ -6,7 +6,7 @@
  */
 
 import type { MultiValueTier } from "@repo/data/coeqwal"
-import type { TierColors } from "../../content/tiers"
+import { TIER_LABELS, type TierColors } from "../../content/tiers"
 
 // Re-export for backwards compatibility
 export type { TierColors }
@@ -27,7 +27,12 @@ type ChartDataPoint = {
  * shipping the redundant `"tier1"`/.../`"tier4"` string on every row
  */
 const TIER_KEYS = ["tier1", "tier2", "tier3", "tier4"] as const
-const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
+const LEVEL_LABELS = [
+  TIER_LABELS[1],
+  TIER_LABELS[2],
+  TIER_LABELS[3],
+  TIER_LABELS[4],
+] as const
 
 /**
  * Convert multi-value tier data to chart format.
@@ -46,7 +51,7 @@ export function convertMultiValueToChartData(
   tierColors: TierColors,
 ): ChartDataPoint[] {
   return tierData.data.map((item, i) => ({
-    label: TIER_LABELS[i] ?? "",
+    label: LEVEL_LABELS[i] ?? "",
     color: tierColors[TIER_KEYS[i] ?? "tier1"],
     value: item.normalized ?? 0,
     tierType: "multi_value" as const,
@@ -66,25 +71,25 @@ export function convertSingleValueToChartData(
 ): ChartDataPoint[] {
   return [
     {
-      label: "Tier 1",
+      label: TIER_LABELS[1],
       color: tierColors.tier1,
       value: tierLevel === 1 ? 1 : 0,
       tierType: "single_value" as const,
     },
     {
-      label: "Tier 2",
+      label: TIER_LABELS[2],
       color: tierColors.tier2,
       value: tierLevel === 2 ? 1 : 0,
       tierType: "single_value" as const,
     },
     {
-      label: "Tier 3",
+      label: TIER_LABELS[3],
       color: tierColors.tier3,
       value: tierLevel === 3 ? 1 : 0,
       tierType: "single_value" as const,
     },
     {
-      label: "Tier 4",
+      label: TIER_LABELS[4],
       color: tierColors.tier4,
       value: tierLevel === 4 ? 1 : 0,
       tierType: "single_value" as const,

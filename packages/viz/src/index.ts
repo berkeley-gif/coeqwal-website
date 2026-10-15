@@ -96,7 +96,12 @@ export { default as CategoricalBarChartSnapshot } from "./components/Categorical
 export type { CategoricalBarChartSnapshotProps } from "./components/CategoricalBarChartSnapshot"
 
 export { default as RadarPlot } from "./components/RadarPlot"
-export type { RadarPlotProps, RadarPlotPalette } from "./components/RadarPlot"
+export type {
+  RadarPlotProps,
+  RadarPlotPalette,
+  RadarPlotZoomControls,
+  RadarPlotZoomTransform,
+} from "./components/RadarPlot"
 export { default as RadarPlotSnapshot } from "./components/RadarPlotSnapshot"
 export type { RadarPlotSnapshotProps } from "./components/RadarPlotSnapshot"
 export type {

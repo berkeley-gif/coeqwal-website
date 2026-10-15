@@ -29,6 +29,9 @@ export interface ShareCardShellProps {
   /** Provenance footer (source, data kind, capture date), rendered inside
    *  the exported area so every figure carries it. */
   figureFooter?: ShareFigureFooter
+  /** Small uppercase label above the footer text, e.g. "Source" (the
+   *  figure-template cards use it) */
+  footerHeading?: string
 }
 
 export default function ShareCardShell({
@@ -38,6 +41,7 @@ export default function ShareCardShell({
   onRemove,
   removeAriaLabel = "Remove from share tray",
   figureFooter,
+  footerHeading,
 }: ShareCardShellProps) {
   const theme = useTheme()
   return (
@@ -71,18 +75,34 @@ export default function ShareCardShell({
       )}
       {children}
       {figureFooter && (
-        <Typography
-          data-share-figure-footer=""
-          sx={{
-            display: "block",
-            mt: 1,
-            fontSize: "0.625rem",
-            lineHeight: 1.35,
-            color: theme.palette.grey[600],
-          }}
-        >
-          {shareFigureFooterText(figureFooter)}
-        </Typography>
+        <>
+          {footerHeading && (
+            <Typography
+              sx={{
+                mt: 1,
+                fontSize: "0.625rem",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: theme.palette.grey[700],
+              }}
+            >
+              {footerHeading}
+            </Typography>
+          )}
+          <Typography
+            data-share-figure-footer=""
+            sx={{
+              display: "block",
+              mt: footerHeading ? 0.25 : 1,
+              fontSize: "0.625rem",
+              lineHeight: 1.35,
+              color: theme.palette.grey[600],
+            }}
+          >
+            {shareFigureFooterText(figureFooter)}
+          </Typography>
+        </>
       )}
       <ShareItemNoteBlock note={note} onNoteChange={onNoteChange} />
     </Box>

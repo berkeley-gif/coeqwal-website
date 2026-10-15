@@ -1,0 +1,2742 @@
+{
+  "scenarios": {
+    "s0011": {
+      "scenario": "s0011",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.175,
+          "normalized_score": 0.456,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.778,
+          "normalized_score": 0.556,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.486,
+          "normalized_score": 0.629,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.19,
+          "normalized_score": 0.202,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 3.062,
+          "normalized_score": 0.485,
+          "data": [
+            { "value": 8.0, "normalized": 0.061 },
+            { "value": 56.0, "normalized": 0.424 },
+            { "value": 41.0, "normalized": 0.311 },
+            { "value": 27.0, "normalized": 0.205 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.739,
+          "normalized_score": 0.815,
+          "data": [
+            { "value": 51.0, "normalized": 0.689 },
+            { "value": 5.0, "normalized": 0.068 },
+            { "value": 16.0, "normalized": 0.216 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.729,
+          "normalized_score": 0.318,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 8.0, "normalized": 0.471 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.504,
+          "normalized_score": 0.624,
+          "data": [
+            { "value": 8.0, "normalized": 0.191 },
+            { "value": 18.0, "normalized": 0.429 },
+            { "value": 14.0, "normalized": 0.333 },
+            { "value": 2.0, "normalized": 0.048 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.525,
+          "normalized_score": 0.619,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0020": {
+      "scenario": "s0020",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.22,
+          "normalized_score": 0.445,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.86,
+          "normalized_score": 0.535,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.72,
+          "normalized_score": 0.57,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.24,
+          "normalized_score": 0.19,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.326,
+          "normalized_score": 0.668,
+          "data": [
+            { "value": 58.0, "normalized": 0.439 },
+            { "value": 52.0, "normalized": 0.394 },
+            { "value": 8.0, "normalized": 0.061 },
+            { "value": 14.0, "normalized": 0.106 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.784,
+          "normalized_score": 0.804,
+          "data": [
+            { "value": 50.0, "normalized": 0.676 },
+            { "value": 5.0, "normalized": 0.068 },
+            { "value": 17.0, "normalized": 0.23 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.734,
+          "normalized_score": 0.317,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 8.0, "normalized": 0.471 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.785,
+          "normalized_score": 0.554,
+          "data": [
+            { "value": 9.0, "normalized": 0.214 },
+            { "value": 12.0, "normalized": 0.286 },
+            { "value": 17.0, "normalized": 0.405 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.451,
+          "normalized_score": 0.637,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0020-R": {
+      "scenario": "s0020-R",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.22,
+          "normalized_score": 0.445,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.86,
+          "normalized_score": 0.535,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.72,
+          "normalized_score": 0.57,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.77,
+          "normalized_score": 0.307,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.326,
+          "normalized_score": 0.668,
+          "data": [
+            { "value": 58.0, "normalized": 0.439 },
+            { "value": 52.0, "normalized": 0.394 },
+            { "value": 8.0, "normalized": 0.061 },
+            { "value": 14.0, "normalized": 0.106 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.784,
+          "normalized_score": 0.804,
+          "data": [
+            { "value": 50.0, "normalized": 0.676 },
+            { "value": 5.0, "normalized": 0.068 },
+            { "value": 17.0, "normalized": 0.23 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.734,
+          "normalized_score": 0.317,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 8.0, "normalized": 0.471 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.785,
+          "normalized_score": 0.554,
+          "data": [
+            { "value": 9.0, "normalized": 0.214 },
+            { "value": 12.0, "normalized": 0.286 },
+            { "value": 17.0, "normalized": 0.405 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.451,
+          "normalized_score": 0.637,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0021": {
+      "scenario": "s0021",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.216,
+          "normalized_score": 0.446,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.674,
+          "normalized_score": 0.581,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.718,
+          "normalized_score": 0.57,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.28,
+          "normalized_score": 0.18,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.324,
+          "normalized_score": 0.669,
+          "data": [
+            { "value": 56.0, "normalized": 0.424 },
+            { "value": 54.0, "normalized": 0.409 },
+            { "value": 9.0, "normalized": 0.068 },
+            { "value": 13.0, "normalized": 0.099 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.793,
+          "normalized_score": 0.802,
+          "data": [
+            { "value": 49.0, "normalized": 0.662 },
+            { "value": 6.0, "normalized": 0.081 },
+            { "value": 17.0, "normalized": 0.23 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.744,
+          "normalized_score": 0.314,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 8.0, "normalized": 0.471 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.785,
+          "normalized_score": 0.554,
+          "data": [
+            { "value": 7.0, "normalized": 0.167 },
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 16.0, "normalized": 0.381 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.492,
+          "normalized_score": 0.627,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0023": {
+      "scenario": "s0023",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.208,
+          "normalized_score": 0.448,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.55,
+          "normalized_score": 0.613,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.507,
+          "normalized_score": 0.623,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.08,
+          "normalized_score": 0.23,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.407,
+          "normalized_score": 0.648,
+          "data": [
+            { "value": 52.0, "normalized": 0.394 },
+            { "value": 55.0, "normalized": 0.417 },
+            { "value": 8.0, "normalized": 0.061 },
+            { "value": 17.0, "normalized": 0.129 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.829,
+          "normalized_score": 0.793,
+          "data": [
+            { "value": 49.0, "normalized": 0.662 },
+            { "value": 5.0, "normalized": 0.068 },
+            { "value": 18.0, "normalized": 0.243 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.772,
+          "normalized_score": 0.307,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 9.0, "normalized": 0.529 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.949,
+          "normalized_score": 0.513,
+          "data": [
+            { "value": 11.0, "normalized": 0.262 },
+            { "value": 9.0, "normalized": 0.214 },
+            { "value": 14.0, "normalized": 0.333 },
+            { "value": 8.0, "normalized": 0.191 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.384,
+          "normalized_score": 0.654,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0024": {
+      "scenario": "s0024",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.202,
+          "normalized_score": 0.449,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.736,
+          "normalized_score": 0.566,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.496,
+          "normalized_score": 0.626,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.08,
+          "normalized_score": 0.23,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.415,
+          "normalized_score": 0.646,
+          "data": [
+            { "value": 53.0, "normalized": 0.402 },
+            { "value": 55.0, "normalized": 0.417 },
+            { "value": 7.0, "normalized": 0.053 },
+            { "value": 17.0, "normalized": 0.129 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.815,
+          "normalized_score": 0.796,
+          "data": [
+            { "value": 50.0, "normalized": 0.676 },
+            { "value": 4.0, "normalized": 0.054 },
+            { "value": 18.0, "normalized": 0.243 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.778,
+          "normalized_score": 0.306,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 9.0, "normalized": 0.529 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.987,
+          "normalized_score": 0.503,
+          "data": [
+            { "value": 10.0, "normalized": 0.238 },
+            { "value": 9.0, "normalized": 0.214 },
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 8.0, "normalized": 0.191 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.311,
+          "normalized_score": 0.672,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0025": {
+      "scenario": "s0025",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.185,
+          "normalized_score": 0.454,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.707,
+          "normalized_score": 0.573,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.51,
+          "normalized_score": 0.622,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.88,
+          "normalized_score": 0.28,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.413,
+          "normalized_score": 0.647,
+          "data": [
+            { "value": 57.0, "normalized": 0.432 },
+            { "value": 48.0, "normalized": 0.364 },
+            { "value": 12.0, "normalized": 0.091 },
+            { "value": 15.0, "normalized": 0.114 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.72,
+          "normalized_score": 0.82,
+          "data": [
+            { "value": 52.0, "normalized": 0.703 },
+            { "value": 4.0, "normalized": 0.054 },
+            { "value": 16.0, "normalized": 0.216 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.771,
+          "normalized_score": 0.307,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 9.0, "normalized": 0.529 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.783,
+          "normalized_score": 0.554,
+          "data": [
+            { "value": 5.0, "normalized": 0.119 },
+            { "value": 14.0, "normalized": 0.333 },
+            { "value": 22.0, "normalized": 0.524 },
+            { "value": 1.0, "normalized": 0.024 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.259,
+          "normalized_score": 0.685,
+          "data": [
+            { "value": 6.0, "normalized": 0.75 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 },
+            { "value": 0.0, "normalized": 0.0 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0026": {
+      "scenario": "s0026",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.183,
+          "normalized_score": 0.454,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.725,
+          "normalized_score": 0.569,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.315,
+          "normalized_score": 0.671,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.01,
+          "normalized_score": 0.248,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.538,
+          "normalized_score": 0.615,
+          "data": [
+            { "value": 49.0, "normalized": 0.371 },
+            { "value": 48.0, "normalized": 0.364 },
+            { "value": 20.0, "normalized": 0.152 },
+            { "value": 15.0, "normalized": 0.114 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.731,
+          "normalized_score": 0.817,
+          "data": [
+            { "value": 51.0, "normalized": 0.689 },
+            { "value": 6.0, "normalized": 0.081 },
+            { "value": 15.0, "normalized": 0.203 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.667,
+          "normalized_score": 0.333,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.118 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.542,
+          "normalized_score": 0.615,
+          "data": [
+            { "value": 10.0, "normalized": 0.238 },
+            { "value": 17.0, "normalized": 0.405 },
+            { "value": 14.0, "normalized": 0.333 },
+            { "value": 1.0, "normalized": 0.024 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.122,
+          "normalized_score": 0.72,
+          "data": [
+            { "value": 6.0, "normalized": 0.75 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0027": {
+      "scenario": "s0027",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.17,
+          "normalized_score": 0.458,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.695,
+          "normalized_score": 0.576,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.471,
+          "normalized_score": 0.632,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.91,
+          "normalized_score": 0.272,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.537,
+          "normalized_score": 0.616,
+          "data": [
+            { "value": 41.0, "normalized": 0.311 },
+            { "value": 60.0, "normalized": 0.455 },
+            { "value": 15.0, "normalized": 0.114 },
+            { "value": 16.0, "normalized": 0.121 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.77,
+          "normalized_score": 0.807,
+          "data": [
+            { "value": 50.0, "normalized": 0.676 },
+            { "value": 4.0, "normalized": 0.054 },
+            { "value": 18.0, "normalized": 0.243 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.765,
+          "normalized_score": 0.309,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 9.0, "normalized": 0.529 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.745,
+          "normalized_score": 0.564,
+          "data": [
+            { "value": 6.0, "normalized": 0.143 },
+            { "value": 14.0, "normalized": 0.333 },
+            { "value": 21.0, "normalized": 0.5 },
+            { "value": 1.0, "normalized": 0.024 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.226,
+          "normalized_score": 0.693,
+          "data": [
+            { "value": 6.0, "normalized": 0.75 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 },
+            { "value": 0.0, "normalized": 0.0 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0028": {
+      "scenario": "s0028",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.159,
+          "normalized_score": 0.46,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.533,
+          "normalized_score": 0.617,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 1.989,
+          "normalized_score": 0.753,
+          "level": 1
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.79,
+          "normalized_score": 0.302,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 3.182,
+          "normalized_score": 0.454,
+          "data": [
+            { "value": 16.0, "normalized": 0.121 },
+            { "value": 42.0, "normalized": 0.318 },
+            { "value": 36.0, "normalized": 0.273 },
+            { "value": 38.0, "normalized": 0.288 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.666,
+          "normalized_score": 0.834,
+          "data": [
+            { "value": 54.0, "normalized": 0.73 },
+            { "value": 4.0, "normalized": 0.054 },
+            { "value": 14.0, "normalized": 0.189 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.658,
+          "normalized_score": 0.336,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.118 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.257,
+          "normalized_score": 0.686,
+          "data": [
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 11.0, "normalized": 0.262 },
+            { "value": 1.0, "normalized": 0.024 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.021,
+          "normalized_score": 0.745,
+          "data": [
+            { "value": 6.0, "normalized": 0.75 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0030": {
+      "scenario": "s0030",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.016,
+          "normalized_score": 0.496,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 1.107,
+          "normalized_score": 0.973,
+          "level": 1
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.516,
+          "normalized_score": 0.621,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.84,
+          "normalized_score": 0.29,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.3,
+          "normalized_score": 0.675,
+          "data": [
+            { "value": 61.0, "normalized": 0.462 },
+            { "value": 48.0, "normalized": 0.364 },
+            { "value": 11.0, "normalized": 0.083 },
+            { "value": 12.0, "normalized": 0.091 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.65,
+          "normalized_score": 0.837,
+          "data": [
+            { "value": 55.0, "normalized": 0.743 },
+            { "value": 3.0, "normalized": 0.041 },
+            { "value": 14.0, "normalized": 0.189 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.554,
+          "normalized_score": 0.362,
+          "data": [
+            { "value": 2.0, "normalized": 0.118 },
+            { "value": 2.0, "normalized": 0.118 },
+            { "value": 4.0, "normalized": 0.235 },
+            { "value": 9.0, "normalized": 0.529 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.729,
+          "normalized_score": 0.568,
+          "data": [
+            { "value": 6.0, "normalized": 0.143 },
+            { "value": 16.0, "normalized": 0.381 },
+            { "value": 17.0, "normalized": 0.405 },
+            { "value": 3.0, "normalized": 0.071 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.199,
+          "normalized_score": 0.7,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0031": {
+      "scenario": "s0031",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.152,
+          "normalized_score": 0.462,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.334,
+          "normalized_score": 0.667,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 1.32,
+          "normalized_score": 0.92,
+          "level": 1
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.74,
+          "normalized_score": 0.315,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.537,
+          "normalized_score": 0.616,
+          "data": [
+            { "value": 48.0, "normalized": 0.364 },
+            { "value": 51.0, "normalized": 0.386 },
+            { "value": 12.0, "normalized": 0.091 },
+            { "value": 21.0, "normalized": 0.159 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.702,
+          "normalized_score": 0.825,
+          "data": [
+            { "value": 51.0, "normalized": 0.689 },
+            { "value": 7.0, "normalized": 0.095 },
+            { "value": 13.0, "normalized": 0.176 },
+            { "value": 3.0, "normalized": 0.041 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.507,
+          "normalized_score": 0.373,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 5.0, "normalized": 0.294 },
+            { "value": 5.0, "normalized": 0.294 },
+            { "value": 7.0, "normalized": 0.412 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.889,
+          "normalized_score": 0.528,
+          "data": [
+            { "value": 5.0, "normalized": 0.119 },
+            { "value": 12.0, "normalized": 0.286 },
+            { "value": 21.0, "normalized": 0.5 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.404,
+          "normalized_score": 0.649,
+          "data": [
+            { "value": 6.0, "normalized": 0.75 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0031-R": {
+      "scenario": "s0031-R",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.152,
+          "normalized_score": 0.462,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.334,
+          "normalized_score": 0.667,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 1.32,
+          "normalized_score": 0.92,
+          "level": 1
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.54,
+          "normalized_score": 0.365,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.537,
+          "normalized_score": 0.616,
+          "data": [
+            { "value": 48.0, "normalized": 0.364 },
+            { "value": 51.0, "normalized": 0.386 },
+            { "value": 12.0, "normalized": 0.091 },
+            { "value": 21.0, "normalized": 0.159 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.702,
+          "normalized_score": 0.825,
+          "data": [
+            { "value": 51.0, "normalized": 0.689 },
+            { "value": 7.0, "normalized": 0.095 },
+            { "value": 13.0, "normalized": 0.176 },
+            { "value": 3.0, "normalized": 0.041 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.507,
+          "normalized_score": 0.373,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 5.0, "normalized": 0.294 },
+            { "value": 5.0, "normalized": 0.294 },
+            { "value": 7.0, "normalized": 0.412 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.889,
+          "normalized_score": 0.528,
+          "data": [
+            { "value": 5.0, "normalized": 0.119 },
+            { "value": 12.0, "normalized": 0.286 },
+            { "value": 21.0, "normalized": 0.5 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.404,
+          "normalized_score": 0.649,
+          "data": [
+            { "value": 6.0, "normalized": 0.75 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0032": {
+      "scenario": "s0032",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.015,
+          "normalized_score": 0.496,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 1.154,
+          "normalized_score": 0.962,
+          "level": 1
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 3.216,
+          "normalized_score": 0.446,
+          "level": 3
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.3,
+          "normalized_score": 0.175,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 3.366,
+          "normalized_score": 0.409,
+          "data": [
+            { "value": 9.0, "normalized": 0.068 },
+            { "value": 36.0, "normalized": 0.273 },
+            { "value": 44.0, "normalized": 0.333 },
+            { "value": 43.0, "normalized": 0.326 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.86,
+          "normalized_score": 0.785,
+          "data": [
+            { "value": 49.0, "normalized": 0.662 },
+            { "value": 2.0, "normalized": 0.027 },
+            { "value": 20.0, "normalized": 0.27 },
+            { "value": 3.0, "normalized": 0.041 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 1.569,
+          "normalized_score": 0.858,
+          "data": [
+            { "value": 13.0, "normalized": 0.765 },
+            { "value": 3.0, "normalized": 0.177 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.382,
+          "normalized_score": 0.655,
+          "data": [
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 12.0, "normalized": 0.286 },
+            { "value": 14.0, "normalized": 0.333 },
+            { "value": 1.0, "normalized": 0.024 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 3.646,
+          "normalized_score": 0.339,
+          "data": [
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 6.0, "normalized": 0.75 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0032-R": {
+      "scenario": "s0032-R",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.015,
+          "normalized_score": 0.496,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 1.154,
+          "normalized_score": 0.962,
+          "level": 1
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 3.216,
+          "normalized_score": 0.446,
+          "level": 3
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.56,
+          "normalized_score": 0.36,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 3.366,
+          "normalized_score": 0.409,
+          "data": [
+            { "value": 9.0, "normalized": 0.068 },
+            { "value": 36.0, "normalized": 0.273 },
+            { "value": 44.0, "normalized": 0.333 },
+            { "value": 43.0, "normalized": 0.326 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.86,
+          "normalized_score": 0.785,
+          "data": [
+            { "value": 49.0, "normalized": 0.662 },
+            { "value": 2.0, "normalized": 0.027 },
+            { "value": 20.0, "normalized": 0.27 },
+            { "value": 3.0, "normalized": 0.041 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 1.569,
+          "normalized_score": 0.858,
+          "data": [
+            { "value": 13.0, "normalized": 0.765 },
+            { "value": 3.0, "normalized": 0.177 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.382,
+          "normalized_score": 0.655,
+          "data": [
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 12.0, "normalized": 0.286 },
+            { "value": 14.0, "normalized": 0.333 },
+            { "value": 1.0, "normalized": 0.024 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 3.646,
+          "normalized_score": 0.339,
+          "data": [
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 6.0, "normalized": 0.75 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0033": {
+      "scenario": "s0033",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.101,
+          "normalized_score": 0.475,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.324,
+          "normalized_score": 0.669,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 1.001,
+          "normalized_score": 1.0,
+          "level": 1
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.42,
+          "normalized_score": 0.395,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 3.44,
+          "normalized_score": 0.39,
+          "data": [
+            { "value": 10.0, "normalized": 0.076 },
+            { "value": 30.0, "normalized": 0.227 },
+            { "value": 45.0, "normalized": 0.341 },
+            { "value": 47.0, "normalized": 0.356 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.617,
+          "normalized_score": 0.846,
+          "data": [
+            { "value": 54.0, "normalized": 0.73 },
+            { "value": 5.0, "normalized": 0.068 },
+            { "value": 12.0, "normalized": 0.162 },
+            { "value": 3.0, "normalized": 0.041 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.401,
+          "normalized_score": 0.4,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 5.0, "normalized": 0.294 },
+            { "value": 6.0, "normalized": 0.353 },
+            { "value": 6.0, "normalized": 0.353 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.458,
+          "normalized_score": 0.635,
+          "data": [
+            { "value": 11.0, "normalized": 0.262 },
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 1.0, "normalized": 0.024 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.212,
+          "normalized_score": 0.697,
+          "data": [
+            { "value": 6.0, "normalized": 0.75 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0033-R": {
+      "scenario": "s0033-R",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.101,
+          "normalized_score": 0.475,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.324,
+          "normalized_score": 0.669,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 1.001,
+          "normalized_score": 1.0,
+          "level": 1
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.37,
+          "normalized_score": 0.407,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 3.44,
+          "normalized_score": 0.39,
+          "data": [
+            { "value": 10.0, "normalized": 0.076 },
+            { "value": 30.0, "normalized": 0.227 },
+            { "value": 45.0, "normalized": 0.341 },
+            { "value": 47.0, "normalized": 0.356 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.617,
+          "normalized_score": 0.846,
+          "data": [
+            { "value": 54.0, "normalized": 0.73 },
+            { "value": 5.0, "normalized": 0.068 },
+            { "value": 12.0, "normalized": 0.162 },
+            { "value": 3.0, "normalized": 0.041 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.401,
+          "normalized_score": 0.4,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 5.0, "normalized": 0.294 },
+            { "value": 6.0, "normalized": 0.353 },
+            { "value": 6.0, "normalized": 0.353 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.458,
+          "normalized_score": 0.635,
+          "data": [
+            { "value": 11.0, "normalized": 0.262 },
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 1.0, "normalized": 0.024 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.212,
+          "normalized_score": 0.697,
+          "data": [
+            { "value": 6.0, "normalized": 0.75 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0035": {
+      "scenario": "s0035",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.199,
+          "normalized_score": 0.45,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.774,
+          "normalized_score": 0.557,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.732,
+          "normalized_score": 0.567,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.47,
+          "normalized_score": 0.133,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.338,
+          "normalized_score": 0.666,
+          "data": [
+            { "value": 58.0, "normalized": 0.439 },
+            { "value": 51.0, "normalized": 0.386 },
+            { "value": 9.0, "normalized": 0.068 },
+            { "value": 14.0, "normalized": 0.106 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.54,
+          "normalized_score": 0.865,
+          "data": [
+            { "value": 56.0, "normalized": 0.757 },
+            { "value": 11.0, "normalized": 0.149 },
+            { "value": 5.0, "normalized": 0.068 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.72,
+          "normalized_score": 0.32,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 8.0, "normalized": 0.471 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.771,
+          "normalized_score": 0.557,
+          "data": [
+            { "value": 10.0, "normalized": 0.238 },
+            { "value": 11.0, "normalized": 0.262 },
+            { "value": 17.0, "normalized": 0.405 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.423,
+          "normalized_score": 0.644,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0037": {
+      "scenario": "s0037",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.201,
+          "normalized_score": 0.45,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.754,
+          "normalized_score": 0.562,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.684,
+          "normalized_score": 0.579,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.03,
+          "normalized_score": 0.242,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.324,
+          "normalized_score": 0.669,
+          "data": [
+            { "value": 59.0, "normalized": 0.447 },
+            { "value": 51.0, "normalized": 0.386 },
+            { "value": 8.0, "normalized": 0.061 },
+            { "value": 14.0, "normalized": 0.106 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.697,
+          "normalized_score": 0.826,
+          "data": [
+            { "value": 52.0, "normalized": 0.703 },
+            { "value": 4.0, "normalized": 0.054 },
+            { "value": 16.0, "normalized": 0.216 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.724,
+          "normalized_score": 0.319,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 8.0, "normalized": 0.471 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.766,
+          "normalized_score": 0.558,
+          "data": [
+            { "value": 10.0, "normalized": 0.238 },
+            { "value": 12.0, "normalized": 0.286 },
+            { "value": 16.0, "normalized": 0.381 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.414,
+          "normalized_score": 0.646,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 2.0, "normalized": 0.25 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0039": {
+      "scenario": "s0039",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.061,
+          "normalized_score": 0.485,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 1.925,
+          "normalized_score": 0.769,
+          "level": 1
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 4.269,
+          "normalized_score": 0.183,
+          "level": 4
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.1,
+          "normalized_score": 0.225,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.497,
+          "normalized_score": 0.626,
+          "data": [
+            { "value": 48.0, "normalized": 0.364 },
+            { "value": 50.0, "normalized": 0.379 },
+            { "value": 17.0, "normalized": 0.129 },
+            { "value": 17.0, "normalized": 0.129 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.99,
+          "normalized_score": 0.753,
+          "data": [
+            { "value": 46.0, "normalized": 0.622 },
+            { "value": 7.0, "normalized": 0.095 },
+            { "value": 14.0, "normalized": 0.189 },
+            { "value": 7.0, "normalized": 0.095 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.806,
+          "normalized_score": 0.299,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 9.0, "normalized": 0.529 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 3.117,
+          "normalized_score": 0.471,
+          "data": [
+            { "value": 8.0, "normalized": 0.191 },
+            { "value": 8.0, "normalized": 0.191 },
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 11.0, "normalized": 0.262 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.728,
+          "normalized_score": 0.568,
+          "data": [
+            { "value": 4.0, "normalized": 0.5 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 2.0, "normalized": 0.25 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0040": {
+      "scenario": "s0040",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.143,
+          "normalized_score": 0.464,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 1.925,
+          "normalized_score": 0.769,
+          "level": 1
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 4.188,
+          "normalized_score": 0.203,
+          "level": 4
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.92,
+          "normalized_score": 0.27,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.467,
+          "normalized_score": 0.633,
+          "data": [
+            { "value": 50.0, "normalized": 0.379 },
+            { "value": 53.0, "normalized": 0.402 },
+            { "value": 12.0, "normalized": 0.091 },
+            { "value": 17.0, "normalized": 0.129 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.923,
+          "normalized_score": 0.769,
+          "data": [
+            { "value": 47.0, "normalized": 0.635 },
+            { "value": 7.0, "normalized": 0.095 },
+            { "value": 17.0, "normalized": 0.23 },
+            { "value": 3.0, "normalized": 0.041 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.781,
+          "normalized_score": 0.305,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 9.0, "normalized": 0.529 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 3.078,
+          "normalized_score": 0.48,
+          "data": [
+            { "value": 8.0, "normalized": 0.191 },
+            { "value": 10.0, "normalized": 0.238 },
+            { "value": 13.0, "normalized": 0.31 },
+            { "value": 11.0, "normalized": 0.262 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.195,
+          "normalized_score": 0.701,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 2.0, "normalized": 0.25 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0041": {
+      "scenario": "s0041",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.124,
+          "normalized_score": 0.469,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 1.903,
+          "normalized_score": 0.774,
+          "level": 1
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 4.207,
+          "normalized_score": 0.198,
+          "level": 4
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.99,
+          "normalized_score": 0.252,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.487,
+          "normalized_score": 0.628,
+          "data": [
+            { "value": 49.0, "normalized": 0.371 },
+            { "value": 50.0, "normalized": 0.379 },
+            { "value": 16.0, "normalized": 0.121 },
+            { "value": 17.0, "normalized": 0.129 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.941,
+          "normalized_score": 0.765,
+          "data": [
+            { "value": 46.0, "normalized": 0.622 },
+            { "value": 8.0, "normalized": 0.108 },
+            { "value": 15.0, "normalized": 0.203 },
+            { "value": 5.0, "normalized": 0.068 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.785,
+          "normalized_score": 0.304,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 9.0, "normalized": 0.529 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 3.112,
+          "normalized_score": 0.472,
+          "data": [
+            { "value": 8.0, "normalized": 0.191 },
+            { "value": 8.0, "normalized": 0.191 },
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 11.0, "normalized": 0.262 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.291,
+          "normalized_score": 0.677,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 2.0, "normalized": 0.25 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0042": {
+      "scenario": "s0042",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.105,
+          "normalized_score": 0.474,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 1.898,
+          "normalized_score": 0.775,
+          "level": 1
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 4.234,
+          "normalized_score": 0.191,
+          "level": 4
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.2,
+          "normalized_score": 0.2,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.481,
+          "normalized_score": 0.63,
+          "data": [
+            { "value": 49.0, "normalized": 0.371 },
+            { "value": 51.0, "normalized": 0.386 },
+            { "value": 15.0, "normalized": 0.114 },
+            { "value": 17.0, "normalized": 0.129 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.963,
+          "normalized_score": 0.759,
+          "data": [
+            { "value": 46.0, "normalized": 0.622 },
+            { "value": 7.0, "normalized": 0.095 },
+            { "value": 15.0, "normalized": 0.203 },
+            { "value": 6.0, "normalized": 0.081 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.781,
+          "normalized_score": 0.305,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 9.0, "normalized": 0.529 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 3.117,
+          "normalized_score": 0.471,
+          "data": [
+            { "value": 8.0, "normalized": 0.191 },
+            { "value": 8.0, "normalized": 0.191 },
+            { "value": 15.0, "normalized": 0.357 },
+            { "value": 11.0, "normalized": 0.262 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.515,
+          "normalized_score": 0.621,
+          "data": [
+            { "value": 4.0, "normalized": 0.5 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 2.0, "normalized": 0.25 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0044": {
+      "scenario": "s0044",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.183,
+          "normalized_score": 0.454,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.628,
+          "normalized_score": 0.593,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 3.169,
+          "normalized_score": 0.458,
+          "level": 3
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.87,
+          "normalized_score": 0.282,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.367,
+          "normalized_score": 0.658,
+          "data": [
+            { "value": 51.0, "normalized": 0.386 },
+            { "value": 57.0, "normalized": 0.432 },
+            { "value": 10.0, "normalized": 0.076 },
+            { "value": 14.0, "normalized": 0.106 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.888,
+          "normalized_score": 0.778,
+          "data": [
+            { "value": 47.0, "normalized": 0.635 },
+            { "value": 6.0, "normalized": 0.081 },
+            { "value": 18.0, "normalized": 0.243 },
+            { "value": 3.0, "normalized": 0.041 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.732,
+          "normalized_score": 0.317,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 8.0, "normalized": 0.471 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.822,
+          "normalized_score": 0.545,
+          "data": [
+            { "value": 9.0, "normalized": 0.214 },
+            { "value": 12.0, "normalized": 0.286 },
+            { "value": 17.0, "normalized": 0.405 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.104,
+          "normalized_score": 0.724,
+          "data": [
+            { "value": 6.0, "normalized": 0.75 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0045": {
+      "scenario": "s0045",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.176,
+          "normalized_score": 0.456,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 3.153,
+          "normalized_score": 0.462,
+          "level": 3
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.396,
+          "normalized_score": 0.651,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.12,
+          "normalized_score": 0.22,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.324,
+          "normalized_score": 0.669,
+          "data": [
+            { "value": 59.0, "normalized": 0.447 },
+            { "value": 51.0, "normalized": 0.386 },
+            { "value": 8.0, "normalized": 0.061 },
+            { "value": 14.0, "normalized": 0.106 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.748,
+          "normalized_score": 0.813,
+          "data": [
+            { "value": 51.0, "normalized": 0.689 },
+            { "value": 5.0, "normalized": 0.068 },
+            { "value": 16.0, "normalized": 0.216 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.719,
+          "normalized_score": 0.32,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 8.0, "normalized": 0.471 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.776,
+          "normalized_score": 0.556,
+          "data": [
+            { "value": 8.0, "normalized": 0.191 },
+            { "value": 14.0, "normalized": 0.333 },
+            { "value": 16.0, "normalized": 0.381 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.375,
+          "normalized_score": 0.656,
+          "data": [
+            { "value": 5.0, "normalized": 0.625 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0046": {
+      "scenario": "s0046",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.111,
+          "normalized_score": 0.472,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.484,
+          "normalized_score": 0.629,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.864,
+          "normalized_score": 0.534,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 4.42,
+          "normalized_score": 0.145,
+          "level": 4
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.595,
+          "normalized_score": 0.601,
+          "data": [
+            { "value": 51.0, "normalized": 0.386 },
+            { "value": 42.0, "normalized": 0.318 },
+            { "value": 19.0, "normalized": 0.144 },
+            { "value": 20.0, "normalized": 0.152 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.836,
+          "normalized_score": 0.791,
+          "data": [
+            { "value": 48.0, "normalized": 0.649 },
+            { "value": 6.0, "normalized": 0.081 },
+            { "value": 18.0, "normalized": 0.243 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 1.698,
+          "normalized_score": 0.825,
+          "data": [
+            { "value": 9.0, "normalized": 0.529 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 0.0, "normalized": 0.0 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.8,
+          "normalized_score": 0.55,
+          "data": [
+            { "value": 9.0, "normalized": 0.214 },
+            { "value": 11.0, "normalized": 0.262 },
+            { "value": 18.0, "normalized": 0.429 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 3.603,
+          "normalized_score": 0.349,
+          "data": [
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 5.0, "normalized": 0.625 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0046-R": {
+      "scenario": "s0046-R",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.111,
+          "normalized_score": 0.472,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.484,
+          "normalized_score": 0.629,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 2.864,
+          "normalized_score": 0.534,
+          "level": 2
+        },
+        "WRC_SALMON_AB": {
+          "name": "Salmon abundance",
+          "type": "single_value",
+          "average_score": 3.62,
+          "normalized_score": 0.345,
+          "level": 3
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.595,
+          "normalized_score": 0.601,
+          "data": [
+            { "value": 51.0, "normalized": 0.386 },
+            { "value": 42.0, "normalized": 0.318 },
+            { "value": 19.0, "normalized": 0.144 },
+            { "value": 20.0, "normalized": 0.152 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.836,
+          "normalized_score": 0.791,
+          "data": [
+            { "value": 48.0, "normalized": 0.649 },
+            { "value": 6.0, "normalized": 0.081 },
+            { "value": 18.0, "normalized": 0.243 },
+            { "value": 2.0, "normalized": 0.027 }
+          ],
+          "total": 74
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 1.698,
+          "normalized_score": 0.825,
+          "data": [
+            { "value": 9.0, "normalized": 0.529 },
+            { "value": 7.0, "normalized": 0.412 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 0.0, "normalized": 0.0 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.8,
+          "normalized_score": 0.55,
+          "data": [
+            { "value": 9.0, "normalized": 0.214 },
+            { "value": 11.0, "normalized": 0.262 },
+            { "value": 18.0, "normalized": 0.429 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 3.603,
+          "normalized_score": 0.349,
+          "data": [
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 5.0, "normalized": 0.625 }
+          ],
+          "total": 8
+        }
+      }
+    },
+    "s0065": {
+      "scenario": "s0065",
+      "tiers": {
+        "DELTA_ECO": {
+          "name": "Delta ecology",
+          "type": "single_value",
+          "average_score": 3.233,
+          "normalized_score": 0.442,
+          "level": 3
+        },
+        "FW_DELTA_USES": {
+          "name": "Freshwater for in-Delta uses",
+          "type": "single_value",
+          "average_score": 2.772,
+          "normalized_score": 0.557,
+          "level": 2
+        },
+        "FW_EXP": {
+          "name": "Freshwater for Delta exports",
+          "type": "single_value",
+          "average_score": 1.931,
+          "normalized_score": 0.767,
+          "level": 1
+        },
+        "AG_REV": {
+          "name": "Agricultural revenue",
+          "type": "multi_value",
+          "average_score": 2.696,
+          "normalized_score": 0.576,
+          "data": [
+            { "value": 25.0, "normalized": 0.189 },
+            { "value": 59.0, "normalized": 0.447 },
+            { "value": 29.0, "normalized": 0.22 },
+            { "value": 19.0, "normalized": 0.144 }
+          ],
+          "total": 132
+        },
+        "CWS_DEL": {
+          "name": "Community water system deliveries",
+          "type": "multi_value",
+          "average_score": 1.946,
+          "normalized_score": 0.763,
+          "data": [
+            { "value": 43.0, "normalized": 0.589 },
+            { "value": 7.0, "normalized": 0.096 },
+            { "value": 20.0, "normalized": 0.274 },
+            { "value": 3.0, "normalized": 0.041 }
+          ],
+          "total": 73
+        },
+        "ENV_FLOWS": {
+          "name": "Environmental flows",
+          "type": "multi_value",
+          "average_score": 3.745,
+          "normalized_score": 0.314,
+          "data": [
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.059 },
+            { "value": 8.0, "normalized": 0.471 },
+            { "value": 8.0, "normalized": 0.471 }
+          ],
+          "total": 17
+        },
+        "GW_STOR": {
+          "name": "Groundwater storage",
+          "type": "multi_value",
+          "average_score": 2.677,
+          "normalized_score": 0.581,
+          "data": [
+            { "value": 11.0, "normalized": 0.262 },
+            { "value": 13.0, "normalized": 0.31 },
+            { "value": 14.0, "normalized": 0.333 },
+            { "value": 4.0, "normalized": 0.095 }
+          ],
+          "total": 42
+        },
+        "RES_STOR": {
+          "name": "Reservoir storage",
+          "type": "multi_value",
+          "average_score": 2.176,
+          "normalized_score": 0.706,
+          "data": [
+            { "value": 6.0, "normalized": 0.75 },
+            { "value": 1.0, "normalized": 0.125 },
+            { "value": 0.0, "normalized": 0.0 },
+            { "value": 1.0, "normalized": 0.125 }
+          ],
+          "total": 8
+        }
+      }
+    }
+  },
+  "count": 28
+}

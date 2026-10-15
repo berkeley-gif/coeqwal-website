@@ -258,7 +258,10 @@ const BEAT4_ACTORS: ActorGroup = {
     {
       kind: "overlayPopup",
       id: "loi-highlight:overlayPopup:ring",
-      window: [LOI_SQUARE_RING_AT, LOI_SETTLE],
+      // Ends at LOI_TAIL_END, not LOI_SETTLE: the beat rests exactly on
+      // LOI_SETTLE and a window's end is exclusive, so ending there would
+      // switch the highlight off the moment the beat settles.
+      window: [LOI_SQUARE_RING_AT, LOI_TAIL_END],
       target: "ring",
       buildInfo: (ctx) => resolveLoiData(ctx)?.info ?? null,
     },
@@ -266,7 +269,7 @@ const BEAT4_ACTORS: ActorGroup = {
     {
       kind: "overlayPopup",
       id: "loi-highlight:overlayPopup:hover",
-      window: [LOI_SQUARE_POPUP_AT, LOI_SETTLE],
+      window: [LOI_SQUARE_POPUP_AT, LOI_TAIL_END],
       target: "hover",
       buildInfo: (ctx) => resolveLoiData(ctx)?.info ?? null,
     },
@@ -274,7 +277,7 @@ const BEAT4_ACTORS: ActorGroup = {
     {
       kind: "mapPaint",
       id: "loi-highlight:mapPaint:polyRing",
-      window: [LOI_POLYGON_RING_AT, LOI_SETTLE],
+      window: [LOI_POLYGON_RING_AT, LOI_TAIL_END],
       payload: {
         kind: "loi-gold-ring",
         loiDuId: LOI_DU_ID,

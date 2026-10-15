@@ -26,7 +26,7 @@ export const EQUITY_TOUR: TourStep[] = [
     anchorId: "equity.controls.chartControlsBar",
     eyebrow: "chart controls",
     title: "These controls configure the chart.",
-    body: "Click on the buttons to change how data on the tier grid is displayed.",
+    body: "Click on the buttons to change how data on the outcome level grid is displayed.",
     placement: "bottom",
   },
   {

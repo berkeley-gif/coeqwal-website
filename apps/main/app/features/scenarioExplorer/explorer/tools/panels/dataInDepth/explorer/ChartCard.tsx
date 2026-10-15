@@ -28,7 +28,6 @@ import {
   type SummaryMember,
 } from "../hooks/interpretiveText"
 import { WYT_LABELS } from "../config/wytFilter"
-import { MOCK_YEARS } from "../config/mockDataEngine"
 import {
   axisLabelFor,
   buildStatsPanels,
@@ -39,6 +38,7 @@ import {
 import { SaveSnapshotButton } from "../../../chrome/actions/SaveSnapshotButton"
 import { InlineTourAnchor, useTourAnchor } from "../../../tour"
 import { useDataShareCapture } from "../hooks/useDataShareCapture"
+import { MODEL_RESULTS_LOAD_ERROR } from "../../../components/loadErrorText"
 
 const CHART_HEIGHT = 340
 
@@ -95,8 +95,6 @@ export default function ChartCard() {
     cursor: "help",
   } as const
 
-  const liveMemberCount = data.members.filter((m) => m.isLive).length
-
   const summaryMembers: SummaryMember[] = data.members.map((m) => ({
     id: m.id,
     label: m.label,
@@ -106,6 +104,7 @@ export default function ChartCard() {
     isLive: m.isLive,
     liveDataMissing: m.liveDataMissing,
     pending: m.pending,
+    loadFailed: m.loadFailed,
   }))
 
   const ctx: SummaryContext = {
@@ -125,29 +124,26 @@ export default function ChartCard() {
   const yLabel = axisLabelFor(data.variable, data.view, data.unit)
   const hasMembers = data.members.length > 0
 
-  // Members whose scenario is not modeled for this variable keep their legend
-  // entry (with a "no data" chip and an explanation) but are NOT drawn. Their
-  // series exists only because the sample engine always produces one, and
-  // drawing it would put a fabricated curve on a chart labeled "Live data".
-  // A member whose live request is still in flight is held back the same
-  // way (legend chip "loading") so the stand-in never shows, even briefly.
+  // Only members carrying served model results are drawn. A member that is
+  // not modeled for this variable ("no data"), still loading ("loading"), or
+  // whose request failed ("could not load") keeps its legend entry with a
+  // chip but never draws: its series is the sample engine's stand-in.
   // Colors are positional, so the subset carries its own aligned colors.
   const plotted = data.members
     .map((m, i) => ({ member: m, color: memberColors[i] ?? "" }))
-    .filter((p) => !p.member.liveDataMissing && !p.member.pending)
+    .filter((p) => p.member.isLive === true)
   const plottedMembers = plotted.map((p) => p.member)
   const plottedColors = plotted.map((p) => p.color)
   const hasPlotted = plottedMembers.length > 0
   const anyPending = data.members.some((m) => m.pending)
+  const anyFailed = data.members.some((m) => m.loadFailed)
   const missingMembers = data.members.filter((m) => m.liveDataMissing)
   // One visible line, in addition to the per-curve chip, whenever a compared
   // member is not modeled for this variable and the chart still draws others.
   const noDataNotice =
     hasPlotted && missingMembers.length > 0
       ? (data.variable?.noLiveDataExplanation ??
-        `Live data is not available for ${missingMembers
-          .map((m) => m.label)
-          .join(", ")}.`)
+        `No data for ${missingMembers.map((m) => m.label).join(", ")}.`)
       : null
 
   // Dev-only (NEXT_PUBLIC_PERF_LOG=1): approximate when the explorer chart
@@ -193,6 +189,24 @@ export default function ChartCard() {
         <Typography variant="body2">Loading model results.</Typography>
       </Box>
     )
+  } else if (!hasPlotted && anyFailed) {
+    // A request failed: say so, rather than reporting the scenario as not
+    // modeled for this variable.
+    chart = (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: CHART_HEIGHT,
+          color: theme.palette.grey[600],
+          px: 3,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="body2">{MODEL_RESULTS_LOAD_ERROR}</Typography>
+      </Box>
+    )
   } else if (!hasMembers || !hasPlotted) {
     chart = (
       <Box
@@ -209,7 +223,7 @@ export default function ChartCard() {
         <Typography variant="body2">
           {hasMembers
             ? (data.variable?.noLiveDataExplanation ??
-              "Live data is not available for the selected scenarios.")
+              "No data for the selected scenarios.")
             : "Nothing to compare yet. Pick members in the controls above."}
         </Typography>
       </Box>
@@ -285,8 +299,22 @@ export default function ChartCard() {
     )
   }
 
+  // What the chart area shows: model results, a loading note, a load-error
+  // note, a no-data note, or a reason the view does not apply. Exposed for
+  // tests.
+  const chartState = data.unavailableReason
+    ? "unavailable"
+    : hasPlotted
+      ? "drawn"
+      : anyPending
+        ? "loading"
+        : anyFailed
+          ? "error"
+          : "no-data"
+
   return (
     <Box
+      data-did-chart-state={chartState}
       sx={{
         border: `1px solid ${theme.palette.divider}`,
         borderRadius: 2,
@@ -294,26 +322,8 @@ export default function ChartCard() {
         backgroundColor: theme.palette.background.paper,
       }}
     >
-      {/* Data-source labels */}
+      {/* Provisional flag and the save button */}
       <Box sx={{ display: "flex", gap: 1, mb: 1.5, flexWrap: "wrap" }}>
-        {/* Nothing is claimed when nothing is shown, or not yet known */}
-        {!data.unavailableReason && !(anyPending && !hasPlotted) && (
-          <Chip
-            size="small"
-            label={data.source === "live" ? "Live data" : "Sample data"}
-            sx={{
-              backgroundColor:
-                data.source === "live"
-                  ? theme.palette.info.light
-                  : theme.palette.grey[100],
-              color:
-                data.source === "live"
-                  ? theme.palette.info.dark
-                  : theme.palette.grey[600],
-              fontWeight: 600,
-            }}
-          />
-        )}
         {data.provisional && (
           <Tooltip title="Scope still under discussion (deck vs. outcomes sheet)">
             <Chip
@@ -435,39 +445,32 @@ export default function ChartCard() {
                   reference
                 </Box>
               )}
-              {/* Per-curve provenance. The chart-level badge above describes
-                  the figure as a whole; once one series is live and another
-                  is not, only a per-curve label is honest. "No data" and
-                  "sample" are deliberately different words: the first means
-                  the scenario is not modeled for this variable at all, the
-                  second means it is not wired to live data yet. */}
+              {/* Per-curve state: still loading, failed to load, or no model
+                  results to show (the site never draws a stand-in). */}
               {m.pending ? (
                 <Tooltip title="Waiting for model results for this series.">
                   <Box component="span" sx={memberChipSx}>
                     loading
                   </Box>
                 </Tooltip>
+              ) : m.loadFailed ? (
+                <Tooltip title="Model results for this series could not be loaded.">
+                  <Box component="span" sx={memberChipSx}>
+                    could not load
+                  </Box>
+                </Tooltip>
               ) : m.liveDataMissing ? (
                 <Tooltip
                   title={
                     data.variable?.noLiveDataExplanation ??
-                    "Live data is not available for this scenario."
+                    "No model results for this scenario here."
                   }
                 >
                   <Box component="span" sx={memberChipSx}>
                     no data
                   </Box>
                 </Tooltip>
-              ) : (
-                data.mixedSource &&
-                !m.isLive && (
-                  <Tooltip title="This series is sample data, not model results.">
-                    <Box component="span" sx={memberChipSx}>
-                      sample
-                    </Box>
-                  </Tooltip>
-                )
-              )}
+              ) : null}
             </Box>
           ))}
         </Box>
@@ -484,25 +487,6 @@ export default function ChartCard() {
           }}
         >
           {data.variable.footnote}
-        </Typography>
-      )}
-
-      {/* Provenance note */}
-      {!data.unavailableReason && (
-        <Typography
-          variant="caption"
-          sx={{
-            display: "block",
-            mt: 1.5,
-            color: theme.palette.grey[500],
-            fontStyle: "italic",
-          }}
-        >
-          {data.source === "live"
-            ? data.mixedSource
-              ? `Live data from api.coeqwal.org (CalSim3 post-processed annual series) for ${liveMemberCount} of ${data.members.length} series; see the legend for series shown as sample or without data.`
-              : "Live data from api.coeqwal.org (CalSim3 post-processed annual series)."
-            : `Sample data (${MOCK_YEARS} simulated years, seeded): illustrative structure that mimics CalSim3 post-processed output, not model results.`}
         </Typography>
       )}
     </Box>

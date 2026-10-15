@@ -47,7 +47,16 @@
 
 import React, { useCallback, useEffect, useMemo } from "react"
 import { Box, Popper, Portal, useTheme } from "@repo/ui/mui"
-import { useExplorerStore, useWorkspaceSlice } from "../../../store"
+import {
+  useExplorerStore,
+  useRadarSlice,
+  useResilienceSlice,
+  useWorkspaceSlice,
+} from "../../../store"
+import {
+  getIsTourExample,
+  TOUR_EXAMPLE_NOTE,
+} from "../../components/scenarioPrompt"
 import { TOUR_MODULES } from "../toolToTourMap"
 import { useTourAnchorResolver } from "../anchors/TourAnchorContext"
 import { HighlightRing } from "./HighlightRing"
@@ -75,6 +84,33 @@ export default function ToolTour() {
   const steps = activeModule?.steps ?? []
   const step = steps[tourStep] ?? null
   const EffectsComponent = activeModule?.EffectsComponent ?? null
+
+  // With nothing selected, the tool draws example results only while its
+  // tour runs, so every card says so: the chart goes away when the tour ends.
+  const selectedScenarioCount = useWorkspaceSlice(
+    (s) => s.selectedScenarios.length,
+  )
+  const equityFocusScenario = useWorkspaceSlice((s) => s.equityFocusScenario)
+  const radarShowAll = useRadarSlice((s) => s.radarShowAll)
+  const resilienceShowAll = useResilienceSlice(
+    (s) => s.resilienceShowAllScenarios,
+  )
+  const note =
+    tourTool &&
+    getIsTourExample({
+      mode: tourTool,
+      selectedScenarioCount,
+      showAll:
+        tourTool === "radar"
+          ? radarShowAll
+          : tourTool === "resilience"
+            ? resilienceShowAll
+            : false,
+      equityFocusScenario,
+      tourActive: true,
+    })
+      ? TOUR_EXAMPLE_NOTE
+      : undefined
 
   // ------------------------------------------------------------------
   // Anchor resolution (find the highlighted element, cope with late mounts)
@@ -142,7 +178,9 @@ export default function ToolTour() {
   const illustration = illustrationKey
     ? (activeModule?.illustrations?.[illustrationKey]?.() ?? null)
     : null
-  const hasMainBlock = Boolean(step && (hasBody || Boolean(illustration)))
+  const hasMainBlock = Boolean(
+    step && (hasBody || Boolean(illustration) || Boolean(note)),
+  )
   const bodyId = useMemo(
     () => (step && hasMainBlock ? `tour-body-${step.id}` : undefined),
     [step, hasMainBlock],
@@ -177,6 +215,7 @@ export default function ToolTour() {
       isFirst={isFirst}
       isLast={isLast}
       illustration={illustration}
+      note={note}
       onBack={handleBack}
       onNext={handleNext}
       onSkip={endTour}

@@ -33,7 +33,7 @@ const NARRATION_BY_BEAT: readonly (readonly string[])[] = [
   ],
   [
     "Outcomes can be displayed in different ways. The distribution view displays outcomes at individual locations.",
-    "Locations of interest can be selected on the map or from the chart.",
+    "Locations of interest can be selected on the map or from the chart. Hover over a square to see it reflected in the map. Click on a square to hold that selection.",
   ],
   [
     "The bar view displays key outcomes as bar charts. This is helpful for summarizing scenario results for all key outcomes.",

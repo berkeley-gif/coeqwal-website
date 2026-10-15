@@ -9,7 +9,12 @@
  * single-outcome requests (equity heatmaps, tier animations, etc.).
  *
  * Uses SWR's `preload()` so that in-flight requests are shared with any
- * `useSWR` hook that mounts with the same cache key (deduplication).
+ * `useSWR` hook that mounts with the same cache key (deduplication). Each
+ * preload swallows its own rejection: the cold-load fan-out can drop a
+ * request in the browser, and an unawaited rejection would surface as an
+ * uncaught "Failed to fetch". SWR keeps the original promise for the
+ * hook that later reads the key, so that hook still sees the error and
+ * applies the app's SWR error-retry settings (see DataProvider).
  *
  * Call this once near the top of the Explore tab tree (e.g. ScenarioExplorer).
  */
@@ -51,7 +56,7 @@ export function usePrefetchTiers() {
     if (activeScenarioIds.length > 0) {
       preload(CACHE_KEYS.allScenarioTiers(activeScenarioIds), () =>
         fetchAllScenarioTiers(activeScenarioIds),
-      )
+      ).catch(() => {})
     }
 
     // Deduplicate scenario ids across hydroclimates so we don't re-preload the
@@ -62,7 +67,7 @@ export function usePrefetchTiers() {
       if (resolvedIds.length === 0) continue
 
       const key = CACHE_KEYS.allScenarioTiers(resolvedIds)
-      preload(key, () => fetchAllScenarioTiers(resolvedIds))
+      preload(key, () => fetchAllScenarioTiers(resolvedIds)).catch(() => {})
 
       for (const id of resolvedIds) allScenarioIds.add(id)
     }
@@ -74,7 +79,7 @@ export function usePrefetchTiers() {
       const key = CACHE_KEYS.tierLocationsBatch(id, ALL_OUTCOME_CODES)
       preload(key, () =>
         fetchTierLocationAssignmentsBatch(id, ALL_OUTCOME_CODES),
-      )
+      ).catch(() => {})
     }
   }, [allMappings, activeScenarioIds])
 }

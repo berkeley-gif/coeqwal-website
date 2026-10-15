@@ -1,32 +1,32 @@
-/* Shared types for the storyboard text overlay and its label-geometry hook.
- * Kept separate so `BeatTextOverlay`, `Narration`, and
- * `useOutcomeLabelGeometry` import them without a circular dependency. */
+/* Shared types for the storyboard's right-panel outcome grid.
+ * Kept separate so `BeatTextOverlay`, `useOutcomeLabelGeometry`, and
+ * `useStoryboardLayout` import them without a circular dependency. */
 
-/** A column heading ("Consumptive uses" / "Non-consumptive uses") shown
- *  above the Beat 2 outcome grid. */
+/** An invisible spacer at the top of each grid column. It reserves the slot
+ *  the view-mode header ("Distribution view" etc.) fades into. The columns
+ *  used to have visible headings here, hence the name. */
 export interface ColumnEyebrow {
-  label: string
-  x: number
-  y: number
-  columnWidth: number
+  /** `progress` value at which the spacer starts fading in. */
   animationStart: number
 }
 
-/** One outcome row in the Beat 2 two-column grid (title + glyph + caption). */
+/** One outcome in the two-column grid (title + glyph + caption). */
 export interface Beat2LayoutItem {
   code: string
+  /** Outcome title shown above the glyph. */
   label: string
+  /** 0 = left, 1 = right. Assigned by hand, see FIRST_COLUMN_CODES in
+   *  useStoryboardLayout. */
   column: 0 | 1
-  columnWidth: number
+  /** False when the outcome has no data to draw; only the title renders. */
   isActive: boolean
-  locationCount: number
   /** Pixel height the glyph placeholder should reserve in document flow. */
   targetHeight: number
   /** Caption rendered under the glyph (e.g. "12 locations"). */
   locationDescription: string
 }
 
-/** Full Beat 2 layout: the outcome rows plus the two column headings. */
+/** Full grid layout: the outcomes plus one header spacer per column. */
 export interface Beat2Layout {
   items: Beat2LayoutItem[]
   eyebrows: ColumnEyebrow[]

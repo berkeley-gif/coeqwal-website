@@ -5,6 +5,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { OutcomeGlyphItem } from "../../../../../../../scenarios/components/shared/OutcomeGlyphItem"
 import type { ChartDataPoint } from "../../../../../../../scenarios/components/shared/types"
 import TourTierLegend from "../../../../tour/reusableContent/TourTierLegend"
+import { TIER_LABELS } from "../../../../../../../../content/tiers"
 
 /**
  * List tour: top visual block for the bar step.
@@ -21,10 +22,30 @@ export default function BarIllustration() {
   const chartData = useMemo((): ChartDataPoint[] => {
     const t = theme.palette.tiers
     return [
-      { label: "Tier 1", color: t.tier1, value: 35, tierType: "multi_value" },
-      { label: "Tier 2", color: t.tier2, value: 28, tierType: "multi_value" },
-      { label: "Tier 3", color: t.tier3, value: 22, tierType: "multi_value" },
-      { label: "Tier 4", color: t.tier4, value: 15, tierType: "multi_value" },
+      {
+        label: TIER_LABELS[1],
+        color: t.tier1,
+        value: 35,
+        tierType: "multi_value",
+      },
+      {
+        label: TIER_LABELS[2],
+        color: t.tier2,
+        value: 28,
+        tierType: "multi_value",
+      },
+      {
+        label: TIER_LABELS[3],
+        color: t.tier3,
+        value: 22,
+        tierType: "multi_value",
+      },
+      {
+        label: TIER_LABELS[4],
+        color: t.tier4,
+        value: 15,
+        tierType: "multi_value",
+      },
     ]
   }, [theme])
 
@@ -98,7 +119,7 @@ export default function BarIllustration() {
           }}
         >
           <Typography component="span" variant="outcomeHeader" sx={eyebrowSx}>
-            Tiers
+            Outcome levels
           </Typography>
           <TourTierLegend bare compact />
         </Box>

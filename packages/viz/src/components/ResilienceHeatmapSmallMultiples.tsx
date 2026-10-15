@@ -130,6 +130,11 @@ export interface ResilienceHeatmapSmallMultiplesProps {
   highlightedRowKeys?: Set<string> | null
   /** Column keys to emphasize within each tile heatmap (sidebar → chart). */
   highlightedColKeys?: Set<string> | null
+  /**
+   * The cell drawn as selected: `cellKey` (`${rowKey}|${colKey}`) inside
+   * the tile whose id is `tileId`. `null` selects nothing.
+   */
+  selectedCell?: { tileId: string; cellKey: string } | null
   onRowKeyHover?: (rowKey: string | null) => void
   onColKeyHover?: (colKey: string | null) => void
   /** Emitted when a cell is clicked. */
@@ -194,7 +199,7 @@ function SharedTierLegend({
       width={totalW}
       height={28}
       role="img"
-      aria-label="Tier legend"
+      aria-label="Outcome level legend"
       style={{ overflow: "visible" }}
     >
       {tierColors.map((color, i) => (
@@ -244,6 +249,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       highlightedTileIds = null,
       highlightedRowKeys = null,
       highlightedColKeys = null,
+      selectedCell = null,
       onRowKeyHover,
       onColKeyHover,
       onCellClick,
@@ -463,6 +469,11 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                       onCellClick={onCellClick}
                       highlightedRowKeys={highlightedRowKeys}
                       highlightedColKeys={highlightedColKeys}
+                      selectedCellKey={
+                        selectedCell?.tileId === tile.id
+                          ? selectedCell.cellKey
+                          : null
+                      }
                       onRowKeyHover={onRowKeyHover}
                       onColKeyHover={onColKeyHover}
                       formatRowTick={formatRowTick}

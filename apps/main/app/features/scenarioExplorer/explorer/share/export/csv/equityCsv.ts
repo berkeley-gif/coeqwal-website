@@ -54,8 +54,8 @@ export function equityDataToCSV(
   lines.push("")
 
   const tableHeader = data.compareToBaseline
-    ? ["Outcome", "Location", "Tier", "Baseline tier"]
-    : ["Outcome", "Location", "Tier"]
+    ? ["Outcome", "Location", "Outcome level", "Baseline outcome level"]
+    : ["Outcome", "Location", "Outcome level"]
   lines.push(tableHeader.join(","))
 
   for (const obj of data.objectives) {

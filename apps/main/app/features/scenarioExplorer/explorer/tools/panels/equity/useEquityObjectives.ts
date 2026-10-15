@@ -29,6 +29,10 @@ export interface UseEquityObjectivesResult {
   categories: string[]
   outcomeNames: { shortCode: string; displayName: string }[]
   ready: boolean
+  /** Outcome codes whose baseline tier data has loaded (empty unless
+   *  compareToBaseline). An objective of any other outcome shows its own
+   *  tier as its baseline, so it carries no comparison yet. */
+  baselineCodes: readonly string[]
 }
 
 const BASELINE_SCENARIO = "s0020"
@@ -231,5 +235,15 @@ export function useEquityObjectives({
     outcomeNames.length > 0 &&
     outcomeNames.every((o) => tierDataByCode[o.shortCode] !== undefined)
 
-  return { objectives, categories, outcomeNames, ready }
+  const baselineCodes = useMemo(
+    () =>
+      compareToBaseline
+        ? Object.keys(baselineTierDataByCode).filter(
+            (code) => baselineTierDataByCode[code] !== undefined,
+          )
+        : [],
+    [compareToBaseline, baselineTierDataByCode],
+  )
+
+  return { objectives, categories, outcomeNames, ready, baselineCodes }
 }

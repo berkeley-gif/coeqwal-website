@@ -51,11 +51,24 @@ export interface SummaryMember {
   /** True while the member's live request is still in flight; its series is
    *  a stand-in and must not be quoted either. */
   pending?: boolean
+  /** True when the member's request failed; its series is a stand-in and
+   *  must not be quoted. */
+  loadFailed?: boolean
 }
 
-/** A member whose series is real enough to put a number in a sentence. */
+/**
+ * A member a sentence may quote at all: model results that have arrived. A
+ * member known not to be live, without data, still loading or failed is
+ * never quoted, whatever it carries. Every view checks this first, then the
+ * payload it reads (series, monthly bands or a single value).
+ */
+function isQuotable(m: SummaryMember): boolean {
+  return m.isLive !== false && !m.liveDataMissing && !m.pending && !m.loadFailed
+}
+
+/** A quotable member with a series to compute from. */
 function hasUsableSeries(m: SummaryMember): boolean {
-  return !m.liveDataMissing && !m.pending && !!m.series && m.series.length > 0
+  return isQuotable(m) && !!m.series && m.series.length > 0
 }
 
 export interface SummaryContext {
@@ -104,19 +117,51 @@ export function formatValue(
 }
 
 /**
- * A value with its unit as prose: "1,234 TAF", "74.2 km", "$2.55 M". Money
- * units put the dollar sign first and the scale after the number.
+ * A value with its unit as prose: "1,234 TAF", "74.2 km", "70%", "$2.55 M".
+ * Money units put the dollar sign first and the scale after the number;
+ * percent sits against the number.
  */
 export function formatWithUnit(v: number, unit: string): string {
   if (unit === "$M") return `$${formatValue(v, unit)} M`
   if (unit === "$B") return `$${formatValue(v, unit)} B`
+  if (unit === "%") return `${formatValue(v, unit)}%`
   return `${formatValue(v, unit)} ${unit}`
 }
 
+/**
+ * The change from `reference` to `other` as a whole percent: "+12%",
+ * "-4%", or "0%" when it rounds to zero (never a signed zero). A zero
+ * reference has no percent change: "0%" when the other value is zero too,
+ * otherwise "n/a".
+ */
 export function percentDelta(reference: number, other: number): string {
-  if (!reference) return "-"
-  const d = ((other - reference) / Math.abs(reference)) * 100
-  return `${d >= 0 ? "+" : ""}${d.toFixed(0)}%`
+  if (!reference) return other ? "n/a" : "0%"
+  const change = roundedPercentChange(reference, other)
+  if (change === 0) return "0%"
+  return `${change > 0 ? "+" : "-"}${Math.abs(change)}%`
+}
+
+/**
+ * The percent change from a nonzero `reference` to `other`, rounded to a
+ * whole number by magnitude so equal rises and falls round alike (a 0.5%
+ * fall reads -1%, as a 0.5% rise reads +1%). Never returns -0.
+ */
+function roundedPercentChange(reference: number, other: number): number {
+  const raw = ((other - reference) / Math.abs(reference)) * 100
+  const magnitude = Math.round(Math.abs(raw))
+  return magnitude === 0 ? 0 : Math.sign(raw) * magnitude
+}
+
+/**
+ * Variables that are zero in most years, by the noun their sentence
+ * repeats. A median of such a series reads 0, so their distribution
+ * sentence names the share of years with none and the mean instead.
+ */
+const ZERO_INFLATED_NOUN: Readonly<Record<string, "loss" | "shortage">> = {
+  cws_welfare: "loss",
+  cws_del_short: "shortage",
+  cws_short: "shortage",
+  ag_short: "shortage",
 }
 
 /**
@@ -139,23 +184,24 @@ export function summarySentence(
     if (salmon) return salmon
   }
 
-  const vn = ctx.proseName ?? ctx.variableName.toLowerCase()
-  const first = members[0] as SummaryMember
+  // The groundwater Level view plots water level, not storage.
+  const vn =
+    ctx.variableId === "gw_stor" && ctx.view === "level"
+      ? "groundwater level"
+      : (ctx.proseName ?? ctx.variableName.toLowerCase())
 
-  // Welfare loss and the surface water delivery shortage are zero in most
-  // years, so their distribution sentence names the share of years with
-  // none and the mean; a median would read 0.
+  // Welfare loss and the shortages are zero in most years, so their
+  // distribution sentence names the share of years with none and the mean;
+  // a median would read 0.
+  const zeroNoun = ctx.variableId
+    ? ZERO_INFLATED_NOUN[ctx.variableId]
+    : undefined
   if (
-    (ctx.variableId === "cws_welfare" || ctx.variableId === "cws_del_short") &&
+    zeroNoun &&
     ctx.distKind !== "stats" &&
-    (ctx.view === "dist" || ctx.view === "pct")
+    (ctx.view === "dist" || ctx.view === "pct" || ctx.view === "pct_demand")
   ) {
-    const zeroAware = welfareSentence(
-      members,
-      ctx,
-      vn,
-      ctx.variableId === "cws_welfare" ? "loss" : "shortage",
-    )
+    const zeroAware = welfareSentence(members, ctx, vn, zeroNoun)
     if (zeroAware) return zeroAware
   }
 
@@ -171,24 +217,38 @@ export function summarySentence(
     return statsSentence(members, ctx, vn)
   }
 
-  if (ctx.view === "monthly" && first.bands && first.bands.length === 12) {
-    const bands = first.bands
+  const withBands = members.filter(
+    (m) => isQuotable(m) && m.bands && m.bands.length === 12,
+  )
+  const firstBanded = withBands[0]
+  if (ctx.view === "monthly") {
+    // A monthly chart is summarized only from monthly bands, never from an
+    // annual series.
+    if (!firstBanded?.bands) return ""
+    const bands = firstBanded.bands
     let peak = 0
     bands.forEach((b, i) => {
       if (b.p50 > (bands[peak] as MonthlyBand).p50) peak = i
     })
-    let s = `Median ${vn} peaks in ${WATER_MONTHS[peak]} for ${first.label}`
-    const last = members[members.length - 1] as SummaryMember
-    if (members.length > 1 && last.bands) {
+    let s = `Median ${vn} peaks in ${WATER_MONTHS[peak]} for ${firstBanded.label}`
+    const last = withBands[withBands.length - 1] as SummaryMember
+    if (withBands.length > 1 && last.bands) {
       const a = bands.reduce((t, b) => t + b.p50, 0)
       const b = last.bands.reduce((t, band) => t + band.p50, 0)
-      s += `; across the year, ${last.label} runs ${percentDelta(a, b)} vs ${first.label}`
+      s += `; across the year, ${last.label} runs ${percentDelta(a, b)} vs ${firstBanded.label}`
     }
     return `${s}.`
   }
 
   if (ctx.view === "cv") {
-    const withValues = members.filter((m) => m.value != null)
+    // Only defined CVs are ranked: finite, from a series whose mean is not 0.
+    const withValues = members.filter(
+      (m) =>
+        isQuotable(m) &&
+        m.value != null &&
+        Number.isFinite(m.value) &&
+        !(m.series && m.series.length > 0 && seriesStats(m.series).mean === 0),
+    )
     if (withValues.length === 0) return ""
     const mx = withValues.reduce((a, b) =>
       (b.value ?? 0) > (a.value ?? 0) ? b : a,
@@ -200,7 +260,7 @@ export function summarySentence(
   }
 
   if (ctx.view === "value") {
-    const withValues = members.filter((m) => m.value != null)
+    const withValues = members.filter((m) => isQuotable(m) && m.value != null)
     if (withValues.length === 0) return ""
     const mx = withValues.reduce((a, b) =>
       (b.value ?? 0) > (a.value ?? 0) ? b : a,
@@ -249,6 +309,10 @@ export function summarySentence(
     return `Under ${ctx.scenarioName} at ${ctx.locationName}, median ${vn} goes from ${formatWithUnit(a.med, ctx.unit)} (${a.m.label}) to ${formatWithUnit(b.med, ctx.unit)} (${b.m.label}): a change of ${percentDelta(a.med, b.med)}${noDataClause}.`
   }
 
+  if (meds.length === 1) {
+    const only = meds[0] as (typeof meds)[0]
+    return `Under ${ctx.scenarioName} (${ctx.climateName}), median ${vn} at ${only.m.label} is ${formatWithUnit(only.med, ctx.unit)}${noDataClause}.`
+  }
   const mx = meds.reduce((p, c) => (c.med > p.med ? c : p))
   const mn = meds.reduce((p, c) => (c.med < p.med ? c : p))
   return `Under ${ctx.scenarioName} (${ctx.climateName}), median ${vn} ranges from ${formatWithUnit(mn.med, ctx.unit)} at ${mn.m.label} to ${formatWithUnit(mx.med, ctx.unit)} at ${mx.m.label}${noDataClause}.`
@@ -294,6 +358,10 @@ function welfareSentence(
     const a = rows[0] as (typeof rows)[0]
     const b = rows[rows.length - 1] as (typeof rows)[0]
     return `Under ${ctx.scenarioName} at ${ctx.locationName}, mean annual ${vn} goes from ${money(a.mean)} (${a.m.label}, ${noLoss(a)}) to ${money(b.mean)} (${b.m.label}, ${noLoss(b)}): a change of ${percentDelta(a.mean, b.mean)}${noDataClause}.`
+  }
+  if (rows.length === 1) {
+    const only = rows[0] as (typeof rows)[0]
+    return `Under ${ctx.scenarioName} (${ctx.climateName}), mean annual ${vn} at ${only.m.label} is ${money(only.mean)} (${noLoss(only)})${noDataClause}.`
   }
   const mx = rows.reduce((p, c) => (c.mean > p.mean ? c : p))
   const mn = rows.reduce((p, c) => (c.mean < p.mean ? c : p))
@@ -343,9 +411,11 @@ function templateSentence(
       `At ${where}, median ${month} reservoir storage for ${ref.m.label} under the ${held} is ${val(ref.med)}.`,
     )
     for (const x of others) {
-      const d = ((x.med - ref.med) / Math.abs(ref.med)) * 100
+      const d = roundedPercentChange(ref.med, x.med)
       sentences.push(
-        `The ${x.m.label} scenario has ${Math.abs(d).toFixed(0)}% ${d >= 0 ? "higher" : "lower"} median ${month} reservoir storage.`,
+        d === 0
+          ? `The ${x.m.label} scenario has about the same median ${month} reservoir storage.`
+          : `The ${x.m.label} scenario has ${Math.abs(d)}% ${d > 0 ? "higher" : "lower"} median ${month} reservoir storage.`,
       )
     }
   } else if (family === "x2") {
@@ -389,9 +459,25 @@ function heldClimateOf(ctx: SummaryContext): string {
     : `${ctx.climateName} hydroclimate`
 }
 
-/** CV as the bars print it: a ratio to two decimals, no unit. */
-function formatCv(cv: number): string {
-  return cv.toFixed(2)
+/**
+ * CV as the bars print it: a ratio to two decimals, no unit. A series whose
+ * mean is zero has no CV, so it reads "n/a".
+ */
+function formatCv(cv: number, mean: number): string {
+  return mean === 0 || !Number.isFinite(cv) ? "n/a" : cv.toFixed(2)
+}
+
+/**
+ * The change between two members' CVs, or "n/a" when either has no CV (a
+ * zero mean or a non-finite value).
+ */
+function cvDelta(
+  a: { cv: number; mean: number },
+  b: { cv: number; mean: number },
+): string {
+  const defined = (r: { cv: number; mean: number }) =>
+    r.mean !== 0 && Number.isFinite(r.cv)
+  return defined(a) && defined(b) ? percentDelta(a.cv, b.cv) : "n/a"
 }
 
 /** Prose list: "a", "a and b", "a, b, and c". */
@@ -406,8 +492,10 @@ function proseList(items: string[]): string {
  * specified per axis (scenarios: "Mean <variable> for <reference> under the
  * <hydroclimate> hydroclimate is <mean> <unit>. Mean <variable> for the
  * <scenario> scenario is <mean> <unit>: a difference of <%>." and the CV
- * twin; climates: "At <location> under <scenario>, mean <variable> ranges
- * from ... (<first>) to ... (<last>): a change of <%>." and the CV twin).
+ * twin; climates: "At <location> under <scenario>, mean <variable> goes
+ * from ... (<first>) to ... (<last>): a change of <%>." and the CV twin,
+ * worded as a change between the first and last climates, which is what
+ * they compare, not as a range over every climate).
  * The X2 variables use the lead's X2 phrasing. On the level view a third
  * sentence reports the linear trend the third panel draws. Members without
  * model results contribute no number and are named.
@@ -448,11 +536,11 @@ function statsSentence(
         )
       }
       sentences.push(
-        `The annual variation in X2 location in ${x2Month} for ${ref.m.label} under the ${held} is ${formatCv(ref.cv)} (CV).`,
+        `The annual variation in X2 location in ${x2Month} for ${ref.m.label} under the ${held} is ${formatCv(ref.cv, ref.mean)} (CV).`,
       )
       for (const r of others) {
         sentences.push(
-          `The annual variation in ${x2Month} X2 location for the ${r.m.label} scenario is ${formatCv(r.cv)} (CV): a difference of ${percentDelta(ref.cv, r.cv)}.`,
+          `The annual variation in ${x2Month} X2 location for the ${r.m.label} scenario is ${formatCv(r.cv, r.mean)} (CV): a difference of ${cvDelta(ref, r)}.`,
         )
       }
     } else {
@@ -465,11 +553,11 @@ function statsSentence(
         )
       }
       sentences.push(
-        `The annual variation in ${vn} for ${ref.m.label} under the ${held} is ${formatCv(ref.cv)} (CV).`,
+        `The annual variation in ${vn} for ${ref.m.label} under the ${held} is ${formatCv(ref.cv, ref.mean)} (CV).`,
       )
       for (const r of others) {
         sentences.push(
-          `The annual variation in ${vn} for the ${r.m.label} scenario is ${formatCv(r.cv)} (CV): a difference of ${percentDelta(ref.cv, r.cv)}.`,
+          `The annual variation in ${vn} for the ${r.m.label} scenario is ${formatCv(r.cv, r.mean)} (CV): a difference of ${cvDelta(ref, r)}.`,
         )
       }
     }
@@ -478,10 +566,15 @@ function statsSentence(
     const b = rows[rows.length - 1] as (typeof rows)[0]
     const where = ctx.locationTitleName || ctx.locationName
     sentences.push(
-      `At ${where} under ${ctx.scenarioName}, mean ${vn} ranges from ${fmt(a.mean)} (${a.m.label}) to ${fmt(b.mean)} (${b.m.label}): a change of ${percentDelta(a.mean, b.mean)}.`,
+      `At ${where} under ${ctx.scenarioName}, mean ${vn} goes from ${fmt(a.mean)} (${a.m.label}) to ${fmt(b.mean)} (${b.m.label}): a change of ${percentDelta(a.mean, b.mean)}.`,
     )
     sentences.push(
-      `At ${where} under ${ctx.scenarioName}, the coefficient of variation (CV) of annual ${vn} is ${formatCv(a.cv)} (${a.m.label}) to ${formatCv(b.cv)} (${b.m.label}): a change of ${percentDelta(a.cv, b.cv)}.`,
+      `At ${where} under ${ctx.scenarioName}, the coefficient of variation (CV) of annual ${vn} changes from ${formatCv(a.cv, a.mean)} (${a.m.label}) to ${formatCv(b.cv, b.mean)} (${b.m.label}): a change of ${cvDelta(a, b)}.`,
+    )
+  } else if (rows.length === 1) {
+    const only = rows[0] as (typeof rows)[0]
+    sentences.push(
+      `Under ${ctx.scenarioName} (${ctx.climateName}), mean ${vn} at ${only.m.label} is ${fmt(only.mean)}, with a coefficient of variation (CV) of ${formatCv(only.cv, only.mean)}.`,
     )
   } else {
     const mx = rows.reduce((p, c) => (c.mean > p.mean ? c : p))
@@ -490,7 +583,7 @@ function statsSentence(
       `Under ${ctx.scenarioName} (${ctx.climateName}), mean ${vn} ranges from ${fmt(mn.mean)} at ${mn.m.label} to ${fmt(mx.mean)} at ${mx.m.label}.`,
     )
     sentences.push(
-      `The coefficient of variation (CV) of annual ${vn} is ${proseList(rows.map((r) => `${formatCv(r.cv)} at ${r.m.label}`))}.`,
+      `The coefficient of variation (CV) of annual ${vn} is ${proseList(rows.map((r) => `${formatCv(r.cv, r.mean)} at ${r.m.label}`))}.`,
     )
   }
 
@@ -525,8 +618,7 @@ function statsSentence(
  *  2. No member without model results may contribute a NUMBER. Scenarios the
  *     model does not cover still carry a sample series (the engine always
  *     produces one), and quoting it read as a real result. Those members are
- *     named as having no data instead. A member that is merely sample-backed
- *     keeps its value but is marked "(sample)".
+ *     named as having no data instead.
  *
  * Every value the sentence reports is an occupancy percent (never a
  * relative-change percent, which would read ambiguous next to a percent-unit
@@ -572,12 +664,7 @@ function salmonSentence(members: SummaryMember[], ctx: SummaryContext): string {
   if (ctx.compareBy === "scenarios") {
     const others = withSeries.filter((m) => m !== ref)
     if (others.length > 0) {
-      // A sample-backed member keeps its number but says so, so the reader
-      // can tell which comparisons rest on model results.
-      const rest = others.map(
-        (m) =>
-          `${m.label} ${medianPct(m)}${m.isLive === false ? " (sample)" : ""}`,
-      )
+      const rest = others.map((m) => `${m.label} ${medianPct(m)}`)
       s += `; for comparison: ${rest.join(", ")}`
     }
   }
