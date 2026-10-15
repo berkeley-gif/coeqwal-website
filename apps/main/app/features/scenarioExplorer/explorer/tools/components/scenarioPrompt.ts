@@ -61,9 +61,13 @@ export function getIsTourExample(input: ScenarioPromptInput): boolean {
   )
 }
 
-/** The tour card note shown while `getIsTourExample` holds. */
+/**
+ * The tour card note shown while `getIsTourExample` holds. It does not say
+ * nothing is selected: Distribution needs its own focus scenario, so the
+ * note can show while the sidebar has a selection.
+ */
 export const TOUR_EXAMPLE_NOTE =
-  "No scenarios are selected, so the tour shows example results. They go away when the tour ends. Select scenarios in the sidebar to see your own."
+  "The tour shows example results. They go away when the tour ends. Select a scenario in the sidebar to see your own."
 
 export type PromptTool = "bar" | "radar" | "equity" | "resilience" | "data"
 

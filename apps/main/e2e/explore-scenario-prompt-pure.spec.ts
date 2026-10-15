@@ -3,6 +3,7 @@ import {
   getIsTourExample,
   needsScenarioPrompt,
   SCENARIO_PROMPT_TEXT,
+  TOUR_EXAMPLE_NOTE,
   type ScenarioPromptInput,
 } from "../app/features/scenarioExplorer/explorer/tools/components/scenarioPrompt"
 import {
@@ -135,6 +136,17 @@ test("the tour card notes example results only when the tour lifts the prompt", 
       tourActive: true,
     }),
   ).toBe(false)
+  // Distribution with a sidebar selection but no focus scenario still draws
+  // an example, so the note must not claim nothing is selected.
+  expect(
+    getIsTourExample({
+      ...base,
+      mode: "equity",
+      selectedScenarioCount: 2,
+      tourActive: true,
+    }),
+  ).toBe(true)
+  expect(TOUR_EXAMPLE_NOTE).not.toMatch(/no scenarios are selected/i)
   expect(getIsTourExample({ ...base, mode: "data" })).toBe(false)
   expect(getIsTourExample({ ...base, mode: "list", tourActive: true })).toBe(
     false,
