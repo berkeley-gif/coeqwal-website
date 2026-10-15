@@ -12,7 +12,8 @@ import {
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
 
 // Location groups with many members (the 132 ag demand units, the 74 and 63
-// community water systems, the 44 groundwater basins) render as a grouped
+// community water systems, the 44 groundwater basins, the 17 river flow
+// locations) render as a grouped
 // select instead of a chip cloud. The option groups are built by a pure
 // helper: aggregates first, then North of Delta, then South of Delta, with
 // optional exclusions (already-selected members) and disabled ids (T3's
@@ -24,8 +25,9 @@ test("large groups use the picker and small groups keep the chip cloud", () => {
   expect(usesLocationPicker(LOCATION_GROUPS.cws)).toBe(true)
   expect(usesLocationPicker(LOCATION_GROUPS.cwsShortage)).toBe(true)
   expect(usesLocationPicker(LOCATION_GROUPS.basins)).toBe(true)
+  // All 17 river flow locations: past the chip cloud, so a picker.
+  expect(usesLocationPicker(LOCATION_GROUPS.rivers)).toBe(true)
   expect(usesLocationPicker(LOCATION_GROUPS.reservoirs)).toBe(false)
-  expect(usesLocationPicker(LOCATION_GROUPS.rivers)).toBe(false)
   expect(usesLocationPicker(LOCATION_GROUPS.sysregions)).toBe(false)
 })
 

@@ -59,7 +59,9 @@ test("getLocationTitle appends the group's title suffix", () => {
   // as full titles, and "Basin" would dangle after the place names.
   expect(getLocationTitle("basins", "WBA10")).toBe("WBA10 - Chico; Durham")
   // Groups whose names already read as full titles get no suffix.
-  expect(getLocationTitle("rivers", "YRS")).toBe("Yuba River")
+  expect(getLocationTitle("rivers", "YRS")).toBe(
+    "Yuba R. near Feather R. confluence",
+  )
   // Aggregate rollups already read as full titles too: "All North of Delta
   // Basin" would be wrong, and the NOD total is now the default groundwater
   // location, so this is the default figure title.
