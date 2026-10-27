@@ -14,6 +14,10 @@
         "sv_csv": {
           "key": "scenario/s0011/csv/s0011_coeqwal_sv_input.csv",
           "filename": "s0011_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0011/csv/s0011_monthly_time_series.csv",
+          "filename": "s0011_monthly_time_series.csv"
         }
       }
     },
@@ -31,6 +35,10 @@
         "sv_csv": {
           "key": "scenario/s0020/csv/s0020_coeqwal_sv_input.csv",
           "filename": "s0020_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0020/csv/s0020_monthly_time_series.csv",
+          "filename": "s0020_monthly_time_series.csv"
         }
       }
     },
@@ -48,6 +56,10 @@
         "sv_csv": {
           "key": "scenario/s0021/csv/s0021_coeqwal_sv_input.csv",
           "filename": "s0021_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0021/csv/s0021_monthly_time_series.csv",
+          "filename": "s0021_monthly_time_series.csv"
         }
       }
     },
@@ -65,6 +77,10 @@
         "sv_csv": {
           "key": "scenario/s0022/csv/s0022_coeqwal_sv_input.csv",
           "filename": "s0022_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0022/csv/s0022_monthly_time_series.csv",
+          "filename": "s0022_monthly_time_series.csv"
         }
       }
     },
@@ -82,6 +98,10 @@
         "sv_csv": {
           "key": "scenario/s0023/csv/s0023_coeqwal_sv_input.csv",
           "filename": "s0023_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0023/csv/s0023_monthly_time_series.csv",
+          "filename": "s0023_monthly_time_series.csv"
         }
       }
     },
@@ -99,6 +119,10 @@
         "sv_csv": {
           "key": "scenario/s0024/csv/s0024_coeqwal_sv_input.csv",
           "filename": "s0024_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0024/csv/s0024_monthly_time_series.csv",
+          "filename": "s0024_monthly_time_series.csv"
         }
       }
     },
@@ -116,6 +140,10 @@
         "sv_csv": {
           "key": "scenario/s0025/csv/s0025_coeqwal_sv_input.csv",
           "filename": "s0025_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0025/csv/s0025_monthly_time_series.csv",
+          "filename": "s0025_monthly_time_series.csv"
         }
       }
     },
@@ -133,6 +161,10 @@
         "sv_csv": {
           "key": "scenario/s0026/csv/s0026_coeqwal_sv_input.csv",
           "filename": "s0026_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0026/csv/s0026_monthly_time_series.csv",
+          "filename": "s0026_monthly_time_series.csv"
         }
       }
     },
@@ -150,6 +182,10 @@
         "sv_csv": {
           "key": "scenario/s0027/csv/s0027_coeqwal_sv_input.csv",
           "filename": "s0027_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0027/csv/s0027_monthly_time_series.csv",
+          "filename": "s0027_monthly_time_series.csv"
         }
       }
     },
@@ -167,6 +203,10 @@
         "sv_csv": {
           "key": "scenario/s0028/csv/s0028_coeqwal_sv_input.csv",
           "filename": "s0028_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0028/csv/s0028_monthly_time_series.csv",
+          "filename": "s0028_monthly_time_series.csv"
         }
       }
     },
@@ -184,6 +224,10 @@
         "sv_csv": {
           "key": "scenario/s0029/csv/s0029_coeqwal_sv_input.csv",
           "filename": "s0029_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0029/csv/s0029_monthly_time_series.csv",
+          "filename": "s0029_monthly_time_series.csv"
         }
       }
     },
@@ -201,6 +245,10 @@
         "sv_csv": {
           "key": "scenario/s0030/csv/s0030_coeqwal_sv_input.csv",
           "filename": "s0030_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0030/csv/s0030_monthly_time_series.csv",
+          "filename": "s0030_monthly_time_series.csv"
         }
       }
     },
@@ -218,6 +266,10 @@
         "sv_csv": {
           "key": "scenario/s0031/csv/s0031_coeqwal_sv_input.csv",
           "filename": "s0031_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0031/csv/s0031_monthly_time_series.csv",
+          "filename": "s0031_monthly_time_series.csv"
         }
       }
     },
@@ -235,6 +287,10 @@
         "sv_csv": {
           "key": "scenario/s0032/csv/s0032_coeqwal_sv_input.csv",
           "filename": "s0032_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0032/csv/s0032_monthly_time_series.csv",
+          "filename": "s0032_monthly_time_series.csv"
         }
       }
     },
@@ -252,6 +308,10 @@
         "sv_csv": {
           "key": "scenario/s0033/csv/s0033_coeqwal_sv_input.csv",
           "filename": "s0033_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0033/csv/s0033_monthly_time_series.csv",
+          "filename": "s0033_monthly_time_series.csv"
         }
       }
     },
@@ -269,6 +329,10 @@
         "sv_csv": {
           "key": "scenario/s0035/csv/s0035_coeqwal_sv_input.csv",
           "filename": "s0035_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0035/csv/s0035_monthly_time_series.csv",
+          "filename": "s0035_monthly_time_series.csv"
         }
       }
     },
@@ -286,6 +350,10 @@
         "sv_csv": {
           "key": "scenario/s0036/csv/s0036_coeqwal_sv_input.csv",
           "filename": "s0036_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0036/csv/s0036_monthly_time_series.csv",
+          "filename": "s0036_monthly_time_series.csv"
         }
       }
     },
@@ -303,6 +371,10 @@
         "sv_csv": {
           "key": "scenario/s0037/csv/s0037_coeqwal_sv_input.csv",
           "filename": "s0037_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0037/csv/s0037_monthly_time_series.csv",
+          "filename": "s0037_monthly_time_series.csv"
         }
       }
     },
@@ -320,6 +392,10 @@
         "sv_csv": {
           "key": "scenario/s0039/csv/s0039_coeqwal_sv_input.csv",
           "filename": "s0039_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0039/csv/s0039_monthly_time_series.csv",
+          "filename": "s0039_monthly_time_series.csv"
         }
       }
     },
@@ -337,6 +413,10 @@
         "sv_csv": {
           "key": "scenario/s0040/csv/s0040_coeqwal_sv_input.csv",
           "filename": "s0040_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0040/csv/s0040_monthly_time_series.csv",
+          "filename": "s0040_monthly_time_series.csv"
         }
       }
     },
@@ -354,6 +434,10 @@
         "sv_csv": {
           "key": "scenario/s0041/csv/s0041_coeqwal_sv_input.csv",
           "filename": "s0041_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0041/csv/s0041_monthly_time_series.csv",
+          "filename": "s0041_monthly_time_series.csv"
         }
       }
     },
@@ -371,6 +455,10 @@
         "sv_csv": {
           "key": "scenario/s0042/csv/s0042_coeqwal_sv_input.csv",
           "filename": "s0042_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0042/csv/s0042_monthly_time_series.csv",
+          "filename": "s0042_monthly_time_series.csv"
         }
       }
     },
@@ -388,6 +476,10 @@
         "sv_csv": {
           "key": "scenario/s0044/csv/s0044_coeqwal_sv_input.csv",
           "filename": "s0044_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0044/csv/s0044_monthly_time_series.csv",
+          "filename": "s0044_monthly_time_series.csv"
         }
       }
     },
@@ -405,6 +497,10 @@
         "sv_csv": {
           "key": "scenario/s0045/csv/s0045_coeqwal_sv_input.csv",
           "filename": "s0045_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0045/csv/s0045_monthly_time_series.csv",
+          "filename": "s0045_monthly_time_series.csv"
         }
       }
     },
@@ -422,6 +518,10 @@
         "sv_csv": {
           "key": "scenario/s0046/csv/s0046_coeqwal_sv_input.csv",
           "filename": "s0046_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0046/csv/s0046_monthly_time_series.csv",
+          "filename": "s0046_monthly_time_series.csv"
         }
       }
     },
@@ -439,6 +539,10 @@
         "sv_csv": {
           "key": "scenario/s0047/csv/s0047_coeqwal_sv_input.csv",
           "filename": "s0047_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0047/csv/s0047_monthly_time_series.csv",
+          "filename": "s0047_monthly_time_series.csv"
         }
       }
     },
@@ -456,6 +560,10 @@
         "sv_csv": {
           "key": "scenario/s0048/csv/s0048_coeqwal_sv_input.csv",
           "filename": "s0048_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0048/csv/s0048_monthly_time_series.csv",
+          "filename": "s0048_monthly_time_series.csv"
         }
       }
     },
@@ -473,6 +581,10 @@
         "sv_csv": {
           "key": "scenario/s0049/csv/s0049_coeqwal_sv_input.csv",
           "filename": "s0049_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0049/csv/s0049_monthly_time_series.csv",
+          "filename": "s0049_monthly_time_series.csv"
         }
       }
     },
@@ -490,6 +602,10 @@
         "sv_csv": {
           "key": "scenario/s0050/csv/s0050_coeqwal_sv_input.csv",
           "filename": "s0050_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0050/csv/s0050_monthly_time_series.csv",
+          "filename": "s0050_monthly_time_series.csv"
         }
       }
     },
@@ -507,6 +623,10 @@
         "sv_csv": {
           "key": "scenario/s0051/csv/s0051_coeqwal_sv_input.csv",
           "filename": "s0051_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0051/csv/s0051_monthly_time_series.csv",
+          "filename": "s0051_monthly_time_series.csv"
         }
       }
     },
@@ -524,6 +644,10 @@
         "sv_csv": {
           "key": "scenario/s0056/csv/s0056_coeqwal_sv_input.csv",
           "filename": "s0056_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0056/csv/s0056_monthly_time_series.csv",
+          "filename": "s0056_monthly_time_series.csv"
         }
       }
     },
@@ -541,6 +665,10 @@
         "sv_csv": {
           "key": "scenario/s0057/csv/s0057_coeqwal_sv_input.csv",
           "filename": "s0057_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0057/csv/s0057_monthly_time_series.csv",
+          "filename": "s0057_monthly_time_series.csv"
         }
       }
     },
@@ -558,6 +686,10 @@
         "sv_csv": {
           "key": "scenario/s0058/csv/s0058_coeqwal_sv_input.csv",
           "filename": "s0058_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0058/csv/s0058_monthly_time_series.csv",
+          "filename": "s0058_monthly_time_series.csv"
         }
       }
     },
@@ -575,6 +707,10 @@
         "sv_csv": {
           "key": "scenario/s0059/csv/s0059_coeqwal_sv_input.csv",
           "filename": "s0059_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0059/csv/s0059_monthly_time_series.csv",
+          "filename": "s0059_monthly_time_series.csv"
         }
       }
     },
@@ -592,6 +728,10 @@
         "sv_csv": {
           "key": "scenario/s0060/csv/s0060_coeqwal_sv_input.csv",
           "filename": "s0060_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0060/csv/s0060_monthly_time_series.csv",
+          "filename": "s0060_monthly_time_series.csv"
         }
       }
     },
@@ -609,6 +749,10 @@
         "sv_csv": {
           "key": "scenario/s0062/csv/s0062_coeqwal_sv_input.csv",
           "filename": "s0062_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0062/csv/s0062_monthly_time_series.csv",
+          "filename": "s0062_monthly_time_series.csv"
         }
       }
     },
@@ -626,6 +770,10 @@
         "sv_csv": {
           "key": "scenario/s0063/csv/s0063_coeqwal_sv_input.csv",
           "filename": "s0063_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0063/csv/s0063_monthly_time_series.csv",
+          "filename": "s0063_monthly_time_series.csv"
         }
       }
     },
@@ -643,6 +791,10 @@
         "sv_csv": {
           "key": "scenario/s0065/csv/s0065_coeqwal_sv_input.csv",
           "filename": "s0065_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0065/csv/s0065_monthly_time_series.csv",
+          "filename": "s0065_monthly_time_series.csv"
         }
       }
     },
@@ -660,6 +812,10 @@
         "sv_csv": {
           "key": "scenario/s0067/csv/s0067_coeqwal_sv_input.csv",
           "filename": "s0067_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0067/csv/s0067_monthly_time_series.csv",
+          "filename": "s0067_monthly_time_series.csv"
         }
       }
     },
@@ -677,6 +833,10 @@
         "sv_csv": {
           "key": "scenario/s0068/csv/s0068_coeqwal_sv_input.csv",
           "filename": "s0068_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0068/csv/s0068_monthly_time_series.csv",
+          "filename": "s0068_monthly_time_series.csv"
         }
       }
     },
@@ -694,6 +854,10 @@
         "sv_csv": {
           "key": "scenario/s0069/csv/s0069_coeqwal_sv_input.csv",
           "filename": "s0069_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0069/csv/s0069_monthly_time_series.csv",
+          "filename": "s0069_monthly_time_series.csv"
         }
       }
     },
@@ -711,6 +875,10 @@
         "sv_csv": {
           "key": "scenario/s0070/csv/s0070_coeqwal_sv_input.csv",
           "filename": "s0070_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0070/csv/s0070_monthly_time_series.csv",
+          "filename": "s0070_monthly_time_series.csv"
         }
       }
     },
@@ -728,6 +896,10 @@
         "sv_csv": {
           "key": "scenario/s0071/csv/s0071_coeqwal_sv_input.csv",
           "filename": "s0071_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0071/csv/s0071_monthly_time_series.csv",
+          "filename": "s0071_monthly_time_series.csv"
         }
       }
     },
@@ -745,6 +917,10 @@
         "sv_csv": {
           "key": "scenario/s0072/csv/s0072_coeqwal_sv_input.csv",
           "filename": "s0072_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0072/csv/s0072_monthly_time_series.csv",
+          "filename": "s0072_monthly_time_series.csv"
         }
       }
     },
@@ -762,6 +938,10 @@
         "sv_csv": {
           "key": "scenario/s0073/csv/s0073_coeqwal_sv_input.csv",
           "filename": "s0073_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0073/csv/s0073_monthly_time_series.csv",
+          "filename": "s0073_monthly_time_series.csv"
         }
       }
     },
@@ -779,6 +959,10 @@
         "sv_csv": {
           "key": "scenario/s0074/csv/s0074_coeqwal_sv_input.csv",
           "filename": "s0074_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0074/csv/s0074_monthly_time_series.csv",
+          "filename": "s0074_monthly_time_series.csv"
         }
       }
     },
@@ -796,6 +980,10 @@
         "sv_csv": {
           "key": "scenario/s0075/csv/s0075_coeqwal_sv_input.csv",
           "filename": "s0075_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0075/csv/s0075_monthly_time_series.csv",
+          "filename": "s0075_monthly_time_series.csv"
         }
       }
     },
@@ -813,6 +1001,10 @@
         "sv_csv": {
           "key": "scenario/s0076/csv/s0076_coeqwal_sv_input.csv",
           "filename": "s0076_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0076/csv/s0076_monthly_time_series.csv",
+          "filename": "s0076_monthly_time_series.csv"
         }
       }
     },
@@ -830,6 +1022,10 @@
         "sv_csv": {
           "key": "scenario/s0077/csv/s0077_coeqwal_sv_input.csv",
           "filename": "s0077_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0077/csv/s0077_monthly_time_series.csv",
+          "filename": "s0077_monthly_time_series.csv"
         }
       }
     },
@@ -847,6 +1043,10 @@
         "sv_csv": {
           "key": "scenario/s0078/csv/s0078_coeqwal_sv_input.csv",
           "filename": "s0078_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0078/csv/s0078_monthly_time_series.csv",
+          "filename": "s0078_monthly_time_series.csv"
         }
       }
     },
@@ -864,6 +1064,10 @@
         "sv_csv": {
           "key": "scenario/s0079/csv/s0079_coeqwal_sv_input.csv",
           "filename": "s0079_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0079/csv/s0079_monthly_time_series.csv",
+          "filename": "s0079_monthly_time_series.csv"
         }
       }
     },
@@ -881,6 +1085,10 @@
         "sv_csv": {
           "key": "scenario/s0080/csv/s0080_coeqwal_sv_input.csv",
           "filename": "s0080_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0080/csv/s0080_monthly_time_series.csv",
+          "filename": "s0080_monthly_time_series.csv"
         }
       }
     },
@@ -898,6 +1106,10 @@
         "sv_csv": {
           "key": "scenario/s0081/csv/s0081_coeqwal_sv_input.csv",
           "filename": "s0081_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0081/csv/s0081_monthly_time_series.csv",
+          "filename": "s0081_monthly_time_series.csv"
         }
       }
     },
@@ -915,6 +1127,10 @@
         "sv_csv": {
           "key": "scenario/s0082/csv/s0082_coeqwal_sv_input.csv",
           "filename": "s0082_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0082/csv/s0082_monthly_time_series.csv",
+          "filename": "s0082_monthly_time_series.csv"
         }
       }
     },
@@ -932,6 +1148,10 @@
         "sv_csv": {
           "key": "scenario/s0083/csv/s0083_coeqwal_sv_input.csv",
           "filename": "s0083_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0083/csv/s0083_monthly_time_series.csv",
+          "filename": "s0083_monthly_time_series.csv"
         }
       }
     },
@@ -949,6 +1169,10 @@
         "sv_csv": {
           "key": "scenario/s0084/csv/s0084_coeqwal_sv_input.csv",
           "filename": "s0084_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0084/csv/s0084_monthly_time_series.csv",
+          "filename": "s0084_monthly_time_series.csv"
         }
       }
     },
@@ -966,6 +1190,10 @@
         "sv_csv": {
           "key": "scenario/s0085/csv/s0085_coeqwal_sv_input.csv",
           "filename": "s0085_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0085/csv/s0085_monthly_time_series.csv",
+          "filename": "s0085_monthly_time_series.csv"
         }
       }
     },
@@ -983,6 +1211,10 @@
         "sv_csv": {
           "key": "scenario/s0087/csv/s0087_coeqwal_sv_input.csv",
           "filename": "s0087_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0087/csv/s0087_monthly_time_series.csv",
+          "filename": "s0087_monthly_time_series.csv"
         }
       }
     },
@@ -1000,6 +1232,10 @@
         "sv_csv": {
           "key": "scenario/s0088/csv/s0088_coeqwal_sv_input.csv",
           "filename": "s0088_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0088/csv/s0088_monthly_time_series.csv",
+          "filename": "s0088_monthly_time_series.csv"
         }
       }
     },
@@ -1017,6 +1253,10 @@
         "sv_csv": {
           "key": "scenario/s0089/csv/s0089_coeqwal_sv_input.csv",
           "filename": "s0089_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0089/csv/s0089_monthly_time_series.csv",
+          "filename": "s0089_monthly_time_series.csv"
         }
       }
     },
@@ -1034,6 +1274,10 @@
         "sv_csv": {
           "key": "scenario/s0090/csv/s0090_coeqwal_sv_input.csv",
           "filename": "s0090_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0090/csv/s0090_monthly_time_series.csv",
+          "filename": "s0090_monthly_time_series.csv"
         }
       }
     },
@@ -1051,6 +1295,10 @@
         "sv_csv": {
           "key": "scenario/s0091/csv/s0091_coeqwal_sv_input.csv",
           "filename": "s0091_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0091/csv/s0091_monthly_time_series.csv",
+          "filename": "s0091_monthly_time_series.csv"
         }
       }
     },
@@ -1068,6 +1316,10 @@
         "sv_csv": {
           "key": "scenario/s0092/csv/s0092_coeqwal_sv_input.csv",
           "filename": "s0092_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0092/csv/s0092_monthly_time_series.csv",
+          "filename": "s0092_monthly_time_series.csv"
         }
       }
     },
@@ -1085,6 +1337,10 @@
         "sv_csv": {
           "key": "scenario/s0093/csv/s0093_coeqwal_sv_input.csv",
           "filename": "s0093_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0093/csv/s0093_monthly_time_series.csv",
+          "filename": "s0093_monthly_time_series.csv"
         }
       }
     },
@@ -1102,6 +1358,10 @@
         "sv_csv": {
           "key": "scenario/s0094/csv/s0094_coeqwal_sv_input.csv",
           "filename": "s0094_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0094/csv/s0094_monthly_time_series.csv",
+          "filename": "s0094_monthly_time_series.csv"
         }
       }
     },
@@ -1119,6 +1379,10 @@
         "sv_csv": {
           "key": "scenario/s0095/csv/s0095_coeqwal_sv_input.csv",
           "filename": "s0095_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0095/csv/s0095_monthly_time_series.csv",
+          "filename": "s0095_monthly_time_series.csv"
         }
       }
     },
@@ -1136,6 +1400,10 @@
         "sv_csv": {
           "key": "scenario/s0096/csv/s0096_coeqwal_sv_input.csv",
           "filename": "s0096_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0096/csv/s0096_monthly_time_series.csv",
+          "filename": "s0096_monthly_time_series.csv"
         }
       }
     },
@@ -1153,6 +1421,10 @@
         "sv_csv": {
           "key": "scenario/s0097/csv/s0097_coeqwal_sv_input.csv",
           "filename": "s0097_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0097/csv/s0097_monthly_time_series.csv",
+          "filename": "s0097_monthly_time_series.csv"
         }
       }
     },
@@ -1170,6 +1442,10 @@
         "sv_csv": {
           "key": "scenario/s0098/csv/s0098_coeqwal_sv_input.csv",
           "filename": "s0098_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0098/csv/s0098_monthly_time_series.csv",
+          "filename": "s0098_monthly_time_series.csv"
         }
       }
     },
@@ -1187,6 +1463,10 @@
         "sv_csv": {
           "key": "scenario/s0099/csv/s0099_coeqwal_sv_input.csv",
           "filename": "s0099_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0099/csv/s0099_monthly_time_series.csv",
+          "filename": "s0099_monthly_time_series.csv"
         }
       }
     },
@@ -1204,6 +1484,10 @@
         "sv_csv": {
           "key": "scenario/s0100/csv/s0100_coeqwal_sv_input.csv",
           "filename": "s0100_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0100/csv/s0100_monthly_time_series.csv",
+          "filename": "s0100_monthly_time_series.csv"
         }
       }
     },
@@ -1221,6 +1505,10 @@
         "sv_csv": {
           "key": "scenario/s0101/csv/s0101_coeqwal_sv_input.csv",
           "filename": "s0101_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0101/csv/s0101_monthly_time_series.csv",
+          "filename": "s0101_monthly_time_series.csv"
         }
       }
     },
@@ -1238,6 +1526,10 @@
         "sv_csv": {
           "key": "scenario/s0102/csv/s0102_coeqwal_sv_input.csv",
           "filename": "s0102_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0102/csv/s0102_monthly_time_series.csv",
+          "filename": "s0102_monthly_time_series.csv"
         }
       }
     },
@@ -1255,6 +1547,10 @@
         "sv_csv": {
           "key": "scenario/s0103/csv/s0103_coeqwal_sv_input.csv",
           "filename": "s0103_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0103/csv/s0103_monthly_time_series.csv",
+          "filename": "s0103_monthly_time_series.csv"
         }
       }
     },
@@ -1272,6 +1568,10 @@
         "sv_csv": {
           "key": "scenario/s0104/csv/s0104_coeqwal_sv_input.csv",
           "filename": "s0104_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0104/csv/s0104_monthly_time_series.csv",
+          "filename": "s0104_monthly_time_series.csv"
         }
       }
     },
@@ -1289,6 +1589,10 @@
         "sv_csv": {
           "key": "scenario/s0105/csv/s0105_coeqwal_sv_input.csv",
           "filename": "s0105_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0105/csv/s0105_monthly_time_series.csv",
+          "filename": "s0105_monthly_time_series.csv"
         }
       }
     },
@@ -1306,6 +1610,10 @@
         "sv_csv": {
           "key": "scenario/s0107/csv/s0107_coeqwal_sv_input.csv",
           "filename": "s0107_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0107/csv/s0107_monthly_time_series.csv",
+          "filename": "s0107_monthly_time_series.csv"
         }
       }
     },
@@ -1323,6 +1631,10 @@
         "sv_csv": {
           "key": "scenario/s0108/csv/s0108_coeqwal_sv_input.csv",
           "filename": "s0108_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0108/csv/s0108_monthly_time_series.csv",
+          "filename": "s0108_monthly_time_series.csv"
         }
       }
     },
@@ -1340,6 +1652,10 @@
         "sv_csv": {
           "key": "scenario/s0109/csv/s0109_coeqwal_sv_input.csv",
           "filename": "s0109_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0109/csv/s0109_monthly_time_series.csv",
+          "filename": "s0109_monthly_time_series.csv"
         }
       }
     },
@@ -1357,6 +1673,10 @@
         "sv_csv": {
           "key": "scenario/s0110/csv/s0110_coeqwal_sv_input.csv",
           "filename": "s0110_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0110/csv/s0110_monthly_time_series.csv",
+          "filename": "s0110_monthly_time_series.csv"
         }
       }
     },
@@ -1374,6 +1694,10 @@
         "sv_csv": {
           "key": "scenario/s0111/csv/s0111_coeqwal_sv_input.csv",
           "filename": "s0111_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0111/csv/s0111_monthly_time_series.csv",
+          "filename": "s0111_monthly_time_series.csv"
         }
       }
     },
@@ -1391,6 +1715,10 @@
         "sv_csv": {
           "key": "scenario/s0112/csv/s0112_coeqwal_sv_input.csv",
           "filename": "s0112_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0112/csv/s0112_monthly_time_series.csv",
+          "filename": "s0112_monthly_time_series.csv"
         }
       }
     },
@@ -1408,6 +1736,10 @@
         "sv_csv": {
           "key": "scenario/s0113/csv/s0113_coeqwal_sv_input.csv",
           "filename": "s0113_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0113/csv/s0113_monthly_time_series.csv",
+          "filename": "s0113_monthly_time_series.csv"
         }
       }
     },
@@ -1425,6 +1757,10 @@
         "sv_csv": {
           "key": "scenario/s0114/csv/s0114_coeqwal_sv_input.csv",
           "filename": "s0114_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0114/csv/s0114_monthly_time_series.csv",
+          "filename": "s0114_monthly_time_series.csv"
         }
       }
     },
@@ -1442,6 +1778,10 @@
         "sv_csv": {
           "key": "scenario/s0115/csv/s0115_coeqwal_sv_input.csv",
           "filename": "s0115_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0115/csv/s0115_monthly_time_series.csv",
+          "filename": "s0115_monthly_time_series.csv"
         }
       }
     },
@@ -1459,6 +1799,10 @@
         "sv_csv": {
           "key": "scenario/s0117/csv/s0117_coeqwal_sv_input.csv",
           "filename": "s0117_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0117/csv/s0117_monthly_time_series.csv",
+          "filename": "s0117_monthly_time_series.csv"
         }
       }
     },
@@ -1476,6 +1820,10 @@
         "sv_csv": {
           "key": "scenario/s0118/csv/s0118_coeqwal_sv_input.csv",
           "filename": "s0118_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0118/csv/s0118_monthly_time_series.csv",
+          "filename": "s0118_monthly_time_series.csv"
         }
       }
     },
@@ -1493,6 +1841,10 @@
         "sv_csv": {
           "key": "scenario/s0119/csv/s0119_coeqwal_sv_input.csv",
           "filename": "s0119_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0119/csv/s0119_monthly_time_series.csv",
+          "filename": "s0119_monthly_time_series.csv"
         }
       }
     },
@@ -1510,6 +1862,10 @@
         "sv_csv": {
           "key": "scenario/s0120/csv/s0120_coeqwal_sv_input.csv",
           "filename": "s0120_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0120/csv/s0120_monthly_time_series.csv",
+          "filename": "s0120_monthly_time_series.csv"
         }
       }
     },
@@ -1527,6 +1883,10 @@
         "sv_csv": {
           "key": "scenario/s0121/csv/s0121_coeqwal_sv_input.csv",
           "filename": "s0121_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0121/csv/s0121_monthly_time_series.csv",
+          "filename": "s0121_monthly_time_series.csv"
         }
       }
     },
@@ -1544,6 +1904,10 @@
         "sv_csv": {
           "key": "scenario/s0123/csv/s0123_coeqwal_sv_input.csv",
           "filename": "s0123_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0123/csv/s0123_monthly_time_series.csv",
+          "filename": "s0123_monthly_time_series.csv"
         }
       }
     },
@@ -1561,6 +1925,10 @@
         "sv_csv": {
           "key": "scenario/s0124/csv/s0124_coeqwal_sv_input.csv",
           "filename": "s0124_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0124/csv/s0124_monthly_time_series.csv",
+          "filename": "s0124_monthly_time_series.csv"
         }
       }
     },
@@ -1578,6 +1946,10 @@
         "sv_csv": {
           "key": "scenario/s0125/csv/s0125_coeqwal_sv_input.csv",
           "filename": "s0125_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0125/csv/s0125_monthly_time_series.csv",
+          "filename": "s0125_monthly_time_series.csv"
         }
       }
     },
@@ -1595,6 +1967,10 @@
         "sv_csv": {
           "key": "scenario/s0126/csv/s0126_coeqwal_sv_input.csv",
           "filename": "s0126_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0126/csv/s0126_monthly_time_series.csv",
+          "filename": "s0126_monthly_time_series.csv"
         }
       }
     },
@@ -1612,6 +1988,10 @@
         "sv_csv": {
           "key": "scenario/s0127/csv/s0127_coeqwal_sv_input.csv",
           "filename": "s0127_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0127/csv/s0127_monthly_time_series.csv",
+          "filename": "s0127_monthly_time_series.csv"
         }
       }
     },
@@ -1629,6 +2009,10 @@
         "sv_csv": {
           "key": "scenario/s0128/csv/s0128_coeqwal_sv_input.csv",
           "filename": "s0128_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0128/csv/s0128_monthly_time_series.csv",
+          "filename": "s0128_monthly_time_series.csv"
         }
       }
     },
@@ -1646,6 +2030,10 @@
         "sv_csv": {
           "key": "scenario/s0129/csv/s0129_coeqwal_sv_input.csv",
           "filename": "s0129_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0129/csv/s0129_monthly_time_series.csv",
+          "filename": "s0129_monthly_time_series.csv"
         }
       }
     },
@@ -1663,6 +2051,10 @@
         "sv_csv": {
           "key": "scenario/s0130/csv/s0130_coeqwal_sv_input.csv",
           "filename": "s0130_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0130/csv/s0130_monthly_time_series.csv",
+          "filename": "s0130_monthly_time_series.csv"
         }
       }
     },
@@ -1680,6 +2072,10 @@
         "sv_csv": {
           "key": "scenario/s0133/csv/s0133_coeqwal_sv_input.csv",
           "filename": "s0133_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0133/csv/s0133_monthly_time_series.csv",
+          "filename": "s0133_monthly_time_series.csv"
         }
       }
     },
@@ -1697,6 +2093,10 @@
         "sv_csv": {
           "key": "scenario/s0134/csv/s0134_coeqwal_sv_input.csv",
           "filename": "s0134_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0134/csv/s0134_monthly_time_series.csv",
+          "filename": "s0134_monthly_time_series.csv"
         }
       }
     },
@@ -1714,6 +2114,10 @@
         "sv_csv": {
           "key": "scenario/s0135/csv/s0135_coeqwal_sv_input.csv",
           "filename": "s0135_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0135/csv/s0135_monthly_time_series.csv",
+          "filename": "s0135_monthly_time_series.csv"
         }
       }
     },
@@ -1731,6 +2135,10 @@
         "sv_csv": {
           "key": "scenario/s0136/csv/s0136_coeqwal_sv_input.csv",
           "filename": "s0136_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0136/csv/s0136_monthly_time_series.csv",
+          "filename": "s0136_monthly_time_series.csv"
         }
       }
     },
@@ -1748,6 +2156,10 @@
         "sv_csv": {
           "key": "scenario/s0137/csv/s0137_coeqwal_sv_input.csv",
           "filename": "s0137_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0137/csv/s0137_monthly_time_series.csv",
+          "filename": "s0137_monthly_time_series.csv"
         }
       }
     },
@@ -1765,6 +2177,10 @@
         "sv_csv": {
           "key": "scenario/s0138/csv/s0138_coeqwal_sv_input.csv",
           "filename": "s0138_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0138/csv/s0138_monthly_time_series.csv",
+          "filename": "s0138_monthly_time_series.csv"
         }
       }
     },
@@ -1782,6 +2198,10 @@
         "sv_csv": {
           "key": "scenario/s0139/csv/s0139_coeqwal_sv_input.csv",
           "filename": "s0139_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0139/csv/s0139_monthly_time_series.csv",
+          "filename": "s0139_monthly_time_series.csv"
         }
       }
     },
@@ -1799,6 +2219,10 @@
         "sv_csv": {
           "key": "scenario/s0140/csv/s0140_coeqwal_sv_input.csv",
           "filename": "s0140_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0140/csv/s0140_monthly_time_series.csv",
+          "filename": "s0140_monthly_time_series.csv"
         }
       }
     },
@@ -1816,6 +2240,10 @@
         "sv_csv": {
           "key": "scenario/s0141/csv/s0141_coeqwal_sv_input.csv",
           "filename": "s0141_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0141/csv/s0141_monthly_time_series.csv",
+          "filename": "s0141_monthly_time_series.csv"
         }
       }
     },
@@ -1833,6 +2261,10 @@
         "sv_csv": {
           "key": "scenario/s0143/csv/s0143_coeqwal_sv_input.csv",
           "filename": "s0143_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0143/csv/s0143_monthly_time_series.csv",
+          "filename": "s0143_monthly_time_series.csv"
         }
       }
     },
@@ -1850,6 +2282,10 @@
         "sv_csv": {
           "key": "scenario/s0144/csv/s0144_coeqwal_sv_input.csv",
           "filename": "s0144_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0144/csv/s0144_monthly_time_series.csv",
+          "filename": "s0144_monthly_time_series.csv"
         }
       }
     },
@@ -1867,6 +2303,10 @@
         "sv_csv": {
           "key": "scenario/s0145/csv/s0145_coeqwal_sv_input.csv",
           "filename": "s0145_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0145/csv/s0145_monthly_time_series.csv",
+          "filename": "s0145_monthly_time_series.csv"
         }
       }
     },
@@ -1884,6 +2324,10 @@
         "sv_csv": {
           "key": "scenario/s0146/csv/s0146_coeqwal_sv_input.csv",
           "filename": "s0146_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0146/csv/s0146_monthly_time_series.csv",
+          "filename": "s0146_monthly_time_series.csv"
         }
       }
     },
@@ -1901,6 +2345,10 @@
         "sv_csv": {
           "key": "scenario/s0147/csv/s0147_coeqwal_sv_input.csv",
           "filename": "s0147_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0147/csv/s0147_monthly_time_series.csv",
+          "filename": "s0147_monthly_time_series.csv"
         }
       }
     },
@@ -1918,6 +2366,10 @@
         "sv_csv": {
           "key": "scenario/s0149/csv/s0149_coeqwal_sv_input.csv",
           "filename": "s0149_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0149/csv/s0149_monthly_time_series.csv",
+          "filename": "s0149_monthly_time_series.csv"
         }
       }
     },
@@ -1935,6 +2387,10 @@
         "sv_csv": {
           "key": "scenario/s0150/csv/s0150_coeqwal_sv_input.csv",
           "filename": "s0150_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0150/csv/s0150_monthly_time_series.csv",
+          "filename": "s0150_monthly_time_series.csv"
         }
       }
     },
@@ -1952,6 +2408,10 @@
         "sv_csv": {
           "key": "scenario/s0151/csv/s0151_coeqwal_sv_input.csv",
           "filename": "s0151_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0151/csv/s0151_monthly_time_series.csv",
+          "filename": "s0151_monthly_time_series.csv"
         }
       }
     },
@@ -1969,6 +2429,10 @@
         "sv_csv": {
           "key": "scenario/s0152/csv/s0152_coeqwal_sv_input.csv",
           "filename": "s0152_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0152/csv/s0152_monthly_time_series.csv",
+          "filename": "s0152_monthly_time_series.csv"
         }
       }
     },
@@ -1986,6 +2450,10 @@
         "sv_csv": {
           "key": "scenario/s0153/csv/s0153_coeqwal_sv_input.csv",
           "filename": "s0153_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0153/csv/s0153_monthly_time_series.csv",
+          "filename": "s0153_monthly_time_series.csv"
         }
       }
     },
@@ -2003,6 +2471,10 @@
         "sv_csv": {
           "key": "scenario/s0154/csv/s0154_coeqwal_sv_input.csv",
           "filename": "s0154_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0154/csv/s0154_monthly_time_series.csv",
+          "filename": "s0154_monthly_time_series.csv"
         }
       }
     },
@@ -2020,6 +2492,10 @@
         "sv_csv": {
           "key": "scenario/s0155/csv/s0155_coeqwal_sv_input.csv",
           "filename": "s0155_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0155/csv/s0155_monthly_time_series.csv",
+          "filename": "s0155_monthly_time_series.csv"
         }
       }
     },
@@ -2037,6 +2513,10 @@
         "sv_csv": {
           "key": "scenario/s0156/csv/s0156_coeqwal_sv_input.csv",
           "filename": "s0156_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0156/csv/s0156_monthly_time_series.csv",
+          "filename": "s0156_monthly_time_series.csv"
         }
       }
     },
@@ -2054,6 +2534,10 @@
         "sv_csv": {
           "key": "scenario/s0157/csv/s0157_coeqwal_sv_input.csv",
           "filename": "s0157_coeqwal_sv_input.csv"
+        },
+        "monthly_time_series_csv": {
+          "key": "scenario/s0157/csv/s0157_monthly_time_series.csv",
+          "filename": "s0157_monthly_time_series.csv"
         }
       }
     }

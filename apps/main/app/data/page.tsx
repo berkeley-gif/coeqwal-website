@@ -554,9 +554,12 @@ export default function DataPage() {
   // Filter scenarios that have zip files
   const zipScenarios = scenarios.filter((scenario) => scenario.files.zip)
 
-  // Filter scenarios that have CSV files (either output_csv or sv_csv)
+  // Filter scenarios that have CSV files (output_csv, sv_csv, or monthly_time_series_csv)
   const csvScenarios = scenarios.filter(
-    (scenario) => scenario.files.output_csv || scenario.files.sv_csv,
+    (scenario) =>
+      scenario.files.output_csv ||
+      scenario.files.sv_csv ||
+      scenario.files.monthly_time_series_csv,
   )
 
   const zipGroups = useMemo(() => {
@@ -766,7 +769,8 @@ export default function DataPage() {
                     }}
                   >
                     Download CalSim3 scenario input and output data in csv
-                    format, including SV input and variable output files.
+                    format, including SV input, variable output, and monthly
+                    time series files.
                   </Typography>
 
                   {loading ? (
@@ -827,8 +831,28 @@ export default function DataPage() {
                                 "sv",
                               )}
                               variant="outlined"
+                              sx={{
+                                mb: (theme) => theme.space.component.xs,
+                              }}
                             >
                               Download SV Input CSV
+                            </DownloadButton>
+                          )}
+                          {selectedCsvScenario.files
+                            .monthly_time_series_csv && (
+                            <DownloadButton
+                              fileId={`${selectedCsvDataset}_monthly`}
+                              filename={
+                                selectedCsvScenario.files
+                                  .monthly_time_series_csv.filename
+                              }
+                              downloadUrl={getFileDownloadUrl(
+                                selectedCsvDataset,
+                                "monthly",
+                              )}
+                              variant="outlined"
+                            >
+                              Download Monthly Time Series CSV
                             </DownloadButton>
                           )}
                         </Box>

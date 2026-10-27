@@ -9,6 +9,7 @@ export interface ScenarioFiles {
   zip?: ScenarioFile | null
   output_csv?: ScenarioFile | null
   sv_csv?: ScenarioFile | null
+  monthly_time_series_csv?: ScenarioFile | null
 }
 
 export interface Scenario {
