@@ -33,7 +33,7 @@ export async function fetchScenariosForDownload(): Promise<ScenariosResponse> {
  */
 export function getFileDownloadUrl(
   scenarioId: string,
-  fileType: "zip" | "output" | "sv",
+  fileType: "zip" | "output" | "sv" | "monthly",
 ): string {
   return `${FILE_DOWNLOAD_API_BASE}/download?scenario=${scenarioId}&type=${fileType}`
 }
