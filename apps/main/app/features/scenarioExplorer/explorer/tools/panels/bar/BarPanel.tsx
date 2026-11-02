@@ -383,6 +383,7 @@ export default function BarPanel() {
           showThemeBadge={false}
           descriptionMaxWidth="65ch"
           descriptionCharLimit={100}
+          showBriefLink
           inlineActions={
             <InlineRowActions
               scenarioId={scenario.scenarioId}

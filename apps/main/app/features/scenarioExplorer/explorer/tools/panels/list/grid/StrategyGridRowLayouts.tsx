@@ -57,6 +57,7 @@ export function NonCompactRowContent({
       descriptionMaxWidth="80%"
       showThemeBadge={showThemeBadge}
       onThemeBadgeClick={onThemeBadgeClick}
+      showBriefLink
     />
   )
 

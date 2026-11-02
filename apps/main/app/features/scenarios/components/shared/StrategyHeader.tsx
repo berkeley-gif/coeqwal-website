@@ -25,6 +25,7 @@ import {
 import { THEME_LABEL_CONFIG } from "../../../../content/themes"
 import type { ScenarioTheme } from "../../../../content/scenarios"
 import { shouldWrapThemeBadgeLabel } from "../../utils/themeLabelWrap"
+import { StrategyBriefLink } from "./StrategyBriefLink"
 import { useIsCoarsePointer } from "@repo/ui/hooks"
 export interface StrategyHeaderProps {
   /** Scenario data */
@@ -53,6 +54,8 @@ export interface StrategyHeaderProps {
   expandDescription?: boolean
   /** Optional adornment rendered before the title text (e.g. a legend dot) */
   titleStartAdornment?: React.ReactNode
+  /** When true, shows a link to the strategy's brief below the description */
+  showBriefLink?: boolean
 }
 
 function CompactDescription({
@@ -175,6 +178,7 @@ export function StrategyHeader({
   inlineActions,
   expandDescription = false,
   titleStartAdornment,
+  showBriefLink = false,
 }: StrategyHeaderProps) {
   const theme = useTheme()
   const showAllThemeBadges = showThemeBadge
@@ -200,41 +204,41 @@ export function StrategyHeader({
     const compactTitleLineHeight = 1.3
     const themeBadgeButtonSx = onThemeBadgeClick
       ? {
-          background: "none" as const,
-          border: "none",
-          padding: 0,
-          cursor: "pointer" as const,
-          textAlign: "left" as const,
-          minWidth: 0,
-          display: "inline-flex" as const,
-          alignItems: themeBadgeMultiline ? "flex-start" : "center",
-          flex: 1,
-          flexBasis: 0,
-          overflow: themeBadgeMultiline ? "visible" : "hidden",
-          flexShrink: 1,
-          "&:hover > span": { opacity: 0.8 },
-          "&:focus-visible": {
-            outline: `2px solid ${theme.palette.blue.bright}`,
-            outlineOffset: "2px",
-            borderRadius: "2px",
-          },
-        }
+        background: "none" as const,
+        border: "none",
+        padding: 0,
+        cursor: "pointer" as const,
+        textAlign: "left" as const,
+        minWidth: 0,
+        display: "inline-flex" as const,
+        alignItems: themeBadgeMultiline ? "flex-start" : "center",
+        flex: 1,
+        flexBasis: 0,
+        overflow: themeBadgeMultiline ? "visible" : "hidden",
+        flexShrink: 1,
+        "&:hover > span": { opacity: 0.8 },
+        "&:focus-visible": {
+          outline: `2px solid ${theme.palette.blue.bright}`,
+          outlineOffset: "2px",
+          borderRadius: "2px",
+        },
+      }
       : {
-          minWidth: 0,
-          display: "inline-flex" as const,
-          alignItems: themeBadgeMultiline ? "flex-start" : "center",
-          overflow: themeBadgeMultiline ? "visible" : "hidden",
-          flexShrink: 1,
-        }
+        minWidth: 0,
+        display: "inline-flex" as const,
+        alignItems: themeBadgeMultiline ? "flex-start" : "center",
+        overflow: themeBadgeMultiline ? "visible" : "hidden",
+        flexShrink: 1,
+      }
     const themeBadgeTextSx = themeBadgeMultiline
       ? { minWidth: 0, maxWidth: "100%" }
       : {
-          whiteSpace: "nowrap" as const,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          minWidth: 0,
-          flexShrink: 0,
-        }
+        whiteSpace: "nowrap" as const,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        minWidth: 0,
+        flexShrink: 0,
+      }
 
     return (
       <Box sx={{ m: 0, p: 0 }}>
@@ -294,9 +298,9 @@ export function StrategyHeader({
               onClick={
                 onThemeBadgeClick && strategy.theme
                   ? (e: React.MouseEvent) => {
-                      e.stopPropagation()
-                      onThemeBadgeClick(strategy.theme as ScenarioTheme)
-                    }
+                    e.stopPropagation()
+                    onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                  }
                   : undefined
               }
               sx={themeBadgeButtonSx}
@@ -334,6 +338,12 @@ export function StrategyHeader({
             maxWidth={descriptionMaxWidth}
           />
         )}
+        {showDescription && showBriefLink && (
+          <StrategyBriefLink
+            scenarioId={strategy.scenarioId}
+            strategyLabel={displayLabel}
+          />
+        )}
       </Box>
     )
   }
@@ -357,42 +367,42 @@ export function StrategyHeader({
             onClick={
               onThemeBadgeClick && strategy.theme
                 ? (e: React.MouseEvent) => {
-                    e.stopPropagation()
-                    onThemeBadgeClick(strategy.theme as ScenarioTheme)
-                  }
+                  e.stopPropagation()
+                  onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                }
                 : undefined
             }
             sx={
               onThemeBadgeClick
                 ? {
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    cursor: "pointer",
-                    textAlign: "left",
-                    minWidth: 0,
-                    display: "inline-flex",
-                    alignItems: themeBadgeMultiline ? "flex-start" : "center",
-                    flex: 1,
-                    flexBasis: 0,
-                    overflow: themeBadgeMultiline ? "visible" : "hidden",
-                    flexShrink: 1,
-                    "&:hover > span": { opacity: 0.8 },
-                    "&:focus-visible": {
-                      outline: `2px solid ${theme.palette.blue.bright}`,
-                      outlineOffset: "2px",
-                      borderRadius: "2px",
-                    },
-                  }
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  minWidth: 0,
+                  display: "inline-flex",
+                  alignItems: themeBadgeMultiline ? "flex-start" : "center",
+                  flex: 1,
+                  flexBasis: 0,
+                  overflow: themeBadgeMultiline ? "visible" : "hidden",
+                  flexShrink: 1,
+                  "&:hover > span": { opacity: 0.8 },
+                  "&:focus-visible": {
+                    outline: `2px solid ${theme.palette.blue.bright}`,
+                    outlineOffset: "2px",
+                    borderRadius: "2px",
+                  },
+                }
                 : {
-                    minWidth: 0,
-                    display: "inline-flex",
-                    alignItems: themeBadgeMultiline ? "flex-start" : "center",
-                    flex: 1,
-                    flexBasis: 0,
-                    overflow: themeBadgeMultiline ? "visible" : "hidden",
-                    flexShrink: 1,
-                  }
+                  minWidth: 0,
+                  display: "inline-flex",
+                  alignItems: themeBadgeMultiline ? "flex-start" : "center",
+                  flex: 1,
+                  flexBasis: 0,
+                  overflow: themeBadgeMultiline ? "visible" : "hidden",
+                  flexShrink: 1,
+                }
             }
           >
             <ScenarioBadge
@@ -403,12 +413,12 @@ export function StrategyHeader({
                 themeBadgeMultiline
                   ? { minWidth: 0, maxWidth: "100%" }
                   : {
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      minWidth: 0,
-                      flexShrink: 0,
-                    }
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    minWidth: 0,
+                    flexShrink: 0,
+                  }
               }
             />
           </Box>
@@ -449,6 +459,12 @@ export function StrategyHeader({
           maxWidth={descriptionMaxWidth}
           disableTruncation={disableTruncation}
           charLimit={descriptionCharLimit}
+        />
+      )}
+      {showDescription && showBriefLink && (
+        <StrategyBriefLink
+          scenarioId={strategy.scenarioId}
+          strategyLabel={displayLabel}
         />
       )}
     </Box>
