@@ -79,7 +79,6 @@ const LAYER_GROUPS: Record<string, LayerSpec[]> = {
       opacityProp: "fill-opacity",
       targetOpacity: 0.6,
     },
-
   ],
 }
 

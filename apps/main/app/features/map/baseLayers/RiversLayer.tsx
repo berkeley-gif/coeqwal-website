@@ -131,7 +131,7 @@ export const FlatMapLabel = memo(function FlatMapLabel({
   text: string
   opacity: number
   /** "start" pins the text's left edge to the SVG's left edge, so callers
- *  can attach things (e.g. a pointer arrow) to a predictable position */
+   *  can attach things (e.g. a pointer arrow) to a predictable position */
   textAnchor?: "middle" | "start"
 }) {
   const theme = useTheme()

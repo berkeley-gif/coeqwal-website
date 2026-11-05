@@ -36,7 +36,7 @@ export default function LayerOrchestrator() {
   const showBasins = useShowBasins()
   const showRivers = useShowRivers()
   const showArrows = useShowArrows()
-    const showCalsimAreas = useShowCalsimAreas()
+  const showCalsimAreas = useShowCalsimAreas()
   const activeOutcomeVisualization = useActiveOutcomeVisualization()
 
   const isLearnMode = mapMode === "learn"

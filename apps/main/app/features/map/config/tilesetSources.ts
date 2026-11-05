@@ -178,7 +178,7 @@ export const RUNTIME_LAYERS: RuntimeLayerDef[] = [
     sourceLayer: "ar0gx61qic1dieokgqwh",
     paint: {
       "fill-color": themeValues.palette.blue.bright,
-      "fill-opacity": 0
+      "fill-opacity": 0,
     },
     layout: { visibility: "none" },
   },
@@ -189,7 +189,7 @@ export const RUNTIME_LAYERS: RuntimeLayerDef[] = [
     sourceLayer: "wei719pmbz5cxtn1lb0m",
     paint: {
       "fill-color": themeValues.palette.nature.earth,
-      "fill-opacity": 0
+      "fill-opacity": 0,
     },
     layout: { visibility: "none" },
   },
