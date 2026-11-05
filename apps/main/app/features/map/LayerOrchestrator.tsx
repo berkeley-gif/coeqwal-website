@@ -25,6 +25,7 @@ import {
   useShowBasins,
   useShowRivers,
   useShowArrows,
+  useShowCalsimAreas,
   useActiveOutcomeVisualization,
 } from "./store"
 
@@ -35,6 +36,7 @@ export default function LayerOrchestrator() {
   const showBasins = useShowBasins()
   const showRivers = useShowRivers()
   const showArrows = useShowArrows()
+    const showCalsimAreas = useShowCalsimAreas()
   const activeOutcomeVisualization = useActiveOutcomeVisualization()
 
   const isLearnMode = mapMode === "learn"
@@ -72,6 +74,7 @@ export default function LayerOrchestrator() {
         riverBasinLabelsOpacity={riverBasinLabelsOpacity}
         arrowsVisible={isLearnMode && showArrows}
         arrowsOpacity={arrowsOpacity}
+        calsimLabelsVisible={isLearnMode && showCalsimAreas}
       />
 
       <VisualizationLayers hidden={!isMapVisible} />

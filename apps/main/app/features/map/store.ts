@@ -428,6 +428,7 @@ export const useShowBasins = createLayerSelector("basins")
 export const useShowRivers = createLayerSelector("rivers")
 export const useShowArrows = createLayerSelector("arrows")
 export const useShowInflowWatersheds = createLayerSelector("inflowWatersheds")
+export const useShowCalsimAreas = createLayerSelector("calsimAreas")
 
 export const useCameraView = () =>
   useMapStore((s) => SECTION_LAYERS[s.activeSubSection].camera)

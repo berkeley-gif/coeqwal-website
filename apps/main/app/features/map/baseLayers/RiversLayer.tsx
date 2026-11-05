@@ -123,12 +123,16 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
  * rotated CurvedRiverLabel wouldn't fit. Shared by Delta and the two river
  * labels so the styling can't drift between them.
  */
-const FlatMapLabel = memo(function FlatMapLabel({
+export const FlatMapLabel = memo(function FlatMapLabel({
   text,
   opacity,
+  textAnchor = "middle",
 }: {
   text: string
   opacity: number
+  /** "start" pins the text's left edge to the SVG's left edge, so callers
+ *  can attach things (e.g. a pointer arrow) to a predictable position */
+  textAnchor?: "middle" | "start"
 }) {
   const theme = useTheme()
 
@@ -144,9 +148,9 @@ const FlatMapLabel = memo(function FlatMapLabel({
         style={{ overflow: "visible" }}
       >
         <text
-          x="50%"
+          x={textAnchor === "start" ? 0 : "50%"}
           y="20"
-          textAnchor="middle"
+          textAnchor={textAnchor}
           style={{
             fontFamily: "Georgia, Times New Roman, serif",
             fontSize: "17px",

@@ -62,6 +62,25 @@ const LAYER_GROUPS: Record<string, LayerSpec[]> = {
       targetOpacity: 0.4,
     },
   ],
+  // Runtime layers from tilesetSources.ts (not in the Studio style)
+  calsimAreas: [
+    {
+      id: "calsim-export-contractors",
+      opacityProp: "fill-opacity",
+      targetOpacity: 0.8,
+    },
+    {
+      id: "calsim-contributing-area",
+      opacityProp: "fill-opacity",
+      targetOpacity: 0.4,
+    },
+    {
+      id: "calsim-water-budget-area",
+      opacityProp: "fill-opacity",
+      targetOpacity: 0.6,
+    },
+
+  ],
 }
 
 const FADE_DURATION = ANIMATION_DURATION.LAYER_FADE
