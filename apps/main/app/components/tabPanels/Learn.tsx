@@ -68,7 +68,13 @@ export default function LearnPanel() {
   // Track scroll to "release" the map when scrollytelling ends
   const handleScroll = useCallback(() => {
     const container = scrollytellingRef.current
-    if (!container) return
+    // No scrollytelling block means another Learn section is showing, so
+    // there's nothing to release the map from. Reset instead of keeping the
+    // last offset, or it carries into the next visit to Get Started.
+    if (!container) {
+      mapActions.setLearnMapScrollOffset(0)
+      return
+    }
 
     const rect = container.getBoundingClientRect()
     const windowHeight = window.innerHeight
@@ -103,6 +109,15 @@ export default function LearnPanel() {
       window.removeEventListener("scroll", handleScroll)
     }
   }, [handleScroll])
+
+  // The scroll listener only runs when the page scrolls, but some layout
+  // changes happen without one: switching sections, and the loading
+  // spinner being replaced by the full scrollytelling content once the
+  // map is ready (or fails). Re-measure after each so the map offset
+  // matches the real layout, not the one it was measured against.
+  useEffect(() => {
+    handleScroll()
+  }, [activeSection, mapReady, mapError, handleScroll])
 
   return (
     <>
