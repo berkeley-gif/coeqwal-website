@@ -40,6 +40,7 @@ export interface SubSectionLayerConfig {
   californiaLabel?: boolean
   centralValley?: boolean
   inflowWatersheds?: boolean
+  calsimAreas?: boolean
 
   // React component layers (controlled via props)
   basins?: boolean
@@ -99,8 +100,8 @@ export const SECTION_LAYERS: Record<SubSectionId, SubSectionLayerConfig> = {
   rivers: { ...BASINS_AND_RIVERS, camera: DELTA_VIEW },
   distribution: { ...BASINS_AND_RIVERS },
   calsim: {
-    ...BASINS_AND_RIVERS,
-    camera: CENTRAL_VALLEY_VIEW,
+    calsimAreas: true,
+    camera: CALIFORNIA_VIEW,
   },
 
   coeqwal: {},

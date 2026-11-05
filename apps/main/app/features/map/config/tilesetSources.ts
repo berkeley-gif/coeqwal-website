@@ -55,6 +55,20 @@ export const COEQWAL_TILESETS: TilesetSourceDef[] = [
     sourceId: "coeqwal-delta-water",
     url: "mapbox://coeqwal.delta-water",
   },
+  // CalSim model extent layers (Learn > CalSim model). Published from Mapbox
+  // Data Workbench, which generates opaque IDs; names noted for readability.
+  {
+    sourceId: "coeqwal-calsim-contributing-area",
+    url: "mapbox://coeqwal.8roi2gb6po6l", // calsim_contributing_area
+  },
+  {
+    sourceId: "coeqwal-calsim-water-budget-area",
+    url: "mapbox://coeqwal.gd764wl8ivwi", // calsim_water_budget_area
+  },
+  {
+    sourceId: "coeqwal-calsim-export-contractors",
+    url: "mapbox://coeqwal.vrd2eelyrgaw", // calsim_export_contractors
+  },
 ]
 
 // ============================================================================
@@ -140,6 +154,42 @@ export const RUNTIME_LAYERS: RuntimeLayerDef[] = [
       "line-color": "#7EB8DA",
       "line-width": 4,
       "line-opacity": 0,
+    },
+    layout: { visibility: "none" },
+  },
+  // -- CalSim model extent layers (always runtime-created, faded by useMapLayers) --
+  // Opacity starts at 0 so the first fade-in animates from nothing.
+  // The real target opacity lives in useMapLayers' LAYER_GROUPS, not here.
+  {
+    id: "calsim-export-contractors",
+    type: "fill",
+    tilesetSourceId: "coeqwal-calsim-export-contractors",
+    sourceLayer: "dbyhp3wnhlxdwm26wjgo",
+    paint: {
+      "fill-color": themeValues.palette.accent.gold,
+      "fill-opacity": 0,
+    },
+    layout: { visibility: "none" },
+  },
+  {
+    id: "calsim-contributing-area",
+    type: "fill",
+    tilesetSourceId: "coeqwal-calsim-contributing-area",
+    sourceLayer: "ar0gx61qic1dieokgqwh",
+    paint: {
+      "fill-color": themeValues.palette.blue.bright,
+      "fill-opacity": 0,
+    },
+    layout: { visibility: "none" },
+  },
+  {
+    id: "calsim-water-budget-area",
+    type: "fill",
+    tilesetSourceId: "coeqwal-calsim-water-budget-area",
+    sourceLayer: "wei719pmbz5cxtn1lb0m",
+    paint: {
+      "fill-color": themeValues.palette.nature.earth,
+      "fill-opacity": 0,
     },
     layout: { visibility: "none" },
   },

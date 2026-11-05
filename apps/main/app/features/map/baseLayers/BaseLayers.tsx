@@ -7,6 +7,7 @@
 import RiversLayer from "./RiversLayer"
 import BasinsLayer from "./BasinsLayer"
 import BasinInflowArrows from "./BasinInflowArrows"
+import CalsimAreaLabels from "./CalsimAreaLabels"
 import type { MapMode } from "../store"
 
 interface BaseLayersProps {
@@ -19,6 +20,7 @@ interface BaseLayersProps {
   riverBasinLabelsOpacity: number
   arrowsVisible: boolean
   arrowsOpacity: number
+  calsimLabelsVisible: boolean
 }
 
 export default function BaseLayers({
@@ -29,6 +31,7 @@ export default function BaseLayers({
   riverBasinLabelsOpacity,
   arrowsVisible,
   arrowsOpacity,
+  calsimLabelsVisible,
 }: BaseLayersProps) {
   return (
     <>
@@ -44,6 +47,8 @@ export default function BaseLayers({
         progress={riversProgress}
         sacramentoOnly={riversSacramentoOnly}
       />
+
+      <CalsimAreaLabels visible={calsimLabelsVisible} />
     </>
   )
 }
